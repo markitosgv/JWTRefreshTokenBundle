@@ -1,0 +1,11 @@
+services:
+    gesdinet.jwtrefreshtoken.refresh_token:
+        class: Gesdinet\JWTRefreshTokenBundle\EventListener\RefreshTokenListener
+        arguments: [@fos_user.user_manager]
+        tags:
+            - { name: kernel.event_subscriber }
+
+    gesdinet.jwtrefreshtoken.send_token:
+        class: Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: attachRefreshToken }
