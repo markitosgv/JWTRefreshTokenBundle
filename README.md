@@ -15,7 +15,7 @@ Installation
 
 ### Step 1: Download the Bundle
 
-Add [`gesdinet/gesdinet-jwt-refresh-token-bundle`](https://packagist.org/packages/lexik/jwt-authentication-bundle) to your `composer.json` file:
+Add [`gesdinet/gesdinet-jwt-refresh-token-bundle`](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) to your `composer.json` file:
 
 ```bash
 $ composer require "gesdinet/gesdinet-jwt-refresh-token-bundle"
