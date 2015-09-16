@@ -129,6 +129,11 @@ curl -X POST -d username="xxxx@xxxx.com" -d refresh_token="xxxx4b54b0076d2fcc5a5
 
 This calls returns a new JWT token with a new refresh token.
 
-Now we have a method to regenerate a JWT without user credentials.
+**Now we have a method to regenerate a JWT with refresh token and without user credentials.**
 
 **NOTE**: Always we regenerate JWT token, refresh token be regenerated too.
+
+KNOWN PROBLEMS
+--------------
+
+* If our user have saved refresh token in local mobile app and makes a login from another device or platform this refresh token will be invalidate cause we only store one valid refresh token.
