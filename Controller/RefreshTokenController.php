@@ -20,7 +20,7 @@ class RefreshTokenController extends Controller
         $refreshToken = $request->request->get('refresh_token');
         $username = $request->request->get('username');
 
-        $user = $this->getDoctrine()->getManager('main')->getRepository('CustomerBundle:Customer')->findOneBy(array($this->getParameter('lexik_jwt_authentication.user_identity_field') => $username, 'refreshToken' => $refreshToken));
+        $user = $this->getDoctrine()->getManager($this->getParameter('fos_user.model_manager_name'))->getRepository('CustomerBundle:Customer')->findOneBy(array($this->getParameter('lexik_jwt_authentication.user_identity_field') => $username, 'refreshToken' => $refreshToken));
 
         $exception = new AuthenticationException($refreshToken);
         if (null === $user) {
