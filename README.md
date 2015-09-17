@@ -121,10 +121,10 @@ You can generate another valid JWT in two ways,
 
 First way is as always, sending again user credentials to /api/login_check. This generates antoher new JWT and another new refresh token.
 
-**Second way** is ask for a new JWT with our refresh token. We need to make a POST call to /token/refresh url with user and refresh token as payload.
+**Second way** is ask for a new JWT with our refresh token. We need to make a POST call to /token/refresh url with refresh token as payload.
 
 ```bash
-curl -X POST -d username="xxxx@xxxx.com" -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
+curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
 ```
 
 This calls returns a new JWT token with a new refresh token.
