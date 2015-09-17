@@ -2,14 +2,11 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
-use FOS\UserBundle\Event\UserEvent;
-use FOS\UserBundle\FOSUserEvents;
 use FOS\UserBundle\Model\UserInterface;
 use FOS\UserBundle\Model\UserManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
+use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Component\Security\Http\SecurityEvents;
 
 class RefreshTokenListener implements EventSubscriberInterface
 {
@@ -26,24 +23,20 @@ class RefreshTokenListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            FOSUserEvents::SECURITY_IMPLICIT_LOGIN => 'refreshToken',
-            SecurityEvents::INTERACTIVE_LOGIN => 'refreshTokenInteractive',
+            Events::AUTHENTICATION_SUCCESS => 'refreshToken',
         );
     }
 
-    public function refreshToken(UserEvent $event)
+    public function refreshToken(AuthenticationSuccessEvent $event)
     {
         $user = $event->getUser();
+
+        if (!$user instanceof UserInterface) {
+            return;
+        }
 
         $user->setRefreshToken(bin2hex(openssl_random_pseudo_bytes(64)));
         $this->userManager->updateUser($user);
     }
-    public function refreshTokenInteractive(InteractiveLoginEvent $event)
-    {
-        $user = $event->getAuthenticationToken()->getUser();
-        if ($user instanceof UserInterface) {
-            $user->setRefreshToken(bin2hex(openssl_random_pseudo_bytes(64)));
-            $this->userManager->updateUser($user);
-        }
-    }
+
 }
