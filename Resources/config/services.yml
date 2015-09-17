@@ -1,10 +1,4 @@
 services:
-    gesdinet.jwtrefreshtoken.refresh_token:
-        class: Gesdinet\JWTRefreshTokenBundle\EventListener\RefreshTokenListener
-        arguments: [@fos_user.user_manager]
-        tags:
-            - { name: kernel.event_subscriber }
-
     gesdinet.jwtrefreshtoken.send_token:
         class: Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener
         tags:

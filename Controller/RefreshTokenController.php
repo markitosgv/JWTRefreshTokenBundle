@@ -6,8 +6,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Component\Security\Http\SecurityEvents;
 
 class RefreshTokenController extends Controller
 {
@@ -28,8 +26,9 @@ class RefreshTokenController extends Controller
 
         $this->get('fos_user.security.login_manager')->logInUser('api', $user);
         $token = $this->get('security.token_storage')->getToken();
-        $event = new InteractiveLoginEvent($request, $token);
-        $this->get('event_dispatcher')->dispatch(SecurityEvents::INTERACTIVE_LOGIN, $event);
+
+        $user->setRefreshToken(bin2hex(openssl_random_pseudo_bytes(64)));
+        $this->get('fos_user.user_manager')->updateUser($user);
 
         return $this->get('lexik_jwt_authentication.handler.authentication_success')->onAuthenticationSuccess($request, $token);
     }
