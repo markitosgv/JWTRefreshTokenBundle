@@ -11,7 +11,7 @@ class RefreshTokenController extends Controller
 {
 
     /**
-     * @Route("/token/refresh", name="api_refresh_token")
+     * @Route("/api/token/refresh", name="api_refresh_token")
      */
     public function refreshTokenAction(Request $request)
     {
