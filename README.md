@@ -64,37 +64,34 @@ gesdinet_jwt_refresh_token:
 
 ### Step 4: Allow anonymous access to refresh token
 
-Add next line on security.yml file:
+Add next lines on security.yml file:
 
 ```yaml
 # app/config/security.yml
+    firewalls:
+        refresh:
+            pattern:  ^/api/token/refresh
+            stateless: true
+            anonymous: true
+    //...
+    
     access_control:
         // ...
-        - { path: ^/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         //...
 # ...
 ```
 
-### Step 5: Extend your user entity from UserRefreshToken
+### Step 5: Declare User entity
 
-```php
-<?php
-//AppBundle\Entity\User.php
+You need to specify where is your FOSUserBundle entity
 
-namespace AppBundle\Entity;
-
-use Gesdinet\JWTRefreshTokenBundle\Entity\UserRefreshToken as BaseUser;
-use Doctrine\ORM\Mapping as ORM;
-
-/**
- * @ORM\Entity()
- * @ORM\Table()
- */
-class User extends BaseUser {
-
-    //...my own user entity data
-}
+```yaml
+orm:
+    resolve_target_entities:
+        Gesdinet\JWTRefreshTokenBundle\Model\UserRefreshTokenInterface: AppBundle\Entity\User
 ```
+
 ### Step 6: Update your schema
 
 Add refresh_token field to User table
@@ -121,10 +118,10 @@ You can generate another valid JWT in two ways,
 
 First way is as always, sending again user credentials to /api/login_check. This generates antoher new JWT and another new refresh token.
 
-**Second way** is ask for a new JWT with our refresh token. We need to make a POST call to /token/refresh url with refresh token as payload.
+**Second way** is ask for a new JWT with our refresh token. We need to make a POST call to /api/token/refresh url with refresh token as payload and username.
 
 ```bash
-curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
+curl -X POST -d username="xxx@xxx.com" -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
 ```
 
 This calls returns a new JWT token with a new refresh token.
@@ -132,8 +129,3 @@ This calls returns a new JWT token with a new refresh token.
 **Now we have a method to regenerate a JWT with refresh token and without user credentials.**
 
 **NOTE**: Always we regenerate JWT token, refresh token be regenerated too.
-
-KNOWN PROBLEMS
---------------
-
-* If our user have saved refresh token in local mobile app and makes a login from another device or platform this refresh token will be invalidate cause we only store one valid refresh token.

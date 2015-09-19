@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the GesdinetJWTRefreshTokenBundle package.
+ *
+ * (c) Gesdinet <http://www.gesdinet.com/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -20,9 +29,12 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('gesdinet_jwt_refresh_token');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->children()
+                ->integerNode('ttl')
+                ->defaultValue('2592000')
+                ->end()
+            ->end();
 
         return $treeBuilder;
     }

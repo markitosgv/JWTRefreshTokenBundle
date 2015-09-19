@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the GesdinetJWTRefreshTokenBundle package.
+ *
+ * (c) Gesdinet <http://www.gesdinet.com/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,5 +33,7 @@ class GesdinetJWTRefreshTokenExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+
+        $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
     }
 }
