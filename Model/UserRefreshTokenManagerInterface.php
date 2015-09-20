@@ -57,6 +57,11 @@ interface UserRefreshTokenManagerInterface
     public function delete(UserRefreshTokenInterface $userRefreshToken);
 
     /**
+     * @return void
+     */
+    public function revokeAllInvalid();
+
+    /**
      * Returns the user's fully qualified class name.
      *
      * @return string

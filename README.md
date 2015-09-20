@@ -1,7 +1,7 @@
 JWTRefreshTokenBundle
 =====================
 
-The purpose of this bundle is to handle a easy way to manage refresh tokens with JWT (Json Web Tokens). This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle) and [FOSUserBundle](https://github.com/FriendsOfSymfony/FOSUserBundle).
+The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle) and [FOSUserBundle](https://github.com/FriendsOfSymfony/FOSUserBundle). At the moment only supports Doctrine ORM.
 
 Prerequisites
 -------------
@@ -84,7 +84,7 @@ Add next lines on security.yml file:
 
 ### Step 5: Declare User entity
 
-You need to specify where is your FOSUserBundle entity
+You need to specify WHERE is your FOSUserBundle entity to resolve many-to-one relationship with our UserRefreshToken entity
 
 ```yaml
 orm:
@@ -94,7 +94,7 @@ orm:
 
 ### Step 6: Update your schema
 
-Add refresh_token field to User table
+With the next command you will create a new table to handle your users refresh tokens
 
 ```bash
 php app/console doctrine:schema:update --force
@@ -103,7 +103,18 @@ php app/console doctrine:schema:update --force
 USAGE
 -----
 
-When you authenticate through /api/login_check with user/password credentials LexikJWTAuthenticationBundle now returns a JWT Token and a Refresh Token data.
+### Config TTL
+
+You must define Refresh Token TTL. Default value is 1 month. You can change this value adding this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    ttl: 2592000
+```
+
+### Generating Tokens
+
+When you authenticate through /api/login_check with user/password credentials, LexikJWTAuthenticationBundle now returns a JWT Token and a Refresh Token data.
 
 ```json
 {
@@ -112,20 +123,43 @@ When you authenticate through /api/login_check with user/password credentials Le
 }
 ```
 
-This refresh token is persisted in User. When your JWT token expires magic starts:
+This refresh token is persisted in UserRefreshToken entity. After that, when your JWT valid token expires, if you want to get a new one you can proceed in two ways:
 
-You can generate another valid JWT in two ways, 
+- Send you user credentials again to /api/login_check. This generates another JWT with another Refresh token.
 
-First way is as always, sending again user credentials to /api/login_check. This generates antoher new JWT and another new refresh token.
-
-**Second way** is ask for a new JWT with our refresh token. We need to make a POST call to /api/token/refresh url with refresh token as payload and username.
+- Ask for a new valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token and username as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid.
 
 ```bash
 curl -X POST -d username="xxx@xxx.com" -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
 ```
 
-This calls returns a new JWT token with a new refresh token.
+This call returns a new valid JWT token with a new refresh token.
 
-**Now we have a method to regenerate a JWT with refresh token and without user credentials.**
+Useful Commands
+---------------
 
-**NOTE**: Always we regenerate JWT token, refresh token be regenerated too.
+We give you two commands to manage tokens.
+
+### Revoke all invalid tokens
+
+If you want to revoke all invalid (datetime expired) refresh tokens you can execute:
+
+```bash
+php app/console gesdinet:jwt:clear
+```
+
+Optional argument is datetime:
+
+```bash
+php app/console gesdinet:jwt:clear 2015-08-08
+```
+
+We recommend to execute this command with a cronjob to remove invalid refresh tokens every certain time.
+
+### Revoke a token
+
+If you want to revoke one token you can use this:
+
+```bash
+php app/console gesdinet:jwt:revoke TOKEN USER
+```

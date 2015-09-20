@@ -20,7 +20,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\UserRefreshTokenInterface;
  * User Refresh Token
  *
  * @ORM\Table("refresh_tokens")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\UserRefreshTokenRepository")
  */
 class UserRefreshToken implements UserRefreshTokenInterface
 {

@@ -88,6 +88,27 @@ class UserRefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
+     * @param \DateTime $datetime
+     * @param boolean   $andFlush
+     *
+     * @return UserRefreshTokenInterface[]
+     */
+    public function revokeAllInvalid($datetime = null, $andFlush = true)
+    {
+        $invalidTokens = $this->repository->findInvalid($datetime);
+
+        foreach ($invalidTokens as $invalidToken) {
+            $this->objectManager->remove($invalidToken);
+        }
+
+        if ($andFlush) {
+            $this->objectManager->flush();
+        }
+
+        return $invalidTokens;
+    }
+
+    /**
      * Returns the UserRefreshToken fully qualified class name.
      *
      * @return string
