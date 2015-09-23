@@ -17,7 +17,6 @@ use Gesdinet\JWTRefreshTokenBundle\Model\UserRefreshTokenInterface;
 
 class UserRefreshTokenManager extends BaseRefreshTokenManager
 {
-
     protected $objectManager;
     protected $class;
     protected $repository;
@@ -25,8 +24,8 @@ class UserRefreshTokenManager extends BaseRefreshTokenManager
     /**
      * Constructor.
      *
-     * @param ObjectManager           $om
-     * @param string                  $class
+     * @param ObjectManager $om
+     * @param string        $class
      */
     public function __construct(ObjectManager $om, $class)
     {
@@ -59,9 +58,7 @@ class UserRefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param UserRefreshTokenInterface $userRefreshToken
-     * @param boolean                   $andFlush
-     *
-     * @return void
+     * @param bool                      $andFlush
      */
     public function save(UserRefreshTokenInterface $userRefreshToken, $andFlush = true)
     {
@@ -74,9 +71,7 @@ class UserRefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param UserRefreshTokenInterface $userRefreshToken
-     * @param boolean                   $andFlush
-     *
-     * @return void
+     * @param bool                      $andFlush
      */
     public function delete(UserRefreshTokenInterface $userRefreshToken, $andFlush = true)
     {
@@ -89,7 +84,7 @@ class UserRefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param \DateTime $datetime
-     * @param boolean   $andFlush
+     * @param bool      $andFlush
      *
      * @return UserRefreshTokenInterface[]
      */

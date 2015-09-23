@@ -13,13 +13,11 @@ namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class ClearInvalidRefreshTokensCommand
- * @package Gesdinet\JWTRefreshTokenBundle\Command
+ * Class ClearInvalidRefreshTokensCommand.
  */
 class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
 {
@@ -32,7 +30,7 @@ class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
             ->setName('gesdinet:jwt:clear')
             ->setDescription('Clear invalid refresh tokens.')
             ->setDefinition(array(
-                new InputArgument('datetime', null, InputArgument::OPTIONAL, 'Set the user as super admin')
+                new InputArgument('datetime', null, InputArgument::OPTIONAL, 'Set the user as super admin'),
             ));
     }
 
@@ -56,5 +54,4 @@ class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
             $output->writeln(sprintf('Revoke <comment>%s</comment> for user %s', $revokedToken->getRefreshToken(), $revokedToken->getUser()->getEmail()));
         }
     }
-
 }

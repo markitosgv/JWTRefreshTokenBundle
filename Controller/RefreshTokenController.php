@@ -18,7 +18,6 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class RefreshTokenController extends Controller
 {
-
     /**
      * @Route("/api/token/refresh", name="api_refresh_token")
      */
@@ -39,7 +38,6 @@ class RefreshTokenController extends Controller
         $userRefreshToken = $userRefreshTokenManager->get($refreshToken, $user);
 
         if (null === $userRefreshToken || !$userRefreshToken->isValid()) {
-
             return $this->get('lexik_jwt_authentication.handler.authentication_failure')->onAuthenticationFailure($request, $exception);
         }
 
@@ -48,7 +46,7 @@ class RefreshTokenController extends Controller
 
         $ttl = $this->getParameter('gesdinet_jwt_refresh_token.ttl');
         $datetime = new \DateTime();
-        $datetime->modify("+".$ttl." seconds");
+        $datetime->modify('+'.$ttl.' seconds');
 
         $userRefreshToken->setRefreshToken();
         $userRefreshToken->setValid($datetime);
