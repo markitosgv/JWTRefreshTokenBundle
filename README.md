@@ -1,6 +1,12 @@
 JWTRefreshTokenBundle
 =====================
 
+[![Latest Stable Version](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
+[![Total Downloads](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
+[![Latest Unstable Version](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/v/unstable)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
+[![License](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle)
+[![StyleCI](https://styleci.io/repos/42582199/shield)](https://styleci.io/repos/42582199)
+
 The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle) and [FOSUserBundle](https://github.com/FriendsOfSymfony/FOSUserBundle). At the moment only supports Doctrine ORM.
 
 Prerequisites
