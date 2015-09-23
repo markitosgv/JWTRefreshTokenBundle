@@ -16,7 +16,6 @@ use FOS\UserBundle\FOSUserEvents;
 use FOS\UserBundle\Model\UserInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\UserRefreshTokenManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
@@ -32,7 +31,7 @@ class RefreshTokenListener implements EventSubscriberInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function getSubscribedEvents()
     {
@@ -41,12 +40,13 @@ class RefreshTokenListener implements EventSubscriberInterface
             SecurityEvents::INTERACTIVE_LOGIN => 'refreshTokenInteractive',
         );
     }
+
     public function refreshToken(UserEvent $event)
     {
         $user = $event->getUser();
 
         $datetime = new \DateTime();
-        $datetime->modify("+".$this->ttl." seconds");
+        $datetime->modify('+'.$this->ttl.' seconds');
 
         $userRefreshToken = $this->userRefreshTokenManager->create();
         $userRefreshToken->setUser($user);
@@ -61,7 +61,7 @@ class RefreshTokenListener implements EventSubscriberInterface
         $user = $event->getAuthenticationToken()->getUser();
         if ($user instanceof UserInterface) {
             $datetime = new \DateTime();
-            $datetime->modify("+".$this->ttl." seconds");
+            $datetime->modify('+'.$this->ttl.' seconds');
 
             $userRefreshToken = $this->userRefreshTokenManager->create();
             $userRefreshToken->setUser($user);
