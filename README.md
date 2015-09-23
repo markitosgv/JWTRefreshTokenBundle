@@ -1,6 +1,7 @@
 JWTRefreshTokenBundle
 =====================
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
 [![Total Downloads](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
 [![Latest Unstable Version](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/v/unstable)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
