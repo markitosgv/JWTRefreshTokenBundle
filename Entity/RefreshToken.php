@@ -13,15 +13,15 @@ namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Gesdinet\JWTRefreshTokenBundle\Model\UserRefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
  * User Refresh Token.
  *
  * @ORM\Table("refresh_tokens")
- * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\UserRefreshTokenRepository")
+ * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
  */
-class UserRefreshToken implements UserRefreshTokenInterface
+class RefreshToken implements RefreshTokenInterface
 {
     /**
      * @var int
@@ -35,6 +35,14 @@ class UserRefreshToken implements UserRefreshTokenInterface
     /**
      * @var string
      *
+     * @ORM\Column(name="username", type="string", length=255)
+     * @Assert\NotBlank()
+     */
+    private $username;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="refresh_token", type="string", length=128)
      * @Assert\NotBlank()
      */
@@ -43,18 +51,15 @@ class UserRefreshToken implements UserRefreshTokenInterface
     /**
      * @var string
      *
-     * @ORM\ManyToOne(targetEntity="Gesdinet\JWTRefreshTokenBundle\Model\UserRefreshTokenInterface")
-     * @Assert\NotBlank()
-     */
-    private $user;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="valid", type="datetime")
      * @Assert\NotBlank()
      */
     private $valid;
+
+    public function constructor()
+    {
+        $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
+    }
 
     /**
      * Get id.
@@ -67,19 +72,38 @@ class UserRefreshToken implements UserRefreshTokenInterface
     }
 
     /**
+     * Set username
+     *
+     * @param string $username
+     * @return RefreshToken
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * Get username
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
      * Set refreshToken.
      *
      * @param string $refreshToken
      *
-     * @return UserRefreshToken
+     * @return RefreshToken
      */
-    public function setRefreshToken($refreshToken = null)
+    public function setRefreshToken($refreshToken)
     {
-        if (null == $refreshToken) {
-            $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
-        } else {
-            $this->refreshToken = $refreshToken;
-        }
+        $this->refreshToken = $refreshToken;
 
         return $this;
     }
@@ -99,7 +123,7 @@ class UserRefreshToken implements UserRefreshTokenInterface
      *
      * @param \DateTime $valid
      *
-     * @return UserRefreshToken
+     * @return RefreshToken
      */
     public function setValid($valid)
     {
@@ -119,30 +143,6 @@ class UserRefreshToken implements UserRefreshTokenInterface
     }
 
     /**
-     * Set user.
-     *
-     * @param \CustomerBundle\Entity\Customer $user
-     *
-     * @return UserRefreshToken
-     */
-    public function setUser($user = null)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * Get user.
-     *
-     * @return \CustomerBundle\Entity\Customer
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
      * Check if is a valid refresh token.
      *
      * @return bool
@@ -152,5 +152,15 @@ class UserRefreshToken implements UserRefreshTokenInterface
         $datetime = new \DateTime();
 
         return ($this->valid >= $datetime) ? true : false;
+    }
+
+    /**
+     * Renew refresh token
+     *
+     * @return self
+     */
+    public function renewRefreshToken()
+    {
+        $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
     }
 }

@@ -15,8 +15,7 @@
   "require" : {
     "php": ">=5.3.3",
     "symfony/symfony": "~2.3",
-    "lexik/jwt-authentication-bundle": "^1.1",
-    "friendsofsymfony/user-bundle": "~2.0@dev"
+    "lexik/jwt-authentication-bundle": "^1.1"
   },
   "autoload" : {
     "psr-0" : {

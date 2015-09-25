@@ -14,7 +14,10 @@ namespace Gesdinet\JWTRefreshTokenBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\AuthenticationServiceException;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 class RefreshTokenController extends Controller
 {
@@ -23,35 +26,33 @@ class RefreshTokenController extends Controller
      */
     public function refreshTokenAction(Request $request)
     {
-        $refreshToken = $request->request->get('refresh_token');
-        $username = $request->request->get('username');
+        $refreshTokenParam = $request->request->get('refresh_token');
+        $refreshTokenManager = $this->get('gesdinet.jwtrefreshtoken.refresh_token_manager');
 
-        $user = $this->get('fos_user.user_manager')->findUserByUsernameOrEmail($username);
+        $refreshToken = $refreshTokenManager->get($refreshTokenParam);
 
-        $exception = new AuthenticationException($refreshToken);
-
-        if (null === $user) {
+        if (null === $refreshToken || !$refreshToken->isValid()) {
+            $exception = new AuthenticationException($refreshTokenParam);
             return $this->get('lexik_jwt_authentication.handler.authentication_failure')->onAuthenticationFailure($request, $exception);
         }
 
-        $userRefreshTokenManager = $this->get('gesdinet.jwtrefreshtoken.user_refresh_token_manager');
-        $userRefreshToken = $userRefreshTokenManager->get($refreshToken, $user);
-
-        if (null === $userRefreshToken || !$userRefreshToken->isValid()) {
+        try {
+            $user = $this->get('gesdinet.jwtrefreshtoken.login_manager')->findUserByUserName($refreshToken->getUsername());
+        } catch (\Exception $e) {
+            $exception = new AuthenticationException($refreshTokenParam);
             return $this->get('lexik_jwt_authentication.handler.authentication_failure')->onAuthenticationFailure($request, $exception);
         }
 
-        $this->get('fos_user.security.login_manager')->logInUser('api', $user);
+        $this->get('gesdinet.jwtrefreshtoken.login_manager')->loginUser('api', $user);
         $token = $this->get('security.token_storage')->getToken();
 
         $ttl = $this->getParameter('gesdinet_jwt_refresh_token.ttl');
         $datetime = new \DateTime();
         $datetime->modify('+'.$ttl.' seconds');
 
-        $userRefreshToken->setRefreshToken();
-        $userRefreshToken->setValid($datetime);
-
-        $userRefreshTokenManager->save($userRefreshToken);
+        $refreshToken->renewRefreshToken();
+        $refreshToken->setValid($datetime);
+        $refreshTokenManager->save($refreshToken);
 
         return $this->get('lexik_jwt_authentication.handler.authentication_success')->onAuthenticationSuccess($request, $token);
     }

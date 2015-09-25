@@ -12,44 +12,40 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
 /**
- * Interface to be implemented by user managers. This adds an additional level
- * of abstraction between your application, and the actual repository.
- *
  * All changes to UserRefreshTokens should happen through this interface.
  */
-interface UserRefreshTokenManagerInterface
+interface RefreshTokenManagerInterface
 {
     /**
      * Creates an empty user instance.
      *
-     * @return UserRefreshTokenInterface
+     * @return RefreshTokenInterface
      */
     public function create();
 
     /**
      * @param string                    $refreshToken
-     * @param UserRefreshTokenInterface $user
      *
-     * @return UserRefreshTokenInterface
+     * @return RefreshTokenInterface
      */
-    public function get($refreshToken, $user);
+    public function get($refreshToken);
 
     /**
-     * @param UserRefreshTokenInterface $user
+     * @param string $username
      *
-     * @return UserRefreshTokenInterface
+     * @return RefreshTokenInterface
      */
-    public function getLastFromUser($user);
+    public function getLastFromUser($username);
 
     /**
-     * @param UserRefreshTokenInterface $userRefreshToken
+     * @param RefreshTokenInterface $refreshToken
      */
-    public function save(UserRefreshTokenInterface $userRefreshToken);
+    public function save(RefreshTokenInterface $refreshToken);
 
     /**
-     * @param UserRefreshTokenInterface $userRefreshToken
+     * @param RefreshTokenInterface $refreshToken
      */
-    public function delete(UserRefreshTokenInterface $userRefreshToken);
+    public function delete(RefreshTokenInterface $refreshToken);
 
     /**
      */
