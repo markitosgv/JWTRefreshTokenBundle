@@ -24,7 +24,7 @@ interface RefreshTokenManagerInterface
     public function create();
 
     /**
-     * @param string                    $refreshToken
+     * @param string $refreshToken
      *
      * @return RefreshTokenInterface
      */

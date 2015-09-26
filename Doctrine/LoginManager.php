@@ -49,7 +49,7 @@ class LoginManager implements LoginManagerInterface
     }
 
     /**
-     * @param string $firewallName
+     * @param string        $firewallName
      * @param UserInterface $user
      */
     public function loginUser($firewallName, UserInterface $user)

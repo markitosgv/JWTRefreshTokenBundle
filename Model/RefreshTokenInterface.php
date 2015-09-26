@@ -24,15 +24,16 @@ interface RefreshTokenInterface
     public function getId();
 
     /**
-     * Set username
+     * Set username.
      *
      * @param string $username
+     *
      * @return self
      */
     public function setUsername($username);
 
     /**
-     * Get username
+     * Get username.
      *
      * @return string
      */
@@ -62,7 +63,7 @@ interface RefreshTokenInterface
     public function isValid();
 
     /**
-     * Renew refresh token
+     * Renew refresh token.
      *
      * @return self
      */

@@ -72,9 +72,10 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Set username
+     * Set username.
      *
      * @param string $username
+     *
      * @return RefreshToken
      */
     public function setUsername($username)
@@ -85,7 +86,7 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Get username
+     * Get username.
      *
      * @return string
      */
@@ -155,7 +156,7 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Renew refresh token
+     * Renew refresh token.
      *
      * @return self
      */

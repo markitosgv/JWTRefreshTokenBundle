@@ -14,10 +14,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\AuthenticationServiceException;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 class RefreshTokenController extends Controller
 {
@@ -33,6 +30,7 @@ class RefreshTokenController extends Controller
 
         if (null === $refreshToken || !$refreshToken->isValid()) {
             $exception = new AuthenticationException($refreshTokenParam);
+
             return $this->get('lexik_jwt_authentication.handler.authentication_failure')->onAuthenticationFailure($request, $exception);
         }
 
@@ -40,6 +38,7 @@ class RefreshTokenController extends Controller
             $user = $this->get('gesdinet.jwtrefreshtoken.login_manager')->findUserByUserName($refreshToken->getUsername());
         } catch (\Exception $e) {
             $exception = new AuthenticationException($refreshTokenParam);
+
             return $this->get('lexik_jwt_authentication.handler.authentication_failure')->onAuthenticationFailure($request, $exception);
         }
 
