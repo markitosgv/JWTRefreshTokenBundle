@@ -45,5 +45,4 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
         $container->setDefinition('gesdinet.jwtrefreshtoken.login_manager', $loginManager);
     }
-
 }
