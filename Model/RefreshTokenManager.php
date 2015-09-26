@@ -11,12 +11,12 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
-abstract class UserRefreshTokenManager implements UserRefreshTokenManagerInterface
+abstract class RefreshTokenManager implements RefreshTokenManagerInterface
 {
     /**
      * Creates an empty UserRefreshToken instance.
      *
-     * @return UserRefreshTokenInterface
+     * @return RefreshTokenInterface
      */
     public function create()
     {

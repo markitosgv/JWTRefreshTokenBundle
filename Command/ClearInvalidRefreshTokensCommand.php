@@ -30,7 +30,7 @@ class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
             ->setName('gesdinet:jwt:clear')
             ->setDescription('Clear invalid refresh tokens.')
             ->setDefinition(array(
-                new InputArgument('datetime', null, InputArgument::OPTIONAL, 'Set the user as super admin'),
+                new InputArgument('datetime', null, InputArgument::OPTIONAL, null),
             ));
     }
 
@@ -47,11 +47,11 @@ class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
             $datetime = new \DateTime($datetime);
         }
 
-        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.user_refresh_token_manager');
+        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.refresh_token_manager');
         $revokedTokens = $manager->revokeAllInvalid($datetime);
 
         foreach ($revokedTokens as $revokedToken) {
-            $output->writeln(sprintf('Revoke <comment>%s</comment> for user %s', $revokedToken->getRefreshToken(), $revokedToken->getUser()->getEmail()));
+            $output->writeln(sprintf('Revoke <comment>%s</comment>', $revokedToken->getRefreshToken()));
         }
     }
 }

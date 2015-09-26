@@ -31,7 +31,6 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
             ->setDescription('Revoke a refresh token')
             ->setDefinition(array(
                 new InputArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke'),
-                new InputArgument('username', InputArgument::REQUIRED, 'The user of this refresh token'),
             ));
     }
 
@@ -40,29 +39,19 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $refreshToken = $input->getArgument('refresh_token');
-        $username = $input->getArgument('username');
+        $refreshTokenParam = $input->getArgument('refresh_token');
 
-        $userManager = $this->getContainer()->get('fos_user.user_manager');
-        $user = $userManager->findUserByUsernameOrEmail($username);
+        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.refresh_token_manager');
+        $refreshToken = $manager->get($refreshTokenParam);
 
-        if (null === $user) {
-            $output->writeln(sprintf('<error>Not Found:</error> User <comment>%s</comment> doesn\'t exists', $username));
-
-            return -1;
-        }
-
-        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.user_refresh_token_manager');
-        $userRefreshToken = $manager->get($refreshToken, $user);
-
-        if (null === $userRefreshToken) {
-            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> for user <comment>%s</comment> doesn\'t exists', $refreshToken, $username));
+        if (null === $refreshToken) {
+            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exists', $refreshTokenParam));
 
             return -1;
         }
 
-        $manager->delete($userRefreshToken);
+        $manager->delete($refreshToken);
 
-        $output->writeln(sprintf('Revoke <comment>%s</comment> for user %s', $userRefreshToken->getRefreshToken(), $userRefreshToken->getUser()->getEmail()));
+        $output->writeln(sprintf('Revoke <comment>%s</comment>', $refreshToken->getRefreshToken()));
     }
 }

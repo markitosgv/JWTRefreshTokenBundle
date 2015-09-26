@@ -11,22 +11,20 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
-use FOS\UserBundle\Event\UserEvent;
-use FOS\UserBundle\FOSUserEvents;
-use FOS\UserBundle\Model\UserInterface;
-use Gesdinet\JWTRefreshTokenBundle\Model\UserRefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
 class RefreshTokenListener implements EventSubscriberInterface
 {
-    protected $userRefreshTokenManager;
+    protected $refreshTokenManager;
     protected $ttl;
 
-    public function __construct(UserRefreshTokenManagerInterface $userRefreshTokenManager, $ttl)
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl)
     {
-        $this->userRefreshTokenManager = $userRefreshTokenManager;
+        $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
     }
 
@@ -36,39 +34,22 @@ class RefreshTokenListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            FOSUserEvents::SECURITY_IMPLICIT_LOGIN => 'refreshToken',
-            SecurityEvents::INTERACTIVE_LOGIN => 'refreshTokenInteractive',
+            SecurityEvents::INTERACTIVE_LOGIN => 'refreshToken',
         );
     }
 
-    public function refreshToken(UserEvent $event)
-    {
-        $user = $event->getUser();
-
-        $datetime = new \DateTime();
-        $datetime->modify('+'.$this->ttl.' seconds');
-
-        $userRefreshToken = $this->userRefreshTokenManager->create();
-        $userRefreshToken->setUser($user);
-        $userRefreshToken->setRefreshToken();
-        $userRefreshToken->setValid($datetime);
-
-        $this->userRefreshTokenManager->save($userRefreshToken);
-    }
-
-    public function refreshTokenInteractive(InteractiveLoginEvent $event)
+    public function refreshToken(InteractiveLoginEvent $event)
     {
         $user = $event->getAuthenticationToken()->getUser();
         if ($user instanceof UserInterface) {
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
 
-            $userRefreshToken = $this->userRefreshTokenManager->create();
-            $userRefreshToken->setUser($user);
-            $userRefreshToken->setRefreshToken();
-            $userRefreshToken->setValid($datetime);
+            $refreshToken = $this->refreshTokenManager->create();
+            $refreshToken->setUsername($user->getUsername());
+            $refreshToken->setValid($datetime);
 
-            $this->userRefreshTokenManager->save($userRefreshToken);
+            $this->refreshTokenManager->save($refreshToken);
         }
     }
 }
