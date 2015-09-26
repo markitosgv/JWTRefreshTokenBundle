@@ -36,7 +36,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param string                    $refreshToken
+     * @param string $refreshToken
      *
      * @return RefreshTokenInterface
      */

@@ -25,8 +25,6 @@ interface LoginManagerInterface
     /**
      * @param string        $firewallName
      * @param UserInterface $user
-     *
-     * @return void
      */
     public function loginUser($firewallName, UserInterface $user);
 }
