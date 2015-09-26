@@ -33,7 +33,7 @@ class AttachRefreshTokenOnSuccessListener
             return;
         }
 
-        $data['refresh_token'] = $this->refreshTokenManager->getLastFromUser($user->getUsername());
+        $data['refresh_token'] = $this->refreshTokenManager->getLastFromUser($user->getUsername())->getRefreshToken();
 
         $event->setData($data);
     }

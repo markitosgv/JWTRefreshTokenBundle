@@ -31,9 +31,8 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->integerNode('ttl')
-                ->defaultValue('2592000')
-                ->end()
+                ->integerNode('ttl')->defaultValue('2592000')->end()
+                ->scalarNode('user_provider')->isRequired()->cannotBeEmpty()->end()
             ->end();
 
         return $treeBuilder;

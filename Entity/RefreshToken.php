@@ -56,7 +56,7 @@ class RefreshToken implements RefreshTokenInterface
      */
     private $valid;
 
-    public function constructor()
+    public function __construct()
     {
         $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
     }

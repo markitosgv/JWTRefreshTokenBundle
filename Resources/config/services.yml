@@ -17,7 +17,3 @@ services:
     gesdinet.jwtrefreshtoken.refresh_token_manager:
         class: Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager
         arguments: [@fos_user.entity_manager, %gesdinet.jwtrefreshtoken.refresh_token.class%]
-
-    gesdinet.jwtrefreshtoken.login_manager:
-        class: Gesdinet\JWTRefreshTokenBundle\Doctrine\LoginManager
-        arguments: [@security.token_storage, @security.user_checker, @security.firewall.map.context.api]
