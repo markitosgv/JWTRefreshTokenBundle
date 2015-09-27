@@ -2,10 +2,10 @@ JWTRefreshTokenBundle
 =====================
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
-[![Total Downloads](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
-[![Latest Unstable Version](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/v/unstable)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) 
-[![License](https://poser.pugx.org/gesdinet/gesdinet-jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle)
+[![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
+[![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
+[![Latest Unstable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/unstable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
+[![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![StyleCI](https://styleci.io/repos/42582199/shield)](https://styleci.io/repos/42582199)
 
 The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle). At the moment only supports Doctrine ORM.
@@ -22,16 +22,16 @@ Installation
 
 ### Step 1: Download the Bundle
 
-Add [`gesdinet/gesdinet-jwt-refresh-token-bundle`](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) to your `composer.json` file:
+Add [`gesdinet/jwt-refresh-token-bundle`](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) to your `composer.json` file:
 
 ```bash
-$ composer require "gesdinet/gesdinet-jwt-refresh-token-bundle"
+$ composer require "gesdinet/jwt-refresh-token-bundle"
 ```
 
 or edit composer.json:
     
     // ...
-    "gesdinet/gesdinet-jwt-refresh-token-bundle": "dev-master",
+    "gesdinet/jwt-refresh-token-bundle": "dev-master",
     // ...
     
 ### Step 2: Enable the Bundle
