@@ -27,31 +27,35 @@ interface RefreshTokenManagerInterface
     public function create();
 
     /**
-     * @param $refreshToken
-     * @param $username
+     * @param string $refreshToken
      *
-     * @return mixed
+     * @return RefreshTokenInterface
      */
     public function get($refreshToken);
 
     /**
-     * @param $username
+     * @param string $username
      *
-     * @return mixed
+     * @return RefreshTokenInterface
      */
     public function getLastFromUsername($username);
 
     /**
-     * @param RefreshTokenInterface $userRefreshToken
+     * @param RefreshTokenInterface $refreshToken
+     *
+     * @return void
      */
     public function save(RefreshTokenInterface $refreshToken);
 
     /**
-     * @param RefreshTokenInterface $userRefreshToken
+     * @param RefreshTokenInterface $refreshToken
+     *
+     * @return void
      */
     public function delete(RefreshTokenInterface $refreshToken);
 
     /**
+     * @return RefreshTokenInterface[]
      */
     public function revokeAllInvalid();
 

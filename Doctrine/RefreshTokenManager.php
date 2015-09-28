@@ -36,9 +36,9 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param $refreshToken
+     * @param string $refreshToken
      *
-     * @return object
+     * @return RefreshTokenInterface
      */
     public function get($refreshToken)
     {
@@ -46,9 +46,9 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param RefreshTokenInterface $username
+     * @param string $username
      *
-     * @return object
+     * @return RefreshTokenInterface
      */
     public function getLastFromUsername($username)
     {
@@ -58,6 +58,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * @param RefreshTokenInterface $refreshToken
      * @param bool|true             $andFlush
+     *
+     * @return void
      */
     public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -71,6 +73,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * @param RefreshTokenInterface $refreshToken
      * @param bool                  $andFlush
+     *
+     * @return void
      */
     public function delete(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
