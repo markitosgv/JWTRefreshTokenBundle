@@ -20,9 +20,7 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthentica
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
 /**
- * Class RefreshToken
- *
- * @package Gesdinet\JWTRefreshTokenBundle\Service
+ * Class RefreshToken.
  */
 class RefreshToken
 {

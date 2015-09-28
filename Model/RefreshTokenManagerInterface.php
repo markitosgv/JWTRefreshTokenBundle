@@ -42,15 +42,11 @@ interface RefreshTokenManagerInterface
 
     /**
      * @param RefreshTokenInterface $refreshToken
-     *
-     * @return void
      */
     public function save(RefreshTokenInterface $refreshToken);
 
     /**
      * @param RefreshTokenInterface $refreshToken
-     *
-     * @return void
      */
     public function delete(RefreshTokenInterface $refreshToken);
 

@@ -19,9 +19,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
- * Class RefreshTokenProvider
- *
- * @package Gesdinet\JWTRefreshTokenBundle\Security\Provider
+ * Class RefreshTokenProvider.
  */
 class RefreshTokenProvider implements UserProviderInterface
 {

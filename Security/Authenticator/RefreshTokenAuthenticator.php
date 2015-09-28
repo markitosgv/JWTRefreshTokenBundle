@@ -22,9 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
 /**
- * Class RefreshTokenAuthenticator
- *
- * @package Gesdinet\JWTRefreshTokenBundle\Security\Authenticator
+ * Class RefreshTokenAuthenticator.
  */
 class RefreshTokenAuthenticator implements SimplePreAuthenticatorInterface, AuthenticationFailureHandlerInterface
 {
