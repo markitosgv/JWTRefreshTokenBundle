@@ -1,14 +1,7 @@
 JWTRefreshTokenBundle
 =====================
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
-[![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
-[![Latest Unstable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/unstable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
-[![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
-[![StyleCI](https://styleci.io/repos/42582199/shield)](https://styleci.io/repos/42582199)
-
-The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle). At the moment only supports Doctrine ORM.
+The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle) and [FOSUserBundle](https://github.com/FriendsOfSymfony/FOSUserBundle). At the moment only supports Doctrine ORM.
 
 Prerequisites
 -------------
@@ -22,16 +15,16 @@ Installation
 
 ### Step 1: Download the Bundle
 
-Add [`gesdinet/jwt-refresh-token-bundle`](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) to your `composer.json` file:
+Add [`gesdinet/gesdinet-jwt-refresh-token-bundle`](https://packagist.org/packages/gesdinet/gesdinet-jwt-refresh-token-bundle) to your `composer.json` file:
 
 ```bash
-$ composer require "gesdinet/jwt-refresh-token-bundle"
+$ composer require "gesdinet/gesdinet-jwt-refresh-token-bundle"
 ```
 
 or edit composer.json:
     
     // ...
-    "gesdinet/jwt-refresh-token-bundle": "dev-master",
+    "gesdinet/gesdinet-jwt-refresh-token-bundle": "dev-master",
     // ...
     
 ### Step 2: Enable the Bundle
@@ -89,18 +82,9 @@ Add next lines on security.yml file:
 # ...
 ```
 
-### Step 5: Declare User Provider
+### Step 5: Update your schema
 
-You need to specify what user provider you want to use. User provider is used to find your user when you try to refresh JWT. For example if you are using FOSUserBundle you can specify this:
-
-```yaml
-gesdinet_jwt_refresh_token:
-    user_provider: fos_user.user_provider.username_email
-```
-
-### Step 6: Update your schema
-
-With the next command you will create a new table to handle your refresh tokens
+With the next command you will create a new table to handle your users refresh tokens
 
 ```bash
 php app/console doctrine:schema:update --force
@@ -116,6 +100,8 @@ You must define Refresh Token TTL. Default value is 1 month. You can change this
 ```yaml
 gesdinet_jwt_refresh_token:
     ttl: 2592000
+    security:
+        firewall: api
 ```
 
 ### Generating Tokens
@@ -129,14 +115,14 @@ When you authenticate through /api/login_check with user/password credentials, L
 }
 ```
 
-This refresh token is persisted in RefreshToken entity. After that, when your JWT valid token expires, if you want to get a new one you can proceed in two ways:
+This refresh token is persisted in UserRefreshToken entity. After that, when your JWT valid token expires, if you want to get a new one you can proceed in two ways:
 
-- Send you user credentials again to /api/login_check. This generates another JWT with another Refresh Token.
+- Send you user credentials again to /api/login_check. This generates another JWT with another Refresh token.
 
-- Ask for a new valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid.
+- Ask for a new valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token and username as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid.
 
 ```bash
-curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
+curl -X POST -d username="xxx@xxx.com" -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
 ```
 
 This call returns a new valid JWT token with a new refresh token.
@@ -154,7 +140,7 @@ If you want to revoke all invalid (datetime expired) refresh tokens you can exec
 php app/console gesdinet:jwt:clear
 ```
 
-Optional argument is datetime, it deletes all tokens smaller than this datetime:
+Optional argument is datetime:
 
 ```bash
 php app/console gesdinet:jwt:clear 2015-08-08
@@ -164,8 +150,8 @@ We recommend to execute this command with a cronjob to remove invalid refresh to
 
 ### Revoke a token
 
-If you want to revoke a single token you can use this:
+If you want to revoke one token you can use this:
 
 ```bash
-php app/console gesdinet:jwt:revoke TOKEN
+php app/console gesdinet:jwt:revoke TOKEN USER
 ```

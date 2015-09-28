@@ -1,13 +1,13 @@
 {
-  "name" : "gesdinet/jwt-refresh-token-bundle",
-  "description" : "Implements a refresh token system over Json Web Tokens in Symfony",
+  "name" : "gesdinet/gesdinet-jwt-refresh-token-bundle",
+  "description" : "Implements a Refresh Token system over Json Web Tokens in Symfony",
   "type" : "symfony-bundle",
   "authors" : [{
     "name" : "Marcos Gómez Vilches",
     "email" : "marcos@gesdinet.com"
   }],
   "keywords" : [
-    "jwt refresh token bundle symfony json web"
+    "jwt refresh token bundle"
   ],
   "license" : [
     "MIT"
@@ -17,15 +17,14 @@
     "symfony/symfony": "~2.3",
     "lexik/jwt-authentication-bundle": "^1.1"
   },
-  "require-dev": {
-    "phpunit/phpunit"                   : "~4.4"
-  },
   "autoload" : {
     "psr-0" : {
       "Gesdinet\\JWTRefreshTokenBundle" : ""
     }
   },
   "target-dir" : "Gesdinet/JWTRefreshTokenBundle",
+  "repositories" : [{
+  }],
   "extra" : {
     "branch-alias" : {
       "dev-master" : "1.0-dev"

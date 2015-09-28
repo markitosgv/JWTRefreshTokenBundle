@@ -12,11 +12,12 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+
 use Symfony\Component\Validator\Constraints as Assert;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
- * User Refresh Token.
+ * Refresh Token
  *
  * @ORM\Table("refresh_tokens")
  * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
@@ -24,21 +25,13 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 class RefreshToken implements RefreshTokenInterface
 {
     /**
-     * @var int
+     * @var integer
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="username", type="string", length=255)
-     * @Assert\NotBlank()
-     */
-    private $username;
 
     /**
      * @var string
@@ -51,20 +44,24 @@ class RefreshToken implements RefreshTokenInterface
     /**
      * @var string
      *
+     * @ORM\Column(name="username", type="string", length=255)
+     * @Assert\NotBlank()
+     */
+    private $username;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="valid", type="datetime")
      * @Assert\NotBlank()
      */
     private $valid;
 
-    public function __construct()
-    {
-        $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
-    }
 
     /**
-     * Get id.
+     * Get id
      *
-     * @return int
+     * @return integer 
      */
     public function getId()
     {
@@ -72,47 +69,26 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Set username.
-     *
-     * @param string $username
-     *
-     * @return RefreshToken
-     */
-    public function setUsername($username)
-    {
-        $this->username = $username;
-
-        return $this;
-    }
-
-    /**
-     * Get username.
-     *
-     * @return string
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-    /**
-     * Set refreshToken.
+     * Set refreshToken
      *
      * @param string $refreshToken
-     *
      * @return RefreshToken
      */
-    public function setRefreshToken($refreshToken)
+    public function setRefreshToken($refreshToken = null)
     {
-        $this->refreshToken = $refreshToken;
+        if (null == $refreshToken) {
+            $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
+        } else {
+            $this->refreshToken = $refreshToken;
+        }
 
         return $this;
     }
 
     /**
-     * Get refreshToken.
+     * Get refreshToken
      *
-     * @return string
+     * @return string 
      */
     public function getRefreshToken()
     {
@@ -120,10 +96,9 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Set valid.
+     * Set valid
      *
      * @param \DateTime $valid
-     *
      * @return RefreshToken
      */
     public function setValid($valid)
@@ -134,9 +109,9 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Get valid.
+     * Get valid
      *
-     * @return \DateTime
+     * @return \DateTime 
      */
     public function getValid()
     {
@@ -144,24 +119,36 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Check if is a valid refresh token.
+     * Set username
      *
-     * @return bool
+     * @param string $username
+     * @return RefreshToken
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * Get username
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * Check if is a valid refresh token
+     *
+     * @return boolean
      */
     public function isValid()
     {
         $datetime = new \DateTime();
-
         return ($this->valid >= $datetime) ? true : false;
-    }
-
-    /**
-     * Renew refresh token.
-     *
-     * @return self
-     */
-    public function renewRefreshToken()
-    {
-        $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
     }
 }

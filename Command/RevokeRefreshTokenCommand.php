@@ -13,11 +13,13 @@ namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class ClearInvalidRefreshTokensCommand.
+ * Class ClearInvalidRefreshTokensCommand
+ * @package Gesdinet\JWTRefreshTokenBundle\Command
  */
 class RevokeRefreshTokenCommand extends ContainerAwareCommand
 {
@@ -31,6 +33,7 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
             ->setDescription('Revoke a refresh token')
             ->setDefinition(array(
                 new InputArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke'),
+                new InputArgument('username', InputArgument::REQUIRED, 'The user of this refresh token'),
             ));
     }
 
@@ -39,19 +42,27 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $refreshTokenParam = $input->getArgument('refresh_token');
+        $refreshToken = $input->getArgument('refresh_token');
+        $username = $input->getArgument('username');
 
-        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.refresh_token_manager');
-        $refreshToken = $manager->get($refreshTokenParam);
+        $user = $this->get('gesdinet.jwtrefreshtoken.user_manager')->findUserByUsername($username);
 
-        if (null === $refreshToken) {
-            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exists', $refreshTokenParam));
-
+        if (null === $user) {
+            $output->writeln(sprintf('<error>Not Found:</error> User <comment>%s</comment> doesn\'t exists', $username));
             return -1;
         }
 
-        $manager->delete($refreshToken);
+        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.refresh_token_manager');
+        $userRefreshToken = $manager->get($refreshToken, $user);
 
-        $output->writeln(sprintf('Revoke <comment>%s</comment>', $refreshToken->getRefreshToken()));
+        if (null === $userRefreshToken) {
+            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> for user <comment>%s</comment> doesn\'t exists', $refreshToken, $username));
+            return -1;
+        }
+
+        $manager->delete($userRefreshToken);
+
+        $output->writeln(sprintf('Revoke <comment>%s</comment> for user %s', $userRefreshToken->getRefreshToken(), $userRefreshToken->getUserName()));
     }
+
 }

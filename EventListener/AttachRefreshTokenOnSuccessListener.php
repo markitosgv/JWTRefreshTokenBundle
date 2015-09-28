@@ -12,16 +12,19 @@
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class AttachRefreshTokenOnSuccessListener
 {
-    protected $refreshTokenManager;
+    protected $userRefreshTokenManager;
+    protected $ttl;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl)
     {
         $this->refreshTokenManager = $refreshTokenManager;
+        $this->ttl = $ttl;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -33,8 +36,21 @@ class AttachRefreshTokenOnSuccessListener
             return;
         }
 
-        $data['refresh_token'] = $this->refreshTokenManager->getLastFromUser($user->getUsername())->getRefreshToken();
+        $refreshToken = $this->refreshTokenManager->getLastFromUsername($user->getUsername());
 
+        if(!$refreshToken instanceof RefreshToken) {
+            $datetime = new \DateTime();
+            $datetime->modify("+".$this->ttl." seconds");
+
+            $refreshToken = $this->refreshTokenManager->create();
+            $refreshToken->setUsername($user->getUsername());
+            $refreshToken->setRefreshToken();
+            $refreshToken->setValid($datetime);
+
+            $this->refreshTokenManager->save($refreshToken);
+        }
+
+        $data['refresh_token'] = $refreshToken->getRefreshToken();
         $event->setData($data);
     }
 }
