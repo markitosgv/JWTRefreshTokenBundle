@@ -22,6 +22,3 @@ services:
 
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
-
-
-
