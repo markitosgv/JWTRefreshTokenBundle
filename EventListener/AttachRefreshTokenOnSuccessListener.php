@@ -38,9 +38,9 @@ class AttachRefreshTokenOnSuccessListener
 
         $refreshToken = $this->refreshTokenManager->getLastFromUsername($user->getUsername());
 
-        if(!$refreshToken instanceof RefreshToken) {
+        if (!$refreshToken instanceof RefreshToken) {
             $datetime = new \DateTime();
-            $datetime->modify("+".$this->ttl." seconds");
+            $datetime->modify('+'.$this->ttl.' seconds');
 
             $refreshToken = $this->refreshTokenManager->create();
             $refreshToken->setUsername($user->getUsername());

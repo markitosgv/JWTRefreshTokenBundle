@@ -10,9 +10,6 @@
  */
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
-use Symfony\Component\HttpFoundation\Request;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 
 abstract class RefreshTokenManager implements RefreshTokenManagerInterface
 {
@@ -24,7 +21,8 @@ abstract class RefreshTokenManager implements RefreshTokenManagerInterface
     public function create()
     {
         $class = $this->getClass();
-        $token = new $class;
+        $token = new $class();
+
         return $token;
     }
 }

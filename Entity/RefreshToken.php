@@ -12,12 +12,11 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
 use Symfony\Component\Validator\Constraints as Assert;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
- * Refresh Token
+ * Refresh Token.
  *
  * @ORM\Table("refresh_tokens")
  * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
@@ -25,7 +24,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 class RefreshToken implements RefreshTokenInterface
 {
     /**
-     * @var integer
+     * @var int
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
@@ -57,11 +56,10 @@ class RefreshToken implements RefreshTokenInterface
      */
     private $valid;
 
-
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer 
+     * @return int
      */
     public function getId()
     {
@@ -69,9 +67,10 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Set refreshToken
+     * Set refreshToken.
      *
      * @param string $refreshToken
+     *
      * @return RefreshToken
      */
     public function setRefreshToken($refreshToken = null)
@@ -86,9 +85,9 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Get refreshToken
+     * Get refreshToken.
      *
-     * @return string 
+     * @return string
      */
     public function getRefreshToken()
     {
@@ -96,9 +95,10 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Set valid
+     * Set valid.
      *
      * @param \DateTime $valid
+     *
      * @return RefreshToken
      */
     public function setValid($valid)
@@ -109,9 +109,9 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Get valid
+     * Get valid.
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getValid()
     {
@@ -119,9 +119,10 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Set username
+     * Set username.
      *
      * @param string $username
+     *
      * @return RefreshToken
      */
     public function setUsername($username)
@@ -132,7 +133,7 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Get username
+     * Get username.
      *
      * @return string
      */
@@ -142,13 +143,14 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Check if is a valid refresh token
+     * Check if is a valid refresh token.
      *
-     * @return boolean
+     * @return bool
      */
     public function isValid()
     {
         $datetime = new \DateTime();
+
         return ($this->valid >= $datetime) ? true : false;
     }
 }

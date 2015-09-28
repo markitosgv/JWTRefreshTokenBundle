@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the GesdinetJWTRefreshTokenBundle package.
+ *
+ * (c) Gesdinet <http://www.gesdinet.com/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
 use Symfony\Component\Security\Core\Authentication\SimplePreAuthenticatorInterface;
@@ -8,11 +17,15 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
+/**
+ * Class RefreshTokenAuthenticator
+ *
+ * @package Gesdinet\JWTRefreshTokenBundle\Security\Authenticator
+ */
 class RefreshTokenAuthenticator implements SimplePreAuthenticatorInterface, AuthenticationFailureHandlerInterface
 {
     public function createToken(Request $request, $providerKey)
@@ -61,6 +74,6 @@ class RefreshTokenAuthenticator implements SimplePreAuthenticatorInterface, Auth
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        return new Response("Refresh token authentication failed.", 403);
+        return new Response('Refresh token authentication failed.', 403);
     }
 }

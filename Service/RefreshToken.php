@@ -1,21 +1,29 @@
 <?php
 
-namespace Gesdinet\JWTRefreshTokenBundle\Service;
+/*
+ * This file is part of the GesdinetJWTRefreshTokenBundle package.
+ *
+ * (c) Gesdinet <http://www.gesdinet.com/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Core\Exception\AuthenticationServiceException;
-use Symfony\Component\Security\Core\User\UserInterface;
+namespace Gesdinet\JWTRefreshTokenBundle\Service;
 
 use Symfony\Component\HttpFoundation\Request;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
+/**
+ * Class RefreshToken
+ *
+ * @package Gesdinet\JWTRefreshTokenBundle\Service
+ */
 class RefreshToken
 {
     private $authenticator;
@@ -24,13 +32,7 @@ class RefreshToken
     private $failureHandler;
     private $refreshTokenManager;
 
-    public function __construct(RefreshTokenAuthenticator $authenticator,
-                                RefreshTokenProvider $provider,
-                                AuthenticationSuccessHandler $successHandler,
-                                AuthenticationFailureHandler $failureHandler,
-                                RefreshTokenManagerInterface $refreshTokenManager,
-                                $ttl,
-                                $providerKey)
+    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey)
     {
         $this->authenticator = $authenticator;
         $this->provider = $provider;
@@ -42,10 +44,12 @@ class RefreshToken
     }
 
     /**
-     * Refresh token
+     * Refresh token.
      *
      * @param Request $request
+     *
      * @return mixed
+     *
      * @throws AuthenticationException
      */
     public function refresh(Request $request)
@@ -56,7 +60,7 @@ class RefreshToken
                 $this->provider,
                 $this->providerKey
             );
-        }catch(AuthenticationException $e) {
+        } catch (AuthenticationException $e) {
             return $this->failureHandler->onAuthenticationFailure($request, $e);
         }
 
@@ -71,10 +75,11 @@ class RefreshToken
         }
 
         $datetime = new \DateTime();
-        $datetime->modify("+" . $this->ttl . " seconds");
+        $datetime->modify('+'.$this->ttl.' seconds');
         $refreshToken->setValid($datetime);
 
         $this->refreshTokenManager->save($refreshToken);
+
         return $this->successHandler->onAuthenticationSuccess($request, $preAuthenticatedToken);
     }
 }

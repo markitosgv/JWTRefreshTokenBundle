@@ -13,13 +13,11 @@ namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class ClearInvalidRefreshTokensCommand
- * @package Gesdinet\JWTRefreshTokenBundle\Command
+ * Class ClearInvalidRefreshTokensCommand.
  */
 class RevokeRefreshTokenCommand extends ContainerAwareCommand
 {
@@ -49,6 +47,7 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
 
         if (null === $user) {
             $output->writeln(sprintf('<error>Not Found:</error> User <comment>%s</comment> doesn\'t exists', $username));
+
             return -1;
         }
 
@@ -57,6 +56,7 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
 
         if (null === $userRefreshToken) {
             $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> for user <comment>%s</comment> doesn\'t exists', $refreshToken, $username));
+
             return -1;
         }
 
@@ -64,5 +64,4 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
 
         $output->writeln(sprintf('Revoke <comment>%s</comment> for user %s', $userRefreshToken->getRefreshToken(), $userRefreshToken->getUserName()));
     }
-
 }

@@ -17,7 +17,6 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 class RefreshTokenManager extends BaseRefreshTokenManager
 {
-
     protected $objectManager;
     protected $class;
     protected $repository;
@@ -25,8 +24,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * Constructor.
      *
-     * @param ObjectManager           $om
-     * @param string                  $class
+     * @param ObjectManager $om
+     * @param string        $class
      */
     public function __construct(ObjectManager $om, $class)
     {
@@ -38,6 +37,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param $refreshToken
+     *
      * @return object
      */
     public function get($refreshToken)
@@ -47,6 +47,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param RefreshTokenInterface $username
+     *
      * @return object
      */
     public function getLastFromUsername($username)
@@ -56,7 +57,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param RefreshTokenInterface $refreshToken
-     * @param bool|true $andFlush
+     * @param bool|true             $andFlush
      */
     public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -68,10 +69,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param RefreshTokenInterface $RefreshToken
-     * @param boolean                   $andFlush
-     *
-     * @return void
+     * @param RefreshTokenInterface $refreshToken
+     * @param bool                  $andFlush
      */
     public function delete(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -84,7 +83,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param \DateTime $datetime
-     * @param boolean   $andFlush
+     * @param bool      $andFlush
      *
      * @return RefreshTokenInterface[]
      */
