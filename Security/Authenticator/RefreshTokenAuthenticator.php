@@ -18,8 +18,8 @@ class RefreshTokenAuthenticator implements SimplePreAuthenticatorInterface, Auth
     public function createToken(Request $request, $providerKey)
     {
         return new PreAuthenticatedToken(
-            $request->query->get('username'),
-            $request->query->get('refresh_token'),
+            '',
+            $request->request->get('refresh_token'),
             $providerKey
         );
     }
