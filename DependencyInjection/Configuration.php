@@ -31,17 +31,8 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->integerNode('ttl')
-                ->defaultValue('2592000')
-                ->end()
-                ->arrayNode('security')
-                    ->children()
-                        ->scalarNode('firewall')
-                        ->defaultValue('api')
-                        ->isRequired()
-                        ->end()
-                    ->end()
-                ->end()
+                ->integerNode('ttl')->defaultValue('2592000')->end()
+                ->scalarNode('firewall')->defaultValue('api')->end()
             ->end();
 
         return $treeBuilder;
