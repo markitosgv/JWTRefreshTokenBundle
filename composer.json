@@ -33,7 +33,6 @@
       "Gesdinet\\JWTRefreshTokenBundle\\spec\\": "spec/"
     }
   },
-  "target-dir" : "Gesdinet/JWTRefreshTokenBundle",
   "extra" : {
     "branch-alias" : {
       "dev-master" : "1.0-dev"

@@ -31,7 +31,7 @@ $ composer require "gesdinet/jwt-refresh-token-bundle"
 or edit composer.json:
     
     // ...
-    "gesdinet/jwt-refresh-token-bundle": "dev-master",
+    "gesdinet/jwt-refresh-token-bundle": "~0.1",
     // ...
     
 ### Step 2: Enable the Bundle
