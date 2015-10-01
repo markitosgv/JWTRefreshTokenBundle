@@ -32,7 +32,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->integerNode('ttl')->defaultValue('2592000')->end()
-                ->scalarNode('user_provider')->isRequired()->cannotBeEmpty()->end()
+                ->scalarNode('firewall')->defaultValue('api')->end()
             ->end();
 
         return $treeBuilder;

@@ -57,15 +57,15 @@ class AppKernel extends Kernel
 }
 ```
 
-### Step 3: Load the Routes of the Bundle
+### Step 3: Configure your own routing to refresh token
 
-Open your main routing configuration file (usually `app/config/routing.yml`) and copy the following four lines at the very beginning of it:
+Open your main routing configuration file (usually `app/config/routing.yml`) and copy the following four lines at the very beginning of it.
 
 ```yaml
 # app/config/routing.yml
 gesdinet_jwt_refresh_token:
-    resource: "@GesdinetJWTRefreshTokenBundle/Controller/"
-    type:     annotation
+    path:     /api/token/refresh
+    defaults: { _controller: gesdinet.jwtrefreshtoken:refresh }
 # ...
 ```
 
@@ -89,16 +89,7 @@ Add next lines on security.yml file:
 # ...
 ```
 
-### Step 5: Declare User Provider
-
-You need to specify what user provider you want to use. User provider is used to find your user when you try to refresh JWT. For example if you are using FOSUserBundle you can specify this:
-
-```yaml
-gesdinet_jwt_refresh_token:
-    user_provider: fos_user.user_provider.username_email
-```
-
-### Step 6: Update your schema
+### Step 5: Update your schema
 
 With the next command you will create a new table to handle your refresh tokens
 
@@ -111,11 +102,20 @@ USAGE
 
 ### Config TTL
 
-You must define Refresh Token TTL. Default value is 1 month. You can change this value adding this line to your config.yml file:
+You can define Refresh Token TTL. Default value is 1 month. You can change this value adding this line to your config.yml file:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     ttl: 2592000
+```
+
+### Config Firewall Name
+
+You can define Firewall name. Default value is api. You can change this value adding this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    firewall: api
 ```
 
 ### Generating Tokens
@@ -133,13 +133,13 @@ This refresh token is persisted in RefreshToken entity. After that, when your JW
 
 - Send you user credentials again to /api/login_check. This generates another JWT with another Refresh Token.
 
-- Ask for a new valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid.
+- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid. Your refresh token do not change but valid datetime will increase.
 
 ```bash
 curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
 ```
 
-This call returns a new valid JWT token with a new refresh token.
+This call returns a new valid JWT token renewing valid datetime of your refresh token.
 
 Useful Commands
 ---------------

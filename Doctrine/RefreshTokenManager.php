@@ -50,14 +50,14 @@ class RefreshTokenManager extends BaseRefreshTokenManager
      *
      * @return RefreshTokenInterface
      */
-    public function getLastFromUser($username)
+    public function getLastFromUsername($username)
     {
         return $this->repository->findOneBy(array('username' => $username), array('valid' => 'DESC'));
     }
 
     /**
      * @param RefreshTokenInterface $refreshToken
-     * @param bool                  $andFlush
+     * @param bool|true             $andFlush
      */
     public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
     {

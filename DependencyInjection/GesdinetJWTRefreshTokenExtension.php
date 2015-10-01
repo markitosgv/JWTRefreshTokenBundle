@@ -13,8 +13,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
@@ -36,13 +34,8 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
-        $loginManager = new Definition('Gesdinet\JWTRefreshTokenBundle\Doctrine\LoginManager');
-
-        $loginManager->addArgument(new Reference('security.token_storage'));
-        $loginManager->addArgument(new Reference('security.user_checker'));
-        $loginManager->addArgument(new Reference($config['user_provider']));
-
         $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
-        $container->setDefinition('gesdinet.jwtrefreshtoken.login_manager', $loginManager);
+        $container->setParameter('gesdinet_jwt_refresh_token.security.firewall', $config['firewall']);
+//        $container->setParameter('gesdinet_jwt_refresh_token.model_manager_name', $config['model_manager_name']);
     }
 }

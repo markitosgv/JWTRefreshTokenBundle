@@ -2,18 +2,23 @@ parameters:
   gesdinet.jwtrefreshtoken.refresh_token.class: Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken
 
 services:
-    gesdinet_jwtrefreshtokenbundle.eventlistener.refreshtokenlistener:
-        class: Gesdinet\JWTRefreshTokenBundle\EventListener\RefreshTokenListener
-        arguments: [ @gesdinet.jwtrefreshtoken.refresh_token_manager, %gesdinet_jwt_refresh_token.ttl% ]
-        tags:
-            - { name: kernel.event_subscriber }
-
     gesdinet.jwtrefreshtoken.send_token:
         class: Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener
-        arguments: [ @gesdinet.jwtrefreshtoken.refresh_token_manager ]
+        arguments: [ @gesdinet.jwtrefreshtoken.refresh_token_manager, %gesdinet_jwt_refresh_token.ttl%]
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: attachRefreshToken }
 
     gesdinet.jwtrefreshtoken.refresh_token_manager:
         class: Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager
-        arguments: [@fos_user.entity_manager, %gesdinet.jwtrefreshtoken.refresh_token.class%]
+        arguments: [@doctrine.orm.entity_manager, %gesdinet.jwtrefreshtoken.refresh_token.class%]
+
+    gesdinet.jwtrefreshtoken:
+        class: Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken
+        arguments: [@gesdinet.jwtrefreshtoken.authenticator, @gesdinet.jwtrefreshtoken.user_provider, @lexik_jwt_authentication.handler.authentication_success, @lexik_jwt_authentication.handler.authentication_failure, @gesdinet.jwtrefreshtoken.refresh_token_manager, %gesdinet_jwt_refresh_token.ttl%, %gesdinet_jwt_refresh_token.security.firewall%]
+
+    gesdinet.jwtrefreshtoken.user_provider:
+        class: Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider
+        arguments: [@gesdinet.jwtrefreshtoken.refresh_token_manager]
+
+    gesdinet.jwtrefreshtoken.authenticator:
+        class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
