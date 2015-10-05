@@ -9,6 +9,11 @@
 /composer.phar
 /vendor/
 /web/bundles/
+composer.lock
+
+# -- Build -----------------------------------------
+coverage.xml
+
 
 # -- Editores -----------------------------------------
 # vim
@@ -65,7 +70,6 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Linux
-.*
 !.bowerrc
 !.gitignore
 !.htaccess

@@ -1,0 +1,16 @@
+suites:
+    default:
+        namespace: Gesdinet\JWTRefreshTokenBundle
+        psr4_prefix: Gesdinet\JWTRefreshTokenBundle
+        src_path: .
+
+extensions:
+    - PhpSpec\Extension\CodeCoverageExtension
+
+code_coverage:
+  format:
+    - html
+    - clover
+  output:
+    html: coverage
+    clover: coverage.xml
