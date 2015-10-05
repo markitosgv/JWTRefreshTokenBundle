@@ -11,10 +11,6 @@
 /web/bundles/
 composer.lock
 
-# -- Build -----------------------------------------
-coverage.xml
-
-
 # -- Editores -----------------------------------------
 # vim
 .*.sw[a-z]
@@ -70,6 +66,7 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Linux
+.*
 !.bowerrc
 !.gitignore
 !.htaccess
