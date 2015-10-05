@@ -9,6 +9,7 @@
 /composer.phar
 /vendor/
 /web/bundles/
+composer.lock
 
 # -- Editores -----------------------------------------
 # vim
