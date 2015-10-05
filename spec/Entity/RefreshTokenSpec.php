@@ -20,17 +20,9 @@ class RefreshTokenSpec extends ObjectBehavior
 
     function it_has_a_custom_refresh_token()
     {
-        $this->setRefreshToken('aadd');
-        $this->getRefreshToken()->shouldBe('aadd');
+        $this->setRefreshToken('token');
+        $this->getRefreshToken()->shouldBe('token');
     }
-
-//    function it_renews_refresh_token()
-//    {
-//        $oldToken = $this->getRefreshToken();
-//        $this->renewRefreshToken();
-//
-//        $this->getRefreshToken()->shouldNotBeEqualTo($oldToken);
-//    }
 
     function it_has_username()
     {

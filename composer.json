@@ -20,7 +20,8 @@
     "lexik/jwt-authentication-bundle": "^1.1"
   },
   "require-dev": {
-    "phpspec/phpspec": "~2.0"
+    "phpspec/phpspec": "~2.0",
+    "henrikbjorn/phpspec-code-coverage": "~1.0"
   },
   "config": {
     "bin-dir": "bin"
