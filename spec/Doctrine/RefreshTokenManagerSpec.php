@@ -74,4 +74,9 @@ class RefreshTokenManagerSpec extends ObjectBehavior
         $this->revokeAllInvalid(null, true);
     }
 
+    function it_has_class()
+    {
+        $this->getClass()->shouldBe(static::refresh_token_entity_class);
+    }
+
 }
