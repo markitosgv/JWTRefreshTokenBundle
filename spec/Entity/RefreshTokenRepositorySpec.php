@@ -29,12 +29,13 @@ class RefreshTokenRepositorySpec extends ObjectBehavior
 
     function it_finds_invalid_tokens($em, QueryBuilder $builder, AbstractQuery $query, RefreshTokenInterface $token)
     {
+        $date = new \DateTime();
         $em->createQueryBuilder()->shouldBeCalled()->willReturn($builder);
 
         $builder->select('u')->shouldBeCalled()->willReturn($builder);
         $builder->from(Argument::any(), 'u', Argument::cetera())->shouldBeCalled()->willReturn($builder);
         $builder->where('u.valid < :datetime')->shouldBeCalled()->willReturn($builder);
-        $builder->setParameter(':datetime', new \DateTime())->shouldBeCalled()->willReturn($builder);
+        $builder->setParameter(':datetime', $date)->shouldBeCalled()->willReturn($builder);
 
         $builder->getQuery()->shouldBeCalled()->willReturn($query);
         $query->getResult()->shouldBeCalled()->willReturn(array($token));
