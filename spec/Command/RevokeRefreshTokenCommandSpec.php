@@ -38,4 +38,13 @@ class RevokeRefreshTokenCommandSpec extends ObjectBehavior
         $this->setContainer($container);
         $this->run($input, $output);
     }
+
+    public function it_not_revokes_a_refresh_token(ContainerInterface $container, InputInterface $input, OutputInterface $output, RefreshTokenManagerInterface $refreshTokenManager, RefreshTokenInterface $refreshToken)
+    {
+        $container->get('gesdinet.jwtrefreshtoken.refresh_token_manager')->shouldBeCalled()->willReturn($refreshTokenManager);
+        $refreshTokenManager->get(Argument::any())->shouldBeCalled()->willReturn(null);
+
+        $this->setContainer($container);
+        $this->run($input, $output)->shouldBe(-1);
+    }
 }
