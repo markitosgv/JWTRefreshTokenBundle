@@ -10,6 +10,7 @@
 /vendor/
 /web/bundles/
 composer.lock
+!.travis.yml
 
 # -- Editores -----------------------------------------
 # vim
@@ -66,7 +67,6 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Linux
-.*
 !.bowerrc
 !.gitignore
 !.htaccess
