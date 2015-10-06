@@ -17,17 +17,17 @@ class RefreshTokenRepositorySpec extends ObjectBehavior
         $this->beConstructedWith($em, $classMetadata);
     }
 
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository');
     }
 
-    function it_is_a_repository()
+    public function it_is_a_repository()
     {
         $this->shouldHaveType('Doctrine\ORM\EntityRepository');
     }
 
-    function it_finds_invalid_tokens($em, QueryBuilder $builder, AbstractQuery $query, RefreshTokenInterface $token)
+    public function it_finds_invalid_tokens($em, QueryBuilder $builder, AbstractQuery $query, RefreshTokenInterface $token)
     {
         $date = new \DateTime();
         $em->createQueryBuilder()->shouldBeCalled()->willReturn($builder);

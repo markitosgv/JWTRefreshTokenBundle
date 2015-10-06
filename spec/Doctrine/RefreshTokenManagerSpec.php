@@ -4,18 +4,15 @@ namespace spec\Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\Common\Persistence\ObjectRepository;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 
 class RefreshTokenManagerSpec extends ObjectBehavior
 {
-
     const refresh_token_entity_class = 'Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken';
 
-    function let(ObjectManager $om, ClassMetadata $class, RefreshToken $entity, RefreshTokenRepository $repository)
+    public function let(ObjectManager $om, ClassMetadata $class, RefreshToken $entity, RefreshTokenRepository $repository)
     {
         $entity->setUsername('test');
         $entity->setRefreshToken('test_token');
@@ -27,29 +24,27 @@ class RefreshTokenManagerSpec extends ObjectBehavior
         $this->beConstructedWith($om, static::refresh_token_entity_class);
     }
 
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager');
     }
 
-    function it_gets_token($repository, $refreshToken)
+    public function it_gets_token($repository, $refreshToken)
     {
-
         $repository->findOneBy(array('refreshToken' => $refreshToken))->shouldBeCalled();
 
         $this->get($refreshToken);
     }
 
-    function it_gets_last_token_from_user($repository, $entity)
+    public function it_gets_last_token_from_user($repository, $entity)
     {
         $username = 'test';
         $repository->findOneBy(array('username' => $username), array('valid' => 'DESC'))->shouldBeCalled()->willReturn($entity);
 
-
         $this->getLastFromUsername($username)->shouldBe($entity);
     }
 
-    function it_saves_refresh_token_and_flush($entity, $om)
+    public function it_saves_refresh_token_and_flush($entity, $om)
     {
         $om->persist($entity)->shouldBeCalled();
         $om->flush()->shouldBeCalled();
@@ -57,7 +52,7 @@ class RefreshTokenManagerSpec extends ObjectBehavior
         $this->save($entity, true);
     }
 
-    function it_deletes_refresh_token_and_flush($entity, $om)
+    public function it_deletes_refresh_token_and_flush($entity, $om)
     {
         $om->remove($entity)->shouldBeCalled();
         $om->flush()->shouldBeCalled();
@@ -65,7 +60,7 @@ class RefreshTokenManagerSpec extends ObjectBehavior
         $this->delete($entity, true);
     }
 
-    function it_revokes_all_invalid_and_flush($om, $repository, $entity)
+    public function it_revokes_all_invalid_and_flush($om, $repository, $entity)
     {
         $repository->findInvalid(null)->shouldBeCalled()->willReturn(array($entity));
         $om->remove($entity)->shouldBeCalled();
@@ -74,9 +69,8 @@ class RefreshTokenManagerSpec extends ObjectBehavior
         $this->revokeAllInvalid(null, true);
     }
 
-    function it_has_class()
+    public function it_has_class()
     {
         $this->getClass()->shouldBe(static::refresh_token_entity_class);
     }
-
 }

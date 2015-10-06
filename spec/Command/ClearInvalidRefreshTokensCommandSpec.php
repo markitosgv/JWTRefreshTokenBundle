@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ClearInvalidRefreshTokensCommandSpec extends ObjectBehavior
 {
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand');
     }
