@@ -10,7 +10,10 @@
 /vendor/
 /web/bundles/
 composer.lock
-!.travis.yml
+
+# -- Build -----------------------------------------
+coverage.xml
+
 
 # -- Editores -----------------------------------------
 # vim

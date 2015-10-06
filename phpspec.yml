@@ -6,3 +6,7 @@ suites:
 
 extensions:
     - PhpSpec\Extension\CodeCoverageExtension
+
+code_coverage:
+    format: clover
+    output: coverage.xml
