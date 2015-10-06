@@ -40,6 +40,6 @@ class RefreshTokenRepositorySpec extends ObjectBehavior
         $builder->getQuery()->shouldBeCalled()->willReturn($query);
         $query->getResult()->shouldBeCalled()->willReturn(array($token));
 
-        $this->findInvalid()->shouldReturn(array($token));
+        $this->findInvalid($date)->shouldReturn(array($token));
     }
 }
