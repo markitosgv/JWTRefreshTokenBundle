@@ -11,6 +11,9 @@
 /web/bundles/
 composer.lock
 
+/coverage/*
+clover.xml
+
 # -- Editores -----------------------------------------
 # vim
 .*.sw[a-z]
