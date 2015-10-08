@@ -14,7 +14,7 @@ cache:
 
 before_script:
   - composer self-update
-  - composer update --prefer-dist --no-interaction --prefer-lowest
+  - composer install --prefer-dist --no-interaction
 
 script: ./bin/phpspec run -fpretty --verbose
 
