@@ -2,9 +2,10 @@ JWTRefreshTokenBundle
 =====================
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
+[![Build Status](https://travis-ci.org/gesdinet/JWTRefreshTokenBundle.svg?branch=master)](https://travis-ci.org/gesdinet/JWTRefreshTokenBundle)
+[![Code Coverage](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
 [![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
-[![Latest Unstable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/unstable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
 [![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![StyleCI](https://styleci.io/repos/42582199/shield)](https://styleci.io/repos/42582199)
 

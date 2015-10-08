@@ -9,8 +9,6 @@ extensions:
 
 code_coverage:
   format:
-    - html
     - clover
   output:
-    html: coverage
-    clover: clover.xml
+    clover: coverage.xml
