@@ -8,7 +8,18 @@ extensions:
     - PhpSpec\Extension\CodeCoverageExtension
 
 code_coverage:
+  whitelist:
+    - Command
+    - DependencyInjection
+    - Doctrine
+    - Entity
+    - EventListener
+    - Model
+    - Security
+    - Service
   format:
     - clover
+    - html
   output:
     clover: coverage.xml
+    html: coverage
