@@ -153,4 +153,12 @@ class RefreshToken implements RefreshTokenInterface
 
         return ($this->valid >= $datetime) ? true : false;
     }
+
+    /**
+     * @return string Refresh Token
+     */
+    public function __toString()
+    {
+        return $this->getRefreshToken();
+    }
 }
