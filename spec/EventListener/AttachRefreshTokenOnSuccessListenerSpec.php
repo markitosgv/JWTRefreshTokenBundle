@@ -8,13 +8,15 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator\RecursiveValidator;
 
 class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
-    public function let(RefreshTokenManagerInterface $refreshTokenManager)
+    public function let(RefreshTokenManagerInterface $refreshTokenManager, RecursiveValidator $validator)
     {
         $ttl = 2592000;
-        $this->beConstructedWith($refreshTokenManager, $ttl);
+        $this->beConstructedWith($refreshTokenManager, $ttl, $validator);
     }
 
     public function it_is_initializable()
@@ -36,7 +38,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_a_new_token(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager)
+    public function it_attach_a_new_token(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator)
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn($user);
@@ -44,6 +46,10 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $refreshTokenManager->getLastFromUsername(Argument::any())->willReturn(null);
 
         $refreshTokenManager->create()->willReturn($refreshToken);
+
+        $violationList = new ConstraintViolationList(array());
+        $validator->validate($refreshToken)->willReturn($violationList);
+
         $refreshTokenManager->save($refreshToken)->shouldBeCalled();
 
         $event->setData(Argument::any())->shouldBeCalled();
@@ -51,7 +57,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->attachRefreshToken($event);
     }
 
-    public function it_is_not_valid_user(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager)
+    public function it_is_not_valid_user(AuthenticationSuccessEvent $event)
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn(null);
