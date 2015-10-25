@@ -14,12 +14,14 @@ namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Refresh Token.
  *
  * @ORM\Table("refresh_tokens")
  * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
+ * @UniqueEntity("refreshToken")
  */
 class RefreshToken implements RefreshTokenInterface
 {
@@ -35,7 +37,7 @@ class RefreshToken implements RefreshTokenInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="refresh_token", type="string", length=128)
+     * @ORM\Column(name="refresh_token", type="string", length=128, unique=true)
      * @Assert\NotBlank()
      */
     private $refreshToken;
