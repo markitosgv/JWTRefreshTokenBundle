@@ -15,7 +15,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Validator\RecursiveValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -23,7 +23,7 @@ class AttachRefreshTokenOnSuccessListener
     protected $ttl;
     protected $validator;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, RecursiveValidator $validator)
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator)
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
