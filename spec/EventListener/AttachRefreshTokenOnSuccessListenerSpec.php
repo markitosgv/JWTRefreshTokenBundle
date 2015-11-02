@@ -9,11 +9,11 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator\RecursiveValidator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
-    public function let(RefreshTokenManagerInterface $refreshTokenManager, RecursiveValidator $validator)
+    public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator)
     {
         $ttl = 2592000;
         $this->beConstructedWith($refreshTokenManager, $ttl, $validator);
