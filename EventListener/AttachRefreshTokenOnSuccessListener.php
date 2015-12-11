@@ -34,14 +34,24 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
+        $request = $event->getRequest();
 
         if (!$user instanceof UserInterface) {
             return;
         }
 
-        $refreshToken = $this->refreshTokenManager->getLastFromUsername($user->getUsername());
+        $refreshTokenString = null;
+        if ($request->headers->get('content_type') == 'application/json') {
+            $content = $request->getContent();
+            $params = !empty($content) ? json_decode($content, true) : array();
+            $refreshTokenString = trim($params['refresh_token']);
+        } else {
+            $refreshTokenString = $request->request->get('refresh_token');
+        }
 
-        if (!$refreshToken instanceof RefreshToken) {
+        if ($refreshTokenString) {
+            $data['refresh_token'] = $refreshTokenString;
+        } else {
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
 
@@ -65,9 +75,9 @@ class AttachRefreshTokenOnSuccessListener
             }
 
             $this->refreshTokenManager->save($refreshToken);
+            $data['refresh_token'] = $refreshToken->getRefreshToken();
         }
 
-        $data['refresh_token'] = $refreshToken->getRefreshToken();
         $event->setData($data);
     }
 }
