@@ -54,9 +54,7 @@ class RefreshToken
     {
         try {
             $preAuthenticatedToken = $this->authenticator->authenticateToken(
-                $this->authenticator->createToken($request, $this->providerKey),
-                $this->provider,
-                $this->providerKey
+                    $this->authenticator->createToken($request, $this->providerKey), $this->provider, $this->providerKey
             );
         } catch (AuthenticationException $e) {
             return $this->failureHandler->onAuthenticationFailure($request, $e);
@@ -65,18 +63,11 @@ class RefreshToken
         $refreshToken = $this->refreshTokenManager->get($preAuthenticatedToken->getCredentials());
 
         if (null === $refreshToken || !$refreshToken->isValid()) {
-            return $this->failureHandler->onAuthenticationFailure($request,
-                new AuthenticationException(
-                    sprintf('Refresh token "%s" is invalid.', $refreshToken)
-                )
+            return $this->failureHandler->onAuthenticationFailure($request, new AuthenticationException(
+                            sprintf('Refresh token "%s" is invalid.', $refreshToken)
+                            )
             );
         }
-
-        $datetime = new \DateTime();
-        $datetime->modify('+'.$this->ttl.' seconds');
-        $refreshToken->setValid($datetime);
-
-        $this->refreshTokenManager->save($refreshToken);
 
         return $this->successHandler->onAuthenticationSuccess($request, $preAuthenticatedToken);
     }
