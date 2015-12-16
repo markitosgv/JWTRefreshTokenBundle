@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
+use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Symfony\Component\Security\Core\Authentication\SimplePreAuthenticatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -28,17 +29,11 @@ class RefreshTokenAuthenticator implements SimplePreAuthenticatorInterface, Auth
 {
     public function createToken(Request $request, $providerKey)
     {
-        if ($request->headers->get('content_type') == 'application/json') {
-            $content = $request->getContent();
-            $params = !empty($content) ? json_decode($content, true) : array();
-            $refreshToken = trim($params['refresh_token']);
-        } else {
-            $refreshToken = $request->request->get('refresh_token');
-        }
+        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
 
         return new PreAuthenticatedToken(
             '',
-            $refreshToken,
+            $refreshTokenString,
             $providerKey
         );
     }
