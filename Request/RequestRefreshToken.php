@@ -21,7 +21,7 @@ class RequestRefreshToken
             $content = $request->getContent();
             $params = !empty($content) ? json_decode($content, true) : array();
             $refreshTokenString = trim($params['refresh_token']);
-        } else if (null !== $request->get('refresh_token')) {
+        } elseif (null !== $request->get('refresh_token')) {
             $refreshTokenString = $request->get('refresh_token');
         } else {
             $refreshTokenString = $request->request->get('refresh_token');
