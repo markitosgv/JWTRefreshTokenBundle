@@ -15,6 +15,7 @@ code_coverage:
     - Entity
     - EventListener
     - Model
+    - Request
     - Security
     - Service
   format:
