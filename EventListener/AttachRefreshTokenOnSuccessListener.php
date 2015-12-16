@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -34,14 +35,17 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
+        $request = $event->getRequest();
 
         if (!$user instanceof UserInterface) {
             return;
         }
 
-        $refreshToken = $this->refreshTokenManager->getLastFromUsername($user->getUsername());
+        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
 
-        if (!$refreshToken instanceof RefreshToken) {
+        if ($refreshTokenString) {
+            $data['refresh_token'] = $refreshTokenString;
+        } else {
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
 
@@ -65,9 +69,9 @@ class AttachRefreshTokenOnSuccessListener
             }
 
             $this->refreshTokenManager->save($refreshToken);
+            $data['refresh_token'] = $refreshToken->getRefreshToken();
         }
 
-        $data['refresh_token'] = $refreshToken->getRefreshToken();
         $event->setData($data);
     }
 }

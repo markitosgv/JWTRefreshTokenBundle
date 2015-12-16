@@ -10,6 +10,9 @@ use Prophecy\Argument;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\HeaderBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
@@ -24,26 +27,33 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener');
     }
 
-    public function it_attach_an_existing_token(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager)
+    public function it_attach_token_on_refresh(Request $request, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager)
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn($user);
 
-        $refreshTokenManager->getLastFromUsername(Argument::any())->willReturn($refreshToken);
+        $refreshTokenArray = array('refresh_token' => 'thepreviouslyissuedrefreshtoken');
+        $headers = new HeaderBag(array('content_type' => 'not-json'));
+        $request->headers = $headers;
+        $request->request = new ParameterBag($refreshTokenArray);
 
-        $refreshToken->getRefreshToken()->willReturn(Argument::any());
+        $event->getRequest()->willReturn($request);
 
-        $event->setData(Argument::any())->shouldBeCalled();
+        $event->setData(Argument::exact($refreshTokenArray))->shouldBeCalled();
 
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_a_new_token(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator)
+    public function it_attach_token_on_credentials_auth(Request $request, HeaderBag $headers, ParameterBag $requestBag, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator)
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn($user);
 
-        $refreshTokenManager->getLastFromUsername(Argument::any())->willReturn(null);
+        $headers = new HeaderBag(array('content_type' => 'not-json'));
+        $request->headers = $headers;
+        $request->request = new ParameterBag();
+
+        $event->getRequest()->willReturn($request);
 
         $refreshTokenManager->create()->willReturn($refreshToken);
 
@@ -61,6 +71,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn(null);
+        $event->getRequest()->willReturn(null);
 
         $this->attachRefreshToken($event);
     }
