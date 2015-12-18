@@ -17,13 +17,14 @@ class RequestRefreshToken
 {
     public static function getRefreshToken(Request $request)
     {
+        $refreshTokenString = null;
         if ($request->headers->get('content_type') == 'application/json') {
             $content = $request->getContent();
             $params = !empty($content) ? json_decode($content, true) : array();
-            $refreshTokenString = trim($params['refresh_token']);
+            $refreshTokenString = isset($params['refresh_token']) ? trim($params['refresh_token']) : null;
         } elseif (null !== $request->get('refresh_token')) {
             $refreshTokenString = $request->get('refresh_token');
-        } else {
+        } elseif (null !== $request->request->get('refresh_token')) {
             $refreshTokenString = $request->request->get('refresh_token');
         }
 
