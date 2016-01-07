@@ -17,12 +17,13 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class RefreshTokenSpec extends ObjectBehavior
 {
-    public function let(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, TokenInterface $token, UserProviderInterface $userProvider, $ttl, $providerKey)
+    public function let(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, TokenInterface $token, UserProviderInterface $userProvider, $ttl, $providerKey, $ttlUpdate)
     {
         $ttl = 2592000;
+        $ttlUpdate = false;
         $providerKey = 'testkey';
 
-        $this->beConstructedWith($authenticator, $provider, $successHandler, $failureHandler, $refreshTokenManager, $ttl, $providerKey);
+        $this->beConstructedWith($authenticator, $provider, $successHandler, $failureHandler, $refreshTokenManager, $ttl, $providerKey, $ttlUpdate);
     }
 
     public function it_is_initializable()
@@ -37,6 +38,22 @@ class RefreshTokenSpec extends ObjectBehavior
 
         $refreshTokenManager->get(Argument::any())->willReturn($refreshToken);
         $refreshToken->isValid()->willReturn(true);
+
+        $this->refresh($request);
+    }
+
+    public function it_refresh_token_with_ttl_update(RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, Request $request, $refreshTokenManager, $authenticator, $token, PreAuthenticatedToken $preAuthenticatedToken, RefreshTokenInterface $refreshToken)
+    {
+        $this->beConstructedWith($authenticator, $provider, $successHandler, $failureHandler, $refreshTokenManager, 2592000, 'testkey', true);
+
+        $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
+        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($preAuthenticatedToken);
+
+        $refreshTokenManager->get(Argument::any())->willReturn($refreshToken);
+        $refreshToken->isValid()->willReturn(true);
+
+        $refreshToken->getValid()->willReturn(new \DateTime());
+        $refreshTokenManager->save($refreshToken)->shouldBeCalled();
 
         $this->refresh($request);
     }
