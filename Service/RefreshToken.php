@@ -73,8 +73,9 @@ class RefreshToken
         }
 
         if ($this->ttlUpdate) {
-            $modifier = sprintf('+%d seconds', $this->ttl);
-            $refreshToken->getValid()->modify($modifier);
+            $expirationDate = new \DateTime();
+            $expirationDate->modify(sprintf('+%d seconds', $this->ttl));
+            $refreshToken->setValid($expirationDate);
 
             $this->refreshTokenManager->save($refreshToken);
         }
