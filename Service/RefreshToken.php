@@ -29,8 +29,10 @@ class RefreshToken
     private $successHandler;
     private $failureHandler;
     private $refreshTokenManager;
+    private $ttl;
+    private $ttlUpdate;
 
-    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey)
+    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate)
     {
         $this->authenticator = $authenticator;
         $this->provider = $provider;
@@ -39,6 +41,7 @@ class RefreshToken
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->providerKey = $providerKey;
+        $this->ttlUpdate = $ttlUpdate;
     }
 
     /**
@@ -67,6 +70,13 @@ class RefreshToken
                             sprintf('Refresh token "%s" is invalid.', $refreshToken)
                             )
             );
+        }
+
+        if ($this->ttlUpdate) {
+            $modifier = sprintf('+%d seconds', $this->ttl);
+            $refreshToken->getValid()->modify($modifier);
+
+            $this->refreshTokenManager->save($refreshToken);
         }
 
         return $this->successHandler->onAuthenticationSuccess($request, $preAuthenticatedToken);
