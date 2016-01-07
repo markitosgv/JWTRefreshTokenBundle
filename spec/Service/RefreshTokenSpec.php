@@ -52,7 +52,7 @@ class RefreshTokenSpec extends ObjectBehavior
         $refreshTokenManager->get(Argument::any())->willReturn($refreshToken);
         $refreshToken->isValid()->willReturn(true);
 
-        $refreshToken->getValid()->willReturn(new \DateTime());
+        $refreshToken->setValid(Argument::any())->shouldBeCalled();
         $refreshTokenManager->save($refreshToken)->shouldBeCalled();
 
         $this->refresh($request);
