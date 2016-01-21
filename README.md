@@ -110,6 +110,17 @@ gesdinet_jwt_refresh_token:
     ttl: 2592000
 ```
 
+### Config TTL update
+
+You can expand Refresh Token TTL on refresh. Default value is false. You can change this value adding this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    ttl_update: true
+```
+
+This will reset the token TTL each time you ask a refresh.
+
 ### Config Firewall Name
 
 You can define Firewall name. Default value is api. You can change this value adding this line to your config.yml file:
