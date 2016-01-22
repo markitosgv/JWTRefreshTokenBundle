@@ -30,7 +30,7 @@ class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
             ->setName('gesdinet:jwt:clear')
             ->setDescription('Clear invalid refresh tokens.')
             ->setDefinition(array(
-		new InputArgument('datetime', null, InputArgument::OPTIONAL, null),
+        new InputArgument('datetime', null, InputArgument::OPTIONAL, null),
             ));
     }
 
