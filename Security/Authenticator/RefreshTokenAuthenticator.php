@@ -22,10 +22,16 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerI
 use Symfony\Component\HttpFoundation\Response;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
+if(interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface')) {
+    abstract class RefreshTokenAuthenticatorBase implements \Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface {}
+} else {
+    abstract class RefreshTokenAuthenticatorBase implements \Symfony\Component\Security\Core\Authentication\SimplePreAuthenticatorInterface {}
+}
+
 /**
  * Class RefreshTokenAuthenticator.
  */
-class RefreshTokenAuthenticator implements SimplePreAuthenticatorInterface, AuthenticationFailureHandlerInterface
+class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements AuthenticationFailureHandlerInterface
 {
     public function createToken(Request $request, $providerKey)
     {
