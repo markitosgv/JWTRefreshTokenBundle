@@ -12,7 +12,6 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
@@ -22,10 +21,14 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerI
 use Symfony\Component\HttpFoundation\Response;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
-if(interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface')) {
-    abstract class RefreshTokenAuthenticatorBase implements \Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface {}
+if (interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface')) {
+    abstract class RefreshTokenAuthenticatorBase implements \Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface
+    {
+    }
 } else {
-    abstract class RefreshTokenAuthenticatorBase implements \Symfony\Component\Security\Core\Authentication\SimplePreAuthenticatorInterface {}
+    abstract class RefreshTokenAuthenticatorBase implements \Symfony\Component\Security\Core\Authentication\SimplePreAuthenticatorInterface
+    {
+    }
 }
 
 /**
