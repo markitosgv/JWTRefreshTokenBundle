@@ -17,7 +17,7 @@
     "symfony/symfony": "~2.3|~3.0",
     "doctrine/orm": "^2.4.8",
     "doctrine/doctrine-bundle": "~1.4",
-    "lexik/jwt-authentication-bundle": "^1.1"
+    "lexik/jwt-authentication-bundle": "^1.1|^2.0@dev"
   },
   "require-dev": {
     "phpspec/phpspec": "~2.0",
