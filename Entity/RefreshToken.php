@@ -32,7 +32,7 @@ class RefreshToken implements RefreshTokenInterface
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
@@ -40,7 +40,7 @@ class RefreshToken implements RefreshTokenInterface
      * @ORM\Column(name="refresh_token", type="string", length=128, unique=true)
      * @Assert\NotBlank()
      */
-    private $refreshToken;
+    protected $refreshToken;
 
     /**
      * @var string
@@ -48,7 +48,7 @@ class RefreshToken implements RefreshTokenInterface
      * @ORM\Column(name="username", type="string", length=255)
      * @Assert\NotBlank()
      */
-    private $username;
+    protected $username;
 
     /**
      * @var string
@@ -56,7 +56,7 @@ class RefreshToken implements RefreshTokenInterface
      * @ORM\Column(name="valid", type="datetime")
      * @Assert\NotBlank()
      */
-    private $valid;
+    protected $valid;
 
     /**
      * Get id.
