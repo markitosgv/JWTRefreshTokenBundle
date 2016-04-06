@@ -130,6 +130,17 @@ gesdinet_jwt_refresh_token:
     firewall: api
 ```
 
+### Config UserProvider
+
+You can define your own UserProvider. By default we use our custom UserProvider. You can change this value by adding this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    user_provider: user_provider_service_id
+```
+
+For example, if you are using FOSUserBundle, user_provider_service_id must be set to `fos_user.user_provider.username_email`.
+
 ### Generating Tokens
 
 When you authenticate through /api/login_check with user/password credentials, LexikJWTAuthenticationBundle now returns a JWT Token and a Refresh Token data.
