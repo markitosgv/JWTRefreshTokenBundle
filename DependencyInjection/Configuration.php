@@ -34,6 +34,7 @@ class Configuration implements ConfigurationInterface
                 ->integerNode('ttl')->defaultValue('2592000')->end()
                 ->booleanNode('ttl_update')->defaultFalse()->end()
                 ->scalarNode('firewall')->defaultValue('api')->end()
+                ->scalarNode('user_provider')->defaultNull()->end()
             ->end();
 
         return $treeBuilder;
