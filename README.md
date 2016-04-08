@@ -4,8 +4,8 @@ JWTRefreshTokenBundle
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
 [![Build Status](https://travis-ci.org/gesdinet/JWTRefreshTokenBundle.svg?branch=master)](https://travis-ci.org/gesdinet/JWTRefreshTokenBundle)
 [![Code Coverage](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
-[![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) 
+[![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
+[![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![StyleCI](https://styleci.io/repos/42582199/shield)](https://styleci.io/repos/42582199)
 
@@ -16,7 +16,7 @@ Prerequisites
 
 This bundle requires Symfony 2.5+ and supports Symfony 3 too.
 
-**Protip:** Though the bundle doesn't enforce you to do so, it is highly recommended to use HTTPS. 
+**Protip:** Though the bundle doesn't enforce you to do so, it is highly recommended to use HTTPS.
 
 Installation
 ------------
@@ -30,11 +30,11 @@ $ composer require "gesdinet/jwt-refresh-token-bundle"
 ```
 
 or edit composer.json:
-    
+
     // ...
     "gesdinet/jwt-refresh-token-bundle": "~0.1",
     // ...
-    
+
 ### Step 2: Enable the Bundle
 
 Then, enable the bundle by adding the following line in the `app/AppKernel.php` file of your Symfony application:
@@ -82,7 +82,7 @@ Add next lines on security.yml file:
             stateless: true
             anonymous: true
     # ...
-    
+
     access_control:
         # ...
         - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
@@ -140,6 +140,48 @@ gesdinet_jwt_refresh_token:
 ```
 
 For example, if you are using FOSUserBundle, user_provider_service_id must be set to `fos_user.user_provider.username_email`.
+
+### Use another entity for refresh tokens
+
+You can define your own entity for refresh tokens.
+Create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken` in you own bundle:
+
+```php
+namespace MyBundle;
+
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as BaseRefreshToken;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * This class override Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken to have another table name.
+ *
+ * @ORM\Table("jwt_refresh_token")
+ * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
+ * @UniqueEntity("refreshToken")
+ */
+class JwtRefreshToken extends BaseRefreshToken
+{
+}
+```
+
+Then declare this entity adding this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    refresh_token_entity: MyBundle\JwtRefreshToken
+```
+
+### Use another entity manager
+
+You can tell JWTRefreshTokenBundle to use another entity manager than default one (doctrine.orm.entity_manager).
+
+Just add this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    entity_manager: my.specific.entity_manager.id
+```
 
 ### Generating Tokens
 
