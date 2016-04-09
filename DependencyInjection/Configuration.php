@@ -35,6 +35,14 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('ttl_update')->defaultFalse()->end()
                 ->scalarNode('firewall')->defaultValue('api')->end()
                 ->scalarNode('user_provider')->defaultNull()->end()
+                ->scalarNode('refresh_token_entity')
+                    ->defaultNull()
+                    ->info('Set another refresh token entity to use instead of default one (Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken)')
+                ->end()
+                ->scalarNode('entity_manager')
+                    ->defaultNull()
+                    ->info('Set another entity manager instead of default one (doctrine.orm.entity_manager)')
+                ->end()
             ->end();
 
         return $treeBuilder;
