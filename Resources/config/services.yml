@@ -2,9 +2,6 @@ parameters:
   gesdinet.jwtrefreshtoken.refresh_token.class: Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken
 
 services:
-    gesdinet.jwtrefreshtoken.entity_manager:
-        alias: '@doctrine.orm.entity_manager'
-
     gesdinet.jwtrefreshtoken.send_token:
         class: Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener
         arguments: [ "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "@validator" ]

@@ -40,8 +40,8 @@ class Configuration implements ConfigurationInterface
                     ->info('Set another refresh token entity to use instead of default one (Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken)')
                 ->end()
                 ->scalarNode('entity_manager')
-                    ->defaultNull()
-                    ->info('Set another entity manager instead of default one (doctrine.orm.entity_manager)')
+                    ->defaultValue('doctrine.orm.entity_manager')
+                    ->info('Set entity manager to use (default: doctrine.orm.entity_manager)')
                 ->end()
             ->end();
 

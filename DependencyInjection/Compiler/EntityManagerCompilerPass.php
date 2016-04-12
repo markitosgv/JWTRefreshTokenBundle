@@ -8,19 +8,18 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 /**
  * CustomUserProviderCompilerPass.
  */
-final class CustomEntityManagerCompilerPass implements CompilerPassInterface
+final class EntityManagerCompilerPass implements CompilerPassInterface
 {
     /**
      * {@inheritdoc}
      */
     public function process(ContainerBuilder $container)
     {
-        $customEntityManagerId = $container->getParameter('gesdinet.jwtrefreshtoken.entity_manager.id');
-        if (!$customEntityManagerId) {
+        $entityManagerId = $container->getParameter('gesdinet.jwtrefreshtoken.entity_manager.id');
+        if (!$entityManagerId) {
             return;
         }
 
-        //replace the base alias
-        $container->setAlias('gesdinet.jwtrefreshtoken.entity_manager', $customEntityManagerId);
+        $container->setAlias('gesdinet.jwtrefreshtoken.entity_manager', $entityManagerId);
     }
 }
