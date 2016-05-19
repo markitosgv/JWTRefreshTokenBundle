@@ -29,7 +29,7 @@ final class CustomUserProviderCompilerPass implements CompilerPassInterface
 
         $definition->addMethodCall(
             'setCustomUserProvider',
-            [new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE, false)]
+            array(new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE, false))
         );
     }
 }
