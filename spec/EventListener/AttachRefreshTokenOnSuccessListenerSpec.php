@@ -10,16 +10,17 @@ use Prophecy\Argument;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
-    public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator)
+    public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
     {
         $ttl = 2592000;
-        $this->beConstructedWith($refreshTokenManager, $ttl, $validator);
+        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack);
     }
 
     public function it_is_initializable()
@@ -27,33 +28,35 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener');
     }
 
-    public function it_attach_token_on_refresh(Request $request, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager)
+    public function it_attach_token_on_refresh(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, RequestStack $requestStack)
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn($user);
 
         $refreshTokenArray = array('refresh_token' => 'thepreviouslyissuedrefreshtoken');
         $headers = new HeaderBag(array('content_type' => 'not-json'));
+        $request = new Request();
         $request->headers = $headers;
         $request->request = new ParameterBag($refreshTokenArray);
 
-        $event->getRequest()->willReturn($request);
+        $requestStack->getCurrentRequest()->willReturn($request);
 
         $event->setData(Argument::exact($refreshTokenArray))->shouldBeCalled();
 
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_token_on_credentials_auth(Request $request, HeaderBag $headers, ParameterBag $requestBag, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator)
+    public function it_attach_token_on_credentials_auth(HeaderBag $headers, ParameterBag $requestBag, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator, RequestStack $requestStack)
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn($user);
 
         $headers = new HeaderBag(array('content_type' => 'not-json'));
+        $request = new Request();
         $request->headers = $headers;
         $request->request = new ParameterBag();
 
-        $event->getRequest()->willReturn($request);
+        $requestStack->getCurrentRequest()->willReturn($request);
 
         $refreshTokenManager->create()->willReturn($refreshToken);
 
@@ -71,7 +74,6 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn(null);
-        $event->getRequest()->willReturn(null);
 
         $this->attachRefreshToken($event);
     }
