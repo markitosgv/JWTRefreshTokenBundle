@@ -45,6 +45,7 @@ class RefreshTokenSpec extends ObjectBehavior
     public function it_refresh_token_with_ttl_update(RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, Request $request, $refreshTokenManager, $authenticator, $token, PreAuthenticatedToken $preAuthenticatedToken, RefreshTokenInterface $refreshToken)
     {
         $this->beConstructedWith($authenticator, $provider, $successHandler, $failureHandler, $refreshTokenManager, 2592000, 'testkey', true);
+        $authenticator->setProperty('refresh_token');
 
         $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
         $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($preAuthenticatedToken);
