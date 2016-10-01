@@ -23,13 +23,15 @@ class AttachRefreshTokenOnSuccessListener
 {
     protected $userRefreshTokenManager;
     protected $ttl;
+    protected $property;
     protected $validator;
     protected $requestStack;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, $property, ValidatorInterface $validator, RequestStack $requestStack)
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
+        $this->property = $property;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
     }
@@ -72,7 +74,7 @@ class AttachRefreshTokenOnSuccessListener
             }
 
             $this->refreshTokenManager->save($refreshToken);
-            $data['refresh_token'] = $refreshToken->getRefreshToken();
+            $data[$this->property] = $refreshToken->getRefreshToken();
         }
 
         $event->setData($data);
