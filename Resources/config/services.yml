@@ -22,3 +22,5 @@ services:
 
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
+        calls:
+            - [setProperty, ["%gesdinet_jwt_refresh_token.refresh_token_property%"]]
