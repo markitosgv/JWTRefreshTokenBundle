@@ -31,18 +31,19 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->integerNode('ttl')->defaultValue('2592000')->end()
-                ->booleanNode('ttl_update')->defaultFalse()->end()
-                ->scalarNode('firewall')->defaultValue('api')->end()
-                ->scalarNode('user_provider')->defaultNull()->end()
-                ->scalarNode('refresh_token_entity')
-                    ->defaultNull()
-                    ->info('Set another refresh token entity to use instead of default one (Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken)')
-                ->end()
-                ->scalarNode('entity_manager')
-                    ->defaultValue('doctrine.orm.entity_manager')
-                    ->info('Set entity manager to use (default: doctrine.orm.entity_manager)')
-                ->end()
+            ->integerNode('ttl')->defaultValue('2592000')->end()
+            ->booleanNode('ttl_update')->defaultFalse()->end()
+            ->scalarNode('firewall')->defaultValue('api')->end()
+            ->scalarNode('refresh_token_property')->defaultValue('refresh_token')->end()
+            ->scalarNode('user_provider')->defaultNull()->end()
+            ->scalarNode('refresh_token_entity')
+            ->defaultNull()
+            ->info('Set another refresh token entity to use instead of default one (Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken)')
+            ->end()
+            ->scalarNode('entity_manager')
+            ->defaultValue('doctrine.orm.entity_manager')
+            ->info('Set entity manager to use (default: doctrine.orm.entity_manager)')
+            ->end()
             ->end();
 
         return $treeBuilder;
