@@ -46,7 +46,7 @@ class AttachRefreshTokenOnSuccessListener
             return;
         }
 
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+        $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->property);
 
         if ($refreshTokenString) {
             $data['refresh_token'] = $refreshTokenString;

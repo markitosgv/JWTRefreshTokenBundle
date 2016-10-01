@@ -15,17 +15,17 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RequestRefreshToken
 {
-    public static function getRefreshToken(Request $request)
+    public static function getRefreshToken(Request $request, $property)
     {
         $refreshTokenString = null;
         if ($request->headers->get('content_type') == 'application/json') {
             $content = $request->getContent();
             $params = !empty($content) ? json_decode($content, true) : array();
-            $refreshTokenString = isset($params['refresh_token']) ? trim($params['refresh_token']) : null;
-        } elseif (null !== $request->get('refresh_token')) {
-            $refreshTokenString = $request->get('refresh_token');
-        } elseif (null !== $request->request->get('refresh_token')) {
-            $refreshTokenString = $request->request->get('refresh_token');
+            $refreshTokenString = isset($params[$property]) ? trim($params[$property]) : null;
+        } elseif (null !== $request->get($property)) {
+            $refreshTokenString = $request->get($property);
+        } elseif (null !== $request->request->get($property)) {
+            $refreshTokenString = $request->request->get($property);
         }
 
         return $refreshTokenString;
