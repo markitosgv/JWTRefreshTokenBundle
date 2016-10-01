@@ -20,7 +20,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
     public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
     {
         $ttl = 2592000;
-        $property = "refresh_token";
+        $property = 'refresh_token';
         $this->beConstructedWith($refreshTokenManager, $ttl, $property, $validator, $requestStack);
     }
 
