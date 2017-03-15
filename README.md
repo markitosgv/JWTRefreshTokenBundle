@@ -172,6 +172,18 @@ gesdinet_jwt_refresh_token:
     manager_type: mongodb
 ```
 
+### Config UserChecker
+
+You can define your own UserChecker. By default the Symfony UserChecker will be used. You can change this value by adding this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    user_checker: user_checker_service_id
+```
+
+You will probably want to use a custom UserProvider along with your UserChecker to ensure that the checker recieves the right type of user.
+
+
 ### Use another entity for refresh tokens
 
 You can define your own refresh token class on your project.
