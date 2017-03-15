@@ -16,6 +16,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,6 +37,21 @@ if (interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAu
  */
 class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements AuthenticationFailureHandlerInterface
 {
+    /**
+     * @var UserCheckerInterface
+     */
+    private $userChecker;
+
+    /**
+     * Constructor
+     *
+     * @param UserCheckerInterface $userChecker
+     */
+    public function __construct(UserCheckerInterface $userChecker)
+    {
+        $this->userChecker = $userChecker;
+    }
+
     public function createToken(Request $request, $providerKey)
     {
         $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
@@ -68,6 +84,9 @@ class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements
         }
 
         $user = $userProvider->loadUserByUsername($username);
+
+        $this->userChecker->checkPreAuth($user);
+        $this->userChecker->checkPostAuth($user);
 
         return new PreAuthenticatedToken(
             $user,

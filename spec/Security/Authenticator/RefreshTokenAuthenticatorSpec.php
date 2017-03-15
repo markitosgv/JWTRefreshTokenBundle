@@ -6,9 +6,15 @@ use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\User\UserCheckerInterface;
 
 class RefreshTokenAuthenticatorSpec extends ObjectBehavior
 {
+    public function let(UserCheckerInterface $userChecker)
+    {
+        $this->beConstructedWith($userChecker);
+    }
+
     public function it_is_initializable()
     {
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator');

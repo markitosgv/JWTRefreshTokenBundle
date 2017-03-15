@@ -48,6 +48,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultNull()
                     ->info('Set object manager to use (default: doctrine.orm.entity_manager)')
                     ->end()
+                ->scalarNode('user_checker')->defaultValue('security.user_checker')->end()
                 ->scalarNode('refresh_token_entity')
                     ->defaultNull()
                     ->info('Deprecated, use refresh_token_class instead')

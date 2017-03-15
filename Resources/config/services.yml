@@ -21,6 +21,7 @@ services:
 
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
+        arguments: [ "@gesdinet.jwtrefreshtoken.user_checker" ]
 
     Gesdinet\JWTRefreshTokenBundle\Command\:
         resource: '../../Command/*'
