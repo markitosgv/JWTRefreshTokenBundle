@@ -43,7 +43,7 @@ class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements
     private $userChecker;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param UserCheckerInterface $userChecker
      */
