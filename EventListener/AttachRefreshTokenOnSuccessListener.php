@@ -13,11 +13,14 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
-use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Gesdinet\JWTRefreshTokenBundle\Event\GetTokenRequestEvent;
+use Gesdinet\JWTRefreshTokenBundle\Event\AddTokenResponseEvent;
+use Gesdinet\JWTRefreshTokenBundle\Events;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -25,30 +28,35 @@ class AttachRefreshTokenOnSuccessListener
     protected $ttl;
     protected $validator;
     protected $requestStack;
+    protected $dispatcher;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack, EventDispatcherInterface $dispatcher)
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
+        $this->dispatcher = $dispatcher;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
     {
         $data = $event->getData();
         $user = $event->getUser();
+        $response = $event->getResponse();
+
         $request = $this->requestStack->getCurrentRequest();
 
         if (!$user instanceof UserInterface) {
             return;
         }
 
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+        $getTokenEvent = new GetTokenRequestEvent($request);
+        $this->dispatcher->dispatch(Events::GET_TOKEN_REQUEST, $getTokenEvent);
 
-        if ($refreshTokenString) {
-            $data['refresh_token'] = $refreshTokenString;
-        } else {
+        $refreshTokenString = $getTokenEvent->getToken();
+
+        if (!$refreshTokenString) {
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
 
@@ -72,9 +80,14 @@ class AttachRefreshTokenOnSuccessListener
             }
 
             $this->refreshTokenManager->save($refreshToken);
-            $data['refresh_token'] = $refreshToken->getRefreshToken();
+
+            $refreshTokenString = $refreshToken->getRefreshToken();
         }
 
-        $event->setData($data);
+        $addTokenEvent = new AddTokenResponseEvent($refreshTokenString, $response);
+        $addTokenEvent->setData($data);
+        $this->dispatcher->dispatch(Events::ADD_TOKEN_RESPONSE, $addTokenEvent);
+
+        $event->setData($addTokenEvent->getData());
     }
 }
