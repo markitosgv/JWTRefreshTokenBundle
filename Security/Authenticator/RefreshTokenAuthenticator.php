@@ -11,7 +11,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
-use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
@@ -20,6 +19,9 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Gesdinet\JWTRefreshTokenBundle\Event\GetTokenRequestEvent;
+use Gesdinet\JWTRefreshTokenBundle\Events;
 
 if (interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface')) {
     abstract class RefreshTokenAuthenticatorBase implements \Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface
@@ -36,9 +38,14 @@ if (interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAu
  */
 class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements AuthenticationFailureHandlerInterface
 {
+    public function __construct(EventDispatcherInterface $dispatcher){
+        $this->dispatcher = $dispatcher;
+    }
     public function createToken(Request $request, $providerKey)
     {
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+        $event = new GetTokenRequestEvent($request);
+        $this->dispatcher->dispatch(Events::GET_TOKEN_REQUEST, $event);
+        $refreshTokenString = $event->getToken();
 
         return new PreAuthenticatedToken(
             '',

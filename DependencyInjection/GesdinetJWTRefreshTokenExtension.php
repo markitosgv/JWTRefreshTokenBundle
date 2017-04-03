@@ -12,9 +12,11 @@
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+use Gesdinet\JWTRefreshTokenBundle\Events;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -45,5 +47,35 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         }
 
         $container->setParameter('gesdinet.jwtrefreshtoken.entity_manager.id', $config['entity_manager']);
+
+        if($config['methods']['request_body']['enabled']){
+            $definition = new Definition(\Gesdinet\JWTRefreshTokenBundle\EventListener\TokenExtractor\RequestBodyTokenExtractorEventListener::class, [$config['methods']['request_body']['name']]);
+            $definition->addTag('kernel.event_listener', ['event' => Events::GET_TOKEN_REQUEST, 'method' => 'onGetToken']);
+            $container->setDefinition('gesdinet_jwt_refresh_token.extractor.request_body', $definition);
+
+            $definition = new Definition(\Gesdinet\JWTRefreshTokenBundle\EventListener\TokenSetter\ResponseBodyTokenSetterEventListener::class, [$config['methods']['request_body']['name']]);
+            $definition->addTag('kernel.event_listener', ['event' => Events::ADD_TOKEN_RESPONSE, 'method' => 'onAddToken']);
+            $container->setDefinition('gesdinet_jwt_refresh_token.setter.response_body', $definition);
+        }
+
+        if($config['methods']['request_header']['enabled']){
+            $definition = new Definition(\Gesdinet\JWTRefreshTokenBundle\EventListener\TokenExtractor\RequestHeaderTokenExtractorEventListener::class, [$config['methods']['request_header']['name']]);
+            $definition->addTag('kernel.event_listener', ['event' => Events::GET_TOKEN_REQUEST, 'method' => 'onGetToken']);
+            $container->setDefinition('gesdinet_jwt_refresh_token.extractor.request_header', $definition);
+
+             $definition = new Definition(\Gesdinet\JWTRefreshTokenBundle\EventListener\TokenSetter\ResponseHeaderTokenSetterEventListener::class, [$config['methods']['request_header']['name']]);
+            $definition->addTag('kernel.event_listener', ['event' => Events::ADD_TOKEN_RESPONSE, 'method' => 'onAddToken']);
+            $container->setDefinition('gesdinet_jwt_refresh_token.setter.response_header', $definition);
+        }
+
+        if($config['methods']['cookie']['enabled']){
+            $definition = new Definition(\Gesdinet\JWTRefreshTokenBundle\EventListener\TokenExtractor\RequestCookieTokenExtractorEventListener::class, [$config['methods']['cookie']['name']]);
+            $definition->addTag('kernel.event_listener', ['event' => Events::GET_TOKEN_REQUEST, 'method' => 'onGetToken']);
+            $container->setDefinition('gesdinet_jwt_refresh_token.extractor.cookie', $definition);
+
+            $definition = new Definition(\Gesdinet\JWTRefreshTokenBundle\EventListener\TokenSetter\ResponseCookieTokenSetterEventListener::class, [$config['methods']['cookie']['name'], $config['ttl']]);
+            $definition->addTag('kernel.event_listener', ['event' => Events::ADD_TOKEN_RESPONSE, 'method' => 'onAddToken']);
+            $container->setDefinition('gesdinet_jwt_refresh_token.setter.cookie', $definition);
+        }
     }
 }
