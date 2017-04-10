@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
@@ -26,16 +27,18 @@ class RefreshToken
 {
     private $authenticator;
     private $provider;
+    private $tokenStorage;
     private $successHandler;
     private $failureHandler;
     private $refreshTokenManager;
     private $ttl;
     private $ttlUpdate;
 
-    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate)
+    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, TokenStorageInterface $tokenStorage, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate)
     {
         $this->authenticator = $authenticator;
         $this->provider = $provider;
+        $this->tokenStorage = $tokenStorage;
         $this->successHandler = $successHandler;
         $this->failureHandler = $failureHandler;
         $this->refreshTokenManager = $refreshTokenManager;
@@ -79,6 +82,8 @@ class RefreshToken
 
             $this->refreshTokenManager->save($refreshToken);
         }
+
+        $this->tokenStorage->setToken($preAuthenticatedToken);
 
         return $this->successHandler->onAuthenticationSuccess($request, $preAuthenticatedToken);
     }
