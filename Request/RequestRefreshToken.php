@@ -18,7 +18,7 @@ class RequestRefreshToken
     public static function getRefreshToken(Request $request)
     {
         $refreshTokenString = null;
-        if ($request->headers->get('content_type') == 'application/json') {
+        if (0 === strpos($request->getContentType(), 'application/json')) {
             $content = $request->getContent();
             $params = !empty($content) ? json_decode($content, true) : array();
             $refreshTokenString = isset($params['refresh_token']) ? trim($params['refresh_token']) : null;
