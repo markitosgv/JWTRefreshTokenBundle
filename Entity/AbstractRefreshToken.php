@@ -24,7 +24,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 abstract class AbstractRefreshToken implements RefreshTokenInterface
 {
-
     /**
      * @var string
      *
