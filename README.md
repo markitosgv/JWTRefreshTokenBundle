@@ -149,7 +149,7 @@ Create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\Refresh
 ```php
 namespace MyBundle;
 
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as BaseRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -160,8 +160,20 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
  * @UniqueEntity("refreshToken")
  */
-class JwtRefreshToken extends BaseRefreshToken
+class JwtRefreshToken extends AbstractRefreshToken
 {
+    /**
+     * @var string
+     */
+    protected $id;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getId()
+    {
+        $this->id;
+    }
 }
 ```
 
