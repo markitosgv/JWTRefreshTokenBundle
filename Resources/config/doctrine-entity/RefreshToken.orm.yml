@@ -1,0 +1,10 @@
+Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken:
+  type: entity
+  table: refresh_tokens
+  repositoryClass: Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository
+  id:
+    id:
+      type: integer
+      column: id
+      generator:
+        strategy: AUTO

@@ -11,7 +11,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -19,7 +18,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * Abstract Refresh Token.
  *
- * @ORM\MappedSuperclass()
  * @UniqueEntity("refreshToken")
  */
 abstract class AbstractRefreshToken implements RefreshTokenInterface
@@ -27,7 +25,6 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="refresh_token", type="string", length=128, unique=true)
      * @Assert\NotBlank()
      */
     private $refreshToken;
@@ -35,15 +32,13 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="username", type="string", length=255)
      * @Assert\NotBlank()
      */
     private $username;
 
     /**
-     * @var string
+     * @var \DateTime
      *
-     * @ORM\Column(name="valid", type="datetime")
      * @Assert\NotBlank()
      */
     private $valid;
@@ -58,7 +53,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
      *
      * @param string $refreshToken
      *
-     * @return RefreshToken
+     * @return AbstractRefreshToken
      */
     public function setRefreshToken($refreshToken = null)
     {
@@ -86,7 +81,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
      *
      * @param \DateTime $valid
      *
-     * @return RefreshToken
+     * @return AbstractRefreshToken
      */
     public function setValid($valid)
     {
@@ -110,7 +105,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
      *
      * @param string $username
      *
-     * @return RefreshToken
+     * @return AbstractRefreshToken
      */
     public function setUsername($username)
     {
