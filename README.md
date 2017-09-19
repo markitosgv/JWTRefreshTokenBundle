@@ -95,7 +95,7 @@ Add next lines on security.yml file:
 With the next command you will create a new table to handle your refresh tokens
 
 ```bash
-php app/console doctrine:schema:update --force
+php bin/console doctrine:schema:update --force
 ```
 
 USAGE
