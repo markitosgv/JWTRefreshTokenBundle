@@ -12,13 +12,11 @@ use Doctrine\ORM\EntityRepository;
  */
 class RefreshTokenRepository extends EntityRepository
 {
-    public function findInvalid($datetime = null)
+    public function findInvalid(\DateTime $datetime = null): array
     {
-        $datetime = (null === $datetime) ? new \DateTime() : $datetime;
-
         return $this->createQueryBuilder('u')
             ->where('u.valid < :datetime')
-            ->setParameter(':datetime', $datetime)
+            ->setParameter(':datetime', $datetime ?? new \DateTime())
             ->getQuery()
             ->getResult();
     }

@@ -13,7 +13,7 @@ final class EntityManagerCompilerPass implements CompilerPassInterface
     /**
      * {@inheritdoc}
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $entityManagerId = $container->getParameter('gesdinet.jwtrefreshtoken.entity_manager.id');
         if (!$entityManagerId) {

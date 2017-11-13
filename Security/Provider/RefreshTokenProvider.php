@@ -11,12 +11,12 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Provider;
 
-use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 /**
  * Class RefreshTokenProvider.
@@ -31,12 +31,12 @@ class RefreshTokenProvider implements UserProviderInterface
         $this->refreshTokenManager = $refreshTokenManager;
     }
 
-    public function setCustomUserProvider(UserProviderInterface $customUserProvider)
+    public function setCustomUserProvider(UserProviderInterface $customUserProvider): void
     {
         $this->customUserProvider = $customUserProvider;
     }
 
-    public function getUsernameForRefreshToken($token)
+    public function getUsernameForRefreshToken($token): ? string
     {
         $refreshToken = $this->refreshTokenManager->get($token);
 
@@ -44,37 +44,37 @@ class RefreshTokenProvider implements UserProviderInterface
             return $refreshToken->getUsername();
         }
 
-        return;
+        return null;
     }
 
-    public function loadUserByUsername($username)
+    public function loadUserByUsername($username): UserInterface
     {
-        if ($this->customUserProvider != null) {
+        if ($this->customUserProvider instanceof UserProviderInterface) {
             return $this->customUserProvider->loadUserByUsername($username);
-        } else {
-            return new User(
-                $username,
-                null,
-                array('ROLE_USER')
-            );
         }
+
+        return new User(
+            $username,
+            null,
+            ['ROLE_USER']
+        );
     }
 
-    public function refreshUser(UserInterface $user)
+    public function refreshUser(UserInterface $user): UserInterface
     {
-        if ($this->customUserProvider != null) {
+        if ($this->customUserProvider instanceof UserProviderInterface) {
             return $this->customUserProvider->refreshUser($user);
-        } else {
-            throw new UnsupportedUserException();
         }
+
+        throw new UnsupportedUserException();
     }
 
-    public function supportsClass($class)
+    public function supportsClass($class): bool
     {
-        if ($this->customUserProvider != null) {
+        if ($this->customUserProvider instanceof UserProviderInterface) {
             return $this->customUserProvider->supportsClass($class);
-        } else {
-            return 'Symfony\Component\Security\Core\User\User' === $class;
         }
+
+        return 'Symfony\Component\Security\Core\User\User' === $class;
     }
 }
