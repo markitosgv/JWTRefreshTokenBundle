@@ -24,14 +24,16 @@ class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
     /**
      * @see Command
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('gesdinet:jwt:clear')
             ->setDescription('Clear invalid refresh tokens.')
-            ->setDefinition(array(
-                new InputArgument('datetime', InputArgument::OPTIONAL),
-            ));
+            ->setDefinition(
+                [
+                    new InputArgument('datetime', InputArgument::OPTIONAL),
+                ]
+            );
     }
 
     /**

@@ -19,46 +19,20 @@ namespace Gesdinet\JWTRefreshTokenBundle\Model;
  */
 interface RefreshTokenManagerInterface
 {
-    /**
-     * Creates an empty user instance.
-     *
-     * @return RefreshTokenInterface
-     */
-    public function create();
+    public function create(): RefreshTokenInterface;
 
-    /**
-     * @param string $refreshToken
-     *
-     * @return RefreshTokenInterface
-     */
-    public function get($refreshToken);
+    public function get(string $refreshToken): ? RefreshTokenInterface;
 
-    /**
-     * @param string $username
-     *
-     * @return RefreshTokenInterface
-     */
-    public function getLastFromUsername($username);
+    public function getLastFromUsername(string $username): ? RefreshTokenInterface;
 
-    /**
-     * @param RefreshTokenInterface $refreshToken
-     */
-    public function save(RefreshTokenInterface $refreshToken);
+    public function save(RefreshTokenInterface $refreshToken): void;
 
-    /**
-     * @param RefreshTokenInterface $refreshToken
-     */
     public function delete(RefreshTokenInterface $refreshToken);
 
     /**
      * @return RefreshTokenInterface[]
      */
-    public function revokeAllInvalid();
+    public function revokeAllInvalid(): array;
 
-    /**
-     * Returns the user's fully qualified class name.
-     *
-     * @return string
-     */
-    public function getClass();
+    public function getClass(): string;
 }
