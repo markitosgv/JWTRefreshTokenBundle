@@ -24,14 +24,16 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
     /**
      * @see Command
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('gesdinet:jwt:revoke')
             ->setDescription('Revoke a refresh token')
-            ->setDefinition(array(
-                new InputArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke'),
-            ));
+            ->setDefinition(
+                [
+                    new InputArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke'),
+                ]
+            );
     }
 
     /**
@@ -45,7 +47,12 @@ class RevokeRefreshTokenCommand extends ContainerAwareCommand
         $refreshToken = $manager->get($refreshTokenParam);
 
         if (null === $refreshToken) {
-            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exists', $refreshTokenParam));
+            $output->writeln(
+                sprintf(
+                    '<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exists',
+                    $refreshTokenParam
+                )
+            );
 
             return -1;
         }

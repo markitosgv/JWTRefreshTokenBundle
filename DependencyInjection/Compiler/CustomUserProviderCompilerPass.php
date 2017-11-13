@@ -15,7 +15,7 @@ final class CustomUserProviderCompilerPass implements CompilerPassInterface
     /**
      * {@inheritdoc}
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $customUserProvider = $container->getParameter('gesdinet_jwt_refresh_token.user_provider');
         if (!$customUserProvider) {
@@ -29,7 +29,7 @@ final class CustomUserProviderCompilerPass implements CompilerPassInterface
 
         $definition->addMethodCall(
             'setCustomUserProvider',
-            array(new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE, false))
+            [new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE)]
         );
     }
 }

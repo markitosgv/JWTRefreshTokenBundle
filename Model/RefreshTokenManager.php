@@ -13,16 +13,10 @@ namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
 abstract class RefreshTokenManager implements RefreshTokenManagerInterface
 {
-    /**
-     * Creates an empty RefreshToken instance.
-     *
-     * @return RefreshTokenInterface
-     */
-    public function create()
+    public function create(): RefreshTokenInterface
     {
         $class = $this->getClass();
-        $token = new $class();
 
-        return $token;
+        return new $class();
     }
 }

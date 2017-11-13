@@ -11,70 +11,22 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
-/**
- * Interface RefreshTokenInterface.
- */
 interface RefreshTokenInterface
 {
-    /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId();
 
-    /**
-     * Set refreshToken.
-     *
-     * @param string $refreshToken
-     *
-     * @return self
-     */
-    public function setRefreshToken($refreshToken = null);
+    public function getId(): ? int;
 
-    /**
-     * Get refreshToken.
-     *
-     * @return string
-     */
-    public function getRefreshToken();
+    public function setRefreshToken(string $refreshToken = null): RefreshTokenInterface;
 
-    /**
-     * Set valid.
-     *
-     * @param \DateTime $valid
-     *
-     * @return self
-     */
-    public function setValid($valid);
+    public function getRefreshToken(): ? string;
 
-    /**
-     * Get valid.
-     *
-     * @return \DateTime
-     */
-    public function getValid();
+    public function setValid(\DateTime $valid): RefreshTokenInterface;
 
-    /**
-     * Set username.
-     *
-     * @param $username
-     *
-     * @return self
-     */
-    public function setUsername($username);
+    public function getValid(): ? \DateTime;
 
-    /**
-     * Get user.
-     *
-     * @return $username
-     */
-    public function getUsername();
+    public function setUsername(string $username): RefreshTokenInterface;
 
-    /**
-     * Check if is a valid refresh token.
-     *
-     * @return bool
-     */
-    public function isValid();
+    public function getUsername(): ? string;
+
+    public function isValid(): bool;
 }

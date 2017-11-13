@@ -11,13 +11,13 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Service;
 
-use Symfony\Component\HttpFoundation\Request;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 /**
  * Class RefreshToken.
@@ -31,17 +31,26 @@ class RefreshToken
     private $refreshTokenManager;
     private $ttl;
     private $ttlUpdate;
+    private $providerKey;
 
-    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate)
-    {
+    public function __construct(
+        RefreshTokenAuthenticator $authenticator,
+        RefreshTokenProvider $provider,
+        AuthenticationSuccessHandler $successHandler,
+        AuthenticationFailureHandler $failureHandler,
+        RefreshTokenManagerInterface $refreshTokenManager,
+        $ttl,
+        $providerKey,
+        $ttlUpdate
+    ) {
         $this->authenticator = $authenticator;
         $this->provider = $provider;
         $this->successHandler = $successHandler;
         $this->failureHandler = $failureHandler;
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
-        $this->providerKey = $providerKey;
         $this->ttlUpdate = $ttlUpdate;
+        $this->providerKey = $providerKey;
     }
 
     /**
@@ -57,7 +66,9 @@ class RefreshToken
     {
         try {
             $preAuthenticatedToken = $this->authenticator->authenticateToken(
-                    $this->authenticator->createToken($request, $this->providerKey), $this->provider, $this->providerKey
+                $this->authenticator->createToken($request, $this->providerKey),
+                $this->provider,
+                $this->providerKey
             );
         } catch (AuthenticationException $e) {
             return $this->failureHandler->onAuthenticationFailure($request, $e);
@@ -66,9 +77,11 @@ class RefreshToken
         $refreshToken = $this->refreshTokenManager->get($preAuthenticatedToken->getCredentials());
 
         if (null === $refreshToken || !$refreshToken->isValid()) {
-            return $this->failureHandler->onAuthenticationFailure($request, new AuthenticationException(
-                            sprintf('Refresh token "%s" is invalid.', $refreshToken)
-                            )
+            return $this->failureHandler->onAuthenticationFailure(
+                $request,
+                new AuthenticationException(
+                    sprintf('Refresh token "%s" is invalid.', $refreshToken)
+                )
             );
         }
 
