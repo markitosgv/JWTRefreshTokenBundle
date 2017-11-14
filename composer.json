@@ -1,5 +1,5 @@
 {
-  "name" : "p4lv/jwt-refresh-token-bundle",
+  "name" : "gesdinet/jwt-refresh-token-bundle",
   "description" : "Implements a refresh token system over Json Web Tokens in Symfony",
   "type" : "symfony-bundle",
   "authors" : [{
