@@ -27,7 +27,11 @@ services:
     Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand:
         class: Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand
         arguments: ['@gesdinet.jwtrefreshtoken.refresh_token_manager']
+        tags:
+            - { name: 'console.command', command: 'gesdinet:jwt:clear' }
 
     Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand:
         class: Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand
         arguments: ['@gesdinet.jwtrefreshtoken.refresh_token_manager']
+        tags:
+            - { name: 'console.command', command: 'gesdinet:jwt:revoke' }
