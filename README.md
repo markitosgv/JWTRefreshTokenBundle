@@ -183,6 +183,27 @@ gesdinet_jwt_refresh_token:
     entity_manager: my.specific.entity_manager.id
 ```
 
+### Use change the format of the 'refresh_token' parameter
+
+You can tell JWTRefreshTokenBundle to use another naming strategy for the 'refresh_token' parameter.  By default this 
+uses the underscore notation, but you can configure it to use any of the provided name generators, or your own custom 
+one.
+
+Just add this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    parameter_name_generator: gesdinet.jwtrefreshtoken.name_generator.camel_case
+```
+
+Provided name generators…
+
+* gesdinet.jwtrefreshtoken.name_generator.underscore
+* gesdinet.jwtrefreshtoken.name_generator.camel_case
+
+If you would like to provide your own, simply register a service that extends  
+\Gesdinet\JWTRefreshTokenBundle\NameGenerator\NameGeneratorInterface, and use this in the config value.
+
 ### Generating Tokens
 
 When you authenticate through /api/login_check with user/password credentials, LexikJWTAuthenticationBundle now returns a JWT Token and a Refresh Token data.
