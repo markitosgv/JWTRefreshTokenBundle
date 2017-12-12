@@ -11,23 +11,59 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Request;
 
+use Gesdinet\JWTRefreshTokenBundle\NameGenerator\NameGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Class RequestRefreshToken
+ *
+ * @package Gesdinet\JWTRefreshTokenBundle
+ */
 class RequestRefreshToken
 {
-    public static function getRefreshToken(Request $request)
+    /**
+     * @var NameGeneratorInterface
+     */
+    private $nameGenerator;
+
+
+    /**
+     * Injects dependencies
+     *
+     * @param NameGeneratorInterface $nameGenerator
+     */
+    public function __construct(NameGeneratorInterface $nameGenerator)
+    {
+        $this->nameGenerator = $nameGenerator;
+    }
+
+
+    public function getRefreshToken(Request $request)
     {
         $refreshTokenString = null;
+        $refreshTokenName   = $this->getRefreshTokenName();
+
         if (false !== strpos($request->getContentType(), 'json')) {
             $content = $request->getContent();
             $params = !empty($content) ? json_decode($content, true) : array();
-            $refreshTokenString = isset($params['refresh_token']) ? trim($params['refresh_token']) : null;
-        } elseif (null !== $request->get('refresh_token')) {
-            $refreshTokenString = $request->get('refresh_token');
-        } elseif (null !== $request->request->get('refresh_token')) {
-            $refreshTokenString = $request->request->get('refresh_token');
+            $refreshTokenString = isset($params[$refreshTokenName]) ? trim($params[$refreshTokenName]) : null;
+        } elseif (null !== $request->get($refreshTokenName)) {
+            $refreshTokenString = $request->get($refreshTokenName);
+        } elseif (null !== $request->request->get($refreshTokenName)) {
+            $refreshTokenString = $request->request->get($refreshTokenName);
         }
 
         return $refreshTokenString;
+    }
+
+
+    /**
+     * Returns the name of the access token based on the current naming convention
+     *
+     * @return string
+     */
+    private function getRefreshTokenName()
+    {
+        return $this->nameGenerator->generateName('refresh_token');
     }
 }

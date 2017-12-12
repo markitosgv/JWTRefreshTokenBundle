@@ -12,6 +12,10 @@ services:
         class: Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager
         arguments: [ "@gesdinet.jwtrefreshtoken.entity_manager", "%gesdinet.jwtrefreshtoken.refresh_token.class%" ]
 
+    gesdinet.jwtrefreshtoken.request_refresh_token:
+        class: Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken
+        arguments: [ "@gesdinet.jwtrefreshtoken.name_generator.default" ]
+
     gesdinet.jwtrefreshtoken:
         class: Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken
         arguments: [ "@gesdinet.jwtrefreshtoken.authenticator", "@gesdinet.jwtrefreshtoken.user_provider", "@lexik_jwt_authentication.handler.authentication_success", "@lexik_jwt_authentication.handler.authentication_failure", "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "%gesdinet_jwt_refresh_token.security.firewall%", "%gesdinet_jwt_refresh_token.ttl_update%" ]
