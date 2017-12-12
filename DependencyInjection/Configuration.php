@@ -43,6 +43,10 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('doctrine.orm.entity_manager')
                     ->info('Set entity manager to use (default: doctrine.orm.entity_manager)')
                 ->end()
+                ->scalarNode('parameter_name_generator')
+                    ->defaultValue('gesdinet.jwtrefreshtoken.name_generator.underscore')
+                    ->info('Set service used to generate the parameter name in requests and responses (default: gesdinet.jwtrefreshtoken.name_generator.underscore)')
+                ->end()
             ->end();
 
         return $treeBuilder;
