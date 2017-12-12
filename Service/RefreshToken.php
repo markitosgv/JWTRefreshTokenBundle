@@ -66,7 +66,6 @@ class RefreshToken
      */
     private $ttlUpdate;
 
-
     public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate)
     {
         $this->authenticator = $authenticator;

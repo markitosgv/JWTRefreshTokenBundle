@@ -24,7 +24,6 @@ class RequestRefreshToken
      */
     private $nameGenerator;
 
-
     /**
      * Injects dependencies.
      *
@@ -34,7 +33,6 @@ class RequestRefreshToken
     {
         $this->nameGenerator = $nameGenerator;
     }
-
 
     public function getRefreshToken(Request $request)
     {
@@ -53,7 +51,6 @@ class RequestRefreshToken
 
         return $refreshTokenString;
     }
-
 
     /**
      * Returns the name of the access token based on the current naming convention.

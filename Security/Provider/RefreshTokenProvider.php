@@ -24,6 +24,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 class RefreshTokenProvider implements UserProviderInterface
 {
     protected $refreshTokenManager;
+
     protected $customUserProvider;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager)

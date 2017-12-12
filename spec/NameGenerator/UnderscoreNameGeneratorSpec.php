@@ -22,12 +22,10 @@ class UnderscoreNameGeneratorSpec extends ObjectBehavior
         $this->shouldHaveType(UnderscoreNameGenerator::class);
     }
 
-
     public function it_implements_name_generator_interface()
     {
         $this->shouldImplement(NameGeneratorInterface::class);
     }
-
 
     public function it_should_return_underscored_values_from_snake_case()
     {

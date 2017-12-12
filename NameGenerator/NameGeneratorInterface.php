@@ -7,7 +7,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\NameGenerator;
  */
 interface NameGeneratorInterface
 {
-
     /**
      * Convert the given name to the generator's styled version.
      *
