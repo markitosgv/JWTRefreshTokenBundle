@@ -34,7 +34,10 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $container->setParameter('gesdinet.jwtrefreshtoken.entity_manager.id', 'doctrine.orm.entity_manager')
                   ->shouldBeCalled();
 
+        // Ignore these calls
         $container->setDefinition(Argument::cetera())
+                  ->willReturn();
+        $container->setAlias(Argument::cetera())
                   ->willReturn();
 
         $configs = [];
