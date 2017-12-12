@@ -35,7 +35,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
                   ->shouldBeCalled();
         $container->setParameter('gesdinet_jwt_refresh_token.user_provider', null)
                   ->shouldBeCalled();
-        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', RefreshToken::class)
+        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', 'Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken')
                   ->shouldBeCalled();
         $container->setParameter('gesdinet.jwtrefreshtoken.entity_manager.id', 'doctrine.orm.entity_manager')
                   ->shouldBeCalled();
@@ -66,7 +66,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $container->setDefinition(Argument::cetera())
                   ->willReturn();
 
-        $configs = [];
+        $configs = array();
         $this->load($configs, $container);
     }
 
@@ -84,9 +84,9 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $container->setAlias(Argument::cetera())
                   ->willReturn();
 
-        $configs = [['parameter_name_generator' => 'some.service.name']];
-        $this->shouldThrow(ServiceNotFoundException::class)
-             ->during('load', [$configs, $container]);
+        $configs = array(array('parameter_name_generator' => 'some.service.name'));
+        $this->shouldThrow('\Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException')
+             ->during('load', array($configs, $container));
     }
 
     public function it_should_configure_a_custom_name_generator(ContainerBuilder $container)
@@ -107,7 +107,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $container->setAlias(Argument::cetera())
                   ->willReturn();
 
-        $configs = [['parameter_name_generator' => 'some.service.name']];
+        $configs = array(array('parameter_name_generator' => 'some.service.name'));
         $this->load($configs, $container);
     }
 }
