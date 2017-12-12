@@ -26,6 +26,7 @@ services:
 
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
+        arguments: [ "@gesdinet.jwtrefreshtoken.request_refresh_token" ]
 
     gesdinet.jwtrefreshtoken.name_generator.default:
         # This is overridden in GesdinetJWTRefreshTokenExtension based on user config

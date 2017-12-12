@@ -36,9 +36,24 @@ if (interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAu
  */
 class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements AuthenticationFailureHandlerInterface
 {
+    /**
+     * @var RequestRefreshToken
+     */
+    private $requestRefreshToken;
+
+    /**
+     * Injects dependencies.
+     *
+     * @param RequestRefreshToken $requestRefreshToken
+     */
+    public function __construct(RequestRefreshToken $requestRefreshToken)
+    {
+        $this->requestRefreshToken = $requestRefreshToken;
+    }
+
     public function createToken(Request $request, $providerKey)
     {
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+        $refreshTokenString = $this->requestRefreshToken->getRefreshToken($request);
 
         return new PreAuthenticatedToken(
             '',
