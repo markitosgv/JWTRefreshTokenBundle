@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\NameGenerator\NameGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -21,17 +22,53 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class AttachRefreshTokenOnSuccessListener
 {
-    protected $userRefreshTokenManager;
-    protected $ttl;
-    protected $validator;
-    protected $requestStack;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)
+    /**
+     * @var NameGeneratorInterface
+     */
+    private $nameGenerator;
+
+    /**
+     * @var RefreshTokenManagerInterface
+     */
+    private $refreshTokenManager;
+
+    private $ttl;
+
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    /**
+     * @var RequestRefreshToken
+     */
+    private $requestRefreshToken;
+
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+
+    /**
+     * Injects dependencies
+     *
+     * @param RefreshTokenManagerInterface $refreshTokenManager
+     * @param                              $ttl
+     * @param ValidatorInterface           $validator
+     * @param RequestStack                 $requestStack
+     * @param RequestRefreshToken          $requestRefreshToken
+     * @param NameGeneratorInterface       $nameGenerator
+     */
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack, RequestRefreshToken $requestRefreshToken, NameGeneratorInterface $nameGenerator)
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
+        $this->requestRefreshToken = $requestRefreshToken;
+        $this->nameGenerator = $nameGenerator;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -44,10 +81,12 @@ class AttachRefreshTokenOnSuccessListener
             return;
         }
 
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+        $refreshTokenString = $this->requestRefreshToken->getRefreshToken($request);
+
+        $refreshTokenName = $this->nameGenerator->generateName('refresh_token');
 
         if ($refreshTokenString) {
-            $data['refresh_token'] = $refreshTokenString;
+            $data[$refreshTokenName] = $refreshTokenString;
         } else {
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
@@ -72,7 +111,7 @@ class AttachRefreshTokenOnSuccessListener
             }
 
             $this->refreshTokenManager->save($refreshToken);
-            $data['refresh_token'] = $refreshToken->getRefreshToken();
+            $data[$refreshTokenName] = $refreshToken->getRefreshToken();
         }
 
         $event->setData($data);
