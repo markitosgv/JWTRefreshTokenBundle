@@ -5,9 +5,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\NameGenerator;
 use Doctrine\Common\Inflector\Inflector;
 
 /**
- * Class CamelCaseNameGenerator
- *
- * @package Gesdinet\JWTRefreshTokenBundle\NameGenerator
+ * Name generator for camel case names.
  *
  * @see CamelCaseNameGeneratorSpec for unit tests
  */

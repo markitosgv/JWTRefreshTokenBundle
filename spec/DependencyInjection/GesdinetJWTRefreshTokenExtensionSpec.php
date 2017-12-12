@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
 {
-    function let(ContainerBuilder $container)
+    public function let(ContainerBuilder $container)
     {
         $container->fileExists(dirname(dirname(__DIR__)).'/DependencyInjection/../Resources/config/services.yml')
                   ->willReturn(true);
@@ -19,12 +19,10 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
                   ->willReturn(true);
     }
 
-
     public function it_is_initializable()
     {
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenExtension');
     }
-
 
     public function it_should_set_parameters_correctly(ContainerBuilder $container)
     {
@@ -54,8 +52,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $this->load($configs, $container);
     }
 
-
-    function it_should_configure_the_default_naming_generator(ContainerBuilder $container)
+    public function it_should_configure_the_default_naming_generator(ContainerBuilder $container)
     {
         $container->setAlias(
             'gesdinet.jwtrefreshtoken.name_generator.default',
@@ -73,8 +70,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $this->load($configs, $container);
     }
 
-
-    function it_should_throw_an_exception_if_specifying_a_non_existent_name_generator_service(
+    public function it_should_throw_an_exception_if_specifying_a_non_existent_name_generator_service(
         ContainerBuilder $container
     ) {
         $container->has('some.service.name')
@@ -93,8 +89,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
              ->during('load', [$configs, $container]);
     }
 
-
-    function it_should_configure_a_custom_name_generator(ContainerBuilder $container)
+    public function it_should_configure_a_custom_name_generator(ContainerBuilder $container)
     {
         // Expectations
         $container->setAlias('gesdinet.jwtrefreshtoken.name_generator.default', 'some.service.name')

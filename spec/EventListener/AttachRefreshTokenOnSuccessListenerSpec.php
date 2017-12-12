@@ -76,7 +76,6 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->attachRefreshToken($event);
     }
 
-
     public function it_is_not_valid_user(AuthenticationSuccessEvent $event)
     {
         $event->getData()->willReturn(array());
@@ -84,7 +83,6 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
         $this->attachRefreshToken($event);
     }
-
 
     public function it_should_support_name_generator_for_data_array_key(AuthenticationSuccessEvent $event, UserInterface $user, RequestStack $requestStack, RequestRefreshToken $requestRefreshToken, NameGeneratorInterface $nameGenerator)
     {

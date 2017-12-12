@@ -15,9 +15,7 @@ use Gesdinet\JWTRefreshTokenBundle\NameGenerator\NameGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class RequestRefreshToken
- *
- * @package Gesdinet\JWTRefreshTokenBundle
+ * Service to extract refresh token from a request object.
  */
 class RequestRefreshToken
 {
@@ -28,7 +26,7 @@ class RequestRefreshToken
 
 
     /**
-     * Injects dependencies
+     * Injects dependencies.
      *
      * @param NameGeneratorInterface $nameGenerator
      */
@@ -41,7 +39,7 @@ class RequestRefreshToken
     public function getRefreshToken(Request $request)
     {
         $refreshTokenString = null;
-        $refreshTokenName   = $this->getRefreshTokenName();
+        $refreshTokenName = $this->getRefreshTokenName();
 
         if (false !== strpos($request->getContentType(), 'json')) {
             $content = $request->getContent();
@@ -58,7 +56,7 @@ class RequestRefreshToken
 
 
     /**
-     * Returns the name of the access token based on the current naming convention
+     * Returns the name of the access token based on the current naming convention.
      *
      * @return string
      */

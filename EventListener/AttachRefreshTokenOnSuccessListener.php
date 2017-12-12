@@ -22,7 +22,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class AttachRefreshTokenOnSuccessListener
 {
-
     /**
      * @var NameGeneratorInterface
      */
@@ -33,6 +32,9 @@ class AttachRefreshTokenOnSuccessListener
      */
     private $refreshTokenManager;
 
+    /**
+     * @var int
+     */
     private $ttl;
 
     /**
@@ -50,9 +52,8 @@ class AttachRefreshTokenOnSuccessListener
      */
     private $requestStack;
 
-
     /**
-     * Injects dependencies
+     * Injects dependencies.
      *
      * @param RefreshTokenManagerInterface $refreshTokenManager
      * @param                              $ttl

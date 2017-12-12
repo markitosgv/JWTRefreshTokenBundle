@@ -5,9 +5,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\NameGenerator;
 use Doctrine\Common\Inflector\Inflector;
 
 /**
- * Class UnderscoreNameGenerator
- *
- * @package Gesdinet\JWTRefreshTokenBundle\NameGenerator
+ * Name generator for underscore names.
  *
  * @see UnderscoreNameGeneratorSpec for unit tests
  */

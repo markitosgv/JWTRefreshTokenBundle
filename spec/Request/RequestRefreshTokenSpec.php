@@ -8,14 +8,13 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RequestRefreshTokenSpec extends ObjectBehavior
 {
-    function let(NameGeneratorInterface $nameGenerator)
+    public function let(NameGeneratorInterface $nameGenerator)
     {
         $this->beConstructedWith($nameGenerator);
-        
+
         $nameGenerator->generateName('refresh_token')
             ->willReturn('refresh_token');
     }
-
 
     public function it_gets_from_query_param()
     {
@@ -56,7 +55,6 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
         $this->getRefreshToken($request)->shouldBe('abcd');
     }
-
 
     public function it_gets_from_query_param_using_camel_case_naming(NameGeneratorInterface $nameGenerator)
     {

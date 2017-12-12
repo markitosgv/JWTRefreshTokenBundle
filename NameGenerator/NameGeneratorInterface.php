@@ -3,15 +3,13 @@
 namespace Gesdinet\JWTRefreshTokenBundle\NameGenerator;
 
 /**
- * Interface for parameter nameing generators
- *
- * @package Gesdinet\JWTRefreshTokenBundle
+ * Interface for parameter naming generators.
  */
 interface NameGeneratorInterface
 {
 
     /**
-     * Convert the given name to the generator's styled version
+     * Convert the given name to the generator's styled version.
      *
      * @param string $name
      *
