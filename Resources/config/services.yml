@@ -28,6 +28,7 @@ services:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
 
     gesdinet.jwtrefreshtoken.name_generator.default:
+        # This is overridden in GesdinetJWTRefreshTokenExtension based on user config
         alias: gesdinet.jwtrefreshtoken.name_generator.underscore
         public: false
 

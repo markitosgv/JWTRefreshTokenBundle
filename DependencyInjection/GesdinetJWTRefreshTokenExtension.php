@@ -11,10 +11,11 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -45,5 +46,13 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         }
 
         $container->setParameter('gesdinet.jwtrefreshtoken.entity_manager.id', $config['entity_manager']);
+
+        /** @var string $nameGeneratorServiceDefinition */
+        $nameGeneratorServiceDefinition = $config['parameter_name_generator'];
+        if (!$container->has($nameGeneratorServiceDefinition)) {
+            throw new ServiceNotFoundException($nameGeneratorServiceDefinition);
+        }
+
+        $container->setAlias('gesdinet.jwtrefreshtoken.name_generator.default', $nameGeneratorServiceDefinition);
     }
 }
