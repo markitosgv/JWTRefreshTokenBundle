@@ -3,7 +3,6 @@
 namespace spec\Gesdinet\JWTRefreshTokenBundle\NameGenerator;
 
 use Gesdinet\JWTRefreshTokenBundle\NameGenerator\CamelCaseNameGenerator;
-use Gesdinet\JWTRefreshTokenBundle\NameGenerator\NameGeneratorInterface;
 use PhpSpec\ObjectBehavior;
 
 /**

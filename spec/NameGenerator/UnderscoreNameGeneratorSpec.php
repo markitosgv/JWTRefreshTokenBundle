@@ -2,7 +2,6 @@
 
 namespace spec\Gesdinet\JWTRefreshTokenBundle\NameGenerator;
 
-use Gesdinet\JWTRefreshTokenBundle\NameGenerator\NameGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\NameGenerator\UnderscoreNameGenerator;
 use PhpSpec\ObjectBehavior;
 

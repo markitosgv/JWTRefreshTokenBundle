@@ -2,12 +2,10 @@
 
 namespace spec\Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
 {

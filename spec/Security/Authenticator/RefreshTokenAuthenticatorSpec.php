@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class RefreshTokenAuthenticatorSpec extends ObjectBehavior
 {
-    function let(RequestRefreshToken $requestRefreshToken)
+    public function let(RequestRefreshToken $requestRefreshToken)
     {
         $this->beConstructedWith($requestRefreshToken);
     }
@@ -26,7 +26,7 @@ class RefreshTokenAuthenticatorSpec extends ObjectBehavior
         $this->supportsToken($token, $providerKey)->shouldBe(true);
     }
 
-    function it_creates_token(RequestRefreshToken $requestRefreshToken, Request $request)
+    public function it_creates_token(RequestRefreshToken $requestRefreshToken, Request $request)
     {
         $providerKey = 'api';
 
