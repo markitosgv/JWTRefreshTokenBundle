@@ -22,3 +22,15 @@ services:
 
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
+
+    gesdinet.jwtrefreshtoken.name_generator.default:
+        alias: gesdinet.jwtrefreshtoken.name_generator.underscore
+        public: false
+
+    gesdinet.jwtrefreshtoken.name_generator.underscore:
+        class: Gesdinet\JWTRefreshTokenBundle\NameGenerator\UnderscoreNameGenerator
+        public: false
+
+    gesdinet.jwtrefreshtoken.name_generator.camel_case:
+        class: Gesdinet\JWTRefreshTokenBundle\NameGenerator\CamelCaseNameGenerator
+        public: false
