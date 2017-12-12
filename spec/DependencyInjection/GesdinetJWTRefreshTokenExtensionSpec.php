@@ -46,7 +46,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $container->setAlias(Argument::cetera())
                   ->willReturn();
 
-        $configs = [];
+        $configs = array();
         $this->load($configs, $container);
     }
 
