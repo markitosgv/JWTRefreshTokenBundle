@@ -96,7 +96,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
     {
         $container->fileExists(dirname(dirname(__DIR__)).'/DependencyInjection/../Resources/config/services.yml')
                   ->willReturn(true);
-        
+
         $container->has('gesdinet.jwtrefreshtoken.name_generator.underscore')
                   ->willReturn(true);
 
