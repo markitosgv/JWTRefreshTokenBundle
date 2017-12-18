@@ -27,3 +27,9 @@ services:
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
         public: true
+
+    Gesdinet\JWTRefreshTokenBundle\Command\:
+        resource: '../../Command/*'
+        autowire: true
+        autoconfigure: true
+        public: true
