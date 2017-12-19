@@ -11,7 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,8 +20,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Class ClearInvalidRefreshTokensCommand.
  */
-class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
+class ClearInvalidRefreshTokensCommand extends Command
 {
+    /**
+     * @var RefreshTokenManagerInterface
+     */
+    private $refreshTokenManager;
+
+    /**
+     * ClearInvalidRefreshTokensCommand constructor.
+     *
+     * @param RefreshTokenManagerInterface $refreshTokenManager
+     */
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
+    {
+        $this->refreshTokenManager = $refreshTokenManager;
+    }
+
     /**
      * @see Command
      */
@@ -47,8 +63,7 @@ class ClearInvalidRefreshTokensCommand extends ContainerAwareCommand
             $datetime = new \DateTime($datetime);
         }
 
-        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.refresh_token_manager');
-        $revokedTokens = $manager->revokeAllInvalid($datetime);
+        $revokedTokens = $this->refreshTokenManager->revokeAllInvalid($datetime);
 
         foreach ($revokedTokens as $revokedToken) {
             $output->writeln(sprintf('Revoke <comment>%s</comment>', $revokedToken->getRefreshToken()));

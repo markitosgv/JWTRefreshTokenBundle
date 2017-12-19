@@ -4,7 +4,6 @@ parameters:
 services:
     gesdinet.jwtrefreshtoken.send_token:
         class: Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener
-        public: true
         arguments: [ "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "@validator", "@request_stack" ]
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: attachRefreshToken }
@@ -28,8 +27,12 @@ services:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
         public: true
 
-    Gesdinet\JWTRefreshTokenBundle\Command\:
-        resource: '../../Command/*'
-        autowire: true
-        autoconfigure: true
-        public: true
+    gesdinet.command.clear_invalid_refresh_tokens:
+        class: Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokens
+        arguments:
+            - "@gesdinet.jwtrefreshtoken.refresh_token_manager"
+
+    gesdinet.command.revoke_refresh_token:
+        class: Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshToken
+        arguments:
+            - "@gesdinet.jwtrefreshtoken.refresh_token_manager"
