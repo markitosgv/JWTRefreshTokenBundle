@@ -13,7 +13,7 @@
     "MIT"
   ],
   "require" : {
-    "php": ">=5.3.3",
+    "php": ">=5.5.0",
     "symfony/framework-bundle": "~2.3|~3.0",
     "symfony/validator": "~2.3|~3.0",
     "doctrine/orm": "^2.4.8",

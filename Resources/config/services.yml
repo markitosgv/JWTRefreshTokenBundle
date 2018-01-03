@@ -15,7 +15,10 @@ services:
 
     gesdinet.jwtrefreshtoken.refresh_token_manager:
         class: Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager
-        arguments: [ "@gesdinet.jwtrefreshtoken.entity_manager", "%gesdinet.jwtrefreshtoken.refresh_token.class%" ]
+        arguments:
+          - "@gesdinet.jwtrefreshtoken.entity_manager"
+          - "%gesdinet.jwtrefreshtoken.refresh_token.class%"
+          - "%gesdinet_jwt_refresh_token.max_token_by_user%"
 
     gesdinet.jwtrefreshtoken:
         class: Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken

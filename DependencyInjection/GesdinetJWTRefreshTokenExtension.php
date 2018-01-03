@@ -39,6 +39,7 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $container->setParameter('gesdinet_jwt_refresh_token.security.firewall', $config['firewall']);
         $container->setParameter('gesdinet_jwt_refresh_token.user_provider', $config['user_provider']);
         $container->setParameter('gesdinet_jwt_refresh_token.get_username', $config['get_username']);
+        $container->setParameter('gesdinet_jwt_refresh_token.max_token_by_user', $config['max_token_by_user']);
 
         //if refresh_token_entity has not be defined in config, we don't want to erase base value
         if (isset($config['refresh_token_entity'])) {

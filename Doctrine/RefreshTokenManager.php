@@ -20,19 +20,22 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     protected $objectManager;
     protected $class;
     protected $repository;
+    protected $maxTokenByUser;
 
     /**
      * Constructor.
      *
      * @param ObjectManager $om
      * @param string        $class
+     * @param string        $maxTokenByUser
      */
-    public function __construct(ObjectManager $om, $class)
+    public function __construct(ObjectManager $om, $class, $maxTokenByUser)
     {
         $this->objectManager = $om;
         $this->repository = $om->getRepository($class);
         $metadata = $om->getClassMetadata($class);
         $this->class = $metadata->getName();
+        $this->maxTokenByUser = $maxTokenByUser;
     }
 
     /**
@@ -61,11 +64,19 @@ class RefreshTokenManager extends BaseRefreshTokenManager
      */
     public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
+        $offset = $this->maxTokenByUser;
+        if (!$andFlush)
+            $offset--;
+        $username = $refreshToken->getUsername();
         $this->objectManager->persist($refreshToken);
 
         if ($andFlush) {
             $this->objectManager->flush();
         }
+
+        $tokens = $this->repository->findBy(['username' => $username], ['valid' => 'DESC'], 1000, $offset);
+
+        $this->revokeTokens($tokens, $andFlush);
     }
 
     /**
@@ -91,15 +102,39 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     {
         $invalidTokens = $this->repository->findInvalid($datetime);
 
-        foreach ($invalidTokens as $invalidToken) {
-            $this->objectManager->remove($invalidToken);
+        return $this->revokeTokens($invalidTokens, $andFlush);
+    }
+
+    /**
+    * @param RefreshTokenInterface[] $tokens
+    * @param bool                    $andFlush
+    *
+    * @return RefreshTokenInterface[]
+    */
+    public function revokeTokens($tokens, $andFlush)
+    {
+        foreach ($tokens as $token) {
+            $this->objectManager->remove($token);
         }
 
         if ($andFlush) {
             $this->objectManager->flush();
         }
 
-        return $invalidTokens;
+        return $tokens;
+    }
+
+    /**
+     * @param string $username
+     * @param bool   $andFlush
+     *
+     * @return RefreshTokenInterface[]
+     */
+    public function revokeAllTokenByUsername($username, $andFlush = true)
+    {
+        $tokens = $this->repository->findBy(['username' => $username]);
+
+        return $this->revokeTokens($tokens, $andFlush);
     }
 
     /**
