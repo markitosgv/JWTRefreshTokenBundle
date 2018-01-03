@@ -21,17 +21,21 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class AttachRefreshTokenOnSuccessListener
 {
-    protected $userRefreshTokenManager;
+    protected $refreshTokenManager;
     protected $ttl;
     protected $validator;
     protected $requestStack;
+    protected $getUsername;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack, string $getUsername)
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
+        $this->getUsername = 'getUsername';
+        if ($getUsername)
+            $this->getUsername = $getUsername;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -52,8 +56,9 @@ class AttachRefreshTokenOnSuccessListener
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
 
+            $getUsername = $this->getUsername;
             $refreshToken = $this->refreshTokenManager->create();
-            $refreshToken->setUsername($user->getUsername());
+            $refreshToken->setUsername($user->$getUsername());
             $refreshToken->setRefreshToken();
             $refreshToken->setValid($datetime);
 
