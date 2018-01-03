@@ -1,5 +1,5 @@
 {
-  "name" : "gesdinet/jwt-refresh-token-bundle",
+  "name" : "doss/jwt-refresh-token-bundle",
   "description" : "Implements a refresh token system over Json Web Tokens in Symfony",
   "type" : "symfony-bundle",
   "authors" : [{
