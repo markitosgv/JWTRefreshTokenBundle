@@ -22,3 +22,7 @@ services:
 
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
+
+    Gesdinet\JWTRefreshTokenBundle\Command\:
+        resource: '../../Command/*'
+        tags: ['console.command']
