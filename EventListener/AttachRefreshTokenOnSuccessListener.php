@@ -88,7 +88,9 @@ class AttachRefreshTokenOnSuccessListener
                 }
             }
 
+            $user->setLastLogin(new \DateTime());
             $this->refreshTokenManager->save($refreshToken);
+            $this->userManager->updateUser($user);
             $data['refresh_token'] = $refreshToken->getRefreshToken();
         }
 
