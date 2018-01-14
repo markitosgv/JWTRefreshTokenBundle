@@ -12,7 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use FOS\UserBundle\Doctrine\UserManager;
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -26,13 +26,22 @@ class AttachRefreshTokenOnSuccessListener
     protected $validator;
     protected $requestStack;
     protected $getUsername;
+    protected $userManager;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack, string $getUsername)
+    public function __construct(
+        RefreshTokenManagerInterface $refreshTokenManager,
+        int $ttl,
+        ValidatorInterface $validator,
+        RequestStack $requestStack,
+        string $getUsername,
+        UserManager $userManager
+    )
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
+        $this->userManager = $userManager;
         $this->getUsername = 'getUsername';
         if ($getUsername)
             $this->getUsername = $getUsername;
@@ -49,6 +58,9 @@ class AttachRefreshTokenOnSuccessListener
         }
 
         $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+
+        $user->setLastLogin(new \DateTime());
+        $this->userManager->updateUser($user);
 
         if ($refreshTokenString) {
             $data['refresh_token'] = $refreshTokenString;
