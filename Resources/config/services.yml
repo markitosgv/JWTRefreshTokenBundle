@@ -10,6 +10,7 @@ services:
           - "@validator"
           - "@request_stack"
           - "%gesdinet_jwt_refresh_token.get_username%"
+          - "@fos_user.user_manager"
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: attachRefreshToken }
 
