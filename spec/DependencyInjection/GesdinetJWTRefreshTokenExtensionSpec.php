@@ -25,8 +25,10 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
 
         $container->getParameterBag()->willReturn($parameterBag);
         $container->fileExists(Argument::any())->willReturn(true);
-        $container->setParameter(Argument::any(), Argument::any())->will(function() {});
-        $container->setDefinition(Argument::any(), Argument::any())->will(function() {});
+        $container->setParameter(Argument::any(), Argument::any())->will(function() {
+        });
+        $container->setDefinition(Argument::any(), Argument::any())->will(function() {
+        });
         $container->getReflectionClass(Argument::type('string'))->will(function ($args) {
             return new \ReflectionClass($args[0]);
         });

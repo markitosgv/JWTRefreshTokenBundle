@@ -22,8 +22,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class AttachRefreshTokenOnSuccessListener
 {
     protected $userRefreshTokenManager;
+
     protected $ttl;
+
     protected $validator;
+    
     protected $requestStack;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)
