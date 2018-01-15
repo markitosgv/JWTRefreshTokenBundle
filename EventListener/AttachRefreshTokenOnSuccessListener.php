@@ -26,7 +26,7 @@ class AttachRefreshTokenOnSuccessListener
     protected $ttl;
 
     protected $validator;
-    
+
     protected $requestStack;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)

@@ -20,7 +20,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     protected $objectManager;
 
     protected $class;
-    
+
     protected $repository;
 
     /**
