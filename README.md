@@ -14,7 +14,7 @@ The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) i
 Prerequisites
 -------------
 
-This bundle requires Symfony 2.5+ and supports Symfony 3 too.
+This bundle requires Symfony 3.3+ or 4.0+.
 
 **Protip:** Though the bundle doesn't enforce you to do so, it is highly recommended to use HTTPS.
 
