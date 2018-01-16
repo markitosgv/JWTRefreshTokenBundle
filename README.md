@@ -16,6 +16,8 @@ Prerequisites
 
 This bundle requires Symfony 3.3+ or 4.0+.
 
+If you want use this bundle with previous Symfony versions, please use 0.2.x releases.
+
 **Protip:** Though the bundle doesn't enforce you to do so, it is highly recommended to use HTTPS.
 
 Installation
