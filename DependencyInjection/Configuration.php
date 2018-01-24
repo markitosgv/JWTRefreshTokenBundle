@@ -35,6 +35,7 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('ttl_update')->defaultFalse()->end()
                 ->scalarNode('firewall')->defaultValue('api')->end()
                 ->scalarNode('user_provider')->defaultNull()->end()
+                ->scalarNode('user_identity_field')->defaultValue('username')->end()
                 ->scalarNode('refresh_token_entity')
                     ->defaultNull()
                     ->info('Set another refresh token entity to use instead of default one (Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken)')

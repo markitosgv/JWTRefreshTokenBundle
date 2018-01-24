@@ -29,12 +29,15 @@ class AttachRefreshTokenOnSuccessListener
 
     protected $requestStack;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)
+    protected $userIdentityField;
+
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack, $userIdentityField)
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
+        $this->userIdentityField = $userIdentityField;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -56,7 +59,8 @@ class AttachRefreshTokenOnSuccessListener
             $datetime->modify('+'.$this->ttl.' seconds');
 
             $refreshToken = $this->refreshTokenManager->create();
-            $refreshToken->setUsername($user->getUsername());
+            $getter = 'get'.ucfirst($this->userIdentityField);
+            $refreshToken->setUsername($user->$getter());
             $refreshToken->setRefreshToken();
             $refreshToken->setValid($datetime);
 
