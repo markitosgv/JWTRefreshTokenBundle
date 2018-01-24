@@ -236,3 +236,44 @@ If you want to revoke a single token you can use this:
 ```bash
 php app/console gesdinet:jwt:revoke TOKEN
 ```
+
+### Events
+
+If you want to do something when token is refreshed you can listen for `gesdinet.refresh_token` event.
+
+For example:
+
+```php
+<?php
+
+namespace AppBundle\EventListener;
+
+use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class LogListener implements EventSubscriberInterface
+{
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function log(RefreshEvent $event)
+    {
+        $refreshToken = $event->getRefreshToken()->getRefreshToken();
+        $user = $event->getPreAuthenticatedToken()->getUser()->getUsername();
+        
+        $this->logger->debug(sprintf('User "%s" has refreshed it\'s JWT token with refresh token "%s".', $user, $refreshToken));
+    }
+    
+    public static function getSubscribedEvents()
+    {
+        return array(
+            'gesdinet.refresh_token' => 'log',
+        );
+    }
+}
+```
