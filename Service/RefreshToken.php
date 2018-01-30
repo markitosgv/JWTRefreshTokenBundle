@@ -25,12 +25,19 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 class RefreshToken
 {
     private $authenticator;
+
     private $provider;
+
     private $successHandler;
+
     private $failureHandler;
+
     private $refreshTokenManager;
+
     private $ttl;
+
     private $ttlUpdate;
+
     private $providerKey;
 
     public function __construct(

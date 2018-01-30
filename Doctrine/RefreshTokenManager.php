@@ -18,7 +18,9 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager as BaseRefreshToken
 class RefreshTokenManager extends BaseRefreshTokenManager
 {
     protected $objectManager;
+
     protected $class;
+
     protected $repository;
 
     public function __construct(ObjectManager $om, string $class)

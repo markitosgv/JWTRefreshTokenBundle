@@ -74,7 +74,6 @@ class RefreshTokenSpec extends ObjectBehavior
         $refreshToken->getRefreshToken()->willReturn(Argument::type('string'));
         $refreshTokenManager->get(Argument::type('string'))->willReturn($refreshToken);
 
-
         $this->refresh($request);
     }
 }

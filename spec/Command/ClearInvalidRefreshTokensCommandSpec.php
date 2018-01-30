@@ -2,15 +2,14 @@
 
 namespace spec\Gesdinet\JWTRefreshTokenBundle\Command;
 
+use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
-use Symfony\Component\Console\Command\Command;
 
 class ClearInvalidRefreshTokensCommandSpec extends ObjectBehavior
 {

@@ -21,9 +21,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class AttachRefreshTokenOnSuccessListener
 {
     protected $refreshTokenManager;
+
     protected $userRefreshTokenManager;
+
     protected $ttl;
+
     protected $validator;
+
     protected $requestStack;
 
     public function __construct(
