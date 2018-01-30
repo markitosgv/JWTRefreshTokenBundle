@@ -24,8 +24,6 @@ class RequestRefreshToken
             $refreshTokenString = isset($params['refresh_token']) ? trim($params['refresh_token']) : null;
         } elseif (null !== $request->get('refresh_token')) {
             $refreshTokenString = $request->get('refresh_token');
-        } elseif (null !== $request->request->get('refresh_token')) {
-            $refreshTokenString = $request->request->get('refresh_token');
         }
 
         return $refreshTokenString;
