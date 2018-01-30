@@ -7,10 +7,12 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use PhpSpec\ObjectBehavior;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Prophecy\Argument;
 
 class RefreshTokenManagerSpec extends ObjectBehavior
 {
-    const refresh_token_entity_class = 'Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken';
+    const refresh_token_entity_class = RefreshToken::class;
 
     public function let(ObjectManager $om, ClassMetadata $class, RefreshToken $entity, RefreshTokenRepository $repository)
     {
@@ -26,20 +28,21 @@ class RefreshTokenManagerSpec extends ObjectBehavior
 
     public function it_is_initializable()
     {
-        $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager');
+        $this->shouldHaveType(RefreshTokenManager::class);
     }
 
-    public function it_gets_token($repository, $refreshToken)
+    public function it_gets_token(RefreshTokenRepository $repository)
     {
+        $refreshToken = Argument::type('string');
         $repository->findOneBy(array('refreshToken' => $refreshToken))->shouldBeCalled();
 
         $this->get($refreshToken);
     }
 
-    public function it_gets_last_token_from_user($repository, $entity)
+    public function it_gets_last_token_from_user(RefreshTokenRepository $repository, RefreshToken $entity)
     {
-        $username = 'test';
-        $repository->findOneBy(array('username' => $username), array('valid' => 'DESC'))->shouldBeCalled()->willReturn($entity);
+        $username = Argument::type('string');
+        $repository->findOneBy(array('username' => $username))->shouldBeCalled()->willReturn($entity);
 
         $this->getLastFromUsername($username)->shouldBe($entity);
     }

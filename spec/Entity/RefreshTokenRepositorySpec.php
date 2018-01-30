@@ -9,6 +9,8 @@ use Doctrine\ORM\QueryBuilder;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
+use Doctrine\ORM\EntityRepository;
 
 class RefreshTokenRepositorySpec extends ObjectBehavior
 {
@@ -19,12 +21,12 @@ class RefreshTokenRepositorySpec extends ObjectBehavior
 
     public function it_is_initializable()
     {
-        $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository');
+        $this->shouldHaveType(RefreshTokenRepository::class);
     }
 
     public function it_is_a_repository()
     {
-        $this->shouldHaveType('Doctrine\ORM\EntityRepository');
+        $this->shouldHaveType(EntityRepository::class);
     }
 
     public function it_finds_invalid_tokens($em, QueryBuilder $builder, AbstractQuery $query, RefreshTokenInterface $token)

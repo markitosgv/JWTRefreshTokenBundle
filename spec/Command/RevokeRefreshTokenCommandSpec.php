@@ -2,24 +2,31 @@
 
 namespace spec\Gesdinet\JWTRefreshTokenBundle\Command;
 
+use Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RevokeRefreshTokenCommandSpec extends ObjectBehavior
 {
+    public function let(RefreshTokenManagerInterface $refreshTokenManager)
+    {
+        $this->beConstructedWith($refreshTokenManager);
+    }
+
     public function it_is_initializable()
     {
-        $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand');
+        $this->shouldHaveType(RevokeRefreshTokenCommand::class);
     }
 
     public function it_is_a_command()
     {
-        $this->shouldHaveType('Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand');
+        $this->shouldHaveType(Command::class);
     }
 
     public function it_has_a_name()
@@ -27,24 +34,34 @@ class RevokeRefreshTokenCommandSpec extends ObjectBehavior
         $this->getName()->shouldReturn('gesdinet:jwt:revoke');
     }
 
-    public function it_revokes_a_refresh_token(ContainerInterface $container, InputInterface $input, OutputInterface $output, RefreshTokenManagerInterface $refreshTokenManager, RefreshTokenInterface $refreshToken)
+    public function it_revokes_a_refresh_token(InputInterface $input, OutputInterface $output, RefreshTokenManagerInterface $refreshTokenManager, RefreshTokenInterface $refreshToken)
     {
-        $container->get('gesdinet.jwtrefreshtoken.refresh_token_manager')->shouldBeCalled()->willReturn($refreshTokenManager);
-        $refreshTokenManager->get(Argument::any())->shouldBeCalled()->willReturn($refreshToken);
+        $input->bind(Argument::type(InputDefinition::class))->shouldBeCalled();
+        $input->isInteractive()->willReturn(false);
+        $input->hasArgument(Argument::exact('command'))->willReturn(false);
+        $input->validate()->shouldBeCalled();
+
+        $argument = Argument::type('string');
+        $input->getArgument(Argument::exact('refresh_token'))->willReturn($argument);
+        $refreshTokenManager->get($argument)->shouldBeCalled()->willReturn($refreshToken);
 
         $refreshTokenManager->delete($refreshToken)->shouldBeCalled();
         $output->writeln(Argument::any())->shouldBeCalled();
 
-        $this->setContainer($container);
         $this->run($input, $output);
     }
 
-    public function it_not_revokes_a_refresh_token(ContainerInterface $container, InputInterface $input, OutputInterface $output, RefreshTokenManagerInterface $refreshTokenManager, RefreshTokenInterface $refreshToken)
+    public function it_not_revokes_a_refresh_token(InputInterface $input, OutputInterface $output, RefreshTokenManagerInterface $refreshTokenManager)
     {
-        $container->get('gesdinet.jwtrefreshtoken.refresh_token_manager')->shouldBeCalled()->willReturn($refreshTokenManager);
-        $refreshTokenManager->get(Argument::any())->shouldBeCalled()->willReturn(null);
+        $input->bind(Argument::type(InputDefinition::class))->shouldBeCalled();
+        $input->isInteractive()->willReturn(false);
+        $input->hasArgument(Argument::exact('command'))->willReturn(false);
+        $input->validate()->shouldBeCalled();
 
-        $this->setContainer($container);
+        $argument = Argument::type('string');
+        $input->getArgument(Argument::exact('refresh_token'))->willReturn($argument);
+        $refreshTokenManager->get($argument)->willReturn(null);
+
         $this->run($input, $output)->shouldBe(-1);
     }
 }

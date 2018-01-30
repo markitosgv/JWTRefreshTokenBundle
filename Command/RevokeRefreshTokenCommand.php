@@ -46,7 +46,7 @@ class RevokeRefreshTokenCommand extends Command
             );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $refreshTokenParam = $input->getArgument('refresh_token');
 
@@ -56,6 +56,8 @@ class RevokeRefreshTokenCommand extends Command
             $this->refreshTokenManager->delete($refreshToken);
 
             $output->writeln(sprintf('Revoke <comment>%s</comment>', $refreshToken->getRefreshToken()));
+
+            return 0;
         } else {
             $output->writeln(
                 sprintf(
@@ -63,6 +65,8 @@ class RevokeRefreshTokenCommand extends Command
                     $refreshTokenParam
                 )
             );
+
+            return -1;
         }
     }
 }
