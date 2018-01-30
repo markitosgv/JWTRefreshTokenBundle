@@ -15,7 +15,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $this->shouldHaveType(GesdinetJWTRefreshTokenExtension::class);
     }
 
-    public function it_should_set_parameters_correctly(ContainerBuilder $container)
+    public function it_should_set_parameters_correctly(ContainerBuilder $container, ParameterBag $parameterBag)
     {
         $configs = [];
         $container->setParameter(Argument::type('string'), Argument::any())->shouldBeCalled();
