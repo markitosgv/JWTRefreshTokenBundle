@@ -1,5 +1,5 @@
 parameters:
-  gesdinet.jwtrefreshtoken.refresh_token.class: Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken
+    gesdinet.jwtrefreshtoken.refresh_token.class: Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken
 
 services:
     gesdinet.jwtrefreshtoken.send_token:
@@ -10,13 +10,12 @@ services:
 
     gesdinet.jwtrefreshtoken.refresh_token_manager:
         class: Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager
-        public: true
         arguments: [ "@gesdinet.jwtrefreshtoken.entity_manager", "%gesdinet.jwtrefreshtoken.refresh_token.class%" ]
 
     gesdinet.jwtrefreshtoken:
         class: Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken
-        public: true
         arguments: [ "@gesdinet.jwtrefreshtoken.authenticator", "@gesdinet.jwtrefreshtoken.user_provider", "@lexik_jwt_authentication.handler.authentication_success", "@lexik_jwt_authentication.handler.authentication_failure", "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "%gesdinet_jwt_refresh_token.security.firewall%", "%gesdinet_jwt_refresh_token.ttl_update%" ]
+        public: true
 
     gesdinet.jwtrefreshtoken.user_provider:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider
@@ -25,6 +24,14 @@ services:
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
 
-    Gesdinet\JWTRefreshTokenBundle\Command\:
-        resource: '../../Command/*'
-        tags: ['console.command']
+    Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand:
+        class: Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand
+        arguments: ['@gesdinet.jwtrefreshtoken.refresh_token_manager']
+        tags:
+            - { name: 'console.command', command: 'gesdinet:jwt:clear' }
+
+    Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand:
+        class: Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand
+        arguments: ['@gesdinet.jwtrefreshtoken.refresh_token_manager']
+        tags:
+            - { name: 'console.command', command: 'gesdinet:jwt:revoke' }

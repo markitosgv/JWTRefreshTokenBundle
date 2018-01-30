@@ -11,7 +11,9 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,39 +21,52 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Class ClearInvalidRefreshTokensCommand.
  */
-class RevokeRefreshTokenCommand extends ContainerAwareCommand
+class RevokeRefreshTokenCommand extends Command
 {
     /**
-     * @see Command
+     * @var RefreshTokenManagerInterface
      */
-    protected function configure()
+    private $refreshTokenManager;
+
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
+    {
+        parent::__construct();
+        $this->refreshTokenManager = $refreshTokenManager;
+    }
+
+    protected function configure(): void
     {
         $this
             ->setName('gesdinet:jwt:revoke')
             ->setDescription('Revoke a refresh token')
-            ->setDefinition(array(
-                new InputArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke'),
-            ));
+            ->setDefinition(
+                [
+                    new InputArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke'),
+                ]
+            );
     }
 
-    /**
-     * @see Command
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $refreshTokenParam = $input->getArgument('refresh_token');
 
-        $manager = $this->getContainer()->get('gesdinet.jwtrefreshtoken.refresh_token_manager');
-        $refreshToken = $manager->get($refreshTokenParam);
+        $refreshToken = $this->refreshTokenManager->get($refreshTokenParam);
 
-        if (null === $refreshToken) {
-            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exists', $refreshTokenParam));
+        if ($refreshToken instanceof RefreshTokenInterface) {
+            $this->refreshTokenManager->delete($refreshToken);
+
+            $output->writeln(sprintf('Revoke <comment>%s</comment>', $refreshToken->getRefreshToken()));
+
+            return 0;
+        } else {
+            $output->writeln(
+                sprintf(
+                    '<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exists',
+                    $refreshTokenParam
+                )
+            );
 
             return -1;
         }
-
-        $manager->delete($refreshToken);
-
-        $output->writeln(sprintf('Revoke <comment>%s</comment>', $refreshToken->getRefreshToken()));
     }
 }
