@@ -25,8 +25,11 @@ use Gesdinet\JWTRefreshTokenBundle\Events;
 class AttachRefreshTokenOnSuccessListener
 {
     protected $userRefreshTokenManager;
+
     protected $ttl;
+
     protected $validator;
+
     protected $requestStack;
     protected $dispatcher;
 

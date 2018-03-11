@@ -14,15 +14,14 @@
   ],
   "require" : {
     "php": ">=5.3.3",
-    "symfony/framework-bundle": "~2.3|~3.0",
-    "symfony/validator": "~2.3|~3.0",
+    "symfony/framework-bundle": "~3.3|~4.0",
+    "symfony/validator": "~3.3|~4.0",
     "doctrine/orm": "^2.4.8",
     "doctrine/doctrine-bundle": "~1.4",
     "lexik/jwt-authentication-bundle": "^1.1|^2.0@dev"
   },
   "require-dev": {
-    "phpspec/phpspec": "~2.0",
-    "henrikbjorn/phpspec-code-coverage": "~1.0"
+    "phpspec/phpspec": "^4.0"
   },
   "config": {
     "bin-dir": "bin"

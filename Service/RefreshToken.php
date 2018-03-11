@@ -25,11 +25,17 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 class RefreshToken
 {
     private $authenticator;
+
     private $provider;
+
     private $successHandler;
+
     private $failureHandler;
+
     private $refreshTokenManager;
+
     private $ttl;
+
     private $ttlUpdate;
 
     public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate)
