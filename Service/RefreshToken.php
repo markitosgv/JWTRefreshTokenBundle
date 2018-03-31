@@ -11,6 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Service;
 
+use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler;
@@ -38,7 +40,9 @@ class RefreshToken
 
     private $ttlUpdate;
 
-    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate)
+    private $eventDispatcher;
+
+    public function __construct(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, $ttl, $providerKey, $ttlUpdate, EventDispatcherInterface $eventDispatcher)
     {
         $this->authenticator = $authenticator;
         $this->provider = $provider;
@@ -48,6 +52,7 @@ class RefreshToken
         $this->ttl = $ttl;
         $this->providerKey = $providerKey;
         $this->ttlUpdate = $ttlUpdate;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -85,6 +90,8 @@ class RefreshToken
 
             $this->refreshTokenManager->save($refreshToken);
         }
+
+        $this->eventDispatcher->dispatch('gesdinet.refresh_token', new RefreshEvent($refreshToken, $preAuthenticatedToken));
 
         return $this->successHandler->onAuthenticationSuccess($request, $preAuthenticatedToken);
     }
