@@ -18,6 +18,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -29,12 +30,15 @@ class AttachRefreshTokenOnSuccessListener
 
     protected $requestStack;
 
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack)
+    protected $userIdentityField;
+
+    public function __construct(RefreshTokenManagerInterface $refreshTokenManager, $ttl, ValidatorInterface $validator, RequestStack $requestStack, $userIdentityField)
     {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
+        $this->userIdentityField = $userIdentityField;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -56,7 +60,11 @@ class AttachRefreshTokenOnSuccessListener
             $datetime->modify('+'.$this->ttl.' seconds');
 
             $refreshToken = $this->refreshTokenManager->create();
-            $refreshToken->setUsername($user->getUsername());
+
+            $accessor = new PropertyAccessor();
+            $userIdentityFieldValue = $accessor->getValue($user, $this->userIdentityField);
+
+            $refreshToken->setUsername($userIdentityFieldValue);
             $refreshToken->setRefreshToken();
             $refreshToken->setValid($datetime);
 

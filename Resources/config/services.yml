@@ -4,7 +4,7 @@ parameters:
 services:
     gesdinet.jwtrefreshtoken.send_token:
         class: Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener
-        arguments: [ "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "@validator", "@request_stack" ]
+        arguments: [ "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "@validator", "@request_stack", "%gesdinet_jwt_refresh_token.user_identity_field%" ]
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: attachRefreshToken }
 

@@ -112,6 +112,15 @@ gesdinet_jwt_refresh_token:
     ttl: 2592000
 ```
 
+### Config User identity field
+
+You can change user identity field. Make sure that your model user has `getter` for this field. Default value is `username`. You can change this value by adding this line to your config.yml file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    user_identity_field: email
+```
+
 ### Config TTL update
 
 You can expand Refresh Token TTL on refresh. Default value is false. You can change this value adding this line to your config.yml file:
