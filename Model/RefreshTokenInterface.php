@@ -58,7 +58,7 @@ interface RefreshTokenInterface
     /**
      * Set username.
      *
-     * @param $username
+     * @param string $username
      *
      * @return self
      */
@@ -67,7 +67,7 @@ interface RefreshTokenInterface
     /**
      * Get user.
      *
-     * @return $username
+     * @return string
      */
     public function getUsername();
 

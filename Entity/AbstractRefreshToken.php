@@ -57,7 +57,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
      */
     public function setRefreshToken($refreshToken = null)
     {
-        if (null == $refreshToken) {
+        if (null === $refreshToken) {
             $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
         } else {
             $this->refreshToken = $refreshToken;
@@ -133,7 +133,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
     {
         $datetime = new \DateTime();
 
-        return ($this->valid >= $datetime) ? true : false;
+        return $this->valid >= $datetime;
     }
 
     /**

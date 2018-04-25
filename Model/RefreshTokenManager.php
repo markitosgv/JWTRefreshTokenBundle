@@ -21,8 +21,7 @@ abstract class RefreshTokenManager implements RefreshTokenManagerInterface
     public function create()
     {
         $class = $this->getClass();
-        $token = new $class();
 
-        return $token;
+        return new $class();
     }
 }
