@@ -50,10 +50,10 @@ class AttachRefreshTokenOnSuccessListener
      * AttachRefreshTokenOnSuccessListener constructor.
      *
      * @param RefreshTokenManagerInterface $refreshTokenManager
-     * @param $ttl
-     * @param ValidatorInterface $validator
-     * @param RequestStack $requestStack
-     * @param $userIdentityField
+     * @param int                          $ttl
+     * @param ValidatorInterface           $validator
+     * @param RequestStack                 $requestStack
+     * @param string                       $userIdentityField
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,

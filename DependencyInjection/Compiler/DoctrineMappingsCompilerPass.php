@@ -7,13 +7,11 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * Class DoctrineMappingsCompilerPass
+ * Class DoctrineMappingsCompilerPass.
  *
  * We can't add DoctrineOrmMappingsPass directly, because in GesdinetJWTRefreshTokenBundle->build we don't have current
  * bundle configuration yet.
  * This CompilerPass is effectively just a wrapper for DoctrineOrmMappingsPass, which passes mappings conditionally.
- *
- * @package Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler
  */
 final class DoctrineMappingsCompilerPass implements CompilerPassInterface
 {
@@ -39,5 +37,4 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
         $pass = DoctrineOrmMappingsPass::createYamlMappingDriver($mappings);
         $pass->process($container);
     }
-
 }
