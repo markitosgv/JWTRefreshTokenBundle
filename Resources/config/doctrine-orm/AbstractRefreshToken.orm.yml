@@ -1,0 +1,15 @@
+Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken:
+  type: mappedSuperclass
+  fields:
+    refreshToken:
+      type: string
+      column: refresh_token
+      length: 128
+      unique: true
+    username:
+      type: string
+      column: username
+      length: 255
+    valid:
+      type: datetime
+      column: valid

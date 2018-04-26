@@ -1,0 +1,146 @@
+<?php
+
+/*
+ * This file is part of the GesdinetJWTRefreshTokenBundle package.
+ *
+ * (c) Gesdinet <http://www.gesdinet.com/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Gesdinet\JWTRefreshTokenBundle\Entity;
+
+use Symfony\Component\Validator\Constraints as Assert;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
+/**
+ * Abstract Refresh Token.
+ *
+ * @UniqueEntity("refreshToken")
+ */
+abstract class AbstractRefreshToken implements RefreshTokenInterface
+{
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank()
+     */
+    private $refreshToken;
+
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank()
+     */
+    private $username;
+
+    /**
+     * @var \DateTime
+     *
+     * @Assert\NotBlank()
+     */
+    private $valid;
+
+    /**
+     * {@inheritdoc}
+     */
+    abstract public function getId();
+
+    /**
+     * Set refreshToken.
+     *
+     * @param string $refreshToken
+     *
+     * @return AbstractRefreshToken
+     */
+    public function setRefreshToken($refreshToken = null)
+    {
+        if (null === $refreshToken) {
+            $this->refreshToken = bin2hex(openssl_random_pseudo_bytes(64));
+        } else {
+            $this->refreshToken = $refreshToken;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get refreshToken.
+     *
+     * @return string
+     */
+    public function getRefreshToken()
+    {
+        return $this->refreshToken;
+    }
+
+    /**
+     * Set valid.
+     *
+     * @param \DateTime $valid
+     *
+     * @return AbstractRefreshToken
+     */
+    public function setValid($valid)
+    {
+        $this->valid = $valid;
+
+        return $this;
+    }
+
+    /**
+     * Get valid.
+     *
+     * @return \DateTime
+     */
+    public function getValid()
+    {
+        return $this->valid;
+    }
+
+    /**
+     * Set username.
+     *
+     * @param string $username
+     *
+     * @return AbstractRefreshToken
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * Get username.
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * Check if is a valid refresh token.
+     *
+     * @return bool
+     */
+    public function isValid()
+    {
+        $datetime = new \DateTime();
+
+        return $this->valid >= $datetime;
+    }
+
+    /**
+     * @return string Refresh Token
+     */
+    public function __toString()
+    {
+        return $this->getRefreshToken();
+    }
+}

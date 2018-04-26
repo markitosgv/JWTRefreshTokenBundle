@@ -1,0 +1,8 @@
+Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken:
+  type: mappedSuperclass
+  id:
+    id:
+      type: integer
+      column: id
+      generator:
+        strategy: AUTO

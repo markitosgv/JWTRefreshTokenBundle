@@ -61,7 +61,7 @@ class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements
         $refreshToken = $token->getCredentials();
         $username = $userProvider->getUsernameForRefreshToken($refreshToken);
 
-        if (!$username) {
+        if (null === $username) {
             throw new AuthenticationException(
                 sprintf('Refresh token "%s" does not exist.', $refreshToken)
             );
