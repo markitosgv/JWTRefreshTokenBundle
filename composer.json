@@ -16,11 +16,11 @@
     "php": ">=5.3.3",
     "symfony/framework-bundle": "~3.3|~4.0",
     "symfony/validator": "~3.3|~4.0",
-    "doctrine/orm": "^2.4.8",
-    "doctrine/doctrine-bundle": "~1.4",
     "lexik/jwt-authentication-bundle": "^1.1|^2.0@dev"
   },
   "require-dev": {
+    "doctrine/orm": "^2.4.8",
+    "doctrine/doctrine-bundle": "~1.4",
     "phpspec/phpspec": "^4.0"
   },
   "config": {

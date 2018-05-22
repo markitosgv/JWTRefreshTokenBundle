@@ -24,6 +24,10 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
+        if ($container->getParameter('gesdinet_jwt_refresh_token.engine') !== 'orm') {
+            return;
+        }
+
         $mappings = array(
             realpath(__DIR__.'/../../Resources/config/doctrine-orm') => 'Gesdinet\JWTRefreshTokenBundle\Entity',
         );

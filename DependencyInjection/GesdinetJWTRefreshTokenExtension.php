@@ -34,6 +34,7 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
+        $container->setParameter('gesdinet_jwt_refresh_token.engine', $config['engine']);
         $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
         $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $config['ttl_update']);
         $container->setParameter('gesdinet_jwt_refresh_token.security.firewall', $config['firewall']);
