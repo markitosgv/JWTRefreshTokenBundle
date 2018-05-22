@@ -31,6 +31,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->scalarNode('engine')->defaultValue('orm')->end()
                 ->integerNode('ttl')->defaultValue(2592000)->end()
                 ->booleanNode('ttl_update')->defaultFalse()->end()
                 ->scalarNode('firewall')->defaultValue('api')->end()
