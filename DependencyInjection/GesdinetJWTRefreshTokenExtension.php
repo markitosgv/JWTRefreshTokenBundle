@@ -43,16 +43,16 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $refreshTokenClass = 'Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken';
         $objectManager = 'doctrine.orm.entity_manager';
 
-        if (strtolower($config['manager_type']) === 'mongodb') {
+        if ('mongodb' === strtolower($config['manager_type'])) {
             $refreshTokenClass = 'Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken';
             $objectManager = 'doctrine_mongodb.odm.document_manager';
         }
 
-        if ($this->getRefreshTokenClass($config) !== null) {
+        if (null !== $this->getRefreshTokenClass($config)) {
             $refreshTokenClass = $this->getRefreshTokenClass($config);
         }
 
-        if ($this->getObjectManager($config) !== null) {
+        if (null !== $this->getObjectManager($config)) {
             $objectManager = $this->getObjectManager($config);
         }
 

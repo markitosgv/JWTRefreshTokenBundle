@@ -57,7 +57,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
      */
     public function setRefreshToken($refreshToken = null)
     {
-        $this->refreshToken = $refreshToken === null
+        $this->refreshToken = null === $refreshToken
             ? bin2hex(openssl_random_pseudo_bytes(64))
             : $refreshToken;
 

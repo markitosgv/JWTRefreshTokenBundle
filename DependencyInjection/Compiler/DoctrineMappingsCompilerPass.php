@@ -27,7 +27,7 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     {
         $config = $container->getExtensionConfig('gesdinet_jwt_refresh_token')[0];
 
-        $mappingPass = strtolower($config['manager_type']) === 'mongodb'
+        $mappingPass = 'mongodb' === strtolower($config['manager_type'])
             ? $this->getODMCompilerPass($config)
             : $this->getORMCompilerPass($config);
 
@@ -43,13 +43,13 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     {
         $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Entity';
         $mappings = array(
-            realpath(dirname(__DIR__, 2) . '/Resources/config/orm/doctrine-orm') => $nameSpace,
+            realpath(dirname(__DIR__, 2).'/Resources/config/orm/doctrine-orm') => $nameSpace,
         );
 
         if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
-            $mappings[realpath(dirname(__DIR__, 2) . '/Resources/config/orm/doctrine-superclass')] = $nameSpace;
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/orm/doctrine-superclass')] = $nameSpace;
         } else {
-            $mappings[realpath(dirname(__DIR__, 2) . '/Resources/config/orm/doctrine-entity')] = $nameSpace;
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/orm/doctrine-entity')] = $nameSpace;
         }
 
         return DoctrineOrmMappingsPass::createYamlMappingDriver($mappings);
@@ -64,13 +64,13 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     {
         $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Document';
         $mappings = array(
-            realpath(dirname(__DIR__, 2) . '/Resources/config/mongodb/doctrine-mongodb') => $nameSpace,
+            realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-mongodb') => $nameSpace,
         );
 
         if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
-            $mappings[realpath(dirname(__DIR__, 2) . '/Resources/config/mongodb/doctrine-superclass')] = $nameSpace;
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-superclass')] = $nameSpace;
         } else {
-            $mappings[realpath(dirname(__DIR__, 2) . '/Resources/config/mongodb/doctrine-document')] = $nameSpace;
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-document')] = $nameSpace;
         }
 
         return DoctrineMongoDBMappingsPass::createYamlMappingDriver($mappings, array());

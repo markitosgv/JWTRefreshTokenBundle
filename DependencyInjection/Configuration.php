@@ -56,9 +56,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultNull()
                     ->info('Deprecated, use object_manager instead')
                     ->end()
-
-
-        ->end();
+            ->end();
 
         return $treeBuilder;
     }
