@@ -6,20 +6,20 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * CustomUserProviderCompilerPass.
+ * ObjectManagerCompilerPass.
  */
-final class EntityManagerCompilerPass implements CompilerPassInterface
+final class ObjectManagerCompilerPass implements CompilerPassInterface
 {
     /**
      * {@inheritdoc}
      */
     public function process(ContainerBuilder $container)
     {
-        $entityManagerId = $container->getParameter('gesdinet.jwtrefreshtoken.entity_manager.id');
-        if (!$entityManagerId) {
+        $objectManagerId = $container->getParameter('gesdinet.jwtrefreshtoken.object_manager.id');
+        if (!$objectManagerId) {
             return;
         }
 
-        $container->setAlias('gesdinet.jwtrefreshtoken.entity_manager', $entityManagerId);
+        $container->setAlias('gesdinet.jwtrefreshtoken.object_manager', $objectManagerId);
     }
 }

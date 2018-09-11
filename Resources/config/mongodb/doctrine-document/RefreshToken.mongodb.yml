@@ -1,0 +1,8 @@
+Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken:
+  type: document
+  collection: refresh_tokens
+  repositoryClass: Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository
+  fields:
+    id:
+      type: id
+      id: true

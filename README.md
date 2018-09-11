@@ -31,10 +31,25 @@ Add [`gesdinet/jwt-refresh-token-bundle`](https://packagist.org/packages/gesdine
 $ composer require "gesdinet/jwt-refresh-token-bundle"
 ```
 
+If you want to use Doctrine's ORM
+
+```bash
+$ composer require "doctrine/orm" "doctrine/doctrine-bundle"
+```
+
+If you want to use Doctrine's MongoDB ODM
+
+```bash
+$ composer require "doctrine/mongodb-odm-bundle"
+```
+
 or edit composer.json:
 
     // ...
     "gesdinet/jwt-refresh-token-bundle": "~0.1",
+    "doctrine/orm": "^2.4.8",
+    "doctrine/doctrine-bundle": "~1.4",
+    "doctrine/mongodb-odm-bundle": "^3.4"
     // ...
 
 ### Step 2: Enable the Bundle
@@ -152,24 +167,31 @@ gesdinet_jwt_refresh_token:
 
 For example, if you are using FOSUserBundle, user_provider_service_id must be set to `fos_user.user_provider.username_email`.
 
+### Select Manager Type
+
+By default manager type is set to use Doctrine's ORM, if you want to use Doctrine's MongoDB ODM you have to change this value:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    manager_type: mongodb
+```
+
 ### Use another entity for refresh tokens
 
-You can define your own entity for refresh tokens.
-Create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken` in you own bundle:
+You can define your own refresh token class on your project.
+
+When using default ORM create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken` in you own bundle:
 
 ```php
 namespace MyBundle;
 
-use Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Doctrine\ORM\Mapping as ORM;
+use Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken;
 
 /**
  * This class override Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken to have another table name.
  *
  * @ORM\Table("jwt_refresh_token")
- * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
- * @UniqueEntity("refreshToken")
  */
 class JwtRefreshToken extends AbstractRefreshToken
 {
@@ -192,22 +214,54 @@ class JwtRefreshToken extends AbstractRefreshToken
 }
 ```
 
-Then declare this entity adding this line to your config.yml file:
+When using MongoBD ODM create the document class extending `Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken` in you own bundle:
+
+```php
+namespace MyBundle;
+
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken;
+
+/**
+ * This class override Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken to have another collection name.
+ *
+ * @MongoDB\Document(collection="UserRefreshToken")
+ */
+class JwtRefreshToken extends AbstractRefreshToken
+{
+    /**
+     * @var string
+     *
+     * @MongoDB\Id(strategy="auto")
+     */
+    protected $id;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getId()
+    {
+        $this->id;
+    }
+}
+```
+
+Then declare this class adding this line to your config.yml file:
 
 ```yaml
 gesdinet_jwt_refresh_token:
-    refresh_token_entity: MyBundle\JwtRefreshToken
+    refresh_token_class: MyBundle\JwtRefreshToken
 ```
 
-### Use another entity manager
+### Use another object manager
 
-You can tell JWTRefreshTokenBundle to use another entity manager than default one (doctrine.orm.entity_manager).
+You can tell JWTRefreshTokenBundle to use another object manager than default one (if using ORM it is doctrine.orm.entity_manager, when using MongoDB ODM it is doctrine_mongodb.odm.document_manager).
 
 Just add this line to your config.yml file:
 
 ```yaml
 gesdinet_jwt_refresh_token:
-    entity_manager: my.specific.entity_manager.id
+    object_manager: my.specific.entity_manager.id
 ```
 
 ### Generating Tokens
