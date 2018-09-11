@@ -40,11 +40,59 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $container->setParameter('gesdinet_jwt_refresh_token.user_provider', $config['user_provider']);
         $container->setParameter('gesdinet_jwt_refresh_token.user_identity_field', $config['user_identity_field']);
 
-        //if refresh_token_entity has not be defined in config, we don't want to erase base value
-        if (isset($config['refresh_token_entity'])) {
-            $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $config['refresh_token_entity']);
+        $refreshTokenClass = 'Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken';
+        $objectManager = 'doctrine.orm.entity_manager';
+
+        if ('mongodb' === strtolower($config['manager_type'])) {
+            $refreshTokenClass = 'Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken';
+            $objectManager = 'doctrine_mongodb.odm.document_manager';
         }
 
-        $container->setParameter('gesdinet.jwtrefreshtoken.entity_manager.id', $config['entity_manager']);
+        if (null !== $this->getRefreshTokenClass($config)) {
+            $refreshTokenClass = $this->getRefreshTokenClass($config);
+        }
+
+        if (null !== $this->getObjectManager($config)) {
+            $objectManager = $this->getObjectManager($config);
+        }
+
+        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $refreshTokenClass);
+        $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
+    }
+
+    /**
+     * Get refresh token class from configuration.
+     *
+     * Supports deprecated configuration
+     *
+     * @param array $config
+     *
+     * @return string|null
+     */
+    protected function getRefreshTokenClass(array $config)
+    {
+        if (isset($config['refresh_token_class'])) {
+            return $config['refresh_token_class'];
+        }
+
+        return $config['refresh_token_entity'] ?: null;
+    }
+
+    /**
+     * Get object manager from configuration.
+     *
+     * Supports deprecated configuration
+     *
+     * @param array $config
+     *
+     * @return string|null
+     */
+    protected function getObjectManager(array $config)
+    {
+        if (isset($config['object_manager'])) {
+            return $config['object_manager'];
+        }
+
+        return $objectManager = $config['entity_manager'] ?: null;
     }
 }

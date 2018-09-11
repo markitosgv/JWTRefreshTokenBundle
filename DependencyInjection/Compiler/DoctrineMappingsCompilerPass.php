@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler;
 
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use Doctrine\Bundle\MongoDBBundle\DependencyInjection\Compiler\DoctrineMongoDBMappingsPass;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -24,17 +25,54 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        $mappings = array(
-            realpath(__DIR__.'/../../Resources/config/doctrine-orm') => 'Gesdinet\JWTRefreshTokenBundle\Entity',
-        );
         $config = $container->getExtensionConfig('gesdinet_jwt_refresh_token')[0];
-        if (isset($config['refresh_token_entity'])) {
-            $mappings[realpath(__DIR__.'/../../Resources/config/doctrine-superclass')] = 'Gesdinet\JWTRefreshTokenBundle\Entity';
+
+        $mappingPass = 'mongodb' === strtolower($config['manager_type'])
+            ? $this->getODMCompilerPass($config)
+            : $this->getORMCompilerPass($config);
+
+        $mappingPass->process($container);
+    }
+
+    /**
+     * @param array $config
+     *
+     * @return CompilerPassInterface
+     */
+    protected function getORMCompilerPass(array $config)
+    {
+        $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Entity';
+        $mappings = array(
+            realpath(dirname(__DIR__, 2).'/Resources/config/orm/doctrine-orm') => $nameSpace,
+        );
+
+        if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/orm/doctrine-superclass')] = $nameSpace;
         } else {
-            $mappings[realpath(__DIR__.'/../../Resources/config/doctrine-entity')] = 'Gesdinet\JWTRefreshTokenBundle\Entity';
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/orm/doctrine-entity')] = $nameSpace;
         }
 
-        $pass = DoctrineOrmMappingsPass::createYamlMappingDriver($mappings);
-        $pass->process($container);
+        return DoctrineOrmMappingsPass::createYamlMappingDriver($mappings);
+    }
+
+    /**
+     * @param array $config
+     *
+     * @return CompilerPassInterface
+     */
+    protected function getODMCompilerPass(array $config)
+    {
+        $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Document';
+        $mappings = array(
+            realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-mongodb') => $nameSpace,
+        );
+
+        if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-superclass')] = $nameSpace;
+        } else {
+            $mappings[realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-document')] = $nameSpace;
+        }
+
+        return DoctrineMongoDBMappingsPass::createYamlMappingDriver($mappings, array());
     }
 }

@@ -1,0 +1,6 @@
+Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken:
+  type: mappedSuperclass
+  fields:
+    id:
+      type: id
+      id: true
