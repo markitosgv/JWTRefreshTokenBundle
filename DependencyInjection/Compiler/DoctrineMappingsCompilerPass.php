@@ -17,15 +17,32 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 final class DoctrineMappingsCompilerPass implements CompilerPassInterface
 {
     /**
-     * Process Doctrine mappings based on gesdinet_jwt_refresh_token.refresh_token_entity config parameter.
-     * If this parameter contains user-defined entity, RefreshToken will be registered as a mapped superclass, not as an
-     * entity, to prevent Doctrine creating table for it and avoid conflicts with user-defined entity.
+     * Process Doctrine mappings based on gesdinet_jwt_refresh_token.manager_type and
+     * gesdinet_jwt_refresh_token.refresh_token_class config parameters.
+     * Depending on the value of manager_type Doctrine's ORM or ODM mappings will be used.
+     * If refresh_token_class parameter contains user-defined entity, RefreshToken will be registered as a mapped
+     * superclass, not as an entity, to prevent Doctrine creating table for it and avoid conflicts with user-defined
+     * entity.
      *
      * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {
         $config = $container->getExtensionConfig('gesdinet_jwt_refresh_token')[0];
+
+        if (!class_exists('Doctrine\Bundle\MongoDBBundle\DependencyInjection\Compiler\DoctrineMongoDBMappingsPass')
+            && (isset($config['manager_type']) && 'mongodb' === strtolower($config['manager_type']))
+        ) {
+            // skip MongoDB ODM mappings
+            return;
+        }
+
+        if (!class_exists('Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass')
+            && (!isset($config['manager_type']) || 'mongodb' !== strtolower($config['manager_type']))
+        ) {
+            // skip ORM mappings
+            return;
+        }
 
         $mappingPass = isset($config['manager_type']) && 'mongodb' === strtolower($config['manager_type'])
             ? $this->getODMCompilerPass($config)

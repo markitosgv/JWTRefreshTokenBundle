@@ -25,22 +25,18 @@ Installation
 
 ### Step 1: Download the Bundle
 
-Add [`gesdinet/jwt-refresh-token-bundle`](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle) to your `composer.json` file:
+**It's important you manually require either Doctrine's ORM or MongoDB ODM as well, these packages are not required automatically now as you can choose between them. Failing to do so may trigger errors on installation**
+
+With Doctrine's ORM
 
 ```bash
-$ composer require "gesdinet/jwt-refresh-token-bundle"
+$ composer require "doctrine/orm" "doctrine/doctrine-bundle" "gesdinet/jwt-refresh-token-bundle"
 ```
 
-If you want to use Doctrine's ORM
+With Doctrine's MongoDB ODM
 
 ```bash
-$ composer require "doctrine/orm" "doctrine/doctrine-bundle"
-```
-
-If you want to use Doctrine's MongoDB ODM
-
-```bash
-$ composer require "doctrine/mongodb-odm-bundle"
+$ composer require "doctrine/mongodb-odm-bundle" "gesdinet/jwt-refresh-token-bundle"
 ```
 
 or edit composer.json:
