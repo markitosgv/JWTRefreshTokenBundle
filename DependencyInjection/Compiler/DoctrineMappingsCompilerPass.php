@@ -27,7 +27,7 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     {
         $config = $container->getExtensionConfig('gesdinet_jwt_refresh_token')[0];
 
-        $mappingPass = 'mongodb' === strtolower($config['manager_type'])
+        $mappingPass = isset($config['manager_type']) && 'mongodb' === strtolower($config['manager_type'])
             ? $this->getODMCompilerPass($config)
             : $this->getORMCompilerPass($config);
 
