@@ -79,7 +79,10 @@ Open your main routing configuration file (usually `app/config/routing.yml`) and
 # app/config/routing.yml
 gesdinet_jwt_refresh_token:
     path:     /api/token/refresh
-    defaults: { _controller: gesdinet.jwtrefreshtoken::refresh }
+    # Symfony 3.x
+    defaults: { _controller: gesdinet.jwtrefreshtoken:refresh }
+    # Symfony 4.x
+    defaults: { _controller: Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken::refresh }
 # ...
 ```
 
