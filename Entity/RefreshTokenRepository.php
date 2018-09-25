@@ -3,7 +3,6 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
-use Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken;
 
 /**
  * RefreshTokenRepository.
