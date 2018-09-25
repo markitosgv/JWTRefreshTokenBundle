@@ -22,7 +22,7 @@
     "doctrine/doctrine-bundle": "~1.4",
     "doctrine/mongodb-odm-bundle": "^3.4",
     "doctrine/orm": "^2.4.8",
-    "phpspec/phpspec": "^4.0"
+    "phpspec/phpspec": "^3.0|^4.0"
   },
   "config": {
     "bin-dir": "bin"
