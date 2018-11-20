@@ -176,7 +176,7 @@ gesdinet_jwt_refresh_token:
 
 You can define your own refresh token class on your project.
 
-When using default ORM create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken` in you own bundle:
+When using default ORM create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken` in your own bundle:
 
 ```php
 namespace MyBundle;
