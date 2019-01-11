@@ -8,15 +8,6 @@ services:
 matrix:
   fast_finish: true
   include:
-      # 3.3.*
-    - php: 5.6
-      env: SYMFONY_VERSION=3.3.*
-    - php: 7.0
-      env: SYMFONY_VERSION=3.3.*
-    - php: 7.1
-      env: SYMFONY_VERSION=3.3.*
-    - php: 7.2
-      env: SYMFONY_VERSION=3.3.*
       # 3.4.*
     - php: 5.6
       env: SYMFONY_VERSION=3.4.*
@@ -26,11 +17,11 @@ matrix:
       env: SYMFONY_VERSION=3.4.*
     - php: 7.2
       env: SYMFONY_VERSION=3.4.*
-      # 4.0.*
+      # 4.2.*
     - php: 7.1
-      env: SYMFONY_VERSION=4.0.*
+      env: SYMFONY_VERSION=4.2.*
     - php: 7.2
-      env: SYMFONY_VERSION=4.0.*
+      env: SYMFONY_VERSION=4.2.*
 
 cache:
   directories:
