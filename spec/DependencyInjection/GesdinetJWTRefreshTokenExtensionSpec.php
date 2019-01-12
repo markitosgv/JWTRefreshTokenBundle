@@ -16,10 +16,10 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
 
     public function it_should_set_parameters_correctly(ContainerBuilder $container, ParameterBag $parameterBag)
     {
-        $parameterBag->resolveValue(Argument::type('string'))->will(function ($args) {
+        $parameterBag->resolveValue(Argument::any())->will(function ($args) {
             return $args[0];
         });
-        $parameterBag->unescapeValue(Argument::type('string'))->will(function ($args) {
+        $parameterBag->unescapeValue(Argument::any())->will(function ($args) {
             return $args[0];
         });
 
