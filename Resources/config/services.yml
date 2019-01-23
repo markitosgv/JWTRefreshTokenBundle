@@ -26,3 +26,6 @@ services:
     Gesdinet\JWTRefreshTokenBundle\Command\:
         resource: '../../Command/*'
         tags: ['console.command']
+
+    Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand: ['@gesdinet.jwtrefreshtoken.refresh_token_manager']
+    Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand: ['@gesdinet.jwtrefreshtoken.refresh_token_manager']
