@@ -96,6 +96,6 @@ class GesdinetJWTRefreshTokenExtension extends Extension
             return $config['object_manager'];
         }
 
-        return $objectManager = $config['entity_manager'] ?: null;
+        return $config['entity_manager'] ?: null;
     }
 }
