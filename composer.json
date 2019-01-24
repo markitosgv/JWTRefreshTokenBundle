@@ -13,7 +13,7 @@
     "MIT"
   ],
   "require" : {
-    "php": ">=5.3.3",
+    "php": "^5.5.9|>=7.0.8",
     "symfony/framework-bundle": "~3.4|~4.0",
     "symfony/validator": "~3.4|~4.0",
     "lexik/jwt-authentication-bundle": "^1.1|^2.0@dev"
