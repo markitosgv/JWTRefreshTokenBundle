@@ -50,7 +50,8 @@ or edit composer.json:
 
 ### Step 2: Enable the Bundle
 
-Then, enable the bundle by adding the following line in the `app/AppKernel.php` file of your Symfony application:
+**Symfony 3 Version:**  
+Register bundle into `app/AppKernel.php`:
 
 ```php
 <?php
@@ -71,10 +72,20 @@ class AppKernel extends Kernel
 }
 ```
 
+**Symfony 4 Version:**   
+Register bundle into `config/bundles.php` (Flex did it automatically):  
+```php 
+return [
+    //...
+    Gesdinet\JWTRefreshTokenBundle\GesdinetJWTRefreshTokenBundle::class => ['all' => true],
+];
+```
+
 ### Step 3: Configure your own routing to refresh token
 
-Open your main routing configuration file (usually `app/config/routing.yml`) and copy the following four lines at the very beginning of it.
+Open your main routing configuration file and copy the following four lines at the very beginning of it.
 
+**Symfony 3 Version:**
 ```yaml
 # app/config/routing.yml
 gesdinet_jwt_refresh_token:
@@ -83,12 +94,21 @@ gesdinet_jwt_refresh_token:
 # ...
 ```
 
+**Symfony 4 Version:**
+```yaml
+# config/routes.yml
+gesdinet_jwt_refresh_token:
+    path:       /api/token/refresh
+    controller: gesdinet.jwtrefreshtoken::refresh
+# ...
+```
+
 ### Step 4: Allow anonymous access to refresh token
 
 Add next lines on security.yml file:
 
 ```yaml
-# app/config/security.yml
+# app/config/security.yml or config/packages/security.yaml
     firewalls:
         refresh:
             pattern:  ^/api/token/refresh
@@ -107,8 +127,14 @@ Add next lines on security.yml file:
 
 With the next command you will create a new table to handle your refresh tokens
 
+**Symfony 3 Version:**   
 ```bash
 php app/console doctrine:schema:update --force
+```
+
+**Symfony 4 Version:**   
+```bash
+php bin/console doctrine:schema:update --force
 ```
 
 USAGE
@@ -304,14 +330,26 @@ We give you two commands to manage tokens.
 
 If you want to revoke all invalid (datetime expired) refresh tokens you can execute:
 
+**Symfony 3 Version:**
 ```bash
 php app/console gesdinet:jwt:clear
 ```
 
+**Symfony 4 Version:**
+```bash
+php bin/console gesdinet:jwt:clear
+```
+
 Optional argument is datetime, it deletes all tokens smaller than this datetime:
 
+**Symfony 3 Version:**
 ```bash
 php app/console gesdinet:jwt:clear 2015-08-08
+```
+
+**Symfony 4 Version:**
+```bash
+php bin/console gesdinet:jwt:clear 2015-08-08
 ```
 
 We recommend to execute this command with a cronjob to remove invalid refresh tokens every certain time.
@@ -320,8 +358,14 @@ We recommend to execute this command with a cronjob to remove invalid refresh to
 
 If you want to revoke a single token you can use this:
 
+**Symfony 3 Version:**
 ```bash
 php app/console gesdinet:jwt:revoke TOKEN
+```
+
+**Symfony 4 Version:**
+```bash
+php bin/console gesdinet:jwt:revoke TOKEN
 ```
 
 ### Events
