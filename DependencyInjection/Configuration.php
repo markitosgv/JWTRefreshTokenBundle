@@ -26,8 +26,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('gesdinet_jwt_refresh_token');
+        $treeBuilder = new TreeBuilder('gesdinet_jwt_refresh_token');
+        $rootNode = method_exists(TreeBuilder::class, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('gesdinet_jwt_refresh_token');
 
         $rootNode
             ->children()
