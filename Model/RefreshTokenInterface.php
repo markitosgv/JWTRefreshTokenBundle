@@ -11,9 +11,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
-/**
- * Interface RefreshTokenInterface.
- */
 interface RefreshTokenInterface
 {
     /**

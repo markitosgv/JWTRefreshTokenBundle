@@ -18,9 +18,6 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
-/**
- * Class RefreshTokenProvider.
- */
 class RefreshTokenProvider implements UserProviderInterface
 {
     /**
@@ -62,7 +59,7 @@ class RefreshTokenProvider implements UserProviderInterface
             return new User(
                 $username,
                 null,
-                array('ROLE_USER')
+                ['ROLE_USER']
             );
         }
     }

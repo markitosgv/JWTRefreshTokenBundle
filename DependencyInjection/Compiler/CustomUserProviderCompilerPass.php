@@ -7,9 +7,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
-/**
- * CustomUserProviderCompilerPass.
- */
 final class CustomUserProviderCompilerPass implements CompilerPassInterface
 {
     /**
@@ -29,7 +26,7 @@ final class CustomUserProviderCompilerPass implements CompilerPassInterface
 
         $definition->addMethodCall(
             'setCustomUserProvider',
-            array(new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE, false))
+            [new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE)]
         );
     }
 }

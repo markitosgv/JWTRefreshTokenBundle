@@ -14,8 +14,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Document;
 use Doctrine\Bundle\MongoDBBundle\Validator\Constraints\Unique;
 
 /**
- * Refresh Token.
- *
  * @Unique("refreshToken")
  */
 class RefreshToken extends AbstractRefreshToken

@@ -8,8 +8,6 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * Class DoctrineMappingsCompilerPass.
- *
  * We can't add DoctrineOrmMappingsPass directly, because in GesdinetJWTRefreshTokenBundle->build we don't have current
  * bundle configuration yet.
  * This CompilerPass is effectively just a wrapper for DoctrineOrmMappingsPass, which passes mappings conditionally.
@@ -52,16 +50,14 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     }
 
     /**
-     * @param array $config
-     *
      * @return CompilerPassInterface
      */
-    protected function getORMCompilerPass(array $config)
+    private function getORMCompilerPass(array $config)
     {
         $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Entity';
-        $mappings = array(
+        $mappings = [
             realpath(dirname(dirname(__DIR__)).'/Resources/config/orm/doctrine-orm') => $nameSpace,
-        );
+        ];
 
         if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/orm/doctrine-superclass')] = $nameSpace;
@@ -73,16 +69,14 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     }
 
     /**
-     * @param array $config
-     *
      * @return CompilerPassInterface
      */
-    protected function getODMCompilerPass(array $config)
+    private function getODMCompilerPass(array $config)
     {
         $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Document';
-        $mappings = array(
+        $mappings = [
             realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-mongodb') => $nameSpace,
-        );
+        ];
 
         if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/mongodb/doctrine-superclass')] = $nameSpace;
@@ -90,6 +84,6 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/mongodb/doctrine-document')] = $nameSpace;
         }
 
-        return DoctrineMongoDBMappingsPass::createYamlMappingDriver($mappings, array());
+        return DoctrineMongoDBMappingsPass::createYamlMappingDriver($mappings, []);
     }
 }

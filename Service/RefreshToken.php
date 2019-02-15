@@ -22,9 +22,6 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 
-/**
- * Class RefreshToken.
- */
 class RefreshToken
 {
     /**
@@ -73,8 +70,6 @@ class RefreshToken
     private $eventDispatcher;
 
     /**
-     * RefreshToken constructor.
-     *
      * @param RefreshTokenAuthenticator             $authenticator
      * @param RefreshTokenProvider                  $provider
      * @param AuthenticationSuccessHandlerInterface $successHandler

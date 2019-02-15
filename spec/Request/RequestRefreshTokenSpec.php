@@ -25,7 +25,7 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
     public function it_gets_from_json()
     {
-        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array('refresh_token' => 'abcd')));
+        $request = Request::create(null, 'POST', [], [], [], [], json_encode(['refresh_token' => 'abcd']));
         $request->headers->set('content_type', 'application/json');
 
         $this::getRefreshToken($request)->shouldBe('abcd');
@@ -33,7 +33,7 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
     public function it_gets_from_json_x()
     {
-        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array('refresh_token' => 'abcd')));
+        $request = Request::create(null, 'POST', [], [], [], [], json_encode(['refresh_token' => 'abcd']));
         $request->headers->set('content_type', 'application/x-json');
 
         $this::getRefreshToken($request)->shouldBe('abcd');
@@ -41,7 +41,7 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
     public function it_gets_from_json_parameter()
     {
-        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array('refresh_token' => 'abcd')));
+        $request = Request::create(null, 'POST', [], [], [], [], json_encode(['refresh_token' => 'abcd']));
         $request->headers->set('content_type', 'application/json;charset=UTF-8');
 
         $this::getRefreshToken($request)->shouldBe('abcd');

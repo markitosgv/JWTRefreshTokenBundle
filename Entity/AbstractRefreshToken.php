@@ -16,8 +16,6 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * Abstract Refresh Token.
- *
  * @UniqueEntity("refreshToken")
  */
 abstract class AbstractRefreshToken implements RefreshTokenInterface

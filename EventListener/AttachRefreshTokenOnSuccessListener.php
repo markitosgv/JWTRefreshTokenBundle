@@ -47,8 +47,6 @@ class AttachRefreshTokenOnSuccessListener
     protected $userIdentityField;
 
     /**
-     * AttachRefreshTokenOnSuccessListener constructor.
-     *
      * @param RefreshTokenManagerInterface $refreshTokenManager
      * @param int                          $ttl
      * @param ValidatorInterface           $validator

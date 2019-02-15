@@ -16,8 +16,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
- * Abstract Refresh Token.
- *
  * @Unique("refreshToken")
  */
 abstract class AbstractRefreshToken implements RefreshTokenInterface

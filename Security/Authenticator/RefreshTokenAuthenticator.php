@@ -32,9 +32,6 @@ if (interface_exists('Symfony\Component\Security\Http\Authentication\SimplePreAu
     }
 }
 
-/**
- * Class RefreshTokenAuthenticator.
- */
 class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements AuthenticationFailureHandlerInterface
 {
     /**
@@ -43,8 +40,6 @@ class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements
     private $userChecker;
 
     /**
-     * Constructor.
-     *
      * @param UserCheckerInterface $userChecker
      */
     public function __construct(UserCheckerInterface $userChecker)

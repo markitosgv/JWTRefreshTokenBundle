@@ -5,9 +5,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-/**
- * ObjectManagerCompilerPass.
- */
 final class ObjectManagerCompilerPass implements CompilerPassInterface
 {
     /**

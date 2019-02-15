@@ -31,7 +31,7 @@ class RefreshTokenManagerSpec extends ObjectBehavior
 
     public function it_gets_token($repository, $refreshToken)
     {
-        $repository->findOneBy(array('refreshToken' => $refreshToken))->shouldBeCalled();
+        $repository->findOneBy(['refreshToken' => $refreshToken])->shouldBeCalled();
 
         $this->get($refreshToken);
     }
@@ -39,7 +39,7 @@ class RefreshTokenManagerSpec extends ObjectBehavior
     public function it_gets_last_token_from_user($repository, $entity)
     {
         $username = 'test';
-        $repository->findOneBy(array('username' => $username), array('valid' => 'DESC'))->shouldBeCalled()->willReturn($entity);
+        $repository->findOneBy(['username' => $username], ['valid' => 'DESC'])->shouldBeCalled()->willReturn($entity);
 
         $this->getLastFromUsername($username)->shouldBe($entity);
     }
@@ -62,7 +62,7 @@ class RefreshTokenManagerSpec extends ObjectBehavior
 
     public function it_revokes_all_invalid_and_flush($om, $repository, $entity)
     {
-        $repository->findInvalid(null)->shouldBeCalled()->willReturn(array($entity));
+        $repository->findInvalid(null)->shouldBeCalled()->willReturn([$entity]);
         $om->remove($entity)->shouldBeCalled();
         $om->flush()->shouldBeCalled();
 
