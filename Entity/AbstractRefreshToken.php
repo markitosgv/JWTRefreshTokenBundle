@@ -9,16 +9,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Gesdinet\JWTRefreshTokenBundle\Entity;
-
 use Symfony\Component\Validator\Constraints as Assert;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Abstract Refresh Token.
- *
- * @UniqueEntity("refreshToken")
  */
 abstract class AbstractRefreshToken implements RefreshTokenInterface
 {
