@@ -9,6 +9,8 @@
  * file that was distributed with this source code.
  */
 
+namespace Gesdinet\JWTRefreshTokenBundle\Entity;
+
 use Symfony\Component\Validator\Constraints as Assert;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
