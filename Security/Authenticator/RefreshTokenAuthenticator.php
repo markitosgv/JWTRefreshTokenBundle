@@ -43,18 +43,25 @@ class RefreshTokenAuthenticator extends RefreshTokenAuthenticatorBase implements
     private $userChecker;
 
     /**
+     * @var string
+     */
+    protected $tokenParameterName;
+
+    /**
      * Constructor.
      *
      * @param UserCheckerInterface $userChecker
+     * @param string               $tokenParameterName
      */
-    public function __construct(UserCheckerInterface $userChecker)
+    public function __construct(UserCheckerInterface $userChecker, $tokenParameterName)
     {
         $this->userChecker = $userChecker;
+        $this->tokenParameterName = $tokenParameterName;
     }
 
     public function createToken(Request $request, $providerKey)
     {
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+        $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
 
         return new PreAuthenticatedToken(
             '',

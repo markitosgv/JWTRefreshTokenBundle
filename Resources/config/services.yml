@@ -1,7 +1,7 @@
 services:
     gesdinet.jwtrefreshtoken.send_token:
         class: Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener
-        arguments: [ "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "@validator", "@request_stack", "%gesdinet_jwt_refresh_token.user_identity_field%" ]
+        arguments: [ "@gesdinet.jwtrefreshtoken.refresh_token_manager", "%gesdinet_jwt_refresh_token.ttl%", "@validator", "@request_stack", "%gesdinet_jwt_refresh_token.user_identity_field%", "%gesdinet_jwt_refresh_token.token_parameter_name%" ]
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: attachRefreshToken }
 
@@ -21,7 +21,7 @@ services:
 
     gesdinet.jwtrefreshtoken.authenticator:
         class: Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator
-        arguments: [ "@gesdinet.jwtrefreshtoken.user_checker" ]
+        arguments: [ "@gesdinet.jwtrefreshtoken.user_checker", "%gesdinet_jwt_refresh_token.token_parameter_name%" ]
 
     Gesdinet\JWTRefreshTokenBundle\Command\:
         resource: '../../Command/*'

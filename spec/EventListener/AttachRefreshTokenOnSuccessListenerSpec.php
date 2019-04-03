@@ -17,11 +17,13 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
+    const TOKEN_PARAMETER_NAME = 'refresh_token';
+
     public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
     {
         $ttl = 2592000;
         $userIdentityField = 'username';
-        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField);
+        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField, self::TOKEN_PARAMETER_NAME);
     }
 
     public function it_is_initializable()
@@ -34,7 +36,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn($user);
 
-        $refreshTokenArray = array('refresh_token' => 'thepreviouslyissuedrefreshtoken');
+        $refreshTokenArray = array(self::TOKEN_PARAMETER_NAME => 'thepreviouslyissuedrefreshtoken');
         $headers = new HeaderBag(array('content_type' => 'not-json'));
         $request = new Request();
         $request->headers = $headers;
