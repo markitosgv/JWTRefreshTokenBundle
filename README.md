@@ -130,19 +130,32 @@ With the next command you will create a new table to handle your refresh tokens
 **Symfony 3 Version:**   
 ```bash
 php app/console doctrine:schema:update --force
+
+# or make and run a migration
+php app/console make:migration
+php app/console doctrine:migrations:migrate
 ```
 
 **Symfony 4 Version:**   
 ```bash
 php bin/console doctrine:schema:update --force
+
+# or make and run a migration:
+php bin/console make:migration
+php bin/console doctrine:migrations:migrate
 ```
 
 USAGE
 -----
 
+The configurations can be put in:
+
+**Symfony 3 Version:** `app/config`  
+**Symfony 4 Version:** `config/packages/gesdinet_jwt_refresh_token.yaml`
+
 ### Config TTL
 
-You can define Refresh Token TTL. Default value is 1 month. You can change this value adding this line to your config.yml file:
+You can define Refresh Token TTL. Default value is 1 month. You can change this value adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
@@ -151,7 +164,7 @@ gesdinet_jwt_refresh_token:
 
 ### Config User identity field
 
-You can change user identity field. Make sure that your model user has `getter` for this field. Default value is `username`. You can change this value by adding this line to your config.yml file:
+You can change user identity field. Make sure that your model user has `getter` for this field. Default value is `username`. You can change this value by adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
@@ -160,7 +173,7 @@ gesdinet_jwt_refresh_token:
 
 ### Config TTL update
 
-You can expand Refresh Token TTL on refresh. Default value is false. You can change this value adding this line to your config.yml file:
+You can expand Refresh Token TTL on refresh. Default value is false. You can change this value adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
@@ -171,7 +184,7 @@ This will reset the token TTL each time you ask a refresh.
 
 ### Config Firewall Name
 
-You can define Firewall name. Default value is api. You can change this value adding this line to your config.yml file:
+You can define Firewall name. Default value is api. You can change this value adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
@@ -180,7 +193,7 @@ gesdinet_jwt_refresh_token:
 
 ### Config UserProvider
 
-You can define your own UserProvider. By default we use our custom UserProvider. You can change this value by adding this line to your config.yml file:
+You can define your own UserProvider. By default we use our custom UserProvider. You can change this value by adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
@@ -200,7 +213,7 @@ gesdinet_jwt_refresh_token:
 
 ### Config UserChecker
 
-You can define your own UserChecker. By default the Symfony UserChecker will be used. You can change this value by adding this line to your config.yml file:
+You can define your own UserChecker. By default the Symfony UserChecker will be used. You can change this value by adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
