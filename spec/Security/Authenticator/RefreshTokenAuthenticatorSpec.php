@@ -12,7 +12,8 @@ class RefreshTokenAuthenticatorSpec extends ObjectBehavior
 {
     public function let(UserCheckerInterface $userChecker)
     {
-        $this->beConstructedWith($userChecker);
+        $tokenParameterName = 'refresh_token';
+        $this->beConstructedWith($userChecker, $tokenParameterName);
     }
 
     public function it_is_initializable()

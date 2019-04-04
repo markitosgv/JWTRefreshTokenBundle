@@ -191,6 +191,15 @@ gesdinet_jwt_refresh_token:
     firewall: api
 ```
 
+### Config Refresh token parameter Name
+
+You can define refresh token parameter name. Default value is refresh_token. You can change this value adding this line to your config file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    token_parameter_name: refreshToken
+```
+
 ### Config UserProvider
 
 You can define your own UserProvider. By default we use our custom UserProvider. You can change this value by adding this line to your config:

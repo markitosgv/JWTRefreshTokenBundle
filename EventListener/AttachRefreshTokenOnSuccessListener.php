@@ -47,6 +47,11 @@ class AttachRefreshTokenOnSuccessListener
     protected $userIdentityField;
 
     /**
+     * @var string
+     */
+    protected $tokenParameterName;
+
+    /**
      * AttachRefreshTokenOnSuccessListener constructor.
      *
      * @param RefreshTokenManagerInterface $refreshTokenManager
@@ -54,19 +59,22 @@ class AttachRefreshTokenOnSuccessListener
      * @param ValidatorInterface           $validator
      * @param RequestStack                 $requestStack
      * @param string                       $userIdentityField
+     * @param string                       $tokenParameterName
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
         $ttl,
         ValidatorInterface $validator,
         RequestStack $requestStack,
-        $userIdentityField
+        $userIdentityField,
+        $tokenParameterName
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
         $this->userIdentityField = $userIdentityField;
+        $this->tokenParameterName = $tokenParameterName;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -79,10 +87,10 @@ class AttachRefreshTokenOnSuccessListener
             return;
         }
 
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request);
+        $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
 
         if ($refreshTokenString) {
-            $data['refresh_token'] = $refreshTokenString;
+            $data[$this->tokenParameterName] = $refreshTokenString;
         } else {
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
@@ -111,7 +119,7 @@ class AttachRefreshTokenOnSuccessListener
             }
 
             $this->refreshTokenManager->save($refreshToken);
-            $data['refresh_token'] = $refreshToken->getRefreshToken();
+            $data[$this->tokenParameterName] = $refreshToken->getRefreshToken();
         }
 
         $event->setData($data);

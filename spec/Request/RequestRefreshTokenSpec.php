@@ -7,43 +7,45 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RequestRefreshTokenSpec extends ObjectBehavior
 {
+    const TOKEN_PARAMETER_NAME = 'refresh_token';
+
     public function it_gets_from_query_param()
     {
         $request = Request::createFromGlobals();
-        $request->attributes->set('refresh_token', 'abcd');
+        $request->attributes->set(self::TOKEN_PARAMETER_NAME, 'abcd');
 
-        $this::getRefreshToken($request)->shouldBe('abcd');
+        $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
     }
 
     public function it_gets_from_body()
     {
         $request = Request::createFromGlobals();
-        $request->request->set('refresh_token', 'abcd');
+        $request->request->set(self::TOKEN_PARAMETER_NAME, 'abcd');
 
-        $this::getRefreshToken($request)->shouldBe('abcd');
+        $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
     }
 
     public function it_gets_from_json()
     {
-        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array('refresh_token' => 'abcd')));
+        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array(self::TOKEN_PARAMETER_NAME => 'abcd')));
         $request->headers->set('content_type', 'application/json');
 
-        $this::getRefreshToken($request)->shouldBe('abcd');
+        $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
     }
 
     public function it_gets_from_json_x()
     {
-        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array('refresh_token' => 'abcd')));
+        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array(self::TOKEN_PARAMETER_NAME => 'abcd')));
         $request->headers->set('content_type', 'application/x-json');
 
-        $this::getRefreshToken($request)->shouldBe('abcd');
+        $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
     }
 
     public function it_gets_from_json_parameter()
     {
-        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array('refresh_token' => 'abcd')));
+        $request = Request::create(null, 'POST', array(), array(), array(), array(), json_encode(array(self::TOKEN_PARAMETER_NAME => 'abcd')));
         $request->headers->set('content_type', 'application/json;charset=UTF-8');
 
-        $this::getRefreshToken($request)->shouldBe('abcd');
+        $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
     }
 }

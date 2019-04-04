@@ -57,6 +57,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultNull()
                     ->info('Deprecated, use object_manager instead')
                     ->end()
+                ->scalarNode('token_parameter_name')->defaultValue('refresh_token')->end()
             ->end();
 
         return $treeBuilder;
