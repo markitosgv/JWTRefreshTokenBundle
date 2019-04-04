@@ -180,7 +180,7 @@ gesdinet_jwt_refresh_token:
 
 ### Config Refresh token parameter Name
 
-You can define refresh token parameter name. Default value is refresh_token. You can change this value adding this line to your config.yml file:
+You can define refresh token parameter name. Default value is refresh_token. You can change this value adding this line to your config file:
 
 ```yaml
 gesdinet_jwt_refresh_token:
