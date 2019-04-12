@@ -12,13 +12,12 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class RefreshTokenSpec extends ObjectBehavior
 {
-    public function let(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, TokenInterface $token, UserProviderInterface $userProvider, $ttl, $providerKey, $ttlUpdate, EventDispatcherInterface $eventDispatcher)
+    public function let(RefreshTokenAuthenticator $authenticator, RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, RefreshTokenManagerInterface $refreshTokenManager, EventDispatcherInterface $eventDispatcher)
     {
         $ttl = 2592000;
         $ttlUpdate = false;
@@ -34,9 +33,9 @@ class RefreshTokenSpec extends ObjectBehavior
 
     public function it_refresh_token(Request $request, $refreshTokenManager, $authenticator, $token, PostAuthenticationGuardToken $postAuthenticationGuardToken, RefreshTokenInterface $refreshToken)
     {
-        $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
-        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
-
+        $authenticator->getCredentials(Argument::any())->willReturn(['token' => '1234']);
+        $authenticator->getUser(Argument::any(), Argument::any())->willReturn(new User('test', 'test'));
+        $authenticator->createAuthenticatedToken(Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
         $refreshTokenManager->get(Argument::any())->willReturn($refreshToken);
         $refreshToken->isValid()->willReturn(true);
 
@@ -47,8 +46,9 @@ class RefreshTokenSpec extends ObjectBehavior
     {
         $this->beConstructedWith($authenticator, $provider, $successHandler, $failureHandler, $refreshTokenManager, 2592000, 'testkey', true, $eventDispatcher);
 
-        $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
-        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
+        $authenticator->getCredentials(Argument::any())->willReturn(['token' => '1234']);
+        $authenticator->getUser(Argument::any(), Argument::any())->willReturn(new User('test', 'test'));
+        $authenticator->createAuthenticatedToken(Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
 
         $refreshTokenManager->get(Argument::any())->willReturn($refreshToken);
         $refreshToken->isValid()->willReturn(true);
@@ -59,10 +59,11 @@ class RefreshTokenSpec extends ObjectBehavior
         $this->refresh($request);
     }
 
-    public function it_throws_an_authentication_exception(Request $request, $refreshTokenManager, $authenticator, $token, PostAuthenticationGuardToken $postAuthenticationGuardToken, RefreshTokenInterface $refreshToken, $failureHandler)
+    public function it_throws_an_authentication_exception(Request $request, $authenticator, PostAuthenticationGuardToken $postAuthenticationGuardToken, $failureHandler)
     {
-        $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
-        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
+        $authenticator->getCredentials(Argument::any())->willReturn(['token' => '1234']);
+        $authenticator->getUser(Argument::any(), Argument::any())->willReturn(new User('test', 'test'));
+        $authenticator->createAuthenticatedToken(Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
 
         $failureHandler->onAuthenticationFailure(Argument::any(), Argument::any())->shouldBeCalled();
 

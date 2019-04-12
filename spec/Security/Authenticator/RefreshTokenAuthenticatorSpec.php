@@ -4,7 +4,6 @@ namespace spec\Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 
@@ -21,10 +20,9 @@ class RefreshTokenAuthenticatorSpec extends ObjectBehavior
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator');
     }
 
-    public function it_supports_token(PreAuthenticatedToken $token, $providerKey)
+    public function it_get_credentials(Request $request)
     {
-        $token->getProviderKey()->willReturn($providerKey);
-        $this->supports($token, $providerKey)->shouldBe(true);
+        $this->getCredentials($request)->shouldBeArray();
     }
 
     public function it_fails_on_authentication(Request $request, AuthenticationException $exception)
