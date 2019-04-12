@@ -27,7 +27,8 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 /**
  * Class RefreshTokenAuthenticator.
  */
-class RefreshTokenAuthenticator extends AbstractGuardAuthenticator {
+class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
+{
 
     /**
      * @var UserCheckerInterface
@@ -43,7 +44,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator {
      * Constructor.
      *
      * @param UserCheckerInterface $userChecker
-     * @param string               $tokenParameterName
+     * @param string $tokenParameterName
      */
     public function __construct(UserCheckerInterface $userChecker, $tokenParameterName)
     {
@@ -116,7 +117,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator {
     {
         $data = [
             // you might translate this message
-            'message' => 'Authentication Required'
+            'message' => 'Authentication Required',
         ];
 
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
