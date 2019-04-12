@@ -24,7 +24,7 @@ class RefreshTokenAuthenticatorSpec extends ObjectBehavior
     public function it_supports_token(PreAuthenticatedToken $token, $providerKey)
     {
         $token->getProviderKey()->willReturn($providerKey);
-        $this->supportsToken($token, $providerKey)->shouldBe(true);
+        $this->supports($token, $providerKey)->shouldBe(true);
     }
 
     public function it_fails_on_authentication(Request $request, AuthenticationException $exception)

@@ -12,7 +12,7 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
@@ -32,10 +32,10 @@ class RefreshTokenSpec extends ObjectBehavior
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken');
     }
 
-    public function it_refresh_token(Request $request, $refreshTokenManager, $authenticator, $token, PreAuthenticatedToken $preAuthenticatedToken, RefreshTokenInterface $refreshToken)
+    public function it_refresh_token(Request $request, $refreshTokenManager, $authenticator, $token, PostAuthenticationGuardToken $postAuthenticationGuardToken, RefreshTokenInterface $refreshToken)
     {
         $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
-        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($preAuthenticatedToken);
+        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
 
         $refreshTokenManager->get(Argument::any())->willReturn($refreshToken);
         $refreshToken->isValid()->willReturn(true);
@@ -43,12 +43,12 @@ class RefreshTokenSpec extends ObjectBehavior
         $this->refresh($request);
     }
 
-    public function it_refresh_token_with_ttl_update(RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, Request $request, $refreshTokenManager, $authenticator, $token, PreAuthenticatedToken $preAuthenticatedToken, RefreshTokenInterface $refreshToken, EventDispatcherInterface $eventDispatcher)
+    public function it_refresh_token_with_ttl_update(RefreshTokenProvider $provider, AuthenticationSuccessHandler $successHandler, AuthenticationFailureHandler $failureHandler, Request $request, $refreshTokenManager, $authenticator, $token, PostAuthenticationGuardToken $postAuthenticationGuardToken, RefreshTokenInterface $refreshToken, EventDispatcherInterface $eventDispatcher)
     {
         $this->beConstructedWith($authenticator, $provider, $successHandler, $failureHandler, $refreshTokenManager, 2592000, 'testkey', true, $eventDispatcher);
 
         $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
-        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($preAuthenticatedToken);
+        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
 
         $refreshTokenManager->get(Argument::any())->willReturn($refreshToken);
         $refreshToken->isValid()->willReturn(true);
@@ -59,10 +59,10 @@ class RefreshTokenSpec extends ObjectBehavior
         $this->refresh($request);
     }
 
-    public function it_throws_an_authentication_exception(Request $request, $refreshTokenManager, $authenticator, $token, PreAuthenticatedToken $preAuthenticatedToken, RefreshTokenInterface $refreshToken, $failureHandler)
+    public function it_throws_an_authentication_exception(Request $request, $refreshTokenManager, $authenticator, $token, PostAuthenticationGuardToken $postAuthenticationGuardToken, RefreshTokenInterface $refreshToken, $failureHandler)
     {
         $authenticator->createToken(Argument::any(), Argument::any())->willReturn($token);
-        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($preAuthenticatedToken);
+        $authenticator->authenticateToken(Argument::any(), Argument::any(), Argument::any())->willReturn($postAuthenticationGuardToken);
 
         $failureHandler->onAuthenticationFailure(Argument::any(), Argument::any())->shouldBeCalled();
 

@@ -13,7 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Event;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 
 class RefreshEvent extends Event
 {
@@ -21,7 +21,7 @@ class RefreshEvent extends Event
 
     private $preAuthenticatedToken;
 
-    public function __construct(RefreshTokenInterface $refreshToken, PreAuthenticatedToken $preAuthenticatedToken)
+    public function __construct(RefreshTokenInterface $refreshToken, PostAuthenticationGuardToken $preAuthenticatedToken)
     {
         $this->refreshToken = $refreshToken;
         $this->preAuthenticatedToken = $preAuthenticatedToken;
