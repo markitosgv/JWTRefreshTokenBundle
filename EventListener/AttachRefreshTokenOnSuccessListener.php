@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
@@ -52,6 +53,11 @@ class AttachRefreshTokenOnSuccessListener
     protected $tokenParameterName;
 
     /**
+     * @var bool
+     */
+    protected $singleUse;
+
+    /**
      * AttachRefreshTokenOnSuccessListener constructor.
      *
      * @param RefreshTokenManagerInterface $refreshTokenManager
@@ -67,7 +73,8 @@ class AttachRefreshTokenOnSuccessListener
         ValidatorInterface $validator,
         RequestStack $requestStack,
         $userIdentityField,
-        $tokenParameterName
+        $tokenParameterName,
+        $singleUse
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
@@ -75,6 +82,7 @@ class AttachRefreshTokenOnSuccessListener
         $this->requestStack = $requestStack;
         $this->userIdentityField = $userIdentityField;
         $this->tokenParameterName = $tokenParameterName;
+        $this->singleUse = $singleUse;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -88,6 +96,15 @@ class AttachRefreshTokenOnSuccessListener
         }
 
         $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
+
+        if ($refreshTokenString && $this->singleUse === true) {
+            $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
+            $refreshTokenString = null;
+
+            if ($refreshToken instanceof RefreshTokenInterface) {
+                $this->refreshTokenManager->delete($refreshToken);
+            }
+        }
 
         if ($refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
