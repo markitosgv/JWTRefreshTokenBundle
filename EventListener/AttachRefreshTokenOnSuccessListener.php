@@ -97,7 +97,7 @@ class AttachRefreshTokenOnSuccessListener
 
         $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
 
-        if ($refreshTokenString && $this->singleUse === true) {
+        if ($refreshTokenString && true === $this->singleUse) {
             $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
             $refreshTokenString = null;
 
