@@ -151,8 +151,7 @@ USAGE
 The configurations can be put in:
 
 **Symfony 3 Version:** `app/config`  
-**Symfony 4 Version:** `config/packages/gesdinet_jwt_refresh_
-.yaml`
+**Symfony 4 Version:** `config/packages/gesdinet_jwt_refresh_token.yaml`
 
 ### Config TTL
 
@@ -347,7 +346,7 @@ This refresh token is persisted in RefreshToken entity. After that, when your JW
 
 - Send you user credentials again to /api/login_check. This generates another JWT with another Refresh Token.
 
-- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid. Your refresh token do not change but valid datetime will increase unless.
+- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid. Your refresh token do not change but valid datetime will increase.
 
 ***Note that when a refresh token is consumed and the config option `single_use` is set to `true` the token will no longer be valid.***
 
