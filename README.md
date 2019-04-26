@@ -151,7 +151,8 @@ USAGE
 The configurations can be put in:
 
 **Symfony 3 Version:** `app/config`  
-**Symfony 4 Version:** `config/packages/gesdinet_jwt_refresh_token.yaml`
+**Symfony 4 Version:** `config/packages/gesdinet_jwt_refresh_
+.yaml`
 
 ### Config TTL
 
@@ -230,6 +231,17 @@ gesdinet_jwt_refresh_token:
 ```
 
 You will probably want to use a custom UserProvider along with your UserChecker to ensure that the checker recieves the right type of user.
+
+### Config Single Use
+
+You can configure the refresh token so it can only be consumed _once_. If set to `true` and the refresh token is consumed, a new refresh token will be provided. 
+
+To enable this behavior add this line to your config:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    single_use: true
+```
 
 
 ### Use another entity for refresh tokens
@@ -335,7 +347,7 @@ This refresh token is persisted in RefreshToken entity. After that, when your JW
 
 - Send you user credentials again to /api/login_check. This generates another JWT with another Refresh Token.
 
-- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid. Your refresh token do not change but valid datetime will increase.
+- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid. Your refresh token do not change but valid datetime will increase unless the configuration option `single_use` is set to `true`.
 
 ```bash
 curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
