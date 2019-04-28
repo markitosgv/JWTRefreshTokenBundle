@@ -66,6 +66,7 @@ class AttachRefreshTokenOnSuccessListener
      * @param RequestStack                 $requestStack
      * @param string                       $userIdentityField
      * @param string                       $tokenParameterName
+     * @param bool                         $singleUse
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
