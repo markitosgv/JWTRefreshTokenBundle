@@ -28,7 +28,6 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
  */
 class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
 {
-
     /**
      * @var UserCheckerInterface
      */
