@@ -276,7 +276,7 @@ class JwtRefreshToken extends AbstractRefreshToken
      */
     public function getId()
     {
-        $this->id;
+        return $this->id;
     }
 }
 ```
@@ -308,7 +308,7 @@ class JwtRefreshToken extends AbstractRefreshToken
      */
     public function getId()
     {
-        $this->id;
+        return $this->id;
     }
 }
 ```

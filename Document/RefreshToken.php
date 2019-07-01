@@ -30,6 +30,6 @@ class RefreshToken extends AbstractRefreshToken
      */
     public function getId()
     {
-        $this->id;
+        return $this->id;
     }
 }
