@@ -57,6 +57,10 @@ class Configuration implements ConfigurationInterface
                     ->defaultNull()
                     ->info('Deprecated, use object_manager instead')
                     ->end()
+                ->scalarNode('single_use')
+                    ->defaultFalse()
+                    ->info('When true, generate a new refresh token on consumption (deleting the old one)')
+                    ->end()
                 ->scalarNode('token_parameter_name')->defaultValue('refresh_token')->end()
             ->end();
 

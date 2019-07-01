@@ -33,6 +33,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
             return new \ReflectionClass($args[0]);
         });
         $container->addResource(Argument::any())->willReturn(null);
+        $container->addRemovedBindingIds(Argument::any())->willReturn(null);
 
         $container->removeBindings(Argument::any())->will(function () {
         });
