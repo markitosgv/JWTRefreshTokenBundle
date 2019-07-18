@@ -42,7 +42,7 @@ $ composer require "doctrine/mongodb-odm-bundle" "gesdinet/jwt-refresh-token-bun
 or edit composer.json:
 
     // ...
-    "gesdinet/jwt-refresh-token-bundle": "~0.1",
+    "gesdinet/jwt-refresh-token-bundle": "~0.8",
     "doctrine/orm": "^2.4.8",
     "doctrine/doctrine-bundle": "~1.4",
     "doctrine/mongodb-odm-bundle": "^3.4"
@@ -62,10 +62,10 @@ class AppKernel extends Kernel
 {
     public function registerBundles()
     {
-        $bundles = array(
+        $bundles = [
             // ...
             new Gesdinet\JWTRefreshTokenBundle\GesdinetJWTRefreshTokenBundle(),
-        );
+        ];
     }
 
     // ...
@@ -127,16 +127,6 @@ Add next lines on security.yml file:
 
 With the next command you will create a new table to handle your refresh tokens
 
-**Symfony 3 Version:**   
-```bash
-php bin/console doctrine:schema:update --force
-
-# or make and run a migration
-php bin/console make:migration
-php bin/console doctrine:migrations:migrate
-```
-
-**Symfony 4 Version:**   
 ```bash
 php bin/console doctrine:schema:update --force
 
@@ -242,7 +232,6 @@ gesdinet_jwt_refresh_token:
     single_use: true
 ```
 
-
 ### Use another entity for refresh tokens
 
 You can define your own refresh token class on your project.
@@ -250,7 +239,7 @@ You can define your own refresh token class on your project.
 When using default ORM create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken` in your own bundle:
 
 ```php
-namespace MyBundle;
+namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken;
@@ -258,7 +247,7 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken;
 /**
  * This class override Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken to have another table name.
  *
- * @ORM\Table("jwt_refresh_token")
+ * @ORM\Table(name="jwt_refresh_token")
  */
 class JwtRefreshToken extends AbstractRefreshToken
 {
@@ -284,7 +273,7 @@ class JwtRefreshToken extends AbstractRefreshToken
 When using MongoBD ODM create the document class extending `Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken` in you own bundle:
 
 ```php
-namespace MyBundle;
+namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken;
@@ -365,24 +354,12 @@ We give you two commands to manage tokens.
 
 If you want to revoke all invalid (datetime expired) refresh tokens you can execute:
 
-**Symfony 3 Version:**
-```bash
-php bin/console gesdinet:jwt:clear
-```
-
-**Symfony 4 Version:**
 ```bash
 php bin/console gesdinet:jwt:clear
 ```
 
 Optional argument is datetime, it deletes all tokens smaller than this datetime:
 
-**Symfony 3 Version:**
-```bash
-php bin/console gesdinet:jwt:clear 2015-08-08
-```
-
-**Symfony 4 Version:**
 ```bash
 php bin/console gesdinet:jwt:clear 2015-08-08
 ```
@@ -393,12 +370,6 @@ We recommend to execute this command with a cronjob to remove invalid refresh to
 
 If you want to revoke a single token you can use this:
 
-**Symfony 3 Version:**
-```bash
-php bin/console gesdinet:jwt:revoke TOKEN
-```
-
-**Symfony 4 Version:**
 ```bash
 php bin/console gesdinet:jwt:revoke TOKEN
 ```
@@ -412,7 +383,7 @@ For example:
 ```php
 <?php
 
-namespace AppBundle\EventListener;
+namespace App\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Psr\Log\LoggerInterface;
@@ -437,9 +408,12 @@ class LogListener implements EventSubscriberInterface
     
     public static function getSubscribedEvents()
     {
-        return array(
+        return [
+            // Up to Symfony 4.3
             'gesdinet.refresh_token' => 'log',
-        );
+            // For Symfony 4.3+
+            RefreshEvent::class => 'log',
+        ];
     }
 }
 ```
