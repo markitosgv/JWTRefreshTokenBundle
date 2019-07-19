@@ -126,17 +126,7 @@ Add next lines on security.yml file:
 ### Step 5: Update your schema
 
 With the next command you will create a new table to handle your refresh tokens
-
-**Symfony 3 Version:**   
-```bash
-php bin/console doctrine:schema:update --force
-
-# or make and run a migration
-php bin/console make:migration
-php bin/console doctrine:migrations:migrate
-```
-
-**Symfony 4 Version:**   
+ 
 ```bash
 php bin/console doctrine:schema:update --force
 
@@ -365,24 +355,12 @@ We give you two commands to manage tokens.
 
 If you want to revoke all invalid (datetime expired) refresh tokens you can execute:
 
-**Symfony 3 Version:**
-```bash
-php bin/console gesdinet:jwt:clear
-```
-
-**Symfony 4 Version:**
 ```bash
 php bin/console gesdinet:jwt:clear
 ```
 
 Optional argument is datetime, it deletes all tokens smaller than this datetime:
 
-**Symfony 3 Version:**
-```bash
-php bin/console gesdinet:jwt:clear 2015-08-08
-```
-
-**Symfony 4 Version:**
 ```bash
 php bin/console gesdinet:jwt:clear 2015-08-08
 ```
@@ -393,12 +371,6 @@ We recommend to execute this command with a cronjob to remove invalid refresh to
 
 If you want to revoke a single token you can use this:
 
-**Symfony 3 Version:**
-```bash
-php bin/console gesdinet:jwt:revoke TOKEN
-```
-
-**Symfony 4 Version:**
 ```bash
 php bin/console gesdinet:jwt:revoke TOKEN
 ```
