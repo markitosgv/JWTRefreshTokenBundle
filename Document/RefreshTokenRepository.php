@@ -2,7 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
+use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken;
 
 /**
