@@ -24,21 +24,21 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
      *
      * @Assert\NotBlank()
      */
-    private $refreshToken;
+    protected $refreshToken;
 
     /**
      * @var string
      *
      * @Assert\NotBlank()
      */
-    private $username;
+    protected $username;
 
     /**
      * @var \DateTime
      *
      * @Assert\NotBlank()
      */
-    private $valid;
+    protected $valid;
 
     /**
      * {@inheritdoc}

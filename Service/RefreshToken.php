@@ -31,12 +31,12 @@ class RefreshToken
     /**
      * @var RefreshTokenAuthenticator
      */
-    private $authenticator;
+    protected $authenticator;
 
     /**
      * @var RefreshTokenProvider
      */
-    private $provider;
+    protected $provider;
 
     /**
      * @var AuthenticationSuccessHandlerInterface
@@ -46,32 +46,32 @@ class RefreshToken
     /**
      * @var AuthenticationFailureHandlerInterface
      */
-    private $failureHandler;
+    protected $failureHandler;
 
     /**
      * @var RefreshTokenManagerInterface
      */
-    private $refreshTokenManager;
+    protected $refreshTokenManager;
 
     /**
      * @var int
      */
-    private $ttl;
+    protected $ttl;
 
     /**
      * @var string
      */
-    private $providerKey;
+    protected $providerKey;
 
     /**
      * @var bool
      */
-    private $ttlUpdate;
+    protected $ttlUpdate;
 
     /**
      * @var EventDispatcherInterface
      */
-    private $eventDispatcher;
+    protected $eventDispatcher;
 
     /**
      * RefreshToken constructor.
