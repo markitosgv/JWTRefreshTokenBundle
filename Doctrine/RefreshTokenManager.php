@@ -76,7 +76,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
         $this->objectManager->persist($refreshToken);
 
         if ($andFlush) {
-            $this->objectManager->flush();
+            $this->objectManager->flush($refreshToken);
         }
     }
 
@@ -89,7 +89,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
         $this->objectManager->remove($refreshToken);
 
         if ($andFlush) {
-            $this->objectManager->flush();
+            $this->objectManager->flush($refreshToken);
         }
     }
 
