@@ -69,7 +69,7 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/orm/doctrine-entity')] = $nameSpace;
         }
 
-        return DoctrineOrmMappingsPass::createYamlMappingDriver($mappings);
+        return DoctrineOrmMappingsPass::createXmlMappingDriver($mappings);
     }
 
     /**
@@ -90,6 +90,6 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/mongodb/doctrine-document')] = $nameSpace;
         }
 
-        return DoctrineMongoDBMappingsPass::createYamlMappingDriver($mappings, array());
+        return DoctrineMongoDBMappingsPass::createXmlMappingDriver($mappings, array());
     }
 }
