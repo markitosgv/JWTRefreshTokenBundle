@@ -19,7 +19,6 @@ if (class_exists(ForwardDocumentRepository::class, false)) {
 
 /**
  * Class DocumentRepository
- * @package Gesdinet\JWTRefreshTokenBundle\Document
  */
 class DocumentRepository extends BaseRepository
 {
