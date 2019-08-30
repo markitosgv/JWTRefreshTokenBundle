@@ -12,7 +12,7 @@ if (class_exists(ForwardDocumentRepository::class, false)) {
     {
     }
 } else {
-    class BaseRepository extends DocumentRepository
+    class BaseRepository extends OldDocumentRepository
     {
     }
 }
