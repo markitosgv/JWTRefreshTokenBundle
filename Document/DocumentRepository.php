@@ -18,9 +18,8 @@ if (class_exists(ForwardDocumentRepository::class, false)) {
 }
 
 /**
- * Class DocumentRepository
+ * Class DocumentRepository.
  */
 class DocumentRepository extends BaseRepository
 {
-
 }
