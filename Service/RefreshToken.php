@@ -131,7 +131,8 @@ class RefreshToken
             return $this->failureHandler->onAuthenticationFailure($request, $e);
         }
 
-        $refreshToken = $this->refreshTokenManager->get($this->authenticator->getCredentials($request));
+        $credentials = $this->authenticator->getCredentials($request);
+        $refreshToken = $this->refreshTokenManager->get($credentials['token']);
 
         if (null === $refreshToken || !$refreshToken->isValid()) {
             return $this->failureHandler->onAuthenticationFailure($request, new AuthenticationException(
