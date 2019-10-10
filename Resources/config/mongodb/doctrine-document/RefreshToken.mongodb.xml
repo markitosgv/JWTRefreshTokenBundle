@@ -6,6 +6,6 @@
                     http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
     <document name="Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken" collection="refresh_tokens" repository-class="Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository">
-        <field field-name="id" type="id" />
+        <id field-name="id" />
     </document>
 </doctrine-mongo-mapping>
