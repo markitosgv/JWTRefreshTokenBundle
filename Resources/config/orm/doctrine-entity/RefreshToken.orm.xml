@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                     http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken">
+    <entity name="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken" table="refresh_tokens">
         <id name="id" type="integer">
             <generator strategy="AUTO"/>
         </id>
