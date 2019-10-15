@@ -6,7 +6,7 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository as MongoDBDocumentRepository;
 use Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken;
 
-if (class_exists(MongoDBDocumentRepository::class, false)) {
+if (class_exists(MongoDBDocumentRepository::class)) {
     // Support for doctrine/mongodb-odm >= 2.0
     class BaseRepository extends MongoDBDocumentRepository
     {
