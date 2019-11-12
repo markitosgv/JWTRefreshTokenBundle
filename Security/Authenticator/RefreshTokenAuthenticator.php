@@ -65,12 +65,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         if (!$userProvider instanceof RefreshTokenProvider) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'The user provider must be an instance of RefreshTokenProvider (%s was given).',
-                    get_class($userProvider)
-                )
-            );
+            throw new \InvalidArgumentException(sprintf('The user provider must be an instance of RefreshTokenProvider (%s was given).', get_class($userProvider)));
         }
 
         $refreshToken = $credentials['token'];
@@ -78,9 +73,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
         $username = $userProvider->getUsernameForRefreshToken($refreshToken);
 
         if (null === $username) {
-            throw new AuthenticationException(
-                sprintf('Refresh token "%s" does not exist.', $refreshToken)
-            );
+            throw new AuthenticationException(sprintf('Refresh token "%s" does not exist.', $refreshToken));
         }
 
         $user = $userProvider->loadUserByUsername($username);
