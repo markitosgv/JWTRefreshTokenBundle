@@ -8,6 +8,6 @@
     <mapped-superclass name="Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken">
         <field field-name="refreshToken" type="string" unique="true" />
         <field field-name="username" type="string" />
-        <field field-name="valid" type="datetime"/>
+        <field field-name="valid" type="date"/>
     </mapped-superclass>
 </doctrine-mongo-mapping>
