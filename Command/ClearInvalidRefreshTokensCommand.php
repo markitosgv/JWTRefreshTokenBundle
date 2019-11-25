@@ -61,5 +61,7 @@ class ClearInvalidRefreshTokensCommand extends Command
         foreach ($revokedTokens as $revokedToken) {
             $output->writeln(sprintf('Revoke <comment>%s</comment>', $revokedToken->getRefreshToken()));
         }
+
+        return 0;
     }
 }

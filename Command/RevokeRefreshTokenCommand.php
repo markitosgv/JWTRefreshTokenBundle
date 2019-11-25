@@ -61,5 +61,7 @@ class RevokeRefreshTokenCommand extends Command
         $this->refreshTokenManager->delete($refreshToken);
 
         $output->writeln(sprintf('Revoke <comment>%s</comment>', $refreshToken->getRefreshToken()));
+
+        return 0;
     }
 }
