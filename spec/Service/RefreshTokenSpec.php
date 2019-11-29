@@ -23,6 +23,8 @@ class RefreshTokenSpec extends ObjectBehavior
         $ttlUpdate = false;
         $providerKey = 'testkey';
 
+        $eventDispatcher->dispatch(Argument::any(), Argument::any())->willReturn(Argument::any());
+
         $this->beConstructedWith($authenticator, $provider, $successHandler, $failureHandler, $refreshTokenManager, $ttl, $providerKey, $ttlUpdate, $eventDispatcher);
     }
 
