@@ -10,6 +10,8 @@ services:
         public: true
         arguments: [ "@gesdinet.jwtrefreshtoken.object_manager", "%gesdinet.jwtrefreshtoken.refresh_token.class%" ]
 
+    Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface: '@gesdinet.jwtrefreshtoken.refresh_token_manager'
+
     gesdinet.jwtrefreshtoken:
         class: Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken
         public: true
