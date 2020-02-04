@@ -29,6 +29,8 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         });
         $container->setDefinition(Argument::any(), Argument::any())->will(function () {
         });
+        $container->setAlias(Argument::any(), Argument::any())->will(function () {
+        });
         $container->getReflectionClass(Argument::type('string'))->will(function ($args) {
             return new \ReflectionClass($args[0]);
         });
