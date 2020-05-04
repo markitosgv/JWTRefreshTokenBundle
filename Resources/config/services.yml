@@ -12,6 +12,9 @@ services:
 
     Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface: '@gesdinet.jwtrefreshtoken.refresh_token_manager'
 
+    gesdinet.jwtrefreshtoken.request_refreshtoken:
+        class: Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken
+
     gesdinet.jwtrefreshtoken:
         class: Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken
         public: true

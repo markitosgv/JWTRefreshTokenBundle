@@ -34,6 +34,11 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     private $userChecker;
 
     /**
+     * @var RequestRefreshToken
+     */
+    protected $requestRefreshToken;
+
+    /**
      * @var string
      */
     protected $tokenParameterName;
@@ -42,23 +47,28 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
      * Constructor.
      *
      * @param UserCheckerInterface $userChecker
+     * @param RequestRefreshToken  $requestRefreshToken
      * @param string               $tokenParameterName
      */
-    public function __construct(UserCheckerInterface $userChecker, $tokenParameterName)
-    {
+    public function __construct(
+        UserCheckerInterface $userChecker,
+        RequestRefreshToken $requestRefreshToken,
+        $tokenParameterName
+    ) {
         $this->userChecker = $userChecker;
+        $this->requestRefreshToken = $requestRefreshToken;
         $this->tokenParameterName = $tokenParameterName;
     }
 
     public function supports(Request $request)
     {
-        return null !== RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
+        return null !== $this->requestRefreshToken->getRefreshToken($request, $this->tokenParameterName);
     }
 
     public function getCredentials(Request $request)
     {
         return [
-            'token' => RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName),
+            'token' => $this->requestRefreshToken->getRefreshToken($request, $this->tokenParameterName),
         ];
     }
 

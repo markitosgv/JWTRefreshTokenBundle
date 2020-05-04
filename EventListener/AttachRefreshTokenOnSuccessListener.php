@@ -43,6 +43,11 @@ class AttachRefreshTokenOnSuccessListener
     protected $requestStack;
 
     /**
+     * @var RequestRefreshToken
+     */
+    protected $requestRefreshToken;
+
+    /**
      * @var string
      */
     protected $userIdentityField;
@@ -64,6 +69,7 @@ class AttachRefreshTokenOnSuccessListener
      * @param int                          $ttl
      * @param ValidatorInterface           $validator
      * @param RequestStack                 $requestStack
+     * @param RequestRefreshToken          $requestRefreshToken
      * @param string                       $userIdentityField
      * @param string                       $tokenParameterName
      * @param bool                         $singleUse
@@ -73,6 +79,7 @@ class AttachRefreshTokenOnSuccessListener
         $ttl,
         ValidatorInterface $validator,
         RequestStack $requestStack,
+        RequestRefreshToken $requestRefreshToken,
         $userIdentityField,
         $tokenParameterName,
         $singleUse
@@ -81,6 +88,7 @@ class AttachRefreshTokenOnSuccessListener
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
+        $this->requestRefreshToken = $requestRefreshToken;
         $this->userIdentityField = $userIdentityField;
         $this->tokenParameterName = $tokenParameterName;
         $this->singleUse = $singleUse;
@@ -90,13 +98,17 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
-        $request = $this->requestStack->getCurrentRequest();
 
         if (!$user instanceof UserInterface) {
             return;
         }
 
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
+        $refreshTokenString = null;
+        $request = $this->requestStack->getCurrentRequest();
+
+        if ($request) {
+            $refreshTokenString = $this->requestRefreshToken->getRefreshToken($request, $this->tokenParameterName);
+        }
 
         if ($refreshTokenString && true === $this->singleUse) {
             $refreshToken = $this->refreshTokenManager->get($refreshTokenString);

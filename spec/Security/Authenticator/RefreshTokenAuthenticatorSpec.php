@@ -2,6 +2,7 @@
 
 namespace spec\Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
+use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -9,10 +10,10 @@ use Symfony\Component\Security\Core\User\UserCheckerInterface;
 
 class RefreshTokenAuthenticatorSpec extends ObjectBehavior
 {
-    public function let(UserCheckerInterface $userChecker)
+    public function let(UserCheckerInterface $userChecker, RequestRefreshToken $requestRefreshToken)
     {
         $tokenParameterName = 'refresh_token';
-        $this->beConstructedWith($userChecker, $tokenParameterName);
+        $this->beConstructedWith($userChecker, $requestRefreshToken, $tokenParameterName);
     }
 
     public function it_is_initializable()

@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RequestRefreshToken
 {
-    public static function getRefreshToken(Request $request, $tokenParameterName)
+    public function getRefreshToken(Request $request, $tokenParameterName)
     {
         $refreshTokenString = null;
         if (false !== strpos($request->getContentType(), 'json')) {

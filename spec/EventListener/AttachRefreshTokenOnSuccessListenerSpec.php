@@ -4,6 +4,7 @@ namespace spec\Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -19,12 +20,16 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
     const TOKEN_PARAMETER_NAME = 'refresh_token';
 
-    public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
-    {
+    public function let(
+        RefreshTokenManagerInterface $refreshTokenManager,
+        ValidatorInterface $validator,
+        RequestStack $requestStack,
+        RequestRefreshToken $requestRefreshToken
+    ) {
         $ttl = 2592000;
         $userIdentityField = 'username';
         $singleUse = false;
-        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField, self::TOKEN_PARAMETER_NAME, $singleUse);
+        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $requestRefreshToken, $userIdentityField, self::TOKEN_PARAMETER_NAME, $singleUse);
     }
 
     public function it_is_initializable()
@@ -32,7 +37,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener');
     }
 
-    public function it_attach_token_on_refresh(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, RequestStack $requestStack)
+    public function it_attach_token_on_refresh(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, RequestStack $requestStack, RequestRefreshToken $requestRefreshToken)
     {
         $event->getData()->willReturn(array());
         $event->getUser()->willReturn($user);
@@ -44,6 +49,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $request->request = new ParameterBag($refreshTokenArray);
 
         $requestStack->getCurrentRequest()->willReturn($request);
+        $requestRefreshToken->getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->willReturn('thepreviouslyissuedrefreshtoken');
 
         $event->setData(Argument::exact($refreshTokenArray))->shouldBeCalled();
 
