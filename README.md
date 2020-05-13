@@ -443,3 +443,21 @@ class LogListener implements EventSubscriberInterface
     }
 }
 ```
+### Creating Refresh Token 
+```php
+<?php
+
+namespace App\Controller;
+
+use App\Entity\User;
+use Gesdinet\JWTRefreshTokenBundle\Services\GenerateRefreshToken;
+
+class MyController extends AbstractController{
+
+
+    public function myAction(User $user, GenerateRefreshToken $generateRefreshToken)
+    {
+        return ["refreshToken" => $generateRefreshToken->generate($user->getEmail())];
+    }
+}
+```
