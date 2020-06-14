@@ -110,6 +110,7 @@ Add next lines on security.yml file:
 ```yaml
 # app/config/security.yml or config/packages/security.yaml
     firewalls:
+        # put it before all your other firewall API entries
         refresh:
             pattern:  ^/api/token/refresh
             stateless: true
@@ -210,6 +211,21 @@ gesdinet_jwt_refresh_token:
 ```
 
 For example, if you are using FOSUserBundle, user_provider_service_id must be set to `fos_user.user_provider.username_email`.
+
+For Doctrine ORM UserProvider, user_provider_service_id must be set to `security.user.provider.concrete.<your_user_provider_name_in_security_yaml>`.
+For example, in your `app/config/security.yml` or `config/packages/security.yaml`:
+```yaml
+security:
+    # ...
+    providers:
+        app_user_provider:
+            # ...
+    firewalls:
+    # ...
+# ...
+```
+
+then your user_provider_service_id is `security.user.provider.concrete.app_user_provider`.
 
 ### Select Manager Type
 
