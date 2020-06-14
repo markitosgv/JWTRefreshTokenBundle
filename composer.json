@@ -16,7 +16,7 @@
     "php": "^5.5.9|>=7.0.8",
     "symfony/framework-bundle": "~3.4|~4.0|~5.0",
     "symfony/validator": "~3.4|~4.0|~5.0",
-    "ocramius/package-versions": "1.7",
+    "ocramius/package-versions": "1.6",
     "lexik/jwt-authentication-bundle": "^1.1|^2.0@dev"
   },
   "require-dev": {
