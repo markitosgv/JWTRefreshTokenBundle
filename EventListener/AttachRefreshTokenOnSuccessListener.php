@@ -113,12 +113,16 @@ class AttachRefreshTokenOnSuccessListener
             $datetime = new \DateTime();
             $datetime->modify('+'.$this->ttl.' seconds');
 
-            $refreshToken = $this->refreshTokenManager->create();
-
             $accessor = new PropertyAccessor();
             $userIdentityFieldValue = $accessor->getValue($user, $this->userIdentityField);
 
-            $refreshToken->setUsername($userIdentityFieldValue);
+            $refreshToken = $this->refreshTokenManager->getLastFromUsername($userIdentityFieldValue);
+
+            if (!$refreshToken) {
+                $refreshToken = $this->refreshTokenManager->create();
+                $refreshToken->setUsername($userIdentityFieldValue);
+            }
+
             $refreshToken->setRefreshToken();
             $refreshToken->setValid($datetime);
 
