@@ -68,10 +68,10 @@ class AttachRefreshTokenOnSuccessListener
     /**
      * AttachRefreshTokenOnSuccessListener constructor.
      *
-     * @param int $ttl
+     * @param int    $ttl
      * @param string $userIdentityField
      * @param string $tokenParameterName
-     * @param bool $singleUse
+     * @param bool   $singleUse
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,

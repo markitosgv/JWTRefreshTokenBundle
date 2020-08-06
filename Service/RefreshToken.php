@@ -77,9 +77,9 @@ class RefreshToken
     /**
      * RefreshToken constructor.
      *
-     * @param int                                   $ttl
-     * @param string                                $providerKey
-     * @param bool                                  $ttlUpdate
+     * @param int    $ttl
+     * @param string $providerKey
+     * @param bool   $ttlUpdate
      */
     public function __construct(
         RefreshTokenAuthenticator $authenticator,
