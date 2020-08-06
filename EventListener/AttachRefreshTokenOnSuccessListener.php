@@ -11,6 +11,9 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
+use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
+use Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenCreatedEvent;
+use Gesdinet\JWTRefreshTokenBundle\Events;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
@@ -19,6 +22,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -58,15 +62,21 @@ class AttachRefreshTokenOnSuccessListener
     protected $singleUse;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    /**
      * AttachRefreshTokenOnSuccessListener constructor.
      *
      * @param RefreshTokenManagerInterface $refreshTokenManager
-     * @param int                          $ttl
-     * @param ValidatorInterface           $validator
-     * @param RequestStack                 $requestStack
-     * @param string                       $userIdentityField
-     * @param string                       $tokenParameterName
-     * @param bool                         $singleUse
+     * @param int $ttl
+     * @param ValidatorInterface $validator
+     * @param RequestStack $requestStack
+     * @param string $userIdentityField
+     * @param string $tokenParameterName
+     * @param bool $singleUse
+     * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
@@ -75,7 +85,8 @@ class AttachRefreshTokenOnSuccessListener
         RequestStack $requestStack,
         $userIdentityField,
         $tokenParameterName,
-        $singleUse
+        $singleUse,
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
@@ -84,6 +95,7 @@ class AttachRefreshTokenOnSuccessListener
         $this->userIdentityField = $userIdentityField;
         $this->tokenParameterName = $tokenParameterName;
         $this->singleUse = $singleUse;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
@@ -136,8 +148,15 @@ class AttachRefreshTokenOnSuccessListener
                 }
             }
 
-            $this->refreshTokenManager->save($refreshToken);
-            $data[$this->tokenParameterName] = $refreshToken->getRefreshToken();
+            $refreshTokenEvent = new RefreshTokenCreatedEvent($refreshToken);
+            if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
+                $this->eventDispatcher->dispatch($refreshTokenEvent, Events::REFRESH_TOKEN_CREATED);
+            } else {
+                $this->eventDispatcher->dispatch(Events::REFRESH_TOKEN_CREATED, $refreshTokenEvent);
+            }
+
+            $this->refreshTokenManager->save($refreshTokenEvent->getRefreshToken());
+            $data[$this->tokenParameterName] = $refreshTokenEvent->getRefreshToken()->getRefreshToken();
         }
 
         $event->setData($data);
