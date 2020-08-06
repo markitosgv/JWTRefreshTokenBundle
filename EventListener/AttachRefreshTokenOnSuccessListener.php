@@ -11,7 +11,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
-use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenCreatedEvent;
 use Gesdinet\JWTRefreshTokenBundle\Events;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -69,14 +68,10 @@ class AttachRefreshTokenOnSuccessListener
     /**
      * AttachRefreshTokenOnSuccessListener constructor.
      *
-     * @param RefreshTokenManagerInterface $refreshTokenManager
      * @param int $ttl
-     * @param ValidatorInterface $validator
-     * @param RequestStack $requestStack
      * @param string $userIdentityField
      * @param string $tokenParameterName
      * @param bool $singleUse
-     * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,

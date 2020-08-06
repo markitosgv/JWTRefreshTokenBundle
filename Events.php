@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Gesdinet\JWTRefreshTokenBundle;
 
 /**
