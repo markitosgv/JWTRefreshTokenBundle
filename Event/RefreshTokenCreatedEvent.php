@@ -3,7 +3,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Event;
 
-
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 class RefreshTokenCreatedEvent extends Event

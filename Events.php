@@ -26,4 +26,3 @@ final class Events
      */
     const REFRESH_TOKEN_CREATED = 'gesdinet.refresh_token_created';
 }
-
