@@ -14,17 +14,18 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
     const TOKEN_PARAMETER_NAME = 'refresh_token';
 
-    public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
+    public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack, EventDispatcherInterface $eventDispatcher)
     {
         $ttl = 2592000;
         $userIdentityField = 'username';
         $singleUse = false;
-        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField, self::TOKEN_PARAMETER_NAME, $singleUse);
+        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField, self::TOKEN_PARAMETER_NAME, $singleUse, $eventDispatcher);
     }
 
     public function it_is_initializable()
