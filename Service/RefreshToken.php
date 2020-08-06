@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Service;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
+use Gesdinet\JWTRefreshTokenBundle\Events;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
@@ -152,9 +153,9 @@ class RefreshToken
         }
 
         if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
-            $this->eventDispatcher->dispatch(new RefreshEvent($refreshToken, $postAuthenticationToken), 'gesdinet.refresh_token');
+            $this->eventDispatcher->dispatch(new RefreshEvent($refreshToken, $postAuthenticationToken), Events::ON_REFRESH_TOKEN);
         } else {
-            $this->eventDispatcher->dispatch('gesdinet.refresh_token', new RefreshEvent($refreshToken, $postAuthenticationToken));
+            $this->eventDispatcher->dispatch(Events::ON_REFRESH_TOKEN, new RefreshEvent($refreshToken, $postAuthenticationToken));
         }
 
         return $this->successHandler->onAuthenticationSuccess($request, $postAuthenticationToken);
