@@ -144,10 +144,11 @@ class RefreshToken
             $this->refreshTokenManager->save($refreshToken);
         }
 
+        $refreshEvent = new RefreshEvent($refreshToken, $postAuthenticationToken);
         if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
-            $this->eventDispatcher->dispatch(new RefreshEvent($refreshToken, $postAuthenticationToken), Events::ON_REFRESH_TOKEN);
+            $this->eventDispatcher->dispatch($refreshEvent, Events::ON_REFRESH_TOKEN);
         } else {
-            $this->eventDispatcher->dispatch(Events::ON_REFRESH_TOKEN, new RefreshEvent($refreshToken, $postAuthenticationToken));
+            $this->eventDispatcher->dispatch(Events::ON_REFRESH_TOKEN, $refreshEvent);
         }
 
         return $this->successHandler->onAuthenticationSuccess($request, $postAuthenticationToken);

@@ -6,9 +6,6 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 class RefreshTokenCreatedEvent extends Event
 {
-    /**
-     * @var RefreshTokenInterface
-     */
     private $refreshToken;
 
     public function __construct(RefreshTokenInterface $refreshToken)
@@ -16,9 +13,6 @@ class RefreshTokenCreatedEvent extends Event
         $this->refreshToken = $refreshToken;
     }
 
-    /**
-     * @return RefreshTokenInterface
-     */
     public function getRefreshToken()
     {
         return $this->refreshToken;
