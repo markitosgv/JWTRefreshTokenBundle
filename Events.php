@@ -23,5 +23,5 @@ final class Events
      *
      * @Event("Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenCreatedEvent")
      */
-    const REFRESH_TOKEN_CREATED = 'gesdinet.refresh_token_created';
+    const ON_REFRESH_TOKEN_CREATED = 'gesdinet.refresh_token_created';
 }
