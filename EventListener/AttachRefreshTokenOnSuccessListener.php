@@ -146,9 +146,9 @@ class AttachRefreshTokenOnSuccessListener
 
             $refreshTokenEvent = new RefreshTokenCreatedEvent($refreshToken);
             if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
-                $this->eventDispatcher->dispatch($refreshTokenEvent, Events::REFRESH_TOKEN_CREATED);
+                $this->eventDispatcher->dispatch($refreshTokenEvent, Events::ON_REFRESH_TOKEN_CREATED);
             } else {
-                $this->eventDispatcher->dispatch(Events::REFRESH_TOKEN_CREATED, $refreshTokenEvent);
+                $this->eventDispatcher->dispatch(Events::ON_REFRESH_TOKEN_CREATED, $refreshTokenEvent);
             }
 
             $this->refreshTokenManager->save($refreshTokenEvent->getRefreshToken());
