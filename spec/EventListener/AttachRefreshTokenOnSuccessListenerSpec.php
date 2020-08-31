@@ -19,7 +19,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
     const TOKEN_PARAMETER_NAME = 'refresh_token';
     const TOKEN_EXPIRATION_PARAMETER_NAME = 'refresh_token_expiration';
-    const RETURN_EXPORATION = false;
+    const RETURN_EXPORATION = true;
 
     public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
     {
