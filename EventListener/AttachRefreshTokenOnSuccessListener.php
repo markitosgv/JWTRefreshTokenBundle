@@ -115,7 +115,7 @@ class AttachRefreshTokenOnSuccessListener
         $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
         $refreshToken = null;
 
-        if($refreshTokenString) {
+        if ($refreshTokenString) {
             $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
         }
 
@@ -129,7 +129,7 @@ class AttachRefreshTokenOnSuccessListener
 
         if ($refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
-            if($this->returnExpiration) {
+            if ($this->returnExpiration) {
                 $data[$this->tokenExpirationParameterName] = ($refreshToken) ? $refreshToken->getValid()->getTimestamp() : 0;
             }
         } else {
@@ -162,7 +162,7 @@ class AttachRefreshTokenOnSuccessListener
             $this->refreshTokenManager->save($refreshToken);
 
             $data[$this->tokenParameterName] = $refreshToken->getRefreshToken();
-            if($this->returnExpiration) {
+            if ($this->returnExpiration) {
                 $data[$this->tokenExpirationParameterName] = $datetime->getTimestamp();
             }
         }
