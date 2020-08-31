@@ -62,6 +62,11 @@ class Configuration implements ConfigurationInterface
                     ->info('When true, generate a new refresh token on consumption (deleting the old one)')
                     ->end()
                 ->scalarNode('token_parameter_name')->defaultValue('refresh_token')->end()
+                ->scalarNode('return_expiration')
+                    ->defaultFalse()
+                    ->info('When true, Response will contain token expiration timestamp')
+                    ->end()
+                ->scalarNode('token_expiration_parameter_name')->defaultValue('refresh_token_expiration')->end()
             ->end();
 
         return $treeBuilder;

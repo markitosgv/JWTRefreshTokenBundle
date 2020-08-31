@@ -201,6 +201,26 @@ gesdinet_jwt_refresh_token:
     token_parameter_name: refreshToken
 ```
 
+### Config Refresh token expiration
+
+You can configure the expiration parameter in Response. If set to `true`, token expiration timestamp will be provided. 
+
+To enable this behavior add this line to your config:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    return_expiration: true
+```
+
+### Config Refresh token expiration parameter Name
+
+You can define refresh token expiration parameter name. Default value is token_expiration. You can change this value adding this line to your config file:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    token_expiration_parameter_name: tokenExpiration
+```
+
 ### Config UserProvider
 
 You can define your own UserProvider. By default we use our custom UserProvider. You can change this value by adding this line to your config:
