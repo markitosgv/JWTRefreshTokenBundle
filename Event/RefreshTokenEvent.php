@@ -14,7 +14,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Event;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 
-class RefreshEvent extends Event
+class RefreshTokenEvent extends Event
 {
     private $refreshToken;
 

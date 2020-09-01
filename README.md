@@ -430,7 +430,7 @@ For example:
 
 namespace AppBundle\EventListener;
 
-use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
+use Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenEvent;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -443,7 +443,7 @@ class LogListener implements EventSubscriberInterface
         $this->logger = $logger;
     }
 
-    public function log(RefreshEvent $event)
+    public function log(RefreshTokenEvent $event)
     {
         $refreshToken = $event->getRefreshToken()->getRefreshToken();
         $user = $event->getPreAuthenticatedToken()->getUser()->getUsername();

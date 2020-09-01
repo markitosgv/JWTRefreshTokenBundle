@@ -13,7 +13,7 @@ final class Events
      * Dispatched after the token refresh.
      * Hook into this event to listen to successful token refreshes.
      *
-     * @Event("Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent")
+     * @Event("Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenEvent")
      */
     const ON_REFRESH_TOKEN = 'gesdinet.refresh_token';
 
