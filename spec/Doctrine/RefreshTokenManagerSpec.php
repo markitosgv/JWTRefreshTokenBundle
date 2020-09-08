@@ -2,8 +2,8 @@
 
 namespace spec\Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use PhpSpec\ObjectBehavior;
