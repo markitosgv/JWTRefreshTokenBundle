@@ -30,19 +30,19 @@ Installation
 With Doctrine's ORM
 
 ```bash
-$ composer require "doctrine/orm" "doctrine/doctrine-bundle" "gesdinet/jwt-refresh-token-bundle"
+$ composer require "doctrine/orm" "doctrine/doctrine-bundle" "ricardodevries/jwt-refresh-token-bundle"
 ```
 
 With Doctrine's MongoDB ODM
 
 ```bash
-$ composer require "doctrine/mongodb-odm-bundle" "gesdinet/jwt-refresh-token-bundle"
+$ composer require "doctrine/mongodb-odm-bundle" "ricardodevries/jwt-refresh-token-bundle"
 ```
 
 or edit composer.json:
 
     // ...
-    "gesdinet/jwt-refresh-token-bundle": "~0.1",
+    "ricardodevries/jwt-refresh-token-bundle": "~0.1",
     "doctrine/orm": "^2.4.8",
     "doctrine/doctrine-bundle": "~1.4",
     "doctrine/mongodb-odm-bundle": "^3.4"
