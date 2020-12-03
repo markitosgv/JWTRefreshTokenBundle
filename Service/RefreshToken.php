@@ -90,10 +90,10 @@ class RefreshToken implements RefreshTokenInterface
     /**
      * RefreshToken constructor.
      *
-     * @param int       $ttl
-     * @param string    $providerKey
-     * @param bool      $ttlUpdate
-     * @param string    $userIdentityField
+     * @param int    $ttl
+     * @param string $providerKey
+     * @param bool   $ttlUpdate
+     * @param string $userIdentityField
      */
     public function __construct(
         RefreshTokenAuthenticator $authenticator,
@@ -179,7 +179,7 @@ class RefreshToken implements RefreshTokenInterface
     public function create(UserInterface $user)
     {
         $datetime = new \DateTime();
-        $datetime->modify('+'.$this->ttl.' seconds');
+        $datetime->modify('+' . $this->ttl . ' seconds');
 
         $refreshToken = $this->refreshTokenManager->create();
 
