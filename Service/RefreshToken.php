@@ -12,21 +12,25 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Service;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
-use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
-use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface as ModelRefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
+use InvalidArgumentException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
 
 /**
  * Class RefreshToken.
  */
-class RefreshToken
+class RefreshToken implements RefreshTokenInterface
 {
     /**
      * @var RefreshTokenAuthenticator
@@ -61,6 +65,11 @@ class RefreshToken
     /**
      * @var string
      */
+    private $userIdentityField;
+
+    /**
+     * @var string
+     */
     private $providerKey;
 
     /**
@@ -74,17 +83,24 @@ class RefreshToken
     private $eventDispatcher;
 
     /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    /**
      * RefreshToken constructor.
      *
-     * @param RefreshTokenAuthenticator             $authenticator
-     * @param RefreshTokenProvider                  $provider
+     * @param RefreshTokenAuthenticator $authenticator
+     * @param RefreshTokenProvider $provider
      * @param AuthenticationSuccessHandlerInterface $successHandler
      * @param AuthenticationFailureHandlerInterface $failureHandler
      * @param RefreshTokenManagerInterface          $refreshTokenManager
      * @param int                                   $ttl
      * @param string                                $providerKey
      * @param bool                                  $ttlUpdate
+     * @param string                                $userIdentityField
      * @param EventDispatcherInterface              $eventDispatcher
+     * @param ValidatorInterface                    $validator
      */
     public function __construct(
         RefreshTokenAuthenticator $authenticator,
@@ -95,7 +111,9 @@ class RefreshToken
         $ttl,
         $providerKey,
         $ttlUpdate,
-        EventDispatcherInterface $eventDispatcher
+        $userIdentityField,
+        EventDispatcherInterface $eventDispatcher,
+        ValidatorInterface $validator
     ) {
         $this->authenticator = $authenticator;
         $this->provider = $provider;
@@ -103,9 +121,11 @@ class RefreshToken
         $this->failureHandler = $failureHandler;
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
+        $this->userIdentityField = $userIdentityField;
         $this->providerKey = $providerKey;
         $this->ttlUpdate = $ttlUpdate;
         $this->eventDispatcher = $eventDispatcher;
+        $this->validator = $validator;
     }
 
     /**
@@ -158,5 +178,45 @@ class RefreshToken
         }
 
         return $this->successHandler->onAuthenticationSuccess($request, $postAuthenticationToken);
+    }
+
+    /**
+     * Refresh token.
+     *
+     * @param UserInterface $user
+     *
+     * @return ModelRefreshTokenInterface The refresh token
+     */
+    public function create(UserInterface $user)
+    {
+        $datetime = new \DateTime();
+        $datetime->modify('+'.$this->ttl.' seconds');
+
+        $refreshToken = $this->refreshTokenManager->create();
+
+        $accessor = new PropertyAccessor();
+        $userIdentityFieldValue = $accessor->getValue($user, $this->userIdentityField);
+
+        $refreshToken->setUsername($userIdentityFieldValue);
+        $refreshToken->setRefreshToken();
+        $refreshToken->setValid($datetime);
+
+        $valid = false;
+        while (false === $valid) {
+            $valid = true;
+            $errors = $this->validator->validate($refreshToken);
+            if ($errors->count() > 0) {
+                foreach ($errors as $error) {
+                    if ('refreshToken' === $error->getPropertyPath()) {
+                        $valid = false;
+                        $refreshToken->setRefreshToken();
+                    }
+                }
+            }
+        }
+
+        $this->refreshTokenManager->save($refreshToken);
+
+        return $refreshToken;
     }
 }

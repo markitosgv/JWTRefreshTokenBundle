@@ -14,11 +14,11 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Service\RefreshTokenInterface as RefreshTokenServiceInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -28,9 +28,9 @@ class AttachRefreshTokenOnSuccessListener
     protected $refreshTokenManager;
 
     /**
-     * @var int
+     * @var RefreshTokenServiceInterface
      */
-    protected $ttl;
+    protected $refreshTokenService;
 
     /**
      * @var ValidatorInterface
@@ -41,11 +41,6 @@ class AttachRefreshTokenOnSuccessListener
      * @var RequestStack
      */
     protected $requestStack;
-
-    /**
-     * @var string
-     */
-    protected $userIdentityField;
 
     /**
      * @var string
@@ -61,27 +56,25 @@ class AttachRefreshTokenOnSuccessListener
      * AttachRefreshTokenOnSuccessListener constructor.
      *
      * @param RefreshTokenManagerInterface $refreshTokenManager
-     * @param int                          $ttl
-     * @param ValidatorInterface           $validator
-     * @param RequestStack                 $requestStack
-     * @param string                       $userIdentityField
-     * @param string                       $tokenParameterName
-     * @param bool                         $singleUse
+     * @param RefreshTokenServiceInterface $refreshTokenService
+     * @param ValidatorInterface $validator
+     * @param RequestStack $requestStack
+     * @param string $userIdentityField
+     * @param string $tokenParameterName
+     * @param bool $singleUse
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
-        $ttl,
+        RefreshTokenServiceInterface $refreshTokenService,
         ValidatorInterface $validator,
         RequestStack $requestStack,
-        $userIdentityField,
         $tokenParameterName,
         $singleUse
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
-        $this->ttl = $ttl;
+        $this->refreshTokenService = $refreshTokenService;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
-        $this->userIdentityField = $userIdentityField;
         $this->tokenParameterName = $tokenParameterName;
         $this->singleUse = $singleUse;
     }
@@ -110,32 +103,7 @@ class AttachRefreshTokenOnSuccessListener
         if ($refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
         } else {
-            $datetime = new \DateTime();
-            $datetime->modify('+'.$this->ttl.' seconds');
-
-            $refreshToken = $this->refreshTokenManager->create();
-
-            $accessor = new PropertyAccessor();
-            $userIdentityFieldValue = $accessor->getValue($user, $this->userIdentityField);
-
-            $refreshToken->setUsername($userIdentityFieldValue);
-            $refreshToken->setRefreshToken();
-            $refreshToken->setValid($datetime);
-
-            $valid = false;
-            while (false === $valid) {
-                $valid = true;
-                $errors = $this->validator->validate($refreshToken);
-                if ($errors->count() > 0) {
-                    foreach ($errors as $error) {
-                        if ('refreshToken' === $error->getPropertyPath()) {
-                            $valid = false;
-                            $refreshToken->setRefreshToken();
-                        }
-                    }
-                }
-            }
-
+            $refreshToken = $this->refreshTokenService->create($user);
             $this->refreshTokenManager->save($refreshToken);
             $data[$this->tokenParameterName] = $refreshToken->getRefreshToken();
         }
