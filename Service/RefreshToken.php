@@ -90,17 +90,10 @@ class RefreshToken implements RefreshTokenInterface
     /**
      * RefreshToken constructor.
      *
-     * @param RefreshTokenAuthenticator $authenticator
-     * @param RefreshTokenProvider $provider
-     * @param AuthenticationSuccessHandlerInterface $successHandler
-     * @param AuthenticationFailureHandlerInterface $failureHandler
-     * @param RefreshTokenManagerInterface          $refreshTokenManager
-     * @param int                                   $ttl
-     * @param string                                $providerKey
-     * @param bool                                  $ttlUpdate
-     * @param string                                $userIdentityField
-     * @param EventDispatcherInterface              $eventDispatcher
-     * @param ValidatorInterface                    $validator
+     * @param int       $ttl
+     * @param string    $providerKey
+     * @param bool      $ttlUpdate
+     * @param string    $userIdentityField
      */
     public function __construct(
         RefreshTokenAuthenticator $authenticator,
@@ -130,8 +123,6 @@ class RefreshToken implements RefreshTokenInterface
 
     /**
      * Refresh token.
-     *
-     * @param Request $request
      *
      * @return mixed
      *
@@ -181,9 +172,7 @@ class RefreshToken implements RefreshTokenInterface
     }
 
     /**
-     * Refresh token.
-     *
-     * @param UserInterface $user
+     * Creates a token.
      *
      * @return ModelRefreshTokenInterface The refresh token
      */

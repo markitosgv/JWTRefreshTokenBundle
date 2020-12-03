@@ -11,16 +11,12 @@ interface RefreshTokenInterface
     /**
      * Refresh token.
      *
-     * @param Request $request
-     *
      * @return mixed
      */
     public function refresh(Request $request);
 
     /**
      * Creates a token.
-     *
-     * @param UserInterface $user
      *
      * @return ModelRefreshTokenInterface The refresh token
      */
