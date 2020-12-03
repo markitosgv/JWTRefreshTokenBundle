@@ -372,6 +372,33 @@ curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886a
 
 This call returns a new valid JWT token renewing valid datetime of your refresh token.
 
+### Creating Refresh tokens programmatically
+
+It might be useful in many cases to manually create a refresh token for a given user. To achieve this, use the `gesdinet.jwtrefreshtoken` service directly.
+
+For example:
+
+```php
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Gesdinet\JWTRefreshTokenBundle\Service\RefreshTokenInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+class ApiController extends Controller
+{
+    public function getRefreshToken(UserInterface $user, RefreshTokenInterface $refreshTokenService)
+    {
+        $refreshToken = $refreshTokenService->create($user);
+
+        return new JsonResponse(['token' => $refreshToken->getRefreshToken()]);
+    }
+}
+```
+
 Useful Commands
 ---------------
 
