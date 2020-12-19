@@ -11,7 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use DateTime;
+use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager as BaseRefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -36,8 +37,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * Constructor.
      *
-     * @param ObjectManager $om
-     * @param string        $class
+     * @param string $class
      */
     public function __construct(ObjectManager $om, $class)
     {
@@ -54,7 +54,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
      */
     public function get($refreshToken)
     {
-        return $this->repository->findOneBy(array('refreshToken' => $refreshToken));
+        return $this->repository->findOneBy(['refreshToken' => $refreshToken]);
     }
 
     /**
@@ -64,12 +64,11 @@ class RefreshTokenManager extends BaseRefreshTokenManager
      */
     public function getLastFromUsername($username)
     {
-        return $this->repository->findOneBy(array('username' => $username), array('valid' => 'DESC'));
+        return $this->repository->findOneBy(['username' => $username], ['valid' => 'DESC']);
     }
 
     /**
-     * @param RefreshTokenInterface $refreshToken
-     * @param bool|true             $andFlush
+     * @param bool|true $andFlush
      */
     public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -81,8 +80,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param RefreshTokenInterface $refreshToken
-     * @param bool                  $andFlush
+     * @param bool $andFlush
      */
     public function delete(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -94,8 +92,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param \DateTime $datetime
-     * @param bool      $andFlush
+     * @param DateTime $datetime
+     * @param bool     $andFlush
      *
      * @return RefreshTokenInterface[]
      */
