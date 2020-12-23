@@ -70,8 +70,6 @@ class GesdinetJWTRefreshTokenExtension extends Extension
      *
      * Supports deprecated configuration
      *
-     * @param array $config
-     *
      * @return string|null
      */
     protected function getRefreshTokenClass(array $config)
@@ -87,8 +85,6 @@ class GesdinetJWTRefreshTokenExtension extends Extension
      * Get object manager from configuration.
      *
      * Supports deprecated configuration
-     *
-     * @param array $config
      *
      * @return string|null
      */

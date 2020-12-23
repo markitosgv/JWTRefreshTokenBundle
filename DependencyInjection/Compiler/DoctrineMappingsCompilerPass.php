@@ -23,8 +23,6 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
      * If refresh_token_class parameter contains user-defined entity, RefreshToken will be registered as a mapped
      * superclass, not as an entity, to prevent Doctrine creating table for it and avoid conflicts with user-defined
      * entity.
-     *
-     * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {
@@ -52,16 +50,14 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     }
 
     /**
-     * @param array $config
-     *
      * @return CompilerPassInterface
      */
-    protected function getORMCompilerPass(array $config)
+    private function getORMCompilerPass(array $config)
     {
         $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Entity';
-        $mappings = array(
+        $mappings = [
             realpath(dirname(dirname(__DIR__)).'/Resources/config/orm/doctrine-orm') => $nameSpace,
-        );
+        ];
 
         if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/orm/doctrine-superclass')] = $nameSpace;
@@ -73,16 +69,14 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
     }
 
     /**
-     * @param array $config
-     *
      * @return CompilerPassInterface
      */
-    protected function getODMCompilerPass(array $config)
+    private function getODMCompilerPass(array $config)
     {
         $nameSpace = 'Gesdinet\JWTRefreshTokenBundle\Document';
-        $mappings = array(
+        $mappings = [
             realpath(dirname(__DIR__, 2).'/Resources/config/mongodb/doctrine-mongodb') => $nameSpace,
-        );
+        ];
 
         if (isset($config['refresh_token_class']) || isset($config['refresh_token_entity'])) {
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/mongodb/doctrine-superclass')] = $nameSpace;
@@ -90,6 +84,6 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
             $mappings[realpath(dirname(dirname(__DIR__)).'/Resources/config/mongodb/doctrine-document')] = $nameSpace;
         }
 
-        return DoctrineMongoDBMappingsPass::createXmlMappingDriver($mappings, array());
+        return DoctrineMongoDBMappingsPass::createXmlMappingDriver($mappings, []);
     }
 }

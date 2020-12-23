@@ -76,15 +76,9 @@ class RefreshToken
     /**
      * RefreshToken constructor.
      *
-     * @param RefreshTokenAuthenticator             $authenticator
-     * @param RefreshTokenProvider                  $provider
-     * @param AuthenticationSuccessHandlerInterface $successHandler
-     * @param AuthenticationFailureHandlerInterface $failureHandler
-     * @param RefreshTokenManagerInterface          $refreshTokenManager
-     * @param int                                   $ttl
-     * @param string                                $providerKey
-     * @param bool                                  $ttlUpdate
-     * @param EventDispatcherInterface              $eventDispatcher
+     * @param int    $ttl
+     * @param string $providerKey
+     * @param bool   $ttlUpdate
      */
     public function __construct(
         RefreshTokenAuthenticator $authenticator,
@@ -110,8 +104,6 @@ class RefreshToken
 
     /**
      * Refresh token.
-     *
-     * @param Request $request
      *
      * @return mixed
      *

@@ -20,7 +20,7 @@ class RequestRefreshToken
         $refreshTokenString = null;
         if (false !== strpos($request->getContentType(), 'json')) {
             $content = $request->getContent();
-            $params = !empty($content) ? json_decode($content, true) : array();
+            $params = !empty($content) ? json_decode($content, true) : [];
             $refreshTokenString = isset($params[$tokenParameterName]) ? trim($params[$tokenParameterName]) : null;
         } elseif (null !== $request->get($tokenParameterName)) {
             $refreshTokenString = $request->get($tokenParameterName);

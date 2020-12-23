@@ -34,11 +34,11 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
     public function it_attach_token_on_refresh(AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, RequestStack $requestStack)
     {
-        $event->getData()->willReturn(array());
+        $event->getData()->willReturn([]);
         $event->getUser()->willReturn($user);
 
-        $refreshTokenArray = array(self::TOKEN_PARAMETER_NAME => 'thepreviouslyissuedrefreshtoken');
-        $headers = new HeaderBag(array('content_type' => 'not-json'));
+        $refreshTokenArray = [self::TOKEN_PARAMETER_NAME => 'thepreviouslyissuedrefreshtoken'];
+        $headers = new HeaderBag(['content_type' => 'not-json']);
         $request = new Request();
         $request->headers = $headers;
         $request->request = new ParameterBag($refreshTokenArray);
@@ -52,10 +52,10 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
     public function it_attach_token_on_credentials_auth(HeaderBag $headers, ParameterBag $requestBag, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator, RequestStack $requestStack)
     {
-        $event->getData()->willReturn(array());
+        $event->getData()->willReturn([]);
         $event->getUser()->willReturn($user);
 
-        $headers = new HeaderBag(array('content_type' => 'not-json'));
+        $headers = new HeaderBag(['content_type' => 'not-json']);
         $request = new Request();
         $request->headers = $headers;
         $request->request = new ParameterBag();
@@ -64,7 +64,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
         $refreshTokenManager->create()->willReturn($refreshToken);
 
-        $violationList = new ConstraintViolationList(array());
+        $violationList = new ConstraintViolationList([]);
         $validator->validate($refreshToken)->willReturn($violationList);
 
         $refreshTokenManager->save($refreshToken)->shouldBeCalled();
@@ -76,7 +76,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
     public function it_is_not_valid_user(AuthenticationSuccessEvent $event)
     {
-        $event->getData()->willReturn(array());
+        $event->getData()->willReturn([]);
         $event->getUser()->willReturn(null);
 
         $this->attachRefreshToken($event);

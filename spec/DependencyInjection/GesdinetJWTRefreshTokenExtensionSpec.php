@@ -40,7 +40,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $container->removeBindings(Argument::any())->will(function () {
         });
 
-        $configs = array();
+        $configs = [];
         $this->load($configs, $container);
     }
 }

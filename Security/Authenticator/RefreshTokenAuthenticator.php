@@ -41,8 +41,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     /**
      * Constructor.
      *
-     * @param UserCheckerInterface $userChecker
-     * @param string               $tokenParameterName
+     * @param string $tokenParameterName
      */
     public function __construct(UserCheckerInterface $userChecker, $tokenParameterName)
     {
