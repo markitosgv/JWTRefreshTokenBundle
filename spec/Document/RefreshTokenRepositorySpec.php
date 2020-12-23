@@ -38,8 +38,8 @@ class RefreshTokenRepositorySpec extends ObjectBehavior
         $builder->setParameter(':datetime', $date)->shouldBeCalled()->willReturn($builder);
 
         $builder->getQuery()->shouldBeCalled()->willReturn($query);
-        $query->getResult()->shouldBeCalled()->willReturn(array($token));
+        $query->getResult()->shouldBeCalled()->willReturn([$token]);
 
-        $this->findInvalid($date)->shouldReturn(array($token));
+        $this->findInvalid($date)->shouldReturn([$token]);
     }
 }
