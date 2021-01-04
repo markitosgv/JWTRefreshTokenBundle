@@ -77,6 +77,10 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
 
         $user = $userProvider->loadUserByUsername($username);
 
+        if (null === $user) {
+            throw new AuthenticationException(sprintf('User with refresh token "%s" does not exist.', $refreshToken));
+        }
+
         $this->userChecker->checkPreAuth($user);
         $this->userChecker->checkPostAuth($user);
 
