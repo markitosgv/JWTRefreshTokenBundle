@@ -27,7 +27,7 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
     public function it_gets_from_json()
     {
-        $request = Request::create('', 'POST', array(), array(), array(), array(), json_encode(array(self::TOKEN_PARAMETER_NAME => 'abcd')));
+        $request = Request::create('', 'POST', [], [], [], [], json_encode([self::TOKEN_PARAMETER_NAME => 'abcd']));
         $request->headers->set('content_type', 'application/json');
 
         $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
@@ -35,7 +35,7 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
     public function it_gets_from_json_x()
     {
-        $request = Request::create('', 'POST', array(), array(), array(), array(), json_encode(array(self::TOKEN_PARAMETER_NAME => 'abcd')));
+        $request = Request::create('', 'POST', [], [], [], [], json_encode([self::TOKEN_PARAMETER_NAME => 'abcd']));
         $request->headers->set('content_type', 'application/x-json');
 
         $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
@@ -43,7 +43,7 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
     public function it_gets_from_json_parameter()
     {
-        $request = Request::create('', 'POST', array(), array(), array(), array(), json_encode(array(self::TOKEN_PARAMETER_NAME => 'abcd')));
+        $request = Request::create('', 'POST', [], [], [], [], json_encode([self::TOKEN_PARAMETER_NAME => 'abcd']));
         $request->headers->set('content_type', 'application/json;charset=UTF-8');
 
         $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');

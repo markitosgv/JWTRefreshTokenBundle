@@ -62,7 +62,7 @@ class RefreshTokenProvider implements UserProviderInterface
             return new User(
                 $username,
                 null,
-                array('ROLE_USER')
+                ['ROLE_USER']
             );
         }
     }

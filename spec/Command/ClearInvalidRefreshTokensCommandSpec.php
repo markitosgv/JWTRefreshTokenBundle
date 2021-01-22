@@ -33,7 +33,7 @@ class ClearInvalidRefreshTokensCommandSpec extends ObjectBehavior
 
     public function it_clears_invalid_refresh_tokens(InputInterface $input, OutputInterface $output, RefreshTokenManagerInterface $refreshTokenManager, RefreshTokenInterface $revokedToken)
     {
-        $refreshTokenManager->revokeAllInvalid(Argument::any())->shouldBeCalled()->willReturn(array($revokedToken));
+        $refreshTokenManager->revokeAllInvalid(Argument::any())->shouldBeCalled()->willReturn([$revokedToken]);
 
         $output->writeln(Argument::any())->shouldBeCalled();
 
