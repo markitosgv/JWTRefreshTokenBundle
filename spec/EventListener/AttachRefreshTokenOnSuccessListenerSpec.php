@@ -25,6 +25,9 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $ttl = 2592000;
         $userIdentityField = 'username';
         $singleUse = false;
+
+        $eventDispatcher->dispatch(Argument::any(), Argument::any())->willReturn(Argument::any());
+
         $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField, self::TOKEN_PARAMETER_NAME, $singleUse, $eventDispatcher);
     }
 
@@ -51,8 +54,10 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_token_on_credentials_auth(HeaderBag $headers, ParameterBag $requestBag, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator, RequestStack $requestStack)
+    public function it_attach_token_on_credentials_auth(HeaderBag $headers, ParameterBag $requestBag, AuthenticationSuccessEvent $event, UserInterface $user, RefreshToken $refreshToken, $refreshTokenManager, $validator, RequestStack $requestStack, EventDispatcherInterface $eventDispatcher)
     {
+        $this->beConstructedWith($refreshTokenManager, 2592000, $validator, $requestStack, 'username', self::TOKEN_PARAMETER_NAME, false, $eventDispatcher);
+
         $event->getData()->willReturn([]);
         $event->getUser()->willReturn($user);
 
