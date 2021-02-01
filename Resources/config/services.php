@@ -8,10 +8,9 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 use Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 
-return static function (ContainerConfigurator $containerConfigurator) {
+return static function ($containerConfigurator) {
     $services = $containerConfigurator->services();
 
     $services->set('gesdinet.jwtrefreshtoken.send_token')
