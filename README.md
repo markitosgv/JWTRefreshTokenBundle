@@ -275,6 +275,7 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken;
  * This class override Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken to have another table name.
  *
  * @ORM\Table("jwt_refresh_token")
+ * @ORM\Entity(repositoryClass="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository")
  */
 class JwtRefreshToken extends AbstractRefreshToken
 {
@@ -308,7 +309,7 @@ use Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken;
 /**
  * This class override Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken to have another collection name.
  *
- * @MongoDB\Document(collection="UserRefreshToken")
+ * @MongoDB\Document(collection="UserRefreshToken", repositoryClass="Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository")
  */
 class JwtRefreshToken extends AbstractRefreshToken
 {
