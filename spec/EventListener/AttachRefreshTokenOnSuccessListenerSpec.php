@@ -24,7 +24,8 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $ttl = 2592000;
         $userIdentityField = 'username';
         $singleUse = false;
-        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField, self::TOKEN_PARAMETER_NAME, $singleUse);
+        $cookie = [];
+        $this->beConstructedWith($refreshTokenManager, $ttl, $validator, $requestStack, $userIdentityField, self::TOKEN_PARAMETER_NAME, $singleUse, $cookie);
     }
 
     public function it_is_initializable()

@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * This is the class that validates and merges configuration from your app/config files.
@@ -62,6 +63,18 @@ class Configuration implements ConfigurationInterface
                     ->info('When true, generate a new refresh token on consumption (deleting the old one)')
                     ->end()
                 ->scalarNode('token_parameter_name')->defaultValue('refresh_token')->end()
+                ->arrayNode('cookie')
+                    ->children()
+                        ->enumNode('sameSite')
+                            ->values([Cookie::SAMESITE_NONE, Cookie::SAMESITE_LAX, Cookie::SAMESITE_STRICT])
+                            ->defaultValue(Cookie::SAMESITE_LAX)
+                        ->end()
+                        ->scalarNode('path')->defaultValue('/')->cannotBeEmpty()->end()
+                        ->scalarNode('domain')->defaultNull()->end()
+                        ->scalarNode('secure')->defaultTrue()->end()
+                        ->scalarNode('httpOnly')->defaultTrue()->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

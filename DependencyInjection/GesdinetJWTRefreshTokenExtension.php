@@ -63,6 +63,7 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $refreshTokenClass);
         $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
         $container->setParameter('gesdinet.jwtrefreshtoken.user_checker.id', $config['user_checker']);
+        $container->setParameter('gesdinet_jwt_refresh_token.cookie', (isset($config['cookie']) ? $config['cookie'] : []));
     }
 
     /**
