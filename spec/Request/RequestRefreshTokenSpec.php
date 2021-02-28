@@ -51,7 +51,7 @@ class RequestRefreshTokenSpec extends ObjectBehavior
 
     public function it_gets_from_cookie()
     {
-        $request = Request::create('', 'GET', array(), [self::TOKEN_PARAMETER_NAME => 'abcd'], array(), array(), null);
+        $request = Request::create('', 'GET', [], [self::TOKEN_PARAMETER_NAME => 'abcd'], [], [], null);
 
         $this::getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->shouldBe('abcd');
     }

@@ -66,10 +66,7 @@ class AttachRefreshTokenOnSuccessListener
     /**
      * AttachRefreshTokenOnSuccessListener constructor.
      *
-     * @param RefreshTokenManagerInterface $refreshTokenManager
      * @param int                          $ttl
-     * @param ValidatorInterface           $validator
-     * @param RequestStack                 $requestStack
      * @param string                       $userIdentityField
      * @param string                       $tokenParameterName
      * @param bool                         $singleUse
@@ -147,7 +144,7 @@ class AttachRefreshTokenOnSuccessListener
             $refreshTokenString = $refreshToken->getRefreshToken();
         }
 
-        if($this->cookie) {
+        if ($this->cookie) {
             $event->getResponse()->headers->setCookie(
                 new Cookie(
                     $this->tokenParameterName,

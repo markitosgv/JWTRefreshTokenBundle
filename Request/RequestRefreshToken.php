@@ -24,7 +24,7 @@ class RequestRefreshToken
             $refreshTokenString = isset($params[$tokenParameterName]) ? trim($params[$tokenParameterName]) : null;
         } elseif (null !== $request->get($tokenParameterName)) {
             $refreshTokenString = $request->get($tokenParameterName);
-        } elseif (null !== $request->cookies) {
+        } elseif ($request->cookies->has($tokenParameterName)) {
             $refreshTokenString = $request->cookies->get($tokenParameterName);
         }
 
