@@ -48,6 +48,14 @@ or edit composer.json:
     "doctrine/mongodb-odm-bundle": "^3.4"
     // ...
 
+Alternatively, custom implementation of persistence can be used.
+
+For that purpose
+* provide an implementation of `Doctrine\Persistence\ObjectManager`
+* configure the bundle according to
+    * [object manager](#use-another-object-manager)
+    * [disabling Doctrine mappings](#disable-automatic-doctrine-mappings)
+
 ### Step 2: Enable the Bundle
 
 **Symfony 3 Version:**  
@@ -345,6 +353,17 @@ Just add this line to your config.yml file:
 ```yaml
 gesdinet_jwt_refresh_token:
     object_manager: my.specific.entity_manager.id
+```
+
+### Disable automatic Doctrine mappings
+
+On some occasions, you may not want to have default Doctrine mappings of object manager enabled as you use neither ORM nor ODM but i.e. using DoctrineBundle for DBAL.
+
+To disable dynamic Doctrine mapping add this line to your config:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    doctrine_mappings: false
 ```
 
 ### Generating Tokens

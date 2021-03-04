@@ -62,6 +62,10 @@ class Configuration implements ConfigurationInterface
                     ->info('When true, generate a new refresh token on consumption (deleting the old one)')
                     ->end()
                 ->scalarNode('token_parameter_name')->defaultValue('refresh_token')->end()
+                ->booleanNode('doctrine_mappings')
+                    ->info('When true, resolving of Doctrine mapping is done automatically to use either ORM or ODM object manager')
+                    ->defaultTrue()
+                ->end()
             ->end();
 
         return $treeBuilder;
