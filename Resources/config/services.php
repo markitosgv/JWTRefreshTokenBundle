@@ -35,11 +35,13 @@ return static function ($containerConfigurator) {
         ->public()
         ->args([
             new Reference('gesdinet.jwtrefreshtoken.object_manager'),
-            'gesdinet.jwtrefreshtoken.refresh_token.class',
+            '%gesdinet.jwtrefreshtoken.refresh_token.class%',
         ]);
 
-    $services->set('gesdinet.jwtrefreshtoken.refresh_token_manager')
-        ->class(RefreshTokenManagerInterface::class);
+    $services->alias(
+        RefreshTokenManagerInterface::class,
+        'gesdinet.jwtrefreshtoken.refresh_token_manager'
+    );
 
     $services->set('gesdinet.jwtrefreshtoken')
         ->class(RefreshToken::class)
