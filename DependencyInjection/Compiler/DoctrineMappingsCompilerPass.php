@@ -26,6 +26,9 @@ final class DoctrineMappingsCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
+        if (!$container->getParameter('gesdinet_jwt_refresh_token.doctrine_mappings')) {
+            return;
+        }
         $config = $container->getExtensionConfig('gesdinet_jwt_refresh_token')[0];
 
         if (!class_exists('Doctrine\Bundle\MongoDBBundle\DependencyInjection\Compiler\DoctrineMongoDBMappingsPass')
