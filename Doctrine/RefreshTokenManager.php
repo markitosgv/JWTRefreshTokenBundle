@@ -13,7 +13,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use DateTime;
 use Doctrine\Persistence\ObjectManager;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager as BaseRefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
@@ -30,7 +29,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     protected $class;
 
     /**
-     * @var RefreshTokenRepository
+     * @var RefreshTokenRepositoryInterface
      */
     protected $repository;
 
@@ -43,6 +42,9 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     {
         $this->objectManager = $om;
         $this->repository = $om->getRepository($class);
+        if (!$this->repository instanceof RefreshTokenRepositoryInterface) {
+            throw new \LogicException("Repository mapped for $class should implement \Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface.");
+        }
         $metadata = $om->getClassMetadata($class);
         $this->class = $metadata->getName();
     }
