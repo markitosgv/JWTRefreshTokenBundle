@@ -75,6 +75,10 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('httpOnly')->defaultTrue()->end()
                     ->end()
                 ->end()
+                ->booleanNode('doctrine_mappings')
+                    ->info('When true, resolving of Doctrine mapping is done automatically to use either ORM or ODM object manager')
+                    ->defaultTrue()
+                ->end()
             ->end();
 
         return $treeBuilder;
