@@ -30,6 +30,7 @@ class Configuration implements ConfigurationInterface
         $rootNode = method_exists(TreeBuilder::class, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('gesdinet_jwt_refresh_token');
 
         $rootNode
+            ->addDefaultsIfNotSet()
             ->children()
                 ->integerNode('ttl')->defaultValue(2592000)->end()
                 ->booleanNode('ttl_update')->defaultFalse()->end()
