@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Service;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
+use Gesdinet\JWTRefreshTokenBundle\Exception\InvalidRefreshTokenException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
 use InvalidArgumentException;
@@ -129,7 +130,7 @@ class RefreshToken
         if (null === $refreshToken || !$refreshToken->isValid()) {
             return $this->failureHandler->onAuthenticationFailure(
                 $request,
-                new AuthenticationException(
+                new InvalidRefreshTokenException(
                     sprintf('Refresh token "%s" is invalid.', $refreshToken)
                 )
             );
