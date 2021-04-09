@@ -6,5 +6,4 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class UnknownRefreshTokenException extends AuthenticationException
 {
-
 }
