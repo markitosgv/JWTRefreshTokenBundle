@@ -31,8 +31,8 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+        $loader = new Loader\PhpFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('services.php');
 
         $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
         $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $config['ttl_update']);
@@ -41,6 +41,7 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $container->setParameter('gesdinet_jwt_refresh_token.user_identity_field', $config['user_identity_field']);
         $container->setParameter('gesdinet_jwt_refresh_token.single_use', $config['single_use']);
         $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $config['token_parameter_name']);
+        $container->setParameter('gesdinet_jwt_refresh_token.doctrine_mappings', $config['doctrine_mappings']);
 
         $refreshTokenClass = 'Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken';
         $objectManager = 'doctrine.orm.entity_manager';

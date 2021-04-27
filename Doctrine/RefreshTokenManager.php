@@ -50,7 +50,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * @param string $refreshToken
      *
-     * @return RefreshTokenInterface
+     * @return RefreshTokenInterface|null
      */
     public function get($refreshToken)
     {
