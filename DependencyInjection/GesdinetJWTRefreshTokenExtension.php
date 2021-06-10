@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
@@ -23,13 +24,18 @@ use Symfony\Component\DependencyInjection\Loader;
  */
 class GesdinetJWTRefreshTokenExtension extends Extension
 {
+    private const DEPRECATED_SERVICES = [
+        'gesdinet.jwtrefreshtoken' => '0.13',
+        'gesdinet.jwtrefreshtoken.authenticator' => '0.13',
+        'gesdinet.jwtrefreshtoken.user_provider' => '0.13',
+    ];
+
     /**
      * {@inheritdoc}
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
+        $config = $this->processConfiguration($this->getConfiguration($configs, $container), $configs);
 
         $loader = new Loader\PhpFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.php');
@@ -64,6 +70,34 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $refreshTokenClass);
         $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
         $container->setParameter('gesdinet.jwtrefreshtoken.user_checker.id', $config['user_checker']);
+
+        $this->deprecateServices($container);
+    }
+
+    private function deprecateServices(ContainerBuilder $container): void
+    {
+        $usesSymfony51Api = method_exists(Definition::class, 'getDeprecation');
+
+        foreach (self::DEPRECATED_SERVICES as $serviceId => $deprecatedSince) {
+            if (!$container->hasDefinition($serviceId)) {
+                continue;
+            }
+
+            $service = $container->getDefinition($serviceId);
+
+            if ($usesSymfony51Api) {
+                $service->setDeprecated(
+                    'gesdinet/jwt-refresh-token-bundle',
+                    $deprecatedSince,
+                    'The "%service_id%" service is deprecated.'
+                );
+            } else {
+                $service->setDeprecated(
+                    true,
+                    'The "%service_id%" service is deprecated.'
+                );
+            }
+        }
     }
 
     /**

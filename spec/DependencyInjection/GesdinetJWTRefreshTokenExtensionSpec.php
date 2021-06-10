@@ -5,6 +5,7 @@ namespace spec\Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
@@ -14,7 +15,7 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
         $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenExtension');
     }
 
-    public function it_should_set_parameters_correctly(ContainerBuilder $container, ParameterBag $parameterBag)
+    public function it_should_set_parameters_correctly(ContainerBuilder $container, ParameterBag $parameterBag, Definition $definition)
     {
         $parameterBag->resolveValue(Argument::any())->will(function ($args) {
             return $args[0];
@@ -23,6 +24,8 @@ class GesdinetJWTRefreshTokenExtensionSpec extends ObjectBehavior
             return $args[0];
         });
 
+        $container->hasDefinition(Argument::any())->willReturn(true);
+        $container->getDefinition(Argument::any())->willReturn($definition);
         $container->getParameterBag()->willReturn($parameterBag);
         $container->fileExists(Argument::any())->willReturn(true);
         $container->setParameter(Argument::any(), Argument::any())->will(function () {

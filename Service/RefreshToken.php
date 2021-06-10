@@ -23,8 +23,12 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 
+trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '0.13', 'The "%s" class is deprecated, use the `refresh_jwt` authenticator instead.', RefreshToken::class);
+
 /**
  * Class RefreshToken.
+ *
+ * @deprecated use the `refresh_jwt` authenticator instead
  */
 class RefreshToken
 {
@@ -143,10 +147,12 @@ class RefreshToken
             $this->refreshTokenManager->save($refreshToken);
         }
 
+        $event = new RefreshEvent($refreshToken, $postAuthenticationToken);
+
         if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
-            $this->eventDispatcher->dispatch(new RefreshEvent($refreshToken, $postAuthenticationToken), 'gesdinet.refresh_token');
+            $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token');
         } else {
-            $this->eventDispatcher->dispatch('gesdinet.refresh_token', new RefreshEvent($refreshToken, $postAuthenticationToken));
+            $this->eventDispatcher->dispatch('gesdinet.refresh_token', $event);
         }
 
         return $this->successHandler->onAuthenticationSuccess($request, $postAuthenticationToken);
