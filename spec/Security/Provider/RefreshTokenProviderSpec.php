@@ -4,9 +4,12 @@ namespace spec\Gesdinet\JWTRefreshTokenBundle\Security\Provider;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
+use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class RefreshTokenProviderSpec extends ObjectBehavior
@@ -19,7 +22,7 @@ class RefreshTokenProviderSpec extends ObjectBehavior
 
     public function it_is_initializable()
     {
-        $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider');
+        $this->shouldHaveType(RefreshTokenProvider::class);
     }
 
     public function it_gets_username($refreshToken, $refreshTokenManager)
@@ -41,6 +44,11 @@ class RefreshTokenProviderSpec extends ObjectBehavior
         $this->loadUserByUsername('testname');
     }
 
+    public function it_loads_by_identifier()
+    {
+        $this->loadUserByIdentifier('testname');
+    }
+
     public function it_refresh_user(UserInterface $user)
     {
         $this->shouldThrow(new UnsupportedUserException())->duringRefreshUser($user);
@@ -48,6 +56,10 @@ class RefreshTokenProviderSpec extends ObjectBehavior
 
     public function it_supports_class()
     {
-        $this->supportsClass('Symfony\Component\Security\Core\User\User')->shouldBe(true);
+        if (class_exists(InMemoryUser::class)) {
+            $this->supportsClass(InMemoryUser::class)->shouldBe(true);
+        }
+
+        $this->supportsClass(User::class)->shouldBe(true);
     }
 }
