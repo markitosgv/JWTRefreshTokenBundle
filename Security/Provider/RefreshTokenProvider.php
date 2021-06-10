@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Provider;
 
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -54,34 +55,58 @@ class RefreshTokenProvider implements UserProviderInterface
         return null;
     }
 
+    /**
+     * @deprecated use loadUserByIdentifier() instead
+     */
     public function loadUserByUsername($username)
     {
+        return $this->loadUserByIdentifier($username);
+    }
+
+    public function loadUserByIdentifier(string $identifier): UserInterface
+    {
         if (null !== $this->customUserProvider) {
+            if (method_exists($this->customUserProvider, 'loadUserByIdentifier')) {
+                return $this->customUserProvider->loadUserByIdentifier($username);
+            }
+
             return $this->customUserProvider->loadUserByUsername($username);
-        } else {
-            return new User(
+        }
+
+        if (class_exists(InMemoryUser::class)) {
+            return new InMemoryUser(
                 $username,
                 null,
                 ['ROLE_USER']
             );
         }
+
+        return new User(
+            $username,
+            null,
+            ['ROLE_USER']
+        );
     }
 
     public function refreshUser(UserInterface $user)
     {
         if (null !== $this->customUserProvider) {
             return $this->customUserProvider->refreshUser($user);
-        } else {
-            throw new UnsupportedUserException();
         }
+
+        throw new UnsupportedUserException();
     }
 
     public function supportsClass($class)
     {
         if (null !== $this->customUserProvider) {
             return $this->customUserProvider->supportsClass($class);
-        } else {
-            return 'Symfony\Component\Security\Core\User\User' === $class;
         }
+
+        if (class_exists(InMemoryUser::class) && InMemoryUser::class === $class) {
+            return true;
+        }
+
+        return User::class === $class;
     }
 }
