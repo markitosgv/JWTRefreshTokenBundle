@@ -67,22 +67,22 @@ class RefreshTokenProvider implements UserProviderInterface
     {
         if (null !== $this->customUserProvider) {
             if (method_exists($this->customUserProvider, 'loadUserByIdentifier')) {
-                return $this->customUserProvider->loadUserByIdentifier($username);
+                return $this->customUserProvider->loadUserByIdentifier($identifier);
             }
 
-            return $this->customUserProvider->loadUserByUsername($username);
+            return $this->customUserProvider->loadUserByUsername($identifier);
         }
 
         if (class_exists(InMemoryUser::class)) {
             return new InMemoryUser(
-                $username,
+                $identifier,
                 null,
                 ['ROLE_USER']
             );
         }
 
         return new User(
-            $username,
+            $identifier,
             null,
             ['ROLE_USER']
         );
