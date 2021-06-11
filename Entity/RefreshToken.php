@@ -11,25 +11,11 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken;
 
 /**
  * Refresh Token.
- *
- * @UniqueEntity("refreshToken")
  */
 class RefreshToken extends AbstractRefreshToken
 {
-    /**
-     * @var int
-     */
-    protected $id;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
 }

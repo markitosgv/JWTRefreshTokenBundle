@@ -3,7 +3,6 @@
 namespace Gesdinet\JWTRefreshTokenBundle;
 
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\CustomUserProviderCompilerPass;
-use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\DoctrineMappingsCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ObjectManagerCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\UserCheckerCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -17,7 +16,6 @@ class GesdinetJWTRefreshTokenBundle extends Bundle
 
         $container->addCompilerPass(new CustomUserProviderCompilerPass());
         $container->addCompilerPass(new ObjectManagerCompilerPass());
-        $container->addCompilerPass(new DoctrineMappingsCompilerPass());
         $container->addCompilerPass(new UserCheckerCompilerPass());
     }
 }
