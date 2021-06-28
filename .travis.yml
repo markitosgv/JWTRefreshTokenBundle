@@ -1,53 +1,77 @@
 language: php
 
-sudo: false
+dist: xenial
 
 services:
   - mongodb
 
+env:
+  global:
+    - COMPOSER_FLAGS="--prefer-dist --no-interaction"
+
 matrix:
   fast_finish: true
   include:
-      # 3.4.*
+    # Build ensuring minimum dependencies are valid
     - php: 7.1
-      env: SYMFONY_VERSION=3.4.*
-    - php: 7.2
-      env: SYMFONY_VERSION=3.4.*
-    - php: 7.3
-      env: SYMFONY_VERSION=3.4.*
-      # 4.3.*
+      env: SYMFONY_REQUIRE=3.4.* COMPOSER_FLAGS="--prefer-lowest --prefer-dist --no-interaction"
+
+    # 3.4.*
     - php: 7.1
-      env: SYMFONY_VERSION=4.3.*
+      env: SYMFONY_REQUIRE=3.4.*
     - php: 7.2
-      env: SYMFONY_VERSION=4.3.*
+      env: SYMFONY_REQUIRE=3.4.*
     - php: 7.3
-      env: SYMFONY_VERSION=4.3.*
-      # 4.4.*
+      env: SYMFONY_REQUIRE=3.4.*
+    - php: 7.4
+      env: SYMFONY_REQUIRE=3.4.*
+
+    # 4.4.*
     - php: 7.1
-      env: SYMFONY_VERSION=4.4.*
+      env: SYMFONY_REQUIRE=4.4.*
     - php: 7.2
-      env: SYMFONY_VERSION=4.4.*
+      env: SYMFONY_REQUIRE=4.4.*
     - php: 7.3
-      env: SYMFONY_VERSION=4.4.*
-      # 5.0.*
+      env: SYMFONY_REQUIRE=4.4.*
+    - php: 7.4
+      env: SYMFONY_REQUIRE=4.4.*
+    - php: 8.0
+      env: SYMFONY_REQUIRE=4.4.*
+
+    # 5.2.*
     - php: 7.2
-      env: SYMFONY_VERSION=5.0.*
+      env: SYMFONY_REQUIRE=5.2.*
     - php: 7.3
-      env: SYMFONY_VERSION=5.0.*
+      env: SYMFONY_REQUIRE=5.2.*
+    - php: 7.4
+      env: SYMFONY_REQUIRE=5.2.*
+    - php: 8.0
+      env: SYMFONY_REQUIRE=5.2.*
+
+    # 5.3.*
+    - php: 7.2
+      env: SYMFONY_REQUIRE=5.3.*
+    - php: 7.3
+      env: SYMFONY_REQUIRE=5.3.*
+    - php: 7.4
+      env: SYMFONY_REQUIRE=5.3.*
+    - php: 8.0
+      env: SYMFONY_REQUIRE=5.3.*
 
 cache:
   directories:
     - $HOME/.composer/cache
 
 before_install:
+  - phpenv config-rm xdebug.ini || true
   - pecl install -f mongodb-stable
   - echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-  - composer selfupdate
-  - if [ "$SYMFONY_VERSION" != "" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --no-update; fi;
+  - travis_retry composer self-update
 
 install:
-  - composer config "platform.ext-mongo" "1.6.16" && composer require alcaeus/mongo-php-adapter --prefer-dist --no-interaction $COMPOSER_FLAGS
-  - composer update --prefer-dist --no-interaction $COMPOSER_FLAGS
+  - composer global require --no-scripts --no-plugins symfony/flex
+  - if [[ $TRAVIS_PHP_VERSION == 7.1 ]]; then composer require --no-update alcaeus/mongo-php-adapter; fi
+  - composer update $COMPOSER_FLAGS
 
 script:
   - ./bin/phpspec run -fpretty --verbose
