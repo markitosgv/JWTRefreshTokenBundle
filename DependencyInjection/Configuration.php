@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\BaseNode;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -50,12 +51,14 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->scalarNode('user_checker')->defaultValue('security.user_checker')->end()
                 ->scalarNode('refresh_token_entity')
+                    ->setDeprecated(...$this->getDeprecationParameters('The "%node%" node is deprecated, use the "refresh_token_class" node instead.', '0.5'))
                     ->defaultNull()
-                    ->info('Deprecated, use refresh_token_class instead')
+                    ->info('Set another refresh token class to use instead of default one (Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken)')
                     ->end()
                 ->scalarNode('entity_manager')
+                    ->setDeprecated(...$this->getDeprecationParameters('The "%node%" node is deprecated, use the "object_manager" node instead.', '0.5'))
                     ->defaultNull()
-                    ->info('Deprecated, use object_manager instead')
+                    ->info('Set entity manager to use')
                     ->end()
                 ->scalarNode('single_use')
                     ->defaultFalse()
@@ -63,11 +66,21 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->scalarNode('token_parameter_name')->defaultValue('refresh_token')->end()
                 ->booleanNode('doctrine_mappings')
+                    ->setDeprecated(...$this->getDeprecationParameters('The "%node%" node is deprecated without replacement.', '0.13'))
                     ->info('When true, resolving of Doctrine mapping is done automatically to use either ORM or ODM object manager')
                     ->defaultTrue()
                 ->end()
             ->end();
 
         return $treeBuilder;
+    }
+
+    private function getDeprecationParameters(string $message, string $version): array
+    {
+        if (method_exists(BaseNode::class, 'getDeprecation')) {
+            return ['gesdinet/jwt-refresh-token-bundle', $version, $message];
+        }
+
+        return [$message];
     }
 }

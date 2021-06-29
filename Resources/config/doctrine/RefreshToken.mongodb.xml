@@ -5,9 +5,10 @@
                         xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
                     http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
-    <mapped-superclass name="Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken">
+    <document name="Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken">
+        <field field-name="id" type="id" />
         <field field-name="refreshToken" type="string" unique="true" />
         <field field-name="username" type="string" />
         <field field-name="valid" type="date"/>
-    </mapped-superclass>
+    </document>
 </doctrine-mongo-mapping>

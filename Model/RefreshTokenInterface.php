@@ -19,14 +19,14 @@ interface RefreshTokenInterface
     /**
      * Get id.
      *
-     * @return int|string
+     * @return int|string|null
      */
     public function getId();
 
     /**
      * Set refreshToken.
      *
-     * @param string $refreshToken
+     * @param string|null $refreshToken
      *
      * @return self
      */
@@ -35,14 +35,14 @@ interface RefreshTokenInterface
     /**
      * Get refreshToken.
      *
-     * @return string
+     * @return string|null
      */
     public function getRefreshToken();
 
     /**
      * Set valid.
      *
-     * @param \DateTime $valid
+     * @param \DateTimeInterface $valid
      *
      * @return self
      */
@@ -51,14 +51,14 @@ interface RefreshTokenInterface
     /**
      * Get valid.
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getValid();
 
     /**
      * Set username.
      *
-     * @param string $username
+     * @param string|null $username
      *
      * @return self
      */
@@ -67,7 +67,7 @@ interface RefreshTokenInterface
     /**
      * Get user.
      *
-     * @return string
+     * @return string|null
      */
     public function getUsername();
 
