@@ -11,6 +11,11 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
+trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, implement "%s" directly.', RefreshTokenManager::class, RefreshTokenManagerInterface::class);
+
+/**
+ * @deprecated to be removed in 2.0, implement `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface` directly.
+ */
 abstract class RefreshTokenManager implements RefreshTokenManagerInterface
 {
     /**

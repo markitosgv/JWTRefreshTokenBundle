@@ -12,35 +12,12 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken as BaseAbstractRefreshToken;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Abstract Refresh Token.
- *
- * @Unique("refreshToken")
  *
  * @deprecated Extend from `Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken` instead
  */
 abstract class AbstractRefreshToken extends BaseAbstractRefreshToken
 {
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     */
-    protected $refreshToken;
-
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     */
-    protected $username;
-
-    /**
-     * @var \DateTimeInterface
-     *
-     * @Assert\NotBlank()
-     */
-    protected $valid;
 }

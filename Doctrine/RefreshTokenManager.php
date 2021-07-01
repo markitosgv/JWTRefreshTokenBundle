@@ -14,8 +14,8 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 use DateTime;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager as BaseRefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager as BaseRefreshTokenManager;
 
 class RefreshTokenManager extends BaseRefreshTokenManager
 {
@@ -60,7 +60,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * @param string $username
      *
-     * @return RefreshTokenInterface
+     * @return RefreshTokenInterface|null
      */
     public function getLastFromUsername($username)
     {
@@ -115,7 +115,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * Returns the RefreshToken fully qualified class name.
      *
-     * @return string
+     * @return class-string<RefreshTokenInterface>
      */
     public function getClass()
     {
