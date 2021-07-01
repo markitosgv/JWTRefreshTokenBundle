@@ -89,7 +89,35 @@ return [
 ];
 ```
 
-### Step 3: Configure your own routing to refresh token
+### Step 3 (Symfony 5.3+)
+
+#### Configure the authenticator
+
+Add the below lines to your security.yml file:
+
+```yaml
+# app/config/security.yml or config/packages/security.yaml
+security:
+    enable_authenticator_manager: true
+
+    firewalls:
+        # put it before all your other firewall API entries
+        api_token_refresh:
+            pattern: ^/api/token/refresh
+            stateless: true
+            refresh_jwt: ~
+    # ...
+
+    access_control:
+        # ...
+        - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # ...
+# ...
+```
+
+### Step 3 (Symfony 5.2-)
+
+#### Configure your own routing to refresh token
 
 Open your main routing configuration file and copy the following four lines at the very beginning of it.
 
@@ -111,7 +139,7 @@ gesdinet_jwt_refresh_token:
 # ...
 ```
 
-### Step 4: Allow anonymous access to refresh token
+#### Allow anonymous access to refresh token
 
 Add next lines on security.yml file:
 
@@ -132,7 +160,7 @@ Add next lines on security.yml file:
 # ...
 ```
 
-### Step 5: Update your schema
+### Step 4: Update your schema
 
 With the next command you will create a new table to handle your refresh tokens
 
@@ -171,15 +199,6 @@ gesdinet_jwt_refresh_token:
     ttl: 2592000
 ```
 
-### Config User identity field
-
-You can change user identity field. Make sure that your model user has `getter` for this field. Default value is `username`. You can change this value by adding this line to your config:
-
-```yaml
-gesdinet_jwt_refresh_token:
-    user_identity_field: email
-```
-
 ### Config TTL update
 
 You can expand Refresh Token TTL on refresh. Default value is false. You can change this value adding this line to your config:
@@ -192,6 +211,8 @@ gesdinet_jwt_refresh_token:
 This will reset the token TTL each time you ask a refresh.
 
 ### Config Firewall Name
+
+*NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
 
 You can define Firewall name. Default value is api. You can change this value adding this line to your config:
 
@@ -211,6 +232,22 @@ gesdinet_jwt_refresh_token:
 
 ### Config UserProvider
 
+#### Symfony 5.3+
+
+You can define a user provider to use for the firewall as part of the authenticator configuration:
+
+```yaml
+# app/config/security.yml or config/packages/security.yaml
+security:
+    firewalls:
+        api_token_refresh:
+            pattern: ^/api/token/refresh
+            stateless: true
+            refresh_jwt:
+                provider: user_provider_service_id
+```
+
+#### Symfony 5.2-
 You can define your own UserProvider. By default we use our custom UserProvider. You can change this value by adding this line to your config:
 
 ```yaml
@@ -246,6 +283,22 @@ gesdinet_jwt_refresh_token:
 
 ### Config UserChecker
 
+#### Symfony 5.3+
+
+You can define a user checker to use for the firewall as part of the firewall configuration:
+
+```yaml
+# app/config/security.yml or config/packages/security.yaml
+security:
+    firewalls:
+        api_token_refresh:
+            pattern: ^/api/token/refresh
+            stateless: true
+            user_checker: user_checker_service_id
+            refresh_jwt: ~
+```
+
+#### Symfony 5.2-
 You can define your own UserChecker. By default the Symfony UserChecker will be used. You can change this value by adding this line to your config:
 
 ```yaml

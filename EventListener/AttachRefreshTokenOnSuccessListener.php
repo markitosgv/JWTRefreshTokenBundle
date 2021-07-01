@@ -15,10 +15,9 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -45,11 +44,6 @@ class AttachRefreshTokenOnSuccessListener
     /**
      * @var string
      */
-    protected $userIdentityField;
-
-    /**
-     * @var string
-     */
     protected $tokenParameterName;
 
     /**
@@ -61,7 +55,6 @@ class AttachRefreshTokenOnSuccessListener
      * AttachRefreshTokenOnSuccessListener constructor.
      *
      * @param int    $ttl
-     * @param string $userIdentityField
      * @param string $tokenParameterName
      * @param bool   $singleUse
      */
@@ -70,7 +63,6 @@ class AttachRefreshTokenOnSuccessListener
         $ttl,
         ValidatorInterface $validator,
         RequestStack $requestStack,
-        $userIdentityField,
         $tokenParameterName,
         $singleUse
     ) {
@@ -78,7 +70,6 @@ class AttachRefreshTokenOnSuccessListener
         $this->ttl = $ttl;
         $this->validator = $validator;
         $this->requestStack = $requestStack;
-        $this->userIdentityField = $userIdentityField;
         $this->tokenParameterName = $tokenParameterName;
         $this->singleUse = $singleUse;
     }
@@ -112,10 +103,12 @@ class AttachRefreshTokenOnSuccessListener
 
             $refreshToken = $this->refreshTokenManager->create();
 
-            $accessor = new PropertyAccessor();
-            $userIdentityFieldValue = $accessor->getValue($user, $this->userIdentityField);
+            if (method_exists($user, 'getUserIdentifier')) {
+                $refreshToken->setUsername($user->getUserIdentifier());
+            } else {
+                $refreshToken->setUsername($user->getUsername());
+            }
 
-            $refreshToken->setUsername($userIdentityFieldValue);
             $refreshToken->setRefreshToken();
             $refreshToken->setValid($datetime);
 

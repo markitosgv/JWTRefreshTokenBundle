@@ -11,6 +11,7 @@ code_coverage:
     - Doctrine
     - Entity
     - EventListener
+    - Http
     - Model
     - Request
     - Security
