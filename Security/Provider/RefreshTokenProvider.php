@@ -19,7 +19,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
-trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '0.13', 'The "%s" class is deprecated, configure the user provider for the `refresh_jwt` authenticator instead.', RefreshTokenProvider::class);
+trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, configure the user provider for the `refresh_jwt` authenticator instead.', RefreshTokenProvider::class);
 
 /**
  * Class RefreshTokenProvider.

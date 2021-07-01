@@ -31,7 +31,7 @@ final class UserCheckerCompilerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         if (false === $this->internalUse) {
-            trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '0.13', 'The "%s" class is deprecated.', self::class);
+            trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated.', self::class);
         }
 
         $userCheckerId = $container->getParameter('gesdinet.jwtrefreshtoken.user_checker.id');
