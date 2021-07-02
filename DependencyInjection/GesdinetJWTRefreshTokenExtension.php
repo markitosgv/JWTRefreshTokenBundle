@@ -25,9 +25,9 @@ use Symfony\Component\DependencyInjection\Loader;
 class GesdinetJWTRefreshTokenExtension extends Extension
 {
     private const DEPRECATED_SERVICES = [
-        'gesdinet.jwtrefreshtoken' => '0.13',
-        'gesdinet.jwtrefreshtoken.authenticator' => '0.13',
-        'gesdinet.jwtrefreshtoken.user_provider' => '0.13',
+        'gesdinet.jwtrefreshtoken' => '1.0',
+        'gesdinet.jwtrefreshtoken.authenticator' => '1.0',
+        'gesdinet.jwtrefreshtoken.user_provider' => '1.0',
     ];
 
     /**

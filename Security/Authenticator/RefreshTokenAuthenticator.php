@@ -23,7 +23,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\HttpFoundation\Response;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
-trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '0.13', 'The "%s" class is deprecated, use the `refresh_jwt` authenticator instead.', RefreshTokenAuthenticator::class);
+trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, use the `refresh_jwt` authenticator instead.', RefreshTokenAuthenticator::class);
 
 /**
  * Class RefreshTokenAuthenticator.

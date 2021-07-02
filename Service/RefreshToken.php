@@ -23,7 +23,7 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 
-trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '0.13', 'The "%s" class is deprecated, use the `refresh_jwt` authenticator instead.', RefreshToken::class);
+trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, use the `refresh_jwt` authenticator instead.', RefreshToken::class);
 
 /**
  * Class RefreshToken.
