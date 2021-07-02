@@ -12,6 +12,8 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
 use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownRefreshTokenException;
+use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownUserFromRefreshTokenException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -76,13 +78,13 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
         $username = $userProvider->getUsernameForRefreshToken($refreshToken);
 
         if (null === $username) {
-            throw new AuthenticationException(sprintf('Refresh token "%s" does not exist.', $refreshToken));
+            throw new UnknownRefreshTokenException(sprintf('Refresh token "%s" does not exist.', $refreshToken));
         }
 
         $user = $userProvider->loadUserByUsername($username);
 
         if (null === $user) {
-            throw new AuthenticationException(sprintf('User with refresh token "%s" does not exist.', $refreshToken));
+            throw new UnknownUserFromRefreshTokenException(sprintf('User with refresh token "%s" does not exist.', $refreshToken));
         }
 
         $this->userChecker->checkPreAuth($user);
