@@ -5,7 +5,7 @@
                         xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
                     http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
-    <document name="Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken">
+    <document name="Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken" collection="refresh_tokens" repository-class="Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository">
         <field field-name="id" type="id" />
         <field field-name="refreshToken" type="string" unique="true" />
         <field field-name="username" type="string" />
