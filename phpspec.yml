@@ -9,8 +9,11 @@ code_coverage:
     - Command
     - DependencyInjection
     - Doctrine
+    - Document
     - Entity
+    - Event
     - EventListener
+    - Generator
     - Http
     - Model
     - Request

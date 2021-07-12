@@ -4,6 +4,8 @@ use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
@@ -23,15 +25,24 @@ return static function (ContainerConfigurator $container) {
         ->args([
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
             new Parameter('gesdinet_jwt_refresh_token.ttl'),
-            new Reference('validator'),
             new Reference('request_stack'),
             new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
             new Parameter('gesdinet_jwt_refresh_token.single_use'),
+            new Reference('gesdinet.jwtrefreshtoken.refresh_token_generator'),
         ])
         ->tag('kernel.event_listener', [
             'event' => 'lexik_jwt_authentication.on_authentication_success',
             'method' => 'attachRefreshToken',
         ]);
+
+    $services->set('gesdinet.jwtrefreshtoken.refresh_token_generator')
+        ->class(RefreshTokenGenerator::class)
+        ->public()
+        ->args([
+            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+        ]);
+
+    $services->alias(RefreshTokenGeneratorInterface::class, 'gesdinet.jwtrefreshtoken.refresh_token_generator');
 
     $services->set('gesdinet.jwtrefreshtoken.refresh_token_manager')
         ->class(RefreshTokenManager::class)

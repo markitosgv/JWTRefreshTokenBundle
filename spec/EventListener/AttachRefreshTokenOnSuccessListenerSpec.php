@@ -2,37 +2,29 @@
 
 namespace spec\Gesdinet\JWTRefreshTokenBundle\EventListener;
 
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\HeaderBag;
-use Symfony\Component\HttpFoundation\ParameterBag;
 
 class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 {
     const TTL = 2592000;
     const TOKEN_PARAMETER_NAME = 'refresh_token';
 
-    public function let(RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
+    public function let(RefreshTokenManagerInterface $refreshTokenManager, RequestStack $requestStack, RefreshTokenGeneratorInterface $refreshTokenGenerator)
     {
-        $this->beConstructedWith($refreshTokenManager, self::TTL, $validator, $requestStack, self::TOKEN_PARAMETER_NAME, false);
+        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, false, $refreshTokenGenerator);
     }
 
-    public function it_is_initializable()
-    {
-        $this->shouldHaveType('Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener');
-    }
-
-    public function it_attach_token_on_refresh(AuthenticationSuccessEvent $event, UserInterface $user, RefreshTokenInterface $refreshToken, RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
+    public function it_attach_token_on_refresh(AuthenticationSuccessEvent $event, UserInterface $user, RequestStack $requestStack)
     {
         $event->getData()->willReturn([]);
         $event->getUser()->willReturn($user);
@@ -46,14 +38,14 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
         $requestStack->getCurrentRequest()->willReturn($request);
 
-        $event->setData(Argument::exact($refreshTokenArray))->shouldBeCalled();
+        $event->setData($refreshTokenArray)->shouldBeCalled();
 
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_token_on_refresh_with_single_use_token(AuthenticationSuccessEvent $event, RefreshTokenInterface $oldRefreshToken, RefreshTokenInterface $newRefreshToken, RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
+    public function it_attach_token_on_refresh_with_single_use_token(AuthenticationSuccessEvent $event, RefreshTokenInterface $oldRefreshToken, RefreshTokenInterface $newRefreshToken, RefreshTokenManagerInterface $refreshTokenManager, RequestStack $requestStack, RefreshTokenGeneratorInterface $refreshTokenGenerator)
     {
-        $this->beConstructedWith($refreshTokenManager, self::TTL, $validator, $requestStack, self::TOKEN_PARAMETER_NAME, true);
+        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, true, $refreshTokenGenerator);
 
         $username = 'username';
         $password = 'password';
@@ -78,26 +70,21 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
         $refreshTokenManager->get($refreshTokenString)->willReturn($oldRefreshToken);
         $refreshTokenManager->delete($oldRefreshToken)->shouldBeCalled();
-        $refreshTokenManager->create()->willReturn($newRefreshToken);
 
-        $violationList = new ConstraintViolationList([]);
-        $validator->validate($newRefreshToken)->willReturn($violationList);
+        $refreshTokenGenerator->createForUserWithTtl($user, self::TTL)->willReturn($newRefreshToken);
 
         $refreshTokenManager->save($newRefreshToken)->shouldBeCalled();
 
         $newRefreshTokenString = 'thenewlyissuedrefreshtoken';
 
-        $newRefreshToken->setUsername($username)->shouldBeCalled();
-        $newRefreshToken->setRefreshToken()->shouldBeCalled();
-        $newRefreshToken->setValid(Argument::type(\DateTime::class))->shouldBeCalled();
         $newRefreshToken->getRefreshToken()->willReturn($newRefreshTokenString);
 
-        $event->setData(Argument::exact([self::TOKEN_PARAMETER_NAME => $newRefreshTokenString]))->shouldBeCalled();
+        $event->setData([self::TOKEN_PARAMETER_NAME => $newRefreshTokenString])->shouldBeCalled();
 
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_token_on_credentials_auth(HeaderBag $headers, ParameterBag $requestBag, AuthenticationSuccessEvent $event, UserInterface $user, RefreshTokenInterface $refreshToken, RefreshTokenManagerInterface $refreshTokenManager, ValidatorInterface $validator, RequestStack $requestStack)
+    public function it_attach_token_on_credentials_auth(AuthenticationSuccessEvent $event, UserInterface $user, RefreshTokenInterface $refreshToken, RefreshTokenManagerInterface $refreshTokenManager, RequestStack $requestStack, RefreshTokenGeneratorInterface $refreshTokenGenerator)
     {
         $event->getData()->willReturn([]);
         $event->getUser()->willReturn($user);
@@ -109,19 +96,18 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
         $requestStack->getCurrentRequest()->willReturn($request);
 
-        $refreshTokenManager->create()->willReturn($refreshToken);
-
-        $violationList = new ConstraintViolationList([]);
-        $validator->validate($refreshToken)->willReturn($violationList);
+        $refreshTokenGenerator->createForUserWithTtl($user, self::TTL)->willReturn($refreshToken);
 
         $refreshTokenManager->save($refreshToken)->shouldBeCalled();
 
-        $event->setData(Argument::any())->shouldBeCalled();
+        $refreshToken->getRefreshToken()->willReturn(Argument::type('string'));
+
+        $event->setData(Argument::type('array'))->shouldBeCalled();
 
         $this->attachRefreshToken($event);
     }
 
-    public function it_is_not_valid_user(AuthenticationSuccessEvent $event)
+    public function it_does_nothing_when_there_is_not_a_user(AuthenticationSuccessEvent $event)
     {
         $event->getData()->willReturn([]);
         $event->getUser()->willReturn(null);
