@@ -11,21 +11,19 @@ JWTRefreshTokenBundle
 
 The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle). Supports Doctrine ORM/ODM.
 
-Prerequisites
--------------
+## Prerequisites
 
-This bundle requires Symfony 3.4+, 4.0+ or 5.0+.
+This bundle requires PHP 7.1.3 or later and Symfony 3.4, 4.4, or 5.2+.
 
 If you want to use this bundle with previous Symfony versions, please use 0.2.x releases.
 
-**Protip:** Though the bundle doesn't enforce you to do so, it is highly recommended to use HTTPS.
+**Protip:** Though the bundle doesn't force you to do so, it is highly recommended to use HTTPS.
 
-Installation
-------------
+## Installation
 
 ### Step 1: Download the Bundle
 
-**It's important you manually require either Doctrine's ORM or MongoDB ODM as well, these packages are not required automatically now as you can choose between them. Failing to do so may trigger errors on installation**
+**It's important you manually require either Doctrine's ORM or MongoDB ODM as well, these packages are not required automatically as you can choose between them. Failing to do so may trigger errors on installation**
 
 With Doctrine's ORM
 
@@ -42,19 +40,18 @@ $ composer require "doctrine/mongodb-odm-bundle" "gesdinet/jwt-refresh-token-bun
 or edit composer.json:
 
     // ...
-    "gesdinet/jwt-refresh-token-bundle": "~0.1",
+    "gesdinet/jwt-refresh-token-bundle": "^1.0",
     "doctrine/orm": "^2.4.8",
-    "doctrine/doctrine-bundle": "~1.4",
-    "doctrine/mongodb-odm-bundle": "^3.4"
+    "doctrine/doctrine-bundle": "^1.4 || ^2.0",
+    "doctrine/mongodb-odm-bundle": "^3.4 || ^4.0"
     // ...
 
-Alternatively, custom implementation of persistence can be used.
+Alternatively, a custom persistence layer can be used.
 
-For that purpose
+For that purpose:
+
 * provide an implementation of `Doctrine\Persistence\ObjectManager`
-* configure the bundle according to
-    * [object manager](#use-another-object-manager)
-    * [disabling Doctrine mappings](#disable-automatic-doctrine-mappings)
+* configure the bundle to [use your object manager](#use-another-object-manager)
 
 ### Step 2: Enable the Bundle
 
@@ -81,7 +78,7 @@ class AppKernel extends Kernel
 ```
 
 **Symfony 4 Version:**   
-Register bundle into `config/bundles.php` (Flex did it automatically):  
+Register bundle into `config/bundles.php` (Flex should do this automatically):  
 ```php 
 return [
     //...
@@ -160,20 +157,10 @@ Add next lines on security.yml file:
 # ...
 ```
 
-### Step 4: Update your schema
+### Step 4: Update your database schema
 
 With the next command you will create a new table to handle your refresh tokens
 
-**Symfony 3 Version:**   
-```bash
-php bin/console doctrine:schema:update --force
-
-# or make and run a migration
-php bin/console make:migration
-php bin/console doctrine:migrations:migrate
-```
-
-**Symfony 4 Version:**   
 ```bash
 php bin/console doctrine:schema:update --force
 
@@ -182,59 +169,56 @@ php bin/console make:migration
 php bin/console doctrine:migrations:migrate
 ```
 
-USAGE
------
+## Usage
 
-The configurations can be put in:
+The below configurations can be put in the following files, depending on the Symfony version you are running:
 
-**Symfony 3 Version:** `app/config`  
+**Symfony 3 Version:** `app/config/config.yml`  
 **Symfony 4 Version:** `config/packages/gesdinet_jwt_refresh_token.yaml`
 
-### Config TTL
+### Token TTL
 
-You can define Refresh Token TTL. Default value is 1 month. You can change this value adding this line to your config:
+You can define the refresh token TTL, this value is set in seconds and defaults to 1 month. You can change this value adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     ttl: 2592000
 ```
 
-### Config TTL update
+### Update Token TTL
 
-You can expand Refresh Token TTL on refresh. Default value is false. You can change this value adding this line to your config:
+You can configure the bundle to refresh the TTL on a refresh token when it is used, by default this feature is disabled. You can change this value adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     ttl_update: true
 ```
 
-This will reset the token TTL each time you ask a refresh.
-
 ### Config Firewall Name
 
 *NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
 
-You can define Firewall name. Default value is api. You can change this value adding this line to your config:
+You can define Firewall name. Default value is `api`. You can change this value adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     firewall: api
 ```
 
-### Config Refresh token parameter Name
+### Refresh Token Parameter Name
 
-You can define refresh token parameter name. Default value is refresh_token. You can change this value adding this line to your config file:
+You can define the parameter name for the refresh token when it is read from the request, the default value is `refresh_token`. You can change this value adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     token_parameter_name: refreshToken
 ```
 
-### Config UserProvider
+### Set The User Provider
 
 #### Symfony 5.3+
 
-You can define a user provider to use for the firewall as part of the authenticator configuration:
+You can define a user provider to use for the authenticator its configuration:
 
 ```yaml
 # app/config/security.yml or config/packages/security.yaml
@@ -247,17 +231,23 @@ security:
                 provider: user_provider_service_id
 ```
 
+By default, when a user provider is not specified, then the user provider for the firewall is used instead.
+
 #### Symfony 5.2-
-You can define your own UserProvider. By default we use our custom UserProvider. You can change this value by adding this line to your config:
+
+*NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
+
+You can define your own user provider, by default the `gesdinet.jwtrefreshtoken.user_provider` service is used. You can change this value by adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     user_provider: user_provider_service_id
 ```
 
-For example, if you are using FOSUserBundle, user_provider_service_id must be set to `fos_user.user_provider.username_email`.
+For example, if you are using FOSUserBundle, `user_provider` must be set to `fos_user.user_provider.username_email`.
 
-For Doctrine ORM UserProvider, user_provider_service_id must be set to `security.user.provider.concrete.<your_user_provider_name_in_security_yaml>`.
+For Doctrine ORM UserProvider, `user_provider` must be set to `security.user.provider.concrete.<your_user_provider_name_in_security_yaml>`.
+
 For example, in your `app/config/security.yml` or `config/packages/security.yaml`:
 ```yaml
 security:
@@ -272,16 +262,16 @@ security:
 
 then your user_provider_service_id is `security.user.provider.concrete.app_user_provider`.
 
-### Select Manager Type
+### Doctrine Manager Type
 
-By default manager type is set to use Doctrine's ORM, if you want to use Doctrine's MongoDB ODM you have to change this value:
+By default, this bundle sets the Doctrine Manager type to the ORM. If you want to use Doctrine's MongoDB ODM you have to change this value:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     manager_type: mongodb
 ```
 
-### Config UserChecker
+### Set The User Checker
 
 #### Symfony 5.3+
 
@@ -299,16 +289,19 @@ security:
 ```
 
 #### Symfony 5.2-
-You can define your own UserChecker. By default the Symfony UserChecker will be used. You can change this value by adding this line to your config:
+
+*NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
+
+You can define your own user checker, by default the `security.user_checker` service is used. You can change this value by adding this line to your config:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     user_checker: user_checker_service_id
 ```
 
-You will probably want to use a custom UserProvider along with your UserChecker to ensure that the checker recieves the right type of user.
+You will probably want to use a custom user provider along with your user checker to ensure that the checker receives the right type of user.
 
-### Config Single Use
+### Single Use Tokens
 
 You can configure the refresh token so it can only be consumed _once_. If set to `true` and the refresh token is consumed, a new refresh token will be provided. 
 
@@ -319,74 +312,47 @@ gesdinet_jwt_refresh_token:
     single_use: true
 ```
 
-
 ### Use another entity for refresh tokens
 
 You can define your own refresh token class on your project.
 
-When using default ORM create the entity class extending `Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken` in your own bundle:
+When using the Doctrine ORM, create a class extending `Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken` in your application:
 
 ```php
-namespace MyBundle;
+<?php
+
+namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Gesdinet\JWTRefreshTokenBundle\Entity\AbstractRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 
 /**
- * This class override Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken to have another table name.
+ * This class extends Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken to have another table name.
  *
  * @ORM\Table("jwt_refresh_token")
  */
-class JwtRefreshToken extends AbstractRefreshToken
+class JwtRefreshToken extends RefreshToken
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
 }
 ```
 
-When using MongoBD ODM create the document class extending `Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken` in you own bundle:
+When using the Doctrine MongoDB ODM, create a class extending `Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken` in your application:
 
 ```php
-namespace MyBundle;
+<?php
+
+namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
-use Gesdinet\JWTRefreshTokenBundle\Document\AbstractRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken;
 
 /**
- * This class override Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken to have another collection name.
+ * This class extends Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken to have another collection name.
  *
- * @MongoDB\Document(collection="UserRefreshToken")
+ * @MongoDB\Document(collection="jwt_refresh_token")
  */
-class JwtRefreshToken extends AbstractRefreshToken
+class JwtRefreshToken extends RefreshToken
 {
-    /**
-     * @var string
-     *
-     * @MongoDB\Id(strategy="auto")
-     */
-    protected $id;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
 }
 ```
 
@@ -394,14 +360,12 @@ Then declare this class adding this line to your config.yml file:
 
 ```yaml
 gesdinet_jwt_refresh_token:
-    refresh_token_class: MyBundle\JwtRefreshToken
+    refresh_token_class: App\Entity\JwtRefreshToken
 ```
 
 ### Use another object manager
 
-You can tell JWTRefreshTokenBundle to use another object manager than default one (if using ORM it is doctrine.orm.entity_manager, when using MongoDB ODM it is doctrine_mongodb.odm.document_manager).
-
-Just add this line to your config.yml file:
+You can configure the bundle to use any object manager,  just add this line to your config.yml file:
 
 ```yaml
 gesdinet_jwt_refresh_token:
@@ -409,6 +373,8 @@ gesdinet_jwt_refresh_token:
 ```
 
 ### Disable automatic Doctrine mappings
+
+*NOTE* This setting is deprecated and is no longer used
 
 On some occasions, you may not want to have default Doctrine mappings of object manager enabled as you use neither ORM nor ODM but i.e. using DoctrineBundle for DBAL.
 
@@ -430,11 +396,10 @@ When you authenticate through /api/login_check with user/password credentials, L
 }
 ```
 
-This refresh token is persisted in RefreshToken entity. After that, when your JWT valid token expires, if you want to get a new one you can proceed in two ways:
+The refresh token is persisted as a `RefreshTokenInterface` object. After that, when your JWT valid token expires, if you want to get a new one you can proceed in two ways:
 
 - Send you user credentials again to /api/login_check. This generates another JWT with another Refresh Token.
-
-- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must notice** if refresh token is still valid. Your refresh token do not change but valid datetime will increase.
+- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must check** if the refresh token is still valid. Your refresh token will not change but its TTL will increase.
 
 ***Note that when a refresh token is consumed and the config option `single_use` is set to `true` the token will no longer be valid.***
 
@@ -444,8 +409,7 @@ curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886a
 
 This call returns a new valid JWT token renewing valid datetime of your refresh token.
 
-Useful Commands
----------------
+## Useful Commands
 
 We give you two commands to manage tokens.
 
@@ -453,45 +417,27 @@ We give you two commands to manage tokens.
 
 If you want to revoke all invalid (datetime expired) refresh tokens you can execute:
 
-**Symfony 3 Version:**
 ```bash
 php bin/console gesdinet:jwt:clear
 ```
 
-**Symfony 4 Version:**
-```bash
-php bin/console gesdinet:jwt:clear
-```
+The command optionally accepts a date argument which will delete all tokens older than the given time. This can be any value that can be parsed by the `DateTime` class.
 
-Optional argument is datetime, it deletes all tokens smaller than this datetime:
-
-**Symfony 3 Version:**
 ```bash
 php bin/console gesdinet:jwt:clear 2015-08-08
 ```
 
-**Symfony 4 Version:**
-```bash
-php bin/console gesdinet:jwt:clear 2015-08-08
-```
-
-We recommend to execute this command with a cronjob to remove invalid refresh tokens every certain time.
+We recommend executing this command as a cronjob to remove invalid refresh tokens on an interval.
 
 ### Revoke a token
 
-If you want to revoke a single token you can use this:
+If you want to revoke a single token you can use this command:
 
-**Symfony 3 Version:**
 ```bash
 php bin/console gesdinet:jwt:revoke TOKEN
 ```
 
-**Symfony 4 Version:**
-```bash
-php bin/console gesdinet:jwt:revoke TOKEN
-```
-
-### Events
+## Events
 
 If you want to do something when token is refreshed you can listen for `gesdinet.refresh_token` event.
 
@@ -500,7 +446,7 @@ For example:
 ```php
 <?php
 
-namespace AppBundle\EventListener;
+namespace App\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Psr\Log\LoggerInterface;
@@ -518,7 +464,7 @@ class LogListener implements EventSubscriberInterface
     public function log(RefreshEvent $event)
     {
         $refreshToken = $event->getRefreshToken()->getRefreshToken();
-        $user = $event->getPreAuthenticatedToken()->getUser()->getUsername();
+        $user = $event->getToken()->getUser()->getUsername();
         
         $this->logger->debug(sprintf('User "%s" has refreshed it\'s JWT token with refresh token "%s".', $user, $refreshToken));
     }
@@ -530,4 +476,49 @@ class LogListener implements EventSubscriberInterface
         );
     }
 }
+```
+
+## Token Extractor
+
+The bundle provides a `Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface` to define classes which can read the refresh token from the request.
+
+By default, the `Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ChainExtractor` is used which allows checking multiple aspects of the request for a token. The first token found will be used.
+
+You can create a custom extractor by adding a class to your application implementing the interface. For example, to add an extractor checking for a "X-Refresh-Token" header:
+
+```php
+<?php
+
+namespace App\Request\Extractor;
+
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
+use Symfony\Component\HttpFoundation\Request;
+
+final class HeaderExtractor implements ExtractorInterface
+{
+    public function getRefreshToken(Request $request, string $parameter): ?string
+    {
+        return $request->headers->get('X-Refresh-Token');
+    }
+}
+```
+
+This bundle handles automatically configuring `ExtractorInterface` objects and will automatically set the `gesdinet_jwt_refresh_token.request_extractor` container tag when your application uses autoconfiguration (`autoconfigure: true` in your `services.yaml` file). If autoconfiguration is not in use, you will need to manually configure the tag:
+
+```yaml
+services:
+    App\Request\Extractor\HeaderExtractor:
+        tags:
+            - { name: gesdinet_jwt_refresh_token.request_extractor }
+```
+
+### Prioritizing Extractors
+
+The `gesdinet_jwt_refresh_token.request_extractor` container tag supports prioritizing extractors, you can use this to set the preferred order for your extractors by adding a `priority` attribute. The higher the number, the sooner the extractor will be run.
+
+```yaml
+services:
+    App\Request\Extractor\HeaderExtractor:
+        tags:
+            - { name: gesdinet_jwt_refresh_token.request_extractor, priority: 25 }
 ```

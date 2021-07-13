@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
@@ -39,6 +40,8 @@ class GesdinetJWTRefreshTokenExtension extends Extension
 
         $loader = new Loader\PhpFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.php');
+
+        $container->registerForAutoconfiguration(ExtractorInterface::class)->addTag('gesdinet_jwt_refresh_token.request_extractor');
 
         $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
         $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $config['ttl_update']);

@@ -7,6 +7,10 @@ use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessList
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ChainExtractor;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestBodyExtractor;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestParameterExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator as LegacyRefreshTokenAuthenticator;
@@ -29,6 +33,7 @@ return static function (ContainerConfigurator $container) {
             new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
             new Parameter('gesdinet_jwt_refresh_token.single_use'),
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_generator'),
+            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
         ])
         ->tag('kernel.event_listener', [
             'event' => 'lexik_jwt_authentication.on_authentication_success',
@@ -53,6 +58,22 @@ return static function (ContainerConfigurator $container) {
         ]);
 
     $services->alias(RefreshTokenManagerInterface::class, 'gesdinet.jwtrefreshtoken.refresh_token_manager');
+
+    $services->set('gesdinet.jwtrefreshtoken.request.extractor.chain')
+        ->class(ChainExtractor::class)
+        ->public();
+
+    $services->alias(ExtractorInterface::class, 'gesdinet.jwtrefreshtoken.request.extractor.chain');
+
+    $services->set('gesdinet.jwtrefreshtoken.request.extractor.request_body')
+        ->class(RequestBodyExtractor::class)
+        ->public()
+        ->tag('gesdinet_jwt_refresh_token.request_extractor');
+
+    $services->set('gesdinet.jwtrefreshtoken.request.extractor.request_parameter')
+        ->class(RequestParameterExtractor::class)
+        ->public()
+        ->tag('gesdinet_jwt_refresh_token.request_extractor');
 
     $services->set('gesdinet.jwtrefreshtoken')
         ->class(RefreshToken::class)
@@ -101,10 +122,11 @@ return static function (ContainerConfigurator $container) {
         ->args([
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
             new Reference('event_dispatcher'),
-            // User provider parameter is added in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
-            // Success handler parameter is added in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
-            // Failure handler parameter is added in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
-            // Options parameter is added in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
+            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
+            null, // User provider parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
+            null, // Success handler parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
+            null, // Failure handler parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
+            null, // Options parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
         ]);
 
     $services->set(ClearInvalidRefreshTokensCommand::class)

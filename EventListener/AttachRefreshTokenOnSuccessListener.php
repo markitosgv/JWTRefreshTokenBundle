@@ -14,7 +14,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
-use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -52,8 +52,11 @@ class AttachRefreshTokenOnSuccessListener
     protected $refreshTokenGenerator;
 
     /**
-     * AttachRefreshTokenOnSuccessListener constructor.
-     *
+     * @var ExtractorInterface
+     */
+    protected $extractor;
+
+    /**
      * @param int    $ttl
      * @param string $tokenParameterName
      * @param bool   $singleUse
@@ -64,7 +67,8 @@ class AttachRefreshTokenOnSuccessListener
         RequestStack $requestStack,
         $tokenParameterName,
         $singleUse,
-        RefreshTokenGeneratorInterface $refreshTokenGenerator
+        RefreshTokenGeneratorInterface $refreshTokenGenerator,
+        ExtractorInterface $extractor
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
@@ -72,19 +76,21 @@ class AttachRefreshTokenOnSuccessListener
         $this->tokenParameterName = $tokenParameterName;
         $this->singleUse = $singleUse;
         $this->refreshTokenGenerator = $refreshTokenGenerator;
+        $this->extractor = $extractor;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event)
     {
-        $data = $event->getData();
         $user = $event->getUser();
-        $request = $this->requestStack->getCurrentRequest();
 
         if (!$user instanceof UserInterface) {
             return;
         }
 
-        $refreshTokenString = RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
+        $data = $event->getData();
+        $request = $this->requestStack->getCurrentRequest();
+
+        $refreshTokenString = $this->extractor->getRefreshToken($request, $this->tokenParameterName);
 
         if ($refreshTokenString && true === $this->singleUse) {
             $refreshToken = $this->refreshTokenManager->get($refreshTokenString);

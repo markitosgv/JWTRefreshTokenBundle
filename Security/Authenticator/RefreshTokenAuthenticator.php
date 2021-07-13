@@ -11,7 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
-use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownRefreshTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownUserFromRefreshTokenException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,25 +45,31 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     protected $tokenParameterName;
 
     /**
+     * @var ExtractorInterface
+     */
+    protected $extractor;
+
+    /**
      * Constructor.
      *
      * @param string $tokenParameterName
      */
-    public function __construct(UserCheckerInterface $userChecker, $tokenParameterName)
+    public function __construct(UserCheckerInterface $userChecker, $tokenParameterName, ExtractorInterface $extractor)
     {
         $this->userChecker = $userChecker;
         $this->tokenParameterName = $tokenParameterName;
+        $this->extractor = $extractor;
     }
 
     public function supports(Request $request)
     {
-        return null !== RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName);
+        return null !== $this->extractor->getRefreshToken($request, $this->tokenParameterName);
     }
 
     public function getCredentials(Request $request)
     {
         return [
-            'token' => RequestRefreshToken::getRefreshToken($request, $this->tokenParameterName),
+            'token' => $this->extractor->getRefreshToken($request, $this->tokenParameterName),
         ];
     }
 
