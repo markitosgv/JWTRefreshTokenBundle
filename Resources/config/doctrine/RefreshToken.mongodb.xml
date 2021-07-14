@@ -6,7 +6,7 @@
                     http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
     <document name="Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken" collection="refresh_tokens" repository-class="Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository">
-        <field field-name="id" type="id" />
+        <id />
         <field field-name="refreshToken" type="string" unique="true" />
         <field field-name="username" type="string" />
         <field field-name="valid" type="date"/>

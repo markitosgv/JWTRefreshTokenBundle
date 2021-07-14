@@ -28,6 +28,16 @@ class RefreshTokenSpec extends ObjectBehavior
         $this->shouldImplement(RefreshTokenInterface::class);
     }
 
+    public function it_can_be_converted_to_a_string()
+    {
+        $this->__toString()->shouldBe('token');
+    }
+
+    public function it_has_no_id_by_default()
+    {
+        $this->getId()->shouldReturn(null);
+    }
+
     public function it_has_a_custom_refresh_token()
     {
         $this->setRefreshToken('custom-token')->shouldReturn($this);

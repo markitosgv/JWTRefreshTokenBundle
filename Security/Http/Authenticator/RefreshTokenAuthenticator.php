@@ -20,7 +20,6 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -35,7 +34,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Authenticator\Passport\UserPassportInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
@@ -173,11 +172,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
             new RefreshAuthenticationFailureResponse($authException->getMessageKey())
         );
 
-        if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
-            $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token_not_found');
-        } else {
-            $this->eventDispatcher->dispatch('gesdinet.refresh_token_not_found', $event);
-        }
+        $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token_not_found');
 
         return $event->getResponse();
     }

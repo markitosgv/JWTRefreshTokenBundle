@@ -46,6 +46,13 @@ jobs:
           extensions: curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip
           coverage: none
 
+      - name: Setup MongoDB
+        id: setup-mongodb
+        uses: mongodb-labs/drivers-evergreen-tools@master
+        with:
+          version: 4.4
+          topology: server
+
       - name: Install dependencies
         run: |
           composer global require --no-scripts --no-plugins symfony/flex
@@ -58,3 +65,5 @@ jobs:
 
       - name: Run PHPUnit
         run: bin/phpunit --verbose
+        env:
+          DOCTRINE_MONGODB_SERVER: ${{ steps.setup-mongodb.outputs.cluster-uri }}
