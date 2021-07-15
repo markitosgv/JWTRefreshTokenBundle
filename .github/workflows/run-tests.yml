@@ -9,12 +9,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [7.1, 7.2, 7.3, 7.4, 8.0]
+        php: [7.4, 8.0]
         symfony: [3.4.*, 4.4.*, 5.2.*, 5.3.*]
         composer-flags: ['--prefer-stable']
         can-fail: [false]
         include:
-          - php: 7.1
+          - php: 7.4
             symfony: 3.4.*
             composer-flags: '--prefer-stable --prefer-lowest'
             can-fail: false
@@ -25,10 +25,6 @@ jobs:
         exclude:
           - php: 8.0
             symfony: 3.4.*
-          - php: 7.1
-            symfony: 5.2.*
-          - php: 7.1
-            symfony: 5.3.*
 
     name: "PHP ${{ matrix.php }} - Symfony ${{ matrix.symfony }}${{ matrix.composer-flags != '' && format(' - Composer {0}', matrix.composer-flags) || '' }}"
 
@@ -49,11 +45,6 @@ jobs:
           tools: composer:v2
           extensions: curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip
           coverage: none
-
-      - name: Install Mongo PHP adapter
-        if: matrix.php == '7.1'
-        run: |
-          composer require --dev --no-update alcaeus/mongo-php-adapter
 
       - name: Install dependencies
         run: |
