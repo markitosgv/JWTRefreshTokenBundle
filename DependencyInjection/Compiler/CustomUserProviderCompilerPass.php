@@ -8,16 +8,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * CustomUserProviderCompilerPass.
- *
  * @deprecated no replacement
  */
 final class CustomUserProviderCompilerPass implements CompilerPassInterface
 {
-    /**
-     * @var bool
-     */
-    private $internalUse;
+    private bool $internalUse;
 
     /**
      * @param bool $internalUse Flag indicating the pass was created by an internal bundle call (used to suppress runtime deprecations)
@@ -27,9 +22,6 @@ final class CustomUserProviderCompilerPass implements CompilerPassInterface
         $this->internalUse = $internalUse;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function process(ContainerBuilder $container)
     {
         if (false === $this->internalUse) {

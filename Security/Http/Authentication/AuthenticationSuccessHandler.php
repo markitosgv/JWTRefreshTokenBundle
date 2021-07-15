@@ -22,15 +22,9 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEvent
 
 class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
-    /**
-     * @var AuthenticationSuccessHandlerInterface
-     */
-    private $lexikAuthenticationSuccessHandler;
+    private AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
     /**
      * @var string|null

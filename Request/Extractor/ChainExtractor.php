@@ -18,7 +18,7 @@ final class ChainExtractor implements ExtractorInterface
     /**
      * @var ExtractorInterface[]
      */
-    private $extractors = [];
+    private array $extractors = [];
 
     public function addExtractor(ExtractorInterface $extractor): void
     {

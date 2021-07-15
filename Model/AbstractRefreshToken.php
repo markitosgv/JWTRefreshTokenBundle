@@ -13,9 +13,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Abstract Refresh Token.
- */
 abstract class AbstractRefreshToken implements RefreshTokenInterface
 {
     /**

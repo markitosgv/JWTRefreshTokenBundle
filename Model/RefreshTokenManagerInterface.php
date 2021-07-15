@@ -47,9 +47,11 @@ interface RefreshTokenManagerInterface
     public function delete(RefreshTokenInterface $refreshToken);
 
     /**
+     * @param \DateTimeInterface|null $datetime
+     *
      * @return RefreshTokenInterface[]
      */
-    public function revokeAllInvalid();
+    public function revokeAllInvalid($datetime = null);
 
     /**
      * Returns the fully qualified class name for a concrete RefreshTokenInterface class.

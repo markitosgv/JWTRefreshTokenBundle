@@ -27,7 +27,7 @@ final class RevokeRefreshTokenCommandTest extends TestCase
         $commandTester = new CommandTester($command);
         $commandTester->execute(['refresh_token' => $token]);
 
-        $this->assertSame(-1, $commandTester->getStatusCode());
+        $this->assertSame(1, $commandTester->getStatusCode());
         $this->assertStringContainsString('Not Found:', $commandTester->getDisplay());
     }
 
@@ -54,6 +54,6 @@ final class RevokeRefreshTokenCommandTest extends TestCase
         $commandTester->execute(['refresh_token' => $token]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
-        $this->assertStringContainsString('Revoke refresh-token', $commandTester->getDisplay());
+        $this->assertStringContainsString('Revoked refresh-token', $commandTester->getDisplay());
     }
 }

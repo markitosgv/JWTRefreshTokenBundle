@@ -15,6 +15,7 @@ use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Exception\InvalidRefreshTokenException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,60 +28,29 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerI
 trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, use the `refresh_jwt` authenticator instead.', RefreshToken::class);
 
 /**
- * Class RefreshToken.
- *
  * @deprecated use the `refresh_jwt` authenticator instead
  */
 class RefreshToken
 {
-    /**
-     * @var RefreshTokenAuthenticator
-     */
-    private $authenticator;
+    private RefreshTokenAuthenticator $authenticator;
+
+    private RefreshTokenProvider $provider;
+
+    private AuthenticationSuccessHandlerInterface $successHandler;
+
+    private AuthenticationFailureHandlerInterface $failureHandler;
+
+    private RefreshTokenManagerInterface $refreshTokenManager;
+
+    private int $ttl;
+
+    private string $providerKey;
+
+    private bool $ttlUpdate;
+
+    private EventDispatcherInterface $eventDispatcher;
 
     /**
-     * @var RefreshTokenProvider
-     */
-    private $provider;
-
-    /**
-     * @var AuthenticationSuccessHandlerInterface
-     */
-    private $successHandler;
-
-    /**
-     * @var AuthenticationFailureHandlerInterface
-     */
-    private $failureHandler;
-
-    /**
-     * @var RefreshTokenManagerInterface
-     */
-    private $refreshTokenManager;
-
-    /**
-     * @var int
-     */
-    private $ttl;
-
-    /**
-     * @var string
-     */
-    private $providerKey;
-
-    /**
-     * @var bool
-     */
-    private $ttlUpdate;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    /**
-     * RefreshToken constructor.
-     *
      * @param int    $ttl
      * @param string $providerKey
      * @param bool   $ttlUpdate
@@ -108,9 +78,7 @@ class RefreshToken
     }
 
     /**
-     * Refresh token.
-     *
-     * @return mixed
+     * @return Response
      *
      * @throws InvalidArgumentException
      * @throws AuthenticationException

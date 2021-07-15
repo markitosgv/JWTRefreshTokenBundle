@@ -28,16 +28,11 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, use the `refresh_jwt` authenticator instead.', RefreshTokenAuthenticator::class);
 
 /**
- * Class RefreshTokenAuthenticator.
- *
  * @deprecated use the `refresh_jwt` authenticator instead
  */
 class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
 {
-    /**
-     * @var UserCheckerInterface
-     */
-    private $userChecker;
+    private UserCheckerInterface $userChecker;
 
     /**
      * @var string
@@ -50,8 +45,6 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     protected $extractor;
 
     /**
-     * Constructor.
-     *
      * @param string $tokenParameterName
      */
     public function __construct(UserCheckerInterface $userChecker, $tokenParameterName, ExtractorInterface $extractor)
@@ -61,11 +54,17 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
         $this->extractor = $extractor;
     }
 
+    /**
+     * @return bool
+     */
     public function supports(Request $request)
     {
         return null !== $this->extractor->getRefreshToken($request, $this->tokenParameterName);
     }
 
+    /**
+     * @return array{token: string|null}
+     */
     public function getCredentials(Request $request)
     {
         return [
@@ -73,6 +72,11 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
         ];
     }
 
+    /**
+     * @param array{token: string|null} $credentials
+     *
+     * @return UserInterface
+     */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         if (!$userProvider instanceof RefreshTokenProvider) {
@@ -99,6 +103,11 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
         return $user;
     }
 
+    /**
+     * @param array{token: string|null} $credentials
+     *
+     * @return bool
+     */
     public function checkCredentials($credentials, UserInterface $user)
     {
         // check credentials - e.g. make sure the password is valid
@@ -108,17 +117,28 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
         return true;
     }
 
+    /**
+     * @param string $providerKey
+     *
+     * @return null
+     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
         // on success, let the request continue
         return null;
     }
 
+    /**
+     * @return Response
+     */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
         return new Response('Refresh token authentication failed.', 403);
     }
 
+    /**
+     * @return Response
+     */
     public function start(Request $request, AuthenticationException $authException = null)
     {
         $data = [
@@ -129,6 +149,9 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
+    /**
+     * @return bool
+     */
     public function supportsRememberMe()
     {
         return false;

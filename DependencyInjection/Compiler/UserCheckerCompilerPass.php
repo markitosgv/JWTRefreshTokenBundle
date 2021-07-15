@@ -6,16 +6,11 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * UserCheckerCompilerPass.
- *
  * @deprecated no replacement
  */
 final class UserCheckerCompilerPass implements CompilerPassInterface
 {
-    /**
-     * @var bool
-     */
-    private $internalUse;
+    private bool $internalUse;
 
     /**
      * @param bool $internalUse Flag indicating the pass was created by an internal bundle call (used to suppress runtime deprecations)
@@ -25,9 +20,6 @@ final class UserCheckerCompilerPass implements CompilerPassInterface
         $this->internalUse = $internalUse;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function process(ContainerBuilder $container)
     {
         if (false === $this->internalUse) {
