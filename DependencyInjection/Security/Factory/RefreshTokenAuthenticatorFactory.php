@@ -75,10 +75,10 @@ final class RefreshTokenAuthenticatorFactory implements SecurityFactoryInterface
         ];
 
         $container->setDefinition($authenticatorId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.refresh_token_authenticator'))
-            ->addArgument(new Reference($userProviderId))
-            ->addArgument(new Reference($this->createAuthenticationSuccessHandler($container, $firewallName, $config)))
-            ->addArgument(new Reference($this->createAuthenticationFailureHandler($container, $firewallName, $config)))
-            ->addArgument($options);
+            ->replaceArgument(3, new Reference($userProviderId))
+            ->replaceArgument(4, new Reference($this->createAuthenticationSuccessHandler($container, $firewallName, $config)))
+            ->replaceArgument(5, new Reference($this->createAuthenticationFailureHandler($container, $firewallName, $config)))
+            ->replaceArgument(6, $options);
 
         return $authenticatorId;
     }

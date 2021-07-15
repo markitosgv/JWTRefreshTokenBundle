@@ -15,7 +15,7 @@ use Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenNotFoundEvent;
 use Gesdinet\JWTRefreshTokenBundle\Http\RefreshAuthenticationFailureResponse;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
-use Gesdinet\JWTRefreshTokenBundle\Request\RequestRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
@@ -50,6 +50,11 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
     private $eventDispatcher;
 
     /**
+     * @var ExtractorInterface
+     */
+    private $extractor;
+
+    /**
      * @var UserProviderInterface
      */
     private $userProvider;
@@ -72,6 +77,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
         EventDispatcherInterface $eventDispatcher,
+        ExtractorInterface $extractor,
         UserProviderInterface $userProvider,
         AuthenticationSuccessHandlerInterface $successHandler,
         AuthenticationFailureHandlerInterface $failureHandler,
@@ -79,6 +85,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->eventDispatcher = $eventDispatcher;
+        $this->extractor = $extractor;
         $this->userProvider = $userProvider;
         $this->successHandler = $successHandler;
         $this->failureHandler = $failureHandler;
@@ -91,12 +98,12 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
 
     public function supports(Request $request): bool
     {
-        return null !== RequestRefreshToken::getRefreshToken($request, $this->options['token_parameter_name']);
+        return null !== $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
     }
 
     public function authenticate(Request $request): PassportInterface
     {
-        $token = RequestRefreshToken::getRefreshToken($request, $this->options['token_parameter_name']);
+        $token = $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
 
         if (null === $token) {
             throw new MissingTokenException();

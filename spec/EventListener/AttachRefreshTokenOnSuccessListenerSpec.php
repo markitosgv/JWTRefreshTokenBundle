@@ -5,6 +5,7 @@ namespace spec\Gesdinet\JWTRefreshTokenBundle\EventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -19,17 +20,26 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
     const TTL = 2592000;
     const TOKEN_PARAMETER_NAME = 'refresh_token';
 
-    public function let(RefreshTokenManagerInterface $refreshTokenManager, RequestStack $requestStack, RefreshTokenGeneratorInterface $refreshTokenGenerator)
-    {
-        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, false, $refreshTokenGenerator);
+    public function let(
+        RefreshTokenManagerInterface $refreshTokenManager,
+        RequestStack $requestStack,
+        RefreshTokenGeneratorInterface $refreshTokenGenerator,
+        ExtractorInterface $extractor
+    ) {
+        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, false, $refreshTokenGenerator, $extractor);
     }
 
-    public function it_attach_token_on_refresh(AuthenticationSuccessEvent $event, UserInterface $user, RequestStack $requestStack)
-    {
-        $event->getData()->willReturn([]);
+    public function it_attach_token_on_refresh(
+        RequestStack $requestStack,
+        ExtractorInterface $extractor,
+        AuthenticationSuccessEvent $event,
+        UserInterface $user
+    ) {
         $event->getUser()->willReturn($user);
+        $event->getData()->willReturn([]);
 
-        $refreshTokenArray = [self::TOKEN_PARAMETER_NAME => 'thepreviouslyissuedrefreshtoken'];
+        $refreshTokenString = 'thepreviouslyissuedrefreshtoken';
+        $refreshTokenArray = [self::TOKEN_PARAMETER_NAME => $refreshTokenString];
         $request = Request::create(
             '/',
             'POST',
@@ -38,14 +48,23 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
         $requestStack->getCurrentRequest()->willReturn($request);
 
+        $extractor->getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->willReturn($refreshTokenString);
+
         $event->setData($refreshTokenArray)->shouldBeCalled();
 
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_token_on_refresh_with_single_use_token(AuthenticationSuccessEvent $event, RefreshTokenInterface $oldRefreshToken, RefreshTokenInterface $newRefreshToken, RefreshTokenManagerInterface $refreshTokenManager, RequestStack $requestStack, RefreshTokenGeneratorInterface $refreshTokenGenerator)
-    {
-        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, true, $refreshTokenGenerator);
+    public function it_attach_token_on_refresh_with_single_use_token(
+        RefreshTokenManagerInterface $refreshTokenManager,
+        RequestStack $requestStack,
+        RefreshTokenGeneratorInterface $refreshTokenGenerator,
+        ExtractorInterface $extractor,
+        AuthenticationSuccessEvent $event,
+        RefreshTokenInterface $oldRefreshToken,
+        RefreshTokenInterface $newRefreshToken
+    ) {
+        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, true, $refreshTokenGenerator, $extractor);
 
         $username = 'username';
         $password = 'password';
@@ -56,8 +75,8 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
             $user = new User($username, $password);
         }
 
-        $event->getData()->willReturn([]);
         $event->getUser()->willReturn($user);
+        $event->getData()->willReturn([]);
 
         $refreshTokenString = 'thepreviouslyissuedrefreshtoken';
         $request = Request::create(
@@ -67,6 +86,8 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         );
 
         $requestStack->getCurrentRequest()->willReturn($request);
+
+        $extractor->getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->willReturn($refreshTokenString);
 
         $refreshTokenManager->get($refreshTokenString)->willReturn($oldRefreshToken);
         $refreshTokenManager->delete($oldRefreshToken)->shouldBeCalled();
@@ -84,10 +105,17 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         $this->attachRefreshToken($event);
     }
 
-    public function it_attach_token_on_credentials_auth(AuthenticationSuccessEvent $event, UserInterface $user, RefreshTokenInterface $refreshToken, RefreshTokenManagerInterface $refreshTokenManager, RequestStack $requestStack, RefreshTokenGeneratorInterface $refreshTokenGenerator)
-    {
-        $event->getData()->willReturn([]);
+    public function it_attach_token_on_credentials_auth(
+        RefreshTokenManagerInterface $refreshTokenManager,
+        RequestStack $requestStack,
+        RefreshTokenGeneratorInterface $refreshTokenGenerator,
+        ExtractorInterface $extractor,
+        AuthenticationSuccessEvent $event,
+        UserInterface $user,
+        RefreshTokenInterface $refreshToken
+    ) {
         $event->getUser()->willReturn($user);
+        $event->getData()->willReturn([]);
 
         $request = Request::create(
             '/',
@@ -95,6 +123,8 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         );
 
         $requestStack->getCurrentRequest()->willReturn($request);
+
+        $extractor->getRefreshToken($request, self::TOKEN_PARAMETER_NAME)->willReturn(null);
 
         $refreshTokenGenerator->createForUserWithTtl($user, self::TTL)->willReturn($refreshToken);
 
@@ -109,7 +139,6 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
 
     public function it_does_nothing_when_there_is_not_a_user(AuthenticationSuccessEvent $event)
     {
-        $event->getData()->willReturn([]);
         $event->getUser()->willReturn(null);
 
         $this->attachRefreshToken($event);
