@@ -79,7 +79,7 @@ class AttachRefreshTokenOnSuccessListener
         $this->extractor = $extractor;
     }
 
-    public function attachRefreshToken(AuthenticationSuccessEvent $event)
+    public function attachRefreshToken(AuthenticationSuccessEvent $event): void
     {
         $user = $event->getUser();
 

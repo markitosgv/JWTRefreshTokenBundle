@@ -16,10 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RefreshAuthenticationFailureResponse extends JsonResponse
 {
-    /**
-     * @var string
-     */
-    private $message;
+    private string $message;
 
     public function __construct(string $message = 'Bad credentials', int $statusCode = Response::HTTP_UNAUTHORIZED)
     {

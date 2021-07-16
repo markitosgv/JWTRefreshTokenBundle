@@ -17,10 +17,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 final class RefreshTokenGenerator implements RefreshTokenGeneratorInterface
 {
-    /**
-     * @var RefreshTokenManagerInterface
-     */
-    private $manager;
+    private RefreshTokenManagerInterface $manager;
 
     public function __construct(RefreshTokenManagerInterface $manager)
     {
@@ -39,7 +36,6 @@ final class RefreshTokenGenerator implements RefreshTokenGeneratorInterface
             $exists = null !== $existingModel;
         }
 
-        /** @var class-string<RefreshTokenInterface> $modelClass */
         $modelClass = $this->manager->getClass();
 
         return $modelClass::createForUserWithTtl($token, $user, $ttl);

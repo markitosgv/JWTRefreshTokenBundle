@@ -16,15 +16,9 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class RefreshTokenNotFoundEvent extends Event
 {
-    /**
-     * @var AuthenticationException
-     */
-    private $exception;
+    private AuthenticationException $exception;
 
-    /**
-     * @var Response|null
-     */
-    private $response;
+    private ?Response $response;
 
     public function __construct(AuthenticationException $exception, ?Response $response = null)
     {

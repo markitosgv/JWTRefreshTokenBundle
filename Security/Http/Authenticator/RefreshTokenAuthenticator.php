@@ -38,40 +38,19 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
-    /**
-     * @var RefreshTokenManagerInterface
-     */
-    private $refreshTokenManager;
+    private RefreshTokenManagerInterface $refreshTokenManager;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * @var ExtractorInterface
-     */
-    private $extractor;
+    private ExtractorInterface $extractor;
 
-    /**
-     * @var UserProviderInterface
-     */
-    private $userProvider;
+    private UserProviderInterface $userProvider;
 
-    /**
-     * @var AuthenticationSuccessHandlerInterface
-     */
-    private $successHandler;
+    private AuthenticationSuccessHandlerInterface $successHandler;
 
-    /**
-     * @var AuthenticationFailureHandlerInterface
-     */
-    private $failureHandler;
+    private AuthenticationFailureHandlerInterface $failureHandler;
 
-    /**
-     * @var array
-     */
-    private $options;
+    private array $options;
 
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,

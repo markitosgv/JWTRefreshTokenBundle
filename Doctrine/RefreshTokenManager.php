@@ -11,7 +11,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
-use DateTime;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -35,9 +34,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     protected $repository;
 
     /**
-     * Constructor.
-     *
-     * @param string $class
+     * @param class-string<RefreshTokenInterface> $class
      */
     public function __construct(ObjectManager $om, $class)
     {
@@ -92,8 +89,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param DateTime $datetime
-     * @param bool     $andFlush
+     * @param \DateTimeInterface|null $datetime
+     * @param bool                    $andFlush
      *
      * @return RefreshTokenInterface[]
      */

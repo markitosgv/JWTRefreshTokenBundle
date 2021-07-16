@@ -63,6 +63,9 @@ final class RefreshTokenAuthenticatorFactory implements SecurityFactoryInterface
         ;
     }
 
+    /**
+     * @return string
+     */
     public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId)
     {
         $authenticatorId = 'security.authenticator.refresh_jwt.'.$firewallName;
@@ -83,7 +86,7 @@ final class RefreshTokenAuthenticatorFactory implements SecurityFactoryInterface
         return $authenticatorId;
     }
 
-    private function createAuthenticationSuccessHandler(ContainerBuilder $container, string $id, array $config)
+    private function createAuthenticationSuccessHandler(ContainerBuilder $container, string $id, array $config): string
     {
         $successHandlerId = $this->getSuccessHandlerId($id);
 
@@ -100,27 +103,27 @@ final class RefreshTokenAuthenticatorFactory implements SecurityFactoryInterface
         return $successHandlerId;
     }
 
-    private function createAuthenticationFailureHandler(ContainerBuilder $container, string $id, array $config)
+    private function createAuthenticationFailureHandler(ContainerBuilder $container, string $id, array $config): string
     {
-        $id = $this->getFailureHandlerId($id);
+        $failureHandlerId = $this->getFailureHandlerId($id);
 
         if (isset($config['failure_handler'])) {
-            $container->setDefinition($id, new ChildDefinition('security.authentication.custom_failure_handler'))
+            $container->setDefinition($failureHandlerId, new ChildDefinition('security.authentication.custom_failure_handler'))
                 ->replaceArgument(0, new Reference($config['failure_handler']))
                 ->replaceArgument(1, []);
         } else {
-            $container->setDefinition($id, new ChildDefinition('gesdinet.jwtrefreshtoken.security.authentication.failure_handler'));
+            $container->setDefinition($failureHandlerId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.authentication.failure_handler'));
         }
 
-        return $id;
+        return $failureHandlerId;
     }
 
-    private function getSuccessHandlerId(string $id)
+    private function getSuccessHandlerId(string $id): string
     {
         return 'security.authentication.success_handler.'.$id.'.'.str_replace('-', '_', $this->getKey());
     }
 
-    private function getFailureHandlerId(string $id)
+    private function getFailureHandlerId(string $id): string
     {
         return 'security.authentication.failure_handler.'.$id.'.'.str_replace('-', '_', $this->getKey());
     }

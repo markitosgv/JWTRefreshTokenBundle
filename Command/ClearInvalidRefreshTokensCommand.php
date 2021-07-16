@@ -17,14 +17,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class ClearInvalidRefreshTokensCommand.
- */
 class ClearInvalidRefreshTokensCommand extends Command
 {
     protected static $defaultName = 'gesdinet:jwt:clear';
 
-    private $refreshTokenManager;
+    private RefreshTokenManagerInterface $refreshTokenManager;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
     {
@@ -33,20 +30,14 @@ class ClearInvalidRefreshTokensCommand extends Command
         $this->refreshTokenManager = $refreshTokenManager;
     }
 
-    /**
-     * @see Command
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Clear invalid refresh tokens.')
-            ->addArgument('datetime', InputArgument::OPTIONAL);
+            ->addArgument('datetime', InputArgument::OPTIONAL, 'An optional date, all tokens before this date will be removed; the value should be able to be parsed by DateTime.');
     }
 
-    /**
-     * @see Command
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $datetime = $input->getArgument('datetime');
 
@@ -59,7 +50,7 @@ class ClearInvalidRefreshTokensCommand extends Command
         $revokedTokens = $this->refreshTokenManager->revokeAllInvalid($datetime);
 
         foreach ($revokedTokens as $revokedToken) {
-            $output->writeln(sprintf('Revoke <comment>%s</comment>', $revokedToken->getRefreshToken()));
+            $output->writeln(sprintf('Revoked <comment>%s</comment>', $revokedToken->getRefreshToken()));
         }
 
         return 0;

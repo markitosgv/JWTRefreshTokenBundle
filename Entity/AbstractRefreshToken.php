@@ -13,9 +13,9 @@ namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken as BaseAbstractRefreshToken;
 
+trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, use "%s" instead.', AbstractRefreshToken::class, BaseAbstractRefreshToken::class);
+
 /**
- * Abstract Refresh Token.
- *
  * @deprecated Extend from `Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken` instead
  */
 abstract class AbstractRefreshToken extends BaseAbstractRefreshToken

@@ -17,10 +17,7 @@ use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 
 class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
 {
-    /**
-     * @var RefreshTokenInterface
-     */
-    private $refreshToken;
+    private RefreshTokenInterface $refreshToken;
 
     /**
      * @param string[] $roles An array of roles

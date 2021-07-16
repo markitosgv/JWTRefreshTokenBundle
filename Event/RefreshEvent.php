@@ -16,20 +16,11 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class RefreshEvent extends Event
 {
-    /**
-     * @var RefreshTokenInterface
-     */
-    private $refreshToken;
+    private RefreshTokenInterface $refreshToken;
 
-    /**
-     * @var TokenInterface
-     */
-    private $token;
+    private TokenInterface $token;
 
-    /**
-     * @var string|null
-     */
-    private $firewallName;
+    private ?string $firewallName;
 
     public function __construct(RefreshTokenInterface $refreshToken, TokenInterface $token, ?string $firewallName = null)
     {
@@ -38,12 +29,17 @@ class RefreshEvent extends Event
         $this->firewallName = $firewallName;
     }
 
+    /**
+     * @return RefreshTokenInterface
+     */
     public function getRefreshToken()
     {
         return $this->refreshToken;
     }
 
     /**
+     * @return TokenInterface
+     *
      * @deprecated use getToken() instead
      */
     public function getPreAuthenticatedToken()

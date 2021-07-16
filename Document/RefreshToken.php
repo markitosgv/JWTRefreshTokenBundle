@@ -13,9 +13,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken;
 
-/**
- * Refresh Token.
- */
 class RefreshToken extends AbstractRefreshToken
 {
 }

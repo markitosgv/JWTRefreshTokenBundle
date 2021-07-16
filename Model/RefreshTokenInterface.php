@@ -38,7 +38,7 @@ interface RefreshTokenInterface
     public function getRefreshToken();
 
     /**
-     * @param \DateTimeInterface|null $refreshToken
+     * @param \DateTimeInterface|null $valid
      *
      * @return $this
      */
@@ -50,7 +50,7 @@ interface RefreshTokenInterface
     public function getValid();
 
     /**
-     * @param string|null $refreshToken
+     * @param string|null $username
      *
      * @return $this
      */

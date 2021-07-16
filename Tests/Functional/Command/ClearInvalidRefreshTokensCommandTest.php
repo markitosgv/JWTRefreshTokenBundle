@@ -32,7 +32,7 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
-        $this->assertStringContainsString('Revoke refresh-token', $commandTester->getDisplay());
+        $this->assertStringContainsString('Revoked refresh-token', $commandTester->getDisplay());
     }
 
     public function test_clears_tokens_with_timestamp(): void
@@ -56,6 +56,6 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $commandTester->execute(['datetime' => '2021-01-01']);
 
         $this->assertSame(0, $commandTester->getStatusCode());
-        $this->assertStringContainsString('Revoke refresh-token', $commandTester->getDisplay());
+        $this->assertStringContainsString('Revoked refresh-token', $commandTester->getDisplay());
     }
 }
