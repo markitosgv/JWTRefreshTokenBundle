@@ -13,10 +13,11 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager as BaseRefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 
-class RefreshTokenManager extends BaseRefreshTokenManager
+class RefreshTokenManager implements RefreshTokenManagerInterface
 {
     /**
      * @var ObjectManager
@@ -42,6 +43,22 @@ class RefreshTokenManager extends BaseRefreshTokenManager
         $this->repository = $om->getRepository($class);
         $metadata = $om->getClassMetadata($class);
         $this->class = $metadata->getName();
+    }
+
+    /**
+     * Creates an empty RefreshTokenInterface instance.
+     *
+     * @return RefreshTokenInterface
+     *
+     * @deprecated to be removed in 2.0, use a `Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface` instead.
+     */
+    public function create()
+    {
+        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '%s() is deprecated and will be removed in 2.0, use a "%s" instance to create new %s objects.', __METHOD__, RefreshTokenGeneratorInterface::class, RefreshTokenInterface::class);
+
+        $class = $this->getClass();
+
+        return new $class();
     }
 
     /**

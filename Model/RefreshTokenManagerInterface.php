@@ -20,7 +20,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Model;
 interface RefreshTokenManagerInterface
 {
     /**
-     * Creates an empty refresh token instance.
+     * Creates an empty RefreshTokenInterface instance.
      *
      * @return RefreshTokenInterface
      *
