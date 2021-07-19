@@ -13,7 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
-interface RefreshTokenInterface
+interface RefreshTokenInterface extends \Stringable
 {
     /**
      * Creates a new model instance based on the provided details.
