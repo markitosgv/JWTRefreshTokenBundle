@@ -22,6 +22,7 @@
     "symfony/event-dispatcher": "^3.4|^4.4|^5.2",
     "symfony/http-foundation": "^3.4|^4.4|^5.2",
     "symfony/http-kernel": "^3.4|^4.4|^5.2",
+    "symfony/polyfill-php80": "^1.15",
     "symfony/property-access": "^3.4|^4.4|^5.2",
     "symfony/security-bundle": "^3.4|^4.0|^5.2",
     "symfony/security-core": "^3.4|^4.4|^5.2",
