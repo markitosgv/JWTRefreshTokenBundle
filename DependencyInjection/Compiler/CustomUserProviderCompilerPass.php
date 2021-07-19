@@ -22,12 +22,13 @@ final class CustomUserProviderCompilerPass implements CompilerPassInterface
         $this->internalUse = $internalUse;
     }
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (false === $this->internalUse) {
             trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated.', self::class);
         }
 
+        /** @var string|null $customUserProvider */
         $customUserProvider = $container->getParameter('gesdinet_jwt_refresh_token.user_provider');
         if (!$customUserProvider) {
             return;
@@ -40,7 +41,7 @@ final class CustomUserProviderCompilerPass implements CompilerPassInterface
 
         $definition->addMethodCall(
             'setCustomUserProvider',
-            [new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE, false)]
+            [new Reference($customUserProvider, ContainerInterface::NULL_ON_INVALID_REFERENCE)]
         );
     }
 }

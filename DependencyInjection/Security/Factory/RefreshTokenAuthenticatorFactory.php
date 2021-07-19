@@ -37,10 +37,10 @@ final class RefreshTokenAuthenticatorFactory implements SecurityFactoryInterface
         return 'refresh-jwt';
     }
 
-    public function addConfiguration(NodeDefinition $node): void
+    public function addConfiguration(NodeDefinition $builder): void
     {
         // no-op TTL and param configuration until bundle is further updated to support per-authenticator configuration
-        $node
+        $builder
             ->children()
                 ->scalarNode('provider')->end()
                 ->scalarNode('success_handler')->end()

@@ -7,17 +7,31 @@ use Doctrine\ODM\MongoDB\Repository\DocumentRepository as MongoDBDocumentReposit
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 if (class_exists(MongoDBDocumentRepository::class)) {
-    // Support for doctrine/mongodb-odm >= 2.0
+    /**
+     * Internal repository supporting doctrine/mongodb-odm >=2.0.
+     *
+     * @template T of object
+     * @extends MongoDBDocumentRepository<T>
+     *
+     * @internal
+     */
     class BaseRepository extends MongoDBDocumentRepository
     {
     }
 } else {
-    // Support for doctrine/mongodb-odm < 2.0
+    /**
+     * Internal repository supporting doctrine/mongodb-odm <2.0.
+     *
+     * @internal
+     */
     class BaseRepository extends DocumentRepository
     {
     }
 }
 
+/**
+ * @extends BaseRepository<RefreshToken>
+ */
 class RefreshTokenRepository extends BaseRepository
 {
     /**

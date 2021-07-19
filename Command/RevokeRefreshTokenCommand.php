@@ -39,6 +39,7 @@ class RevokeRefreshTokenCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var string $refreshTokenParam */
         $refreshTokenParam = $input->getArgument('refresh_token');
 
         $refreshToken = $this->refreshTokenManager->get($refreshTokenParam);

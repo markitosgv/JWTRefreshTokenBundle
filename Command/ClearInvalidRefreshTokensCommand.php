@@ -39,6 +39,7 @@ class ClearInvalidRefreshTokensCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var string|null $datetime */
         $datetime = $input->getArgument('datetime');
 
         if (null === $datetime) {

@@ -14,7 +14,7 @@ use Symfony\Component\Security\Http\RememberMe\RememberMeHandlerInterface;
 
 class GesdinetJWTRefreshTokenBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 

@@ -21,17 +21,17 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
     protected $id;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $refreshToken;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $username;
 
     /**
-     * @var \DateTimeInterface
+     * @var \DateTimeInterface|null
      */
     protected $valid;
 

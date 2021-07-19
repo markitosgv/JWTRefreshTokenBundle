@@ -7,8 +7,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class ObjectManagerCompilerPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
+        /** @var string|null $objectManagerId */
         $objectManagerId = $container->getParameter('gesdinet.jwtrefreshtoken.object_manager.id');
         if (!$objectManagerId) {
             return;
