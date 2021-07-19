@@ -14,10 +14,13 @@ namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownRefreshTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownUserFromRefreshTokenException;
+use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -83,7 +86,11 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
             throw new \InvalidArgumentException(sprintf('The user provider must be an instance of RefreshTokenProvider (%s was given).', get_class($userProvider)));
         }
 
-        $refreshToken = $credentials['token'];
+        $refreshToken = $credentials['token'] ?? null;
+
+        if (null === $refreshToken) {
+            throw new MissingTokenException('The refresh token could not be read from the request.');
+        }
 
         $username = $userProvider->getUsernameForRefreshToken($refreshToken);
 
@@ -91,10 +98,10 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
             throw new UnknownRefreshTokenException(sprintf('Refresh token "%s" does not exist.', $refreshToken));
         }
 
-        $user = $userProvider->loadUserByUsername($username);
-
-        if (null === $user) {
-            throw new UnknownUserFromRefreshTokenException(sprintf('User with refresh token "%s" does not exist.', $refreshToken));
+        try {
+            $user = $userProvider->loadUserByUsername($username);
+        } catch (UsernameNotFoundException | UserNotFoundException $exception) {
+            throw new UnknownUserFromRefreshTokenException(sprintf('User with refresh token "%s" does not exist.', $refreshToken), $exception->getCode(), $exception);
         }
 
         $this->userChecker->checkPreAuth($user);

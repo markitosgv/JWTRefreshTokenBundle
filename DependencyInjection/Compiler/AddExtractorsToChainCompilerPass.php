@@ -10,7 +10,7 @@ final class AddExtractorsToChainCompilerPass implements CompilerPassInterface
 {
     use PriorityTaggedServiceTrait;
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('gesdinet.jwtrefreshtoken.request.extractor.chain')) {
             return;

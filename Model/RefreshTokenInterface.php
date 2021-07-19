@@ -33,7 +33,7 @@ interface RefreshTokenInterface
     public function setRefreshToken($refreshToken = null);
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getRefreshToken();
 

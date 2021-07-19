@@ -103,7 +103,7 @@ class RefreshToken
             return $this->failureHandler->onAuthenticationFailure(
                 $request,
                 new InvalidRefreshTokenException(
-                    sprintf('Refresh token "%s" is invalid.', $refreshToken)
+                    sprintf('Refresh token "%s" is invalid.', (string) $refreshToken)
                 )
             );
         }

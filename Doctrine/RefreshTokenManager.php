@@ -24,7 +24,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     protected $objectManager;
 
     /**
-     * @var string
+     * @var class-string<RefreshTokenInterface>
      */
     protected $class;
 
@@ -65,7 +65,9 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param bool|true $andFlush
+     * @param bool $andFlush
+     *
+     * @return void
      */
     public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -78,6 +80,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param bool $andFlush
+     *
+     * @return void
      */
     public function delete(RefreshTokenInterface $refreshToken, $andFlush = true)
     {

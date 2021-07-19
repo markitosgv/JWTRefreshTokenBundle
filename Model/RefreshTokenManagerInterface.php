@@ -42,8 +42,14 @@ interface RefreshTokenManagerInterface
      */
     public function getLastFromUsername($username);
 
+    /**
+     * @return void
+     */
     public function save(RefreshTokenInterface $refreshToken);
 
+    /**
+     * @return void
+     */
     public function delete(RefreshTokenInterface $refreshToken);
 
     /**

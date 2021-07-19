@@ -5,6 +5,9 @@ namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 use Doctrine\ORM\EntityRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
+/**
+ * @extends EntityRepository<RefreshToken>
+ */
 class RefreshTokenRepository extends EntityRepository
 {
     /**
