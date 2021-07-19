@@ -11,6 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+
 trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, implement "%s" directly.', RefreshTokenManager::class, RefreshTokenManagerInterface::class);
 
 /**
@@ -19,12 +21,16 @@ trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class 
 abstract class RefreshTokenManager implements RefreshTokenManagerInterface
 {
     /**
-     * Creates an empty RefreshToken instance.
+     * Creates an empty RefreshTokenInterface instance.
      *
      * @return RefreshTokenInterface
+     *
+     * @deprecated to be removed in 2.0, use a `Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface` instead.
      */
     public function create()
     {
+        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '%s() is deprecated and will be removed in 2.0, use a "%s" instance to create new %s objects.', __METHOD__, RefreshTokenGeneratorInterface::class, RefreshTokenInterface::class);
+
         $class = $this->getClass();
 
         return new $class();
