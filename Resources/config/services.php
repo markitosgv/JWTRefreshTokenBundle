@@ -67,12 +67,10 @@ return static function (ContainerConfigurator $container) {
 
     $services->set('gesdinet.jwtrefreshtoken.request.extractor.request_body')
         ->class(RequestBodyExtractor::class)
-        ->public()
         ->tag('gesdinet_jwt_refresh_token.request_extractor');
 
     $services->set('gesdinet.jwtrefreshtoken.request.extractor.request_parameter')
         ->class(RequestParameterExtractor::class)
-        ->public()
         ->tag('gesdinet_jwt_refresh_token.request_extractor');
 
     $services->set('gesdinet.jwtrefreshtoken')
