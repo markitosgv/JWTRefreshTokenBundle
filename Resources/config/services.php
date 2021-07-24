@@ -99,6 +99,7 @@ return static function (ContainerConfigurator $container) {
         ->args([
             new Reference('gesdinet.jwtrefreshtoken.user_checker'),
             new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
+            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.security.authentication.failure_handler')
