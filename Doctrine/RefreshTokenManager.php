@@ -29,20 +29,24 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     protected $class;
 
     /**
-     * @var RefreshTokenRepositoryInterface
+     * @var RefreshTokenRepositoryInterface<RefreshTokenInterface>
      */
     protected $repository;
 
     /**
      * @param class-string<RefreshTokenInterface> $class
+     *
+     * @throws \LogicException if the object repository does not implement `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface`.
      */
     public function __construct(ObjectManager $om, $class)
     {
         $this->objectManager = $om;
         $this->repository = $om->getRepository($class);
+
         if (!$this->repository instanceof RefreshTokenRepositoryInterface) {
-            throw new \LogicException("Repository mapped for $class should implement \Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface.");
+            throw new \LogicException(sprintf('Repository mapped for "%s" should implement %s.', $class, RefreshTokenRepositoryInterface::class));
         }
+
         $metadata = $om->getClassMetadata($class);
         $this->class = $metadata->getName();
     }
