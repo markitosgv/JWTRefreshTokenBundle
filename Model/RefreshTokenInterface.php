@@ -11,69 +11,57 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
-/**
- * Interface RefreshTokenInterface.
- */
-interface RefreshTokenInterface
+use Symfony\Component\Security\Core\User\UserInterface;
+
+interface RefreshTokenInterface extends \Stringable
 {
     /**
-     * Get id.
-     *
-     * @return int|string
+     * Creates a new model instance based on the provided details.
+     */
+    public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): RefreshTokenInterface;
+
+    /**
+     * @return int|string|null
      */
     public function getId();
 
     /**
-     * Set refreshToken.
+     * @param string|null $refreshToken
      *
-     * @param string $refreshToken
-     *
-     * @return self
+     * @return $this
      */
     public function setRefreshToken($refreshToken = null);
 
     /**
-     * Get refreshToken.
-     *
-     * @return string
+     * @return string|null
      */
     public function getRefreshToken();
 
     /**
-     * Set valid.
+     * @param \DateTimeInterface|null $valid
      *
-     * @param \DateTime $valid
-     *
-     * @return self
+     * @return $this
      */
     public function setValid($valid);
 
     /**
-     * Get valid.
-     *
-     * @return \DateTime
+     * @return \DateTimeInterface|null
      */
     public function getValid();
 
     /**
-     * Set username.
+     * @param string|null $username
      *
-     * @param string $username
-     *
-     * @return self
+     * @return $this
      */
     public function setUsername($username);
 
     /**
-     * Get user.
-     *
-     * @return string
+     * @return string|null
      */
     public function getUsername();
 
     /**
-     * Check if is a valid refresh token.
-     *
      * @return bool
      */
     public function isValid();

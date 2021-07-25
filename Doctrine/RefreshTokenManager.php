@@ -11,12 +11,12 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
-use DateTime;
 use Doctrine\Persistence\ObjectManager;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager as BaseRefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 
-class RefreshTokenManager extends BaseRefreshTokenManager
+class RefreshTokenManager implements RefreshTokenManagerInterface
 {
     /**
      * @var ObjectManager
@@ -24,7 +24,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     protected $objectManager;
 
     /**
-     * @var string
+     * @var class-string<RefreshTokenInterface>
      */
     protected $class;
 
@@ -34,9 +34,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     protected $repository;
 
     /**
-     * Constructor.
-     *
-     * @param string $class
+     * @param class-string<RefreshTokenInterface> $class
      */
     public function __construct(ObjectManager $om, $class)
     {
@@ -47,6 +45,22 @@ class RefreshTokenManager extends BaseRefreshTokenManager
         }
         $metadata = $om->getClassMetadata($class);
         $this->class = $metadata->getName();
+    }
+
+    /**
+     * Creates an empty RefreshTokenInterface instance.
+     *
+     * @return RefreshTokenInterface
+     *
+     * @deprecated to be removed in 2.0, use a `Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface` instead.
+     */
+    public function create()
+    {
+        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '%s() is deprecated and will be removed in 2.0, use a "%s" instance to create new %s objects.', __METHOD__, RefreshTokenGeneratorInterface::class, RefreshTokenInterface::class);
+
+        $class = $this->getClass();
+
+        return new $class();
     }
 
     /**
@@ -62,7 +76,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * @param string $username
      *
-     * @return RefreshTokenInterface
+     * @return RefreshTokenInterface|null
      */
     public function getLastFromUsername($username)
     {
@@ -70,7 +84,9 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param bool|true $andFlush
+     * @param bool $andFlush
+     *
+     * @return void
      */
     public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -83,6 +99,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
 
     /**
      * @param bool $andFlush
+     *
+     * @return void
      */
     public function delete(RefreshTokenInterface $refreshToken, $andFlush = true)
     {
@@ -94,8 +112,8 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     }
 
     /**
-     * @param DateTime $datetime
-     * @param bool     $andFlush
+     * @param \DateTimeInterface|null $datetime
+     * @param bool                    $andFlush
      *
      * @return RefreshTokenInterface[]
      */
@@ -117,7 +135,7 @@ class RefreshTokenManager extends BaseRefreshTokenManager
     /**
      * Returns the RefreshToken fully qualified class name.
      *
-     * @return string
+     * @return class-string<RefreshTokenInterface>
      */
     public function getClass()
     {

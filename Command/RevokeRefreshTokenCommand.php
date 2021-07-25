@@ -17,14 +17,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Class ClearInvalidRefreshTokensCommand.
- */
 class RevokeRefreshTokenCommand extends Command
 {
     protected static $defaultName = 'gesdinet:jwt:revoke';
 
-    private $refreshTokenManager;
+    private RefreshTokenManagerInterface $refreshTokenManager;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
     {
@@ -33,34 +30,29 @@ class RevokeRefreshTokenCommand extends Command
         $this->refreshTokenManager = $refreshTokenManager;
     }
 
-    /**
-     * @see Command
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Revoke a refresh token')
             ->addArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke');
     }
 
-    /**
-     * @see Command
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var string $refreshTokenParam */
         $refreshTokenParam = $input->getArgument('refresh_token');
 
         $refreshToken = $this->refreshTokenManager->get($refreshTokenParam);
 
         if (null === $refreshToken) {
-            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exists', $refreshTokenParam));
+            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exist', $refreshTokenParam));
 
-            return -1;
+            return 1;
         }
 
         $this->refreshTokenManager->delete($refreshToken);
 
-        $output->writeln(sprintf('Revoke <comment>%s</comment>', $refreshToken->getRefreshToken()));
+        $output->writeln(sprintf('Revoked <comment>%s</comment>', $refreshToken->getRefreshToken()));
 
         return 0;
     }

@@ -11,25 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
-use Doctrine\Bundle\MongoDBBundle\Validator\Constraints\Unique;
+use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken;
 
-/**
- * Refresh Token.
- *
- * @Unique("refreshToken")
- */
 class RefreshToken extends AbstractRefreshToken
 {
-    /**
-     * @var string
-     */
-    protected $id;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
 }

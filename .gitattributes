@@ -1,0 +1,8 @@
+/.github export-ignore
+/spec export-ignore
+/Tests export-ignore
+/.gitignore export-ignore
+/CHANGELOG.md export-ignore
+/phpspec.yml export-ignore
+/phpunit.xml.dist export-ignore
+/README.md export-ignore
