@@ -28,23 +28,27 @@ If you want to use this bundle with previous Symfony versions, please use 0.2.x 
 With Doctrine's ORM
 
 ```bash
-$ composer require "doctrine/orm" "doctrine/doctrine-bundle" "gesdinet/jwt-refresh-token-bundle"
+composer require doctrine/orm doctrine/doctrine-bundle gesdinet/jwt-refresh-token-bundle
 ```
 
 With Doctrine's MongoDB ODM
 
 ```bash
-$ composer require "doctrine/mongodb-odm-bundle" "gesdinet/jwt-refresh-token-bundle"
+composer require doctrine/mongodb-odm-bundle gesdinet/jwt-refresh-token-bundle
 ```
 
 or edit composer.json:
 
-    // ...
-    "gesdinet/jwt-refresh-token-bundle": "^1.0",
-    "doctrine/orm": "^2.4.8",
-    "doctrine/doctrine-bundle": "^1.4 || ^2.0",
-    "doctrine/mongodb-odm-bundle": "^3.4 || ^4.0"
-    // ...
+```json
+{
+  "require": {
+    "doctrine/doctrine-bundle": "^1.12 || ^2.0",
+    "doctrine/mongodb-odm-bundle": "^3.4 || ^4.0",
+    "doctrine/orm": "^2.7",
+    "gesdinet/jwt-refresh-token-bundle": "^1.0"
+  }
+}
+```
 
 Alternatively, a custom persistence layer can be used.
 
@@ -55,42 +59,56 @@ For that purpose:
 
 ### Step 2: Enable the Bundle
 
-**Symfony 3 Version:**  
-Register bundle into `app/AppKernel.php`:
+#### Symfony Flex Application
+
+For an application using Symfony Flex the bundle should be automatically registered, but if not you will need to add it to your `config/bundles.php` file.
 
 ```php
 <?php
-// app/AppKernel.php
 
-// ...
-class AppKernel extends Kernel
-{
-    public function registerBundles()
-    {
-        $bundles = array(
-            // ...
-            new Gesdinet\JWTRefreshTokenBundle\GesdinetJWTRefreshTokenBundle(),
-        );
-    }
-
-    // ...
-}
-```
-
-**Symfony 4 Version:**   
-Register bundle into `config/bundles.php` (Flex should do this automatically):  
-```php 
 return [
     //...
     Gesdinet\JWTRefreshTokenBundle\GesdinetJWTRefreshTokenBundle::class => ['all' => true],
 ];
 ```
 
+#### Symfony Standard Application
+
+For an application based on the Symfony Standard structure, you will need to add the bundle to your `AppKernel` class' `registerBundles()` method.
+
+```php
+<?php
+
+use Symfony\Component\HttpKernel\Kernel;
+
+class AppKernel extends Kernel
+{
+    public function registerBundles()
+    {
+        $bundles = [
+            // ...
+            new Gesdinet\JWTRefreshTokenBundle\GesdinetJWTRefreshTokenBundle(),
+        ];
+    }
+}
+```
+
 ### Step 3 (Symfony 5.3+)
+
+#### Define the refresh token route
+
+Open your routing configuration file and add the following route to it:
+
+```yaml
+# app/config/routing.yml or config/routes.yaml
+gesdinet_jwt_refresh_token:
+    path: /api/token/refresh
+# ...
+```
 
 #### Configure the authenticator
 
-Add the below lines to your security.yml file:
+Add the below to your security configuration file:
 
 ```yaml
 # app/config/security.yml or config/packages/security.yaml
@@ -107,16 +125,16 @@ security:
 
     access_control:
         # ...
-        - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
         # ...
 # ...
 ```
 
 ### Step 3 (Symfony 5.2-)
 
-#### Configure your own routing to refresh token
+#### Define the refresh token route
 
-Open your main routing configuration file and copy the following four lines at the very beginning of it.
+Open your routing configuration file and add the following route to it:
 
 **Symfony 3 Version:**
 ```yaml
@@ -129,19 +147,20 @@ gesdinet_jwt_refresh_token:
 
 **Symfony 4 Version:**
 ```yaml
-# config/routes.yml
+# config/routes.yaml
 gesdinet_jwt_refresh_token:
     path:       /api/token/refresh
     controller: gesdinet.jwtrefreshtoken::refresh
 # ...
 ```
 
-#### Allow anonymous access to refresh token
+#### Configure the security firewall
 
-Add next lines on security.yml file:
+Add the below to your security configuration file:
 
 ```yaml
 # app/config/security.yml or config/packages/security.yaml
+security:
     firewalls:
         # put it before all your other firewall API entries
         refresh:
@@ -159,7 +178,7 @@ Add next lines on security.yml file:
 
 ### Step 4: Update your database schema
 
-With the next command you will create a new table to handle your refresh tokens
+With the next commands you will add the table to store your refresh tokens to your database
 
 ```bash
 php bin/console doctrine:schema:update --force
