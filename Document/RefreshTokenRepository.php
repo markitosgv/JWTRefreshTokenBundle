@@ -4,7 +4,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository as MongoDBDocumentRepository;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 
 if (class_exists(MongoDBDocumentRepository::class)) {
     /**
@@ -31,13 +31,14 @@ if (class_exists(MongoDBDocumentRepository::class)) {
 
 /**
  * @extends BaseRepository<RefreshToken>
+ * @implements RefreshTokenRepositoryInterface<RefreshToken>
  */
-class RefreshTokenRepository extends BaseRepository
+class RefreshTokenRepository extends BaseRepository implements RefreshTokenRepositoryInterface
 {
     /**
      * @param \DateTimeInterface|null $datetime
      *
-     * @return RefreshTokenInterface[]
+     * @return RefreshToken[]
      */
     public function findInvalid($datetime = null)
     {
