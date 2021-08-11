@@ -13,12 +13,11 @@ namespace Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshAuthenticationFailureEvent;
 use Gesdinet\JWTRefreshTokenBundle\Http\RefreshAuthenticationFailureResponse;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterface
 {
@@ -29,18 +28,14 @@ class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterf
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
         $event = new RefreshAuthenticationFailureEvent(
             $exception,
             new RefreshAuthenticationFailureResponse($exception->getMessageKey())
         );
 
-        if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
-            $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token_failure');
-        } else {
-            $this->eventDispatcher->dispatch('gesdinet.refresh_token_failure', $event);
-        }
+        $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token_failure');
 
         return $event->getResponse();
     }

@@ -14,6 +14,7 @@ use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\LogicException;
@@ -56,7 +57,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
     protected function setUp(): void
     {
         if (!interface_exists(AuthenticatorInterface::class)) {
-            self::markTestSkipped('Only applies to Symfony 5.2+');
+            self::markTestSkipped('Test requires Symfony 5.4 and later.');
         }
 
         $this->refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
@@ -118,7 +119,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
         $this->createRefreshTokenGetUsernameExpectation($refreshToken, 'test@example.com');
 
         $passport = $this->refreshTokenAuthenticator->authenticate($request);
-        $this->assertInstanceOf(PassportInterface::class, $passport);
+        $this->assertInstanceOf(interface_exists(PassportInterface::class) ? PassportInterface::class : Passport::class, $passport);
     }
 
     public function testAuthenticatesTheRequestWhenTtlUpdateIsEnabled(): void
@@ -203,6 +204,10 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testCreatesTheAuthenticatedToken(): void
     {
+        if (!interface_exists(PassportInterface::class)) {
+            $this->markTestSkipped('Test only applies to Symfony 5.4 and earlier.');
+        }
+
         $username = 'username';
         $user = UserCreator::create($username);
         $passport = $this->createUserPassport($username, $user);
@@ -214,6 +219,10 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotCreateTheAuthenticatedTokenWhenThePassportDoesNotImplementTheRequiredInterface(): void
     {
+        if (!interface_exists(PassportInterface::class)) {
+            $this->markTestSkipped('Test only applies to Symfony 5.4 and earlier.');
+        }
+
         /** @var PassportInterface|MockObject $passport */
         $passport = $this->createMock(PassportInterface::class);
 
@@ -224,6 +233,10 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testCreatesTheToken(): void
     {
+        if (!interface_exists(PassportInterface::class)) {
+            $this->markTestSkipped('Test only applies to Symfony 5.4 and earlier.');
+        }
+
         $username = 'username';
         $user = UserCreator::create($username);
         $passport = $this->createUserPassport($username, $user);
@@ -252,13 +265,17 @@ class RefreshTokenAuthenticatorTest extends TestCase
         /** @var TokenInterface|MockObject $token */
         $token = $this->createMock(TokenInterface::class);
 
+        /** @var Response|MockObject $response */
+        $response = $this->createMock(Response::class);
+
         $this->successHandler
             ->expects($this->once())
             ->method('onAuthenticationSuccess')
             ->with($request, $token)
-            ->willReturn(null);
+            ->willReturn($response);
 
-        $this->assertNull(
+        $this->assertSame(
+            $response,
             $this->refreshTokenAuthenticator->onAuthenticationSuccess($request, $token, 'test')
         );
     }
@@ -271,13 +288,19 @@ class RefreshTokenAuthenticatorTest extends TestCase
         /** @var AuthenticationException|MockObject $exception */
         $exception = $this->createMock(AuthenticationException::class);
 
+        /** @var Response|MockObject $response */
+        $response = $this->createMock(Response::class);
+
         $this->failureHandler
             ->expects($this->once())
             ->method('onAuthenticationFailure')
             ->with($request, $exception)
-            ->willReturn(null);
+            ->willReturn($response);
 
-        $this->assertNull($this->refreshTokenAuthenticator->onAuthenticationFailure($request, $exception));
+        $this->assertSame(
+            $response,
+            $this->refreshTokenAuthenticator->onAuthenticationFailure($request, $exception)
+        );
     }
 
     public function testStartsAnAuthenticationRequest(): void

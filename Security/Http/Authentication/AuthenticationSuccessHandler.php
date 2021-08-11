@@ -13,12 +13,11 @@ namespace Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as ContractsEventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
@@ -39,16 +38,12 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
     {
         if ($token instanceof PostRefreshTokenAuthenticationToken) {
             $event = new RefreshEvent($token->getRefreshToken(), $token, $this->firewallName);
 
-            if ($this->eventDispatcher instanceof ContractsEventDispatcherInterface) {
-                $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token');
-            } else {
-                $this->eventDispatcher->dispatch('gesdinet.refresh_token', $event);
-            }
+            $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token');
         }
 
         return $this->lexikAuthenticationSuccessHandler->onAuthenticationSuccess($request, $token);

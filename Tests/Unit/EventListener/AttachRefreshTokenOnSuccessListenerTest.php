@@ -13,6 +13,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class AttachRefreshTokenOnSuccessListenerTest extends TestCase
@@ -61,7 +62,7 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         );
     }
 
-    public function testAttachTokenOnRefresh()
+    public function testAttachesTheTokenToTheResponseBodyOnRefresh()
     {
         /** @var UserInterface|MockObject $user */
         $user = $this->createMock(UserInterface::class);
@@ -100,6 +101,61 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ->with($this->equalTo($refreshTokenArray));
 
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
+    }
+
+    public function testAddsTheTokenToTheResponseCookiesOnRefresh()
+    {
+        /** @var UserInterface|MockObject $user */
+        $user = $this->createMock(UserInterface::class);
+
+        /** @var AuthenticationSuccessEvent|MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+
+        $event
+            ->expects($this->once())
+            ->method('getUser')
+            ->willReturn($user);
+
+        $event
+            ->expects($this->once())
+            ->method('getData')
+            ->willReturn([]);
+
+        $refreshTokenString = 'thepreviouslyissuedrefreshtoken';
+        $refreshTokenArray = [self::TOKEN_PARAMETER_NAME => $refreshTokenString];
+        $request = Request::create('/', 'POST', $refreshTokenArray);
+
+        $this->requestStack
+            ->expects($this->once())
+            ->method('getCurrentRequest')
+            ->willReturn($request);
+
+        $this->extractor
+            ->expects($this->once())
+            ->method('getRefreshToken')
+            ->with($request, self::TOKEN_PARAMETER_NAME)
+            ->willReturn($refreshTokenString);
+
+        $event
+            ->expects($this->atLeastOnce())
+            ->method('getResponse')
+            ->willReturn(new Response());
+
+        $event
+            ->expects($this->atLeastOnce())
+            ->method('setData')
+            ->with($this->equalTo([]));
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            ['enabled' => true]
+        ))->attachRefreshToken($event);
     }
 
     public function testAttachTokenOnRefreshWithSingleUseToken()
@@ -177,7 +233,7 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }
 
-    public function testAttachTokenOnCredentialsAuth()
+    public function testAttachesTheTokenToTheResponseBodyOnCredentialsAuth()
     {
         /** @var AuthenticationSuccessEvent|MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);

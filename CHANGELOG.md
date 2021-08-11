@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Dropped support for MongoDB ODM 1.x
+- Dropped support for Symfony 3.4
+- Added support for Symfony 6.0
+
+## 1.0.0-beta4
+
 - Added `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface`
 - `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager` now requires all object repositories implement `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface`
 

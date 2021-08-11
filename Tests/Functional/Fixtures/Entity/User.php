@@ -12,27 +12,21 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User implements UserInterface
 {
     /**
-     * @var int|null
-     *
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
-     * @var string
-     *
      * @ORM\Column(type="string")
      */
-    private $email;
+    private string $email;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(type="string", nullable=true)
      */
-    private $password;
+    private ?string $password;
 
     public function __construct(string $email, ?string $password = null)
     {

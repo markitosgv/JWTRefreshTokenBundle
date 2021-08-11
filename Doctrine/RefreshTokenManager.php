@@ -41,11 +41,14 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     public function __construct(ObjectManager $om, $class)
     {
         $this->objectManager = $om;
-        $this->repository = $om->getRepository($class);
 
-        if (!$this->repository instanceof RefreshTokenRepositoryInterface) {
+        $repository = $om->getRepository($class);
+
+        if (!$repository instanceof RefreshTokenRepositoryInterface) {
             throw new \LogicException(sprintf('Repository mapped for "%s" should implement %s.', $class, RefreshTokenRepositoryInterface::class));
         }
+
+        $this->repository = $repository;
 
         $metadata = $om->getClassMetadata($class);
         $this->class = $metadata->getName();

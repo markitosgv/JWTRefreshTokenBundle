@@ -18,6 +18,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 class RefreshTokenAuthenticatorTest extends TestCase
 {
     private const PARAMETER_NAME = 'refresh_token';
+
     /**
      * @var ExtractorInterface|MockObject
      */
@@ -27,6 +28,10 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!class_exists(AbstractGuardAuthenticator::class)) {
+            self::markTestSkipped('Test requires Symfony 5.4 or earlier.');
+        }
+
         /** @var UserCheckerInterface|MockObject $userChecker */
         $userChecker = $this->createMock(UserCheckerInterface::class);
 

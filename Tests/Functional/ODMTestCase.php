@@ -2,11 +2,10 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional;
 
-use Doctrine\Bundle\MongoDBBundle\Mapping\Driver\XmlDriver;
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\DocumentManager;
-use Doctrine\ODM\MongoDB\Mapping\Driver\YamlDriver;
+use Doctrine\ODM\MongoDB\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use MongoDB\Client;
 use MongoDB\Model\DatabaseInfo;
@@ -19,13 +18,6 @@ abstract class ODMTestCase extends TestCase
      * @var DocumentManager
      */
     protected $documentManager;
-
-    public static function setUpBeforeClass(): void
-    {
-        if (class_exists(YamlDriver::class)) {
-            self::markTestSkipped('MongoDB ODM tests only run against `doctrine/mongodb-odm:>=2.0`');
-        }
-    }
 
     protected function setUp(): void
     {
@@ -49,8 +41,9 @@ abstract class ODMTestCase extends TestCase
 
         $annotationDriver = $config->newDefaultAnnotationDriver([__DIR__.'/Fixtures/Document']);
 
-        $xmlDriver = new XmlDriver(
-            [(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Document']
+        $xmlDriver = new SimplifiedXmlDriver(
+            [(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Document'],
+            '.mongodb.xml'
         );
 
         $driverChain->addDriver(

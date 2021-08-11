@@ -129,6 +129,6 @@ class RefreshTokenProvider implements UserProviderInterface
             return true;
         }
 
-        return User::class === $class;
+        return class_exists(User::class) && User::class === $class;
     }
 }

@@ -28,6 +28,18 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.single_use', false);
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.token_parameter_name', 'refresh_token');
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.doctrine_mappings', true);
+        $this->assertContainerBuilderHasParameter(
+            'gesdinet_jwt_refresh_token.cookie',
+            [
+                'enabled' => false,
+                'same_site' => 'lax',
+                'path' => '/',
+                'domain' => null,
+                'secure' => true,
+                'http_only' => true,
+                'remove_token_from_body' => true,
+            ],
+        );
 
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.refresh_token.class', RefreshTokenEntity::class);
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.object_manager.id', 'doctrine.orm.entity_manager');
@@ -49,6 +61,14 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'single_use' => true,
             'token_parameter_name' => 'the_token',
             'doctrine_mappings' => false,
+            'cookie' => [
+                'enabled' => true,
+                'same_site' => 'strict',
+                'path' => '/api/',
+                'domain' => 'example.com',
+                'secure' => false,
+                'http_only' => false,
+            ],
         ]);
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.ttl', 123);
@@ -59,6 +79,18 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.single_use', true);
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.token_parameter_name', 'the_token');
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.doctrine_mappings', false);
+        $this->assertContainerBuilderHasParameter(
+            'gesdinet_jwt_refresh_token.cookie',
+            [
+                'enabled' => true,
+                'same_site' => 'strict',
+                'path' => '/api/',
+                'domain' => 'example.com',
+                'secure' => false,
+                'http_only' => false,
+                'remove_token_from_body' => true,
+            ],
+        );
 
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.refresh_token.class', RefreshTokenDocument::class);
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.object_manager.id', 'doctrine_mongodb.odm.document_manager');

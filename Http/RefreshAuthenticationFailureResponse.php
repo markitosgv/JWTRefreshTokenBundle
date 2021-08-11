@@ -14,7 +14,41 @@ namespace Gesdinet\JWTRefreshTokenBundle\Http;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-class RefreshAuthenticationFailureResponse extends JsonResponse
+if (80000 <= \PHP_VERSION_ID && (new \ReflectionMethod(JsonResponse::class, 'setData'))->hasReturnType()) {
+    eval('
+        namespace Gesdinet\JWTRefreshTokenBundle\Http;
+
+        use Symfony\Component\HttpFoundation\JsonResponse;
+
+        /**
+         * Compatibility layer for Symfony 6.0 and later.
+         *
+         * @internal
+         */
+        abstract class CompatRefreshAuthenticationFailureResponse extends JsonResponse
+        {
+            public function setData(mixed $data = []): static
+            {
+                return parent::setData((array) $data + ["code" => $this->statusCode, "message" => $this->getMessage()]);
+            }
+        }
+    ');
+} else {
+    /**
+     * Compatibility layer for Symfony 5.4 and earlier.
+     *
+     * @internal
+     */
+    abstract class CompatRefreshAuthenticationFailureResponse extends JsonResponse
+    {
+        public function setData($data = [])
+        {
+            return parent::setData((array) $data + ['code' => $this->statusCode, 'message' => $this->getMessage()]);
+        }
+    }
+}
+
+class RefreshAuthenticationFailureResponse extends CompatRefreshAuthenticationFailureResponse
 {
     private string $message;
 
@@ -35,10 +69,5 @@ class RefreshAuthenticationFailureResponse extends JsonResponse
     public function getMessage(): string
     {
         return $this->message;
-    }
-
-    public function setData($data = []): self
-    {
-        return parent::setData((array) $data + ['code' => $this->statusCode, 'message' => $this->message]);
     }
 }

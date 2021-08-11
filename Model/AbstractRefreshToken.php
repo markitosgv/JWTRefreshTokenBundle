@@ -56,7 +56,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
      */
     public function __toString()
     {
-        return $this->getRefreshToken();
+        return $this->getRefreshToken() ?: '';
     }
 
     /**
