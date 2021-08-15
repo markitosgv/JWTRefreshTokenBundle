@@ -15,7 +15,6 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Symfony\Component\Config\Definition\BaseNode;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\HttpFoundation\Cookie;
 
 class Configuration implements ConfigurationInterface
 {
@@ -89,8 +88,8 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('cookie')
                     ->children()
                         ->enumNode('sameSite')
-                            ->values([Cookie::SAMESITE_NONE, Cookie::SAMESITE_LAX, Cookie::SAMESITE_STRICT])
-                            ->defaultValue(Cookie::SAMESITE_LAX)
+                            ->values(['none', 'lax', 'strict'])
+                            ->defaultValue('lax')
                         ->end()
                         ->scalarNode('path')->defaultValue('/')->cannotBeEmpty()->end()
                         ->scalarNode('domain')->defaultNull()->end()
