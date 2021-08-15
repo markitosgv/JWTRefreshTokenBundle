@@ -11,6 +11,7 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ChainExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestBodyExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestParameterExtractor;
+use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator as LegacyRefreshTokenAuthenticator;
@@ -34,6 +35,7 @@ return static function (ContainerConfigurator $container) {
             new Parameter('gesdinet_jwt_refresh_token.single_use'),
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_generator'),
             new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
+            new Parameter('gesdinet_jwt_refresh_token.cookie'),
         ])
         ->tag('kernel.event_listener', [
             'event' => 'lexik_jwt_authentication.on_authentication_success',
@@ -71,6 +73,10 @@ return static function (ContainerConfigurator $container) {
 
     $services->set('gesdinet.jwtrefreshtoken.request.extractor.request_parameter')
         ->class(RequestParameterExtractor::class)
+        ->tag('gesdinet_jwt_refresh_token.request_extractor');
+
+    $services->set('gesdinet.jwtrefreshtoken.request.extractor.request_cookie')
+        ->class(RequestCookieExtractor::class)
         ->tag('gesdinet_jwt_refresh_token.request_extractor');
 
     $services->set('gesdinet.jwtrefreshtoken')

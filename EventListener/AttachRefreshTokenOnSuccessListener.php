@@ -16,8 +16,9 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -57,6 +58,11 @@ class AttachRefreshTokenOnSuccessListener
     protected $extractor;
 
     /**
+     * @var array
+     */
+    protected $cookie;
+
+    /**
      * @param int    $ttl
      * @param string $tokenParameterName
      * @param bool   $singleUse
@@ -68,7 +74,8 @@ class AttachRefreshTokenOnSuccessListener
         $tokenParameterName,
         $singleUse,
         RefreshTokenGeneratorInterface $refreshTokenGenerator,
-        ExtractorInterface $extractor
+        ExtractorInterface $extractor,
+        $cookie
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
@@ -77,6 +84,7 @@ class AttachRefreshTokenOnSuccessListener
         $this->singleUse = $singleUse;
         $this->refreshTokenGenerator = $refreshTokenGenerator;
         $this->extractor = $extractor;
+        $this->cookie = $cookie;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event): void
@@ -107,9 +115,27 @@ class AttachRefreshTokenOnSuccessListener
             $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, $this->ttl);
 
             $this->refreshTokenManager->save($refreshToken);
-            $data[$this->tokenParameterName] = $refreshToken->getRefreshToken();
+            $refreshTokenString = $refreshToken->getRefreshToken();
         }
 
-        $event->setData($data);
+        if ($this->cookie) {
+            $event->getResponse()->headers->setCookie(
+                new Cookie(
+                    $this->tokenParameterName,
+                    $refreshTokenString,
+                    time() + $this->ttl,
+                    $this->cookie['path'],
+                    $this->cookie['domain'],
+                    $this->cookie['secure'],
+                    $this->cookie['httpOnly'],
+                    false,
+                    $this->cookie['sameSite']
+                )
+            );
+        } else {
+            $data[$this->tokenParameterName] = $refreshTokenString;
+
+            $event->setData($data);
+        }
     }
 }

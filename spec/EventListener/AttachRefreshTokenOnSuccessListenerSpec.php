@@ -26,7 +26,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         RefreshTokenGeneratorInterface $refreshTokenGenerator,
         ExtractorInterface $extractor
     ) {
-        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, false, $refreshTokenGenerator, $extractor);
+        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, false, $refreshTokenGenerator, $extractor, []);
     }
 
     public function it_attach_token_on_refresh(
@@ -64,7 +64,7 @@ class AttachRefreshTokenOnSuccessListenerSpec extends ObjectBehavior
         RefreshTokenInterface $oldRefreshToken,
         RefreshTokenInterface $newRefreshToken
     ) {
-        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, true, $refreshTokenGenerator, $extractor);
+        $this->beConstructedWith($refreshTokenManager, self::TTL, $requestStack, self::TOKEN_PARAMETER_NAME, true, $refreshTokenGenerator, $extractor, []);
 
         $username = 'username';
         $password = 'password';
