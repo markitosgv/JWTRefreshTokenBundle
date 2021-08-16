@@ -331,20 +331,19 @@ gesdinet_jwt_refresh_token:
     single_use: true
 ```
 
-### Config refresh token in cookie ###
+### Configure refresh token in cookie
 
-By default, refresh token is returned as JSON response. You can configure to retrieve it in a cookie. Cookie is then extracted from request automatically.
-
-Here are default values.
+By default, the refresh token is returned in a JsonResponse. You can use the following configuration to set it in a HttpOnly cookie instead. The refresh token is automatically extracted from the cookie during refresh.
 
 ```yaml
 gesdinet_jwt_refresh_token:
     cookie:
-      sameSite: lax
-      path: /
-      domain: null
-      httpOnly: true
-      secure: true
+      enabled: true
+      sameSite: lax  # default value
+      path: /        # default value
+      domain: null   # default value
+      httpOnly: true # default value
+      secure: true   # default value
 ```
 
 ### Use another entity for refresh tokens
