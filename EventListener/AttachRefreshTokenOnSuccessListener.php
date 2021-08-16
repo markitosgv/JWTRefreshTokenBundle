@@ -60,7 +60,7 @@ class AttachRefreshTokenOnSuccessListener
     /**
      * @var array
      */
-    protected $cookie;
+    protected $cookieSettings;
 
     /**
      * @param int    $ttl
@@ -75,7 +75,7 @@ class AttachRefreshTokenOnSuccessListener
         $singleUse,
         RefreshTokenGeneratorInterface $refreshTokenGenerator,
         ExtractorInterface $extractor,
-        $cookie
+        array $cookieSettings
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
@@ -84,7 +84,13 @@ class AttachRefreshTokenOnSuccessListener
         $this->singleUse = $singleUse;
         $this->refreshTokenGenerator = $refreshTokenGenerator;
         $this->extractor = $extractor;
-        $this->cookie = $cookie;
+        $this->cookieSettings = array_merge([
+            'sameSite' => 'lax',
+            'path' => '/',
+            'domain' => null,
+            'httpOnly' => true,
+            'secure' => true,
+        ], $cookieSettings);
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event): void
@@ -118,18 +124,18 @@ class AttachRefreshTokenOnSuccessListener
             $refreshTokenString = $refreshToken->getRefreshToken();
         }
 
-        if ($this->cookie) {
+        if (isset($this->cookieSettings['enabled']) && $this->cookieSettings['enabled']) {
             $event->getResponse()->headers->setCookie(
                 new Cookie(
                     $this->tokenParameterName,
                     $refreshTokenString,
                     time() + $this->ttl,
-                    $this->cookie['path'],
-                    $this->cookie['domain'],
-                    $this->cookie['secure'],
-                    $this->cookie['httpOnly'],
+                    $this->cookieSettings['path'],
+                    $this->cookieSettings['domain'],
+                    $this->cookieSettings['secure'],
+                    $this->cookieSettings['httpOnly'],
                     false,
-                    $this->cookie['sameSite']
+                    $this->cookieSettings['sameSite']
                 )
             );
         } else {
