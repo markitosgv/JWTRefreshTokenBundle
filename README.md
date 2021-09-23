@@ -246,8 +246,7 @@ security:
         api_token_refresh:
             pattern: ^/api/token/refresh
             stateless: true
-            refresh_jwt:
-                provider: user_provider_service_id
+            provider: user_provider_service_id
 ```
 
 By default, when a user provider is not specified, then the user provider for the firewall is used instead.
