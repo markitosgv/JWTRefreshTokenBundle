@@ -85,10 +85,10 @@ class AttachRefreshTokenOnSuccessListener
         $this->refreshTokenGenerator = $refreshTokenGenerator;
         $this->extractor = $extractor;
         $this->cookieSettings = array_merge([
-            'sameSite' => 'lax',
+            'same_site' => 'lax',
             'path' => '/',
             'domain' => null,
-            'httpOnly' => true,
+            'http_only' => true,
             'secure' => true,
         ], $cookieSettings);
     }
@@ -133,9 +133,9 @@ class AttachRefreshTokenOnSuccessListener
                     $this->cookieSettings['path'],
                     $this->cookieSettings['domain'],
                     $this->cookieSettings['secure'],
-                    $this->cookieSettings['httpOnly'],
+                    $this->cookieSettings['http_only'],
                     false,
-                    $this->cookieSettings['sameSite']
+                    $this->cookieSettings['same_site']
                 )
             );
         } else {
