@@ -339,11 +339,12 @@ By default, the refresh token is returned in a JsonResponse. You can use the fol
 gesdinet_jwt_refresh_token:
     cookie:
       enabled: true
-      same_site: lax  # default value
-      path: /         # default value
-      domain: null    # default value
-      http_only: true # default value
-      secure: true    # default value
+      same_site: lax               # default value
+      path: /                      # default value
+      domain: null                 # default value
+      http_only: true              # default value
+      secure: true                 # default value
+      remove_token_from_body: true # default value
 ```
 
 ### Use another entity for refresh tokens

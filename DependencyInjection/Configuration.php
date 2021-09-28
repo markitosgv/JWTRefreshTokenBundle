@@ -93,8 +93,9 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->scalarNode('path')->defaultValue('/')->cannotBeEmpty()->end()
                         ->scalarNode('domain')->defaultNull()->end()
-                        ->scalarNode('secure')->defaultTrue()->end()
                         ->scalarNode('http_only')->defaultTrue()->end()
+                        ->scalarNode('secure')->defaultTrue()->end()
+                        ->scalarNode('remove_token_from_body')->defaultTrue()->end()
                     ->end()
                 ->end()
             ->end();

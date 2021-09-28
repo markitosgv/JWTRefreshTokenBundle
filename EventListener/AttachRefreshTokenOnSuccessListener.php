@@ -90,6 +90,7 @@ class AttachRefreshTokenOnSuccessListener
             'domain' => null,
             'http_only' => true,
             'secure' => true,
+            'remove_token_from_body' => true,
         ], $cookieSettings);
     }
 
@@ -104,8 +105,10 @@ class AttachRefreshTokenOnSuccessListener
         $data = $event->getData();
         $request = $this->requestStack->getCurrentRequest();
 
+        // Extract refreshToken from the request
         $refreshTokenString = $this->extractor->getRefreshToken($request, $this->tokenParameterName);
 
+        // Remove the current refreshToken if it is single-use
         if ($refreshTokenString && true === $this->singleUse) {
             $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
             $refreshTokenString = null;
@@ -115,6 +118,7 @@ class AttachRefreshTokenOnSuccessListener
             }
         }
 
+        // Set or create the refreshTokenString
         if ($refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
         } else {
@@ -122,8 +126,10 @@ class AttachRefreshTokenOnSuccessListener
 
             $this->refreshTokenManager->save($refreshToken);
             $refreshTokenString = $refreshToken->getRefreshToken();
+            $data[$this->tokenParameterName] = $refreshTokenString;
         }
 
+        // Add a response cookie if enabled
         if (isset($this->cookieSettings['enabled']) && $this->cookieSettings['enabled']) {
             $event->getResponse()->headers->setCookie(
                 new Cookie(
@@ -138,10 +144,14 @@ class AttachRefreshTokenOnSuccessListener
                     $this->cookieSettings['same_site']
                 )
             );
-        } else {
-            $data[$this->tokenParameterName] = $refreshTokenString;
 
-            $event->setData($data);
+            // Remove the refreshTokenString from the response body
+            if (isset($this->cookieSettings['remove_token_from_body']) && $this->cookieSettings['remove_token_from_body']) {
+                unset($data[$this->tokenParameterName]);
+            }
         }
+
+        // Set response data
+        $event->setData($data);
     }
 }
