@@ -100,7 +100,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
 
         try {
             $user = $userProvider->loadUserByUsername($username);
-        } catch (UsernameNotFoundException | UserNotFoundException $exception) {
+        } catch (UsernameNotFoundException|UserNotFoundException $exception) {
             throw new UnknownUserFromRefreshTokenException(sprintf('User with refresh token "%s" does not exist.', $refreshToken), $exception->getCode(), $exception);
         }
 
