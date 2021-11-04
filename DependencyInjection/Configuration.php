@@ -84,6 +84,20 @@ class Configuration implements ConfigurationInterface
                     ->info('When true, resolving of Doctrine mapping is done automatically to use either ORM or ODM object manager')
                     ->defaultTrue()
                 ->end()
+                ->arrayNode('cookie')
+                    ->canBeEnabled()
+                    ->children()
+                        ->enumNode('same_site')
+                            ->values(['none', 'lax', 'strict'])
+                            ->defaultValue('lax')
+                        ->end()
+                        ->scalarNode('path')->defaultValue('/')->cannotBeEmpty()->end()
+                        ->scalarNode('domain')->defaultNull()->end()
+                        ->scalarNode('http_only')->defaultTrue()->end()
+                        ->scalarNode('secure')->defaultTrue()->end()
+                        ->scalarNode('remove_token_from_body')->defaultTrue()->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;
