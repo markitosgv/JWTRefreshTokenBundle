@@ -13,15 +13,23 @@ jobs:
         symfony: [3.4.*, 4.4.*, 5.2.*, 5.3.*]
         composer-flags: ['--prefer-stable']
         can-fail: [false]
+        extensions: ['curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip']
         include:
           - php: 7.4
             symfony: 3.4.*
             composer-flags: '--prefer-stable --prefer-lowest'
             can-fail: false
+            extensions: 'curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip'
           - php: 8.0
             symfony: 5.4.*@dev
             composer-flags: ''
             can-fail: true
+            extensions: 'curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip'
+          - php: 8.1
+            symfony: 5.3.*
+            composer-flags: '--ignore-platform-req=php'
+            can-fail: true
+            extensions: 'curl, iconv, mbstring, mongodb-1.11.0alpha1, pdo, pdo_sqlite, sqlite, zip'
         exclude:
           - php: 8.0
             symfony: 3.4.*
@@ -42,8 +50,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          tools: composer:v2
-          extensions: curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip
+          tools: composer:v2, flex
+          extensions: ${{ matrix.extensions }}
           coverage: none
 
       - name: Setup MongoDB
@@ -54,9 +62,7 @@ jobs:
           topology: server
 
       - name: Install dependencies
-        run: |
-          composer global require --no-scripts --no-plugins symfony/flex
-          composer update ${{ matrix.composer-flags }} --prefer-dist --no-suggest
+        run: composer update ${{ matrix.composer-flags }} --prefer-dist --no-suggest
         env:
           SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
