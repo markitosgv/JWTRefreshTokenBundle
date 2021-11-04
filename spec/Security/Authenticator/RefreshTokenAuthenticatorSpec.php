@@ -13,6 +13,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
+/**
+ * @require Symfony\Component\Security\Guard\AbstractGuardAuthenticator
+ */
 class RefreshTokenAuthenticatorSpec extends ObjectBehavior
 {
     private const PARAMETER_NAME = 'refresh_token';

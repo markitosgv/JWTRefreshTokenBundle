@@ -12,24 +12,20 @@
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory;
 
 use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\AuthenticatorFactoryInterface;
-use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\SecurityFactoryInterface;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 
-final class RefreshTokenAuthenticatorFactory implements SecurityFactoryInterface, AuthenticatorFactoryInterface
+/**
+ * @final
+ */
+/* final */ class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInterface
 {
-    public function create(ContainerBuilder $container, string $id, array $config, string $userProviderId, ?string $defaultEntryPointId): array
+    public function getPriority(): int
     {
-        // Does not support the legacy authentication system
-        return [];
-    }
-
-    public function getPosition(): string
-    {
-        return 'http';
+        return -50;
     }
 
     public function getKey(): string

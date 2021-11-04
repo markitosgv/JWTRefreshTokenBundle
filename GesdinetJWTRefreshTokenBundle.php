@@ -6,6 +6,7 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\AddExtractorsToC
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\CustomUserProviderCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ObjectManagerCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\UserCheckerCompilerPass;
+use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory\LegacyRefreshTokenAuthenticatorFactory;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory\RefreshTokenAuthenticatorFactory;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,7 +28,12 @@ class GesdinetJWTRefreshTokenBundle extends Bundle
         if (interface_exists(RememberMeHandlerInterface::class)) {
             /** @var SecurityExtension $extension */
             $extension = $container->getExtension('security');
-            $extension->addSecurityListenerFactory(new RefreshTokenAuthenticatorFactory());
+
+            if (method_exists($extension, 'addAuthenticatorFactory')) {
+                $extension->addAuthenticatorFactory(new RefreshTokenAuthenticatorFactory());
+            } else {
+                $extension->addSecurityListenerFactory(new LegacyRefreshTokenAuthenticatorFactory());
+            }
         }
     }
 }

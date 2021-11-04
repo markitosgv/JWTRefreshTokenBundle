@@ -30,6 +30,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerI
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Authenticator\Passport\UserPassportInterface;
@@ -79,7 +80,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
         return null !== $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
     }
 
-    public function authenticate(Request $request): PassportInterface
+    public function authenticate(Request $request): Passport
     {
         $token = $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
 
@@ -113,12 +114,22 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
         return $passport;
     }
 
+    /**
+     * @deprecated to be removed in 2.0, use `createToken()` instead
+     */
     public function createAuthenticatedToken(PassportInterface $passport, string $firewallName): TokenInterface
     {
         if (!$passport instanceof UserPassportInterface) {
-            throw new LogicException(sprintf('Passport does not contain a user, overwrite "createAuthenticatedToken()" in "%s" to create a custom authenticated token.', static::class));
+            throw new LogicException(sprintf('Passport does not contain a user, overwrite "createToken()" in "%s" to create a custom authentication token.', static::class));
         }
 
+        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '"%s()" is deprecated, use "%s::createToken()" instead.', __METHOD__, __CLASS__);
+
+        return $this->createToken($passport, $firewallName);
+    }
+
+    public function createToken(Passport $passport, string $firewallName): TokenInterface
+    {
         /** @var RefreshTokenInterface|null $refreshToken */
         $refreshToken = $passport->getAttribute('refreshToken');
 

@@ -24,6 +24,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerI
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
@@ -112,7 +113,7 @@ final class RefreshTokenAuthenticatorSpec extends ObjectBehavior
 
         $refreshToken->getUsername()->willReturn('test@example.com');
 
-        $this->authenticate($request)->shouldImplement(PassportInterface::class);
+        $this->authenticate($request)->shouldBeAnInstanceOf(Passport::class);
     }
 
     public function it_does_not_authenticate_the_request_when_the_token_is_not_valid(ExtractorInterface $extractor, Request $request, RefreshTokenManagerInterface $refreshTokenManager, RefreshTokenInterface $refreshToken): void
@@ -147,7 +148,10 @@ final class RefreshTokenAuthenticatorSpec extends ObjectBehavior
         $this->shouldThrow(MissingTokenException::class)->duringAuthenticate($request);
     }
 
-    public function it_creates_the_security_token(): void
+    /**
+     * @require Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface
+     */
+    public function it_creates_the_authenticated_token(): void
     {
         $refreshToken = new class() extends AbstractRefreshToken {};
 
@@ -173,7 +177,41 @@ final class RefreshTokenAuthenticatorSpec extends ObjectBehavior
         $this->createAuthenticatedToken($passport, 'test')->shouldImplement(TokenInterface::class);
     }
 
-    public function it_does_not_create_the_security_token_when_the_passport_does_not_have_the_refresh_token(): void
+    /**
+     * @require Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface
+     */
+    public function it_does_not_create_the_authenticated_token_when_the_passport_does_not_implement_the_required_interface(PassportInterface $passport): void
+    {
+        $this->shouldThrow(LogicException::class)->duringCreateAuthenticatedToken($passport, 'test');
+    }
+
+    public function it_creates_the_token(): void
+    {
+        $refreshToken = new class() extends AbstractRefreshToken {};
+
+        $userIdentifier = 'test@example.com';
+        $password = 'password';
+
+        if (class_exists(InMemoryUser::class)) {
+            $user = new InMemoryUser($userIdentifier, $password);
+        } else {
+            $user = new User($userIdentifier, $password);
+        }
+
+        $passport = new SelfValidatingPassport(
+            new UserBadge(
+                $userIdentifier,
+                static function (string $userIdentifier) use ($user): UserInterface {
+                    return $user;
+                }
+            )
+        );
+        $passport->setAttribute('refreshToken', $refreshToken);
+
+        $this->createToken($passport, 'test')->shouldImplement(TokenInterface::class);
+    }
+
+    public function it_does_not_create_the_token_when_the_passport_does_not_have_the_refresh_token(): void
     {
         $userIdentifier = 'test@example.com';
         $password = 'password';
@@ -193,12 +231,7 @@ final class RefreshTokenAuthenticatorSpec extends ObjectBehavior
             )
         );
 
-        $this->shouldThrow(LogicException::class)->duringCreateAuthenticatedToken($passport, 'test');
-    }
-
-    public function it_does_not_create_the_security_token_when_the_passport_does_not_implement_the_required_interface(PassportInterface $passport): void
-    {
-        $this->shouldThrow(LogicException::class)->duringCreateAuthenticatedToken($passport, 'test');
+        $this->shouldThrow(LogicException::class)->duringCreateToken($passport, 'test');
     }
 
     public function it_handles_successful_authentication(AuthenticationSuccessHandlerInterface $successHandler, Request $request, TokenInterface $token): void
