@@ -18,11 +18,20 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthentica
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 use Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 
 return static function (ContainerConfigurator $container) {
+    $deprecateArgs = static function (string $version, string $message = 'The "%service_id%" service is deprecated.'): array {
+        if (method_exists(Definition::class, 'getDeprecation')) {
+            return ['gesdinet/jwt-refresh-token-bundle', $version, $message];
+        }
+
+        return [$message];
+    };
+
     $services = $container->services();
 
     $services->set('gesdinet.jwtrefreshtoken.send_token')
@@ -80,6 +89,7 @@ return static function (ContainerConfigurator $container) {
         ->tag('gesdinet_jwt_refresh_token.request_extractor');
 
     $services->set('gesdinet.jwtrefreshtoken')
+        ->deprecate(...$deprecateArgs('1.0'))
         ->class(RefreshToken::class)
         ->public()
         ->args([
@@ -95,12 +105,14 @@ return static function (ContainerConfigurator $container) {
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.user_provider')
+        ->deprecate(...$deprecateArgs('1.0'))
         ->class(RefreshTokenProvider::class)
         ->args([
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.authenticator')
+        ->deprecate(...$deprecateArgs('1.0'))
         ->class(LegacyRefreshTokenAuthenticator::class)
         ->args([
             new Reference('gesdinet.jwtrefreshtoken.user_checker'),

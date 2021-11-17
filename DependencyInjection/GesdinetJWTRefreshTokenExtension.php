@@ -17,18 +17,11 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
 class GesdinetJWTRefreshTokenExtension extends Extension
 {
-    private const DEPRECATED_SERVICES = [
-        'gesdinet.jwtrefreshtoken' => '1.0',
-        'gesdinet.jwtrefreshtoken.authenticator' => '1.0',
-        'gesdinet.jwtrefreshtoken.user_provider' => '1.0',
-    ];
-
     public function load(array $configs, ContainerBuilder $container): void
     {
         $config = $this->processConfiguration($this->getConfiguration($configs, $container), $configs);
@@ -67,34 +60,6 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $refreshTokenClass);
         $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
         $container->setParameter('gesdinet.jwtrefreshtoken.user_checker.id', $config['user_checker']);
-
-        $this->deprecateServices($container);
-    }
-
-    private function deprecateServices(ContainerBuilder $container): void
-    {
-        $usesSymfony51Api = method_exists(Definition::class, 'getDeprecation');
-
-        foreach (self::DEPRECATED_SERVICES as $serviceId => $deprecatedSince) {
-            if (!$container->hasDefinition($serviceId)) {
-                continue;
-            }
-
-            $service = $container->getDefinition($serviceId);
-
-            if ($usesSymfony51Api) {
-                $service->setDeprecated(
-                    'gesdinet/jwt-refresh-token-bundle',
-                    $deprecatedSince,
-                    'The "%service_id%" service is deprecated.'
-                );
-            } else {
-                $service->setDeprecated(
-                    true,
-                    'The "%service_id%" service is deprecated.'
-                );
-            }
-        }
     }
 
     /**
