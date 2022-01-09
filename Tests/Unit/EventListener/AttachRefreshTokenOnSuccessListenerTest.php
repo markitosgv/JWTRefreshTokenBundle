@@ -256,12 +256,9 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     private function setSingleUseOnEventListener(bool $singleUse): void
     {
-        try {
-            $reflector = new \ReflectionClass(AttachRefreshTokenOnSuccessListener::class);
-            $property = $reflector->getProperty('singleUse');
-            $property->setAccessible(true);
-            $property->setValue($this->attachRefreshTokenOnSuccessListener, $singleUse);
-        } catch (\ReflectionException $exception) {
-        }
+        $reflector = new \ReflectionClass(AttachRefreshTokenOnSuccessListener::class);
+        $property = $reflector->getProperty('singleUse');
+        $property->setAccessible(true);
+        $property->setValue($this->attachRefreshTokenOnSuccessListener, $singleUse);
     }
 }
