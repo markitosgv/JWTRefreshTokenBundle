@@ -124,11 +124,9 @@ class RefreshTokenProviderTest extends TestCase
 
     public function testSupportsAUserClass(): void
     {
-        if (class_exists(InMemoryUser::class)) {
-            $this->assertTrue($this->refreshTokenProvider->supportsClass(InMemoryUser::class));
-        }
-
-        $this->assertTrue($this->refreshTokenProvider->supportsClass(User::class));
+        $this->assertTrue($this->refreshTokenProvider->supportsClass(
+            class_exists(InMemoryUser::class) ? InMemoryUser::class : User::class
+        ));
     }
 
     public function testSupportsAUserClassWhenUsingACustomProvider(): void
@@ -136,11 +134,9 @@ class RefreshTokenProviderTest extends TestCase
         $userProvider = new InMemoryUserProvider(['testname' => ['password' => 'secure-password']]);
         $this->refreshTokenProvider->setCustomUserProvider($userProvider);
 
-        if (class_exists(InMemoryUser::class)) {
-            $this->assertTrue($this->refreshTokenProvider->supportsClass(InMemoryUser::class));
-        }
-
-        $this->assertTrue($this->refreshTokenProvider->supportsClass(User::class));
+        $this->assertTrue($this->refreshTokenProvider->supportsClass(
+            class_exists(InMemoryUser::class) ? InMemoryUser::class : User::class
+        ));
     }
 
     private function createRefreshTokenManagerGetExpectation(string $token, ?RefreshTokenInterface $refreshToken): void
