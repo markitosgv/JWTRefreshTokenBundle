@@ -54,7 +54,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
     {
         /** @var Request|MockObject $request */
         $request = $this->createMock(Request::class);
-        $this->setExtractorGetRefreshTokenExpectation($request, 'my-refresh-token');
+        $this->createExtractorGetRefreshTokenExpectation($request, 'my-refresh-token');
 
         $this->assertTrue($this->refreshTokenAuthenticator->supports($request));
     }
@@ -63,7 +63,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
     {
         /** @var Request|MockObject $request */
         $request = $this->createMock(Request::class);
-        $this->setExtractorGetRefreshTokenExpectation($request, null);
+        $this->createExtractorGetRefreshTokenExpectation($request, null);
 
         $this->assertFalse($this->refreshTokenAuthenticator->supports($request));
     }
@@ -73,7 +73,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
         /** @var Request|MockObject $request */
         $request = $this->createMock(Request::class);
         $token = 'my-refresh-token';
-        $this->setExtractorGetRefreshTokenExpectation($request, $token);
+        $this->createExtractorGetRefreshTokenExpectation($request, $token);
 
         $this->assertSame(['token' => $token], $this->refreshTokenAuthenticator->getCredentials($request));
     }
@@ -128,7 +128,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
         $this->assertFalse($this->refreshTokenAuthenticator->supportsRememberMe());
     }
 
-    private function setExtractorGetRefreshTokenExpectation(Request $request, ?string $token): void
+    private function createExtractorGetRefreshTokenExpectation(Request $request, ?string $token): void
     {
         $this->extractor
             ->expects($this->once())

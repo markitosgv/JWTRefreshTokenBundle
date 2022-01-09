@@ -40,8 +40,8 @@ class ChainExtractorTest extends TestCase
 
         $token = 'my-refresh-token';
 
-        $this->setGetRefreshTokenExpectationOnExtractor($firstExtractor, null);
-        $this->setGetRefreshTokenExpectationOnExtractor($secondExtractor, $token);
+        $this->createExtractorGetRefreshTokenExpectation($firstExtractor, null);
+        $this->createExtractorGetRefreshTokenExpectation($secondExtractor, $token);
         $thirdExtractor
             ->expects($this->never())
             ->method('getRefreshToken');
@@ -67,9 +67,9 @@ class ChainExtractorTest extends TestCase
         /** @var Request|MockObject $request */
         $request = $this->createMock(Request::class);
 
-        $this->setGetRefreshTokenExpectationOnExtractor($firstExtractor, null);
-        $this->setGetRefreshTokenExpectationOnExtractor($secondExtractor, null);
-        $this->setGetRefreshTokenExpectationOnExtractor($thirdExtractor, null);
+        $this->createExtractorGetRefreshTokenExpectation($firstExtractor, null);
+        $this->createExtractorGetRefreshTokenExpectation($secondExtractor, null);
+        $this->createExtractorGetRefreshTokenExpectation($thirdExtractor, null);
 
         $this->chainExtractor->addExtractor($firstExtractor);
         $this->chainExtractor->addExtractor($secondExtractor);
@@ -78,7 +78,7 @@ class ChainExtractorTest extends TestCase
         $this->assertSame(null, $this->chainExtractor->getRefreshToken($request, self::PARAMETER_NAME));
     }
 
-    private function setGetRefreshTokenExpectationOnExtractor(MockObject $extractor, ?string $return): void
+    private function createExtractorGetRefreshTokenExpectation(MockObject $extractor, ?string $return): void
     {
         $extractor
             ->expects($this->once())
