@@ -204,12 +204,9 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testCreatesTheAuthenticatedToken(): void
     {
-        if (!method_exists(UserInterface::class, 'getUserIdentifier')) {
-            self::markTestSkipped('Only applies to Symfony 5.3+');
-        }
-
-        $user = UserCreator::create();
-        $passport = $this->createUserPassport($user->getUserIdentifier(), $user);
+        $username = 'username';
+        $user = UserCreator::create($username);
+        $passport = $this->createUserPassport($username, $user);
         $passport->setAttribute('refreshToken', $this->createMock(RefreshTokenInterface::class));
 
         $token = $this->refreshTokenAuthenticator->createAuthenticatedToken($passport, 'test');
@@ -218,10 +215,6 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotCreateTheAuthenticatedTokenWhenThePassportDoesNotImplementTheRequiredInterface(): void
     {
-        if (!method_exists(UserInterface::class, 'getUserIdentifier')) {
-            self::markTestSkipped('Only applies to Symfony 5.3+');
-        }
-
         /** @var PassportInterface|MockObject $passport */
         $passport = $this->createMock(PassportInterface::class);
 
@@ -232,8 +225,9 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testCreatesTheToken(): void
     {
-        $user = UserCreator::create();
-        $passport = $this->createUserPassport($user->getUserIdentifier(), $user);
+        $username = 'username';
+        $user = UserCreator::create($username);
+        $passport = $this->createUserPassport($username, $user);
         $passport->setAttribute('refreshToken', $this->createMock(RefreshTokenInterface::class));
 
         $token = $this->refreshTokenAuthenticator->createAuthenticatedToken($passport, 'test');
@@ -242,8 +236,9 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotCreateTheTokenWhenThePassportDoesNotHaveTheRefreshToken(): void
     {
-        $user = UserCreator::create();
-        $passport = $this->createUserPassport($user->getUserIdentifier(), $user);
+        $username = 'username';
+        $user = UserCreator::create($username);
+        $passport = $this->createUserPassport($username, $user);
 
         $this->expectException(LogicException::class);
 

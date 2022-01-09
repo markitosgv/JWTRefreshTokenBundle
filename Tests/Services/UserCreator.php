@@ -8,15 +8,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserCreator
 {
-    public static function create(): UserInterface
+    public static function create(string $identifier = 'username'): UserInterface
     {
-        $username = 'username';
         $password = 'password';
 
         if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($username, $password);
+            $user = new InMemoryUser($identifier, $password);
         } else {
-            $user = new User($username, $password);
+            $user = new User($identifier, $password);
         }
 
         return $user;
