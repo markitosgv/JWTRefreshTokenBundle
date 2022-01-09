@@ -27,6 +27,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use Symfony\Component\Security\Http\RememberMe\RememberMeHandlerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RefreshTokenAuthenticatorTest extends TestCase
@@ -55,6 +56,10 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!interface_exists(AuthenticatorInterface::class)) {
+            self::markTestSkipped('Only applies to Symfony 5.2+');
+        }
+
         $this->refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $this->extractor = $this->createMock(ExtractorInterface::class);
         $this->successHandler = $this->createMock(AuthenticationSuccessHandlerInterface::class);
