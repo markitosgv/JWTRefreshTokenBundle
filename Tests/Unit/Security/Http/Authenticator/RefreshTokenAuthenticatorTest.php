@@ -202,9 +202,12 @@ class RefreshTokenAuthenticatorTest extends TestCase
         $this->refreshTokenAuthenticator->authenticate($request);
     }
 
-
     public function testCreatesTheAuthenticatedToken(): void
     {
+        if (!method_exists(UserInterface::class, 'getUserIdentifier')) {
+            self::markTestSkipped('Only applies to Symfony 5.3+');
+        }
+
         $user = UserCreator::create();
         $passport = $this->createUserPassport($user->getUserIdentifier(), $user);
         $passport->setAttribute('refreshToken', $this->createMock(RefreshTokenInterface::class));
@@ -215,6 +218,10 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotCreateTheAuthenticatedTokenWhenThePassportDoesNotImplementTheRequiredInterface(): void
     {
+        if (!method_exists(UserInterface::class, 'getUserIdentifier')) {
+            self::markTestSkipped('Only applies to Symfony 5.3+');
+        }
+
         /** @var PassportInterface|MockObject $passport */
         $passport = $this->createMock(PassportInterface::class);
 
