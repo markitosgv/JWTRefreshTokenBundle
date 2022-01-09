@@ -1,8 +1,8 @@
 <?php
 
-namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Document;
+namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Entity;
 
-use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Unit\AbstractRefreshTokenTest;
 use Symfony\Component\Security\Core\User\UserInterface;
