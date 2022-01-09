@@ -7,13 +7,12 @@ use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class AttachRefreshTokenOnSuccessListenerTest extends TestCase
@@ -115,14 +114,7 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         /** @var RefreshTokenInterface|MockObject $newRefreshToken */
         $newRefreshToken = $this->createMock(RefreshTokenInterface::class);
 
-        $username = 'username';
-        $password = 'password';
-
-        if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($username, $password);
-        } else {
-            $user = new User($username, $password);
-        }
+        $user = UserCreator::create();
 
         $event
             ->expects($this->once())

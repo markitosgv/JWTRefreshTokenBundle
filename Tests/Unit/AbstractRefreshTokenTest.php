@@ -3,9 +3,8 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class AbstractRefreshTokenTest extends TestCase
@@ -14,16 +13,7 @@ abstract class AbstractRefreshTokenTest extends TestCase
 
     protected function setUp(): void
     {
-        $username = 'username';
-        $password = 'password';
-
-        if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($username, $password);
-        } else {
-            $user = new User($username, $password);
-        }
-
-        $this->refreshToken = $this->createRefreshToken('token', $user, 600);
+        $this->refreshToken = $this->createRefreshToken('token', UserCreator::create(), 600);
     }
 
     abstract protected function createRefreshToken(

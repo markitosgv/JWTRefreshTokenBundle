@@ -10,14 +10,13 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\LogicException;
-use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
@@ -201,16 +200,8 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testCreatesTheAuthenticatedToken(): void
     {
-        $userIdentifier = 'test@example.com';
-        $password = 'password';
-
-        if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($userIdentifier, $password);
-        } else {
-            $user = new User($userIdentifier, $password);
-        }
-
-        $passport = $this->createUserPassport($userIdentifier, $user);
+        $user = UserCreator::create();
+        $passport = $this->createUserPassport($user->getUserIdentifier(), $user);
         $passport->setAttribute('refreshToken', $this->createMock(RefreshTokenInterface::class));
 
         $token = $this->refreshTokenAuthenticator->createAuthenticatedToken($passport, 'test');
@@ -229,16 +220,8 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testCreatesTheToken(): void
     {
-        $userIdentifier = 'test@example.com';
-        $password = 'password';
-
-        if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($userIdentifier, $password);
-        } else {
-            $user = new User($userIdentifier, $password);
-        }
-
-        $passport = $this->createUserPassport($userIdentifier, $user);
+        $user = UserCreator::create();
+        $passport = $this->createUserPassport($user->getUserIdentifier(), $user);
         $passport->setAttribute('refreshToken', $this->createMock(RefreshTokenInterface::class));
 
         $token = $this->refreshTokenAuthenticator->createAuthenticatedToken($passport, 'test');
@@ -247,16 +230,8 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotCreateTheTokenWhenThePassportDoesNotHaveTheRefreshToken(): void
     {
-        $userIdentifier = 'test@example.com';
-        $password = 'password';
-
-        if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($userIdentifier, $password);
-        } else {
-            $user = new User($userIdentifier, $password);
-        }
-
-        $passport = $this->createUserPassport($userIdentifier, $user);
+        $user = UserCreator::create();
+        $passport = $this->createUserPassport($user->getUserIdentifier(), $user);
 
         $this->expectException(LogicException::class);
 

@@ -7,10 +7,9 @@ use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\User;
 
 class RefreshTokenGeneratorTest extends TestCase
 {
@@ -41,18 +40,9 @@ class RefreshTokenGeneratorTest extends TestCase
             ->method('getClass')
             ->willReturn(RefreshToken::class);
 
-        $username = 'username';
-        $password = 'password';
-
-        if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($username, $password);
-        } else {
-            $user = new User($username, $password);
-        }
-
         $this->assertInstanceOf(
             RefreshTokenInterface::class,
-            $this->refreshTokenGenerator->createForUserWithTtl($user, 600)
+            $this->refreshTokenGenerator->createForUserWithTtl(UserCreator::create(), 600)
         );
     }
 
@@ -72,17 +62,9 @@ class RefreshTokenGeneratorTest extends TestCase
             ->method('getClass')
             ->willReturn(RefreshToken::class);
 
-        $username = 'username';
-        $password = 'password';
-        if (class_exists(InMemoryUser::class)) {
-            $user = new InMemoryUser($username, $password);
-        } else {
-            $user = new User($username, $password);
-        }
-
         $this->assertInstanceOf(
             RefreshTokenInterface::class,
-            $this->refreshTokenGenerator->createForUserWithTtl($user, 600)
+            $this->refreshTokenGenerator->createForUserWithTtl(UserCreator::create(), 600)
         );
     }
 }
