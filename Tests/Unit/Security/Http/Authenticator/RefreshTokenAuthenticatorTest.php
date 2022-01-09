@@ -27,7 +27,6 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Http\RememberMe\RememberMeHandlerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RefreshTokenAuthenticatorTest extends TestCase
