@@ -60,6 +60,7 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             []
         );
     }
+
     public function testAttachTokenOnRefresh()
     {
         /** @var UserInterface|MockObject $user */

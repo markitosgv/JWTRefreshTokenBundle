@@ -44,7 +44,7 @@ class RequestBodyExtractorTest extends TestCase
 
     public function testReturnsNullIfTheRequestIsNotAJsonType(): void
     {
-        $request = $this->createMockRequest( null);
+        $request = $this->createMockRequest(null);
 
         $this->assertNull($this->requestBodyExtractor->getRefreshToken($request, self::PARAMETER_NAME));
     }

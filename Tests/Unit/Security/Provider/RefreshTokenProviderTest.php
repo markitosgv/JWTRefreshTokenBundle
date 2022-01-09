@@ -29,6 +29,7 @@ class RefreshTokenProviderTest extends TestCase
 
         $this->refreshTokenProvider = new RefreshTokenProvider($this->refreshTokenManager);
     }
+
     public function testIsAUserProvider(): void
     {
         $this->assertInstanceOf(UserProviderInterface::class, $this->refreshTokenProvider);

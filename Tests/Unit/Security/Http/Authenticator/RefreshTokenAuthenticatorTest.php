@@ -352,7 +352,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
         return new SelfValidatingPassport(
             new UserBadge(
                 $userIdentifier,
-                function (string $userIdentifier) use ($user) : UserInterface {
+                function (string $userIdentifier) use ($user): UserInterface {
                     return $user;
                 }
             )

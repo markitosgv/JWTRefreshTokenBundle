@@ -141,7 +141,7 @@ class RefreshTokenTest extends TestCase
             ->willReturn($credentials);
     }
 
-    private function createAuthenticatorGetUserExpectation(UserInterface  $user): void
+    private function createAuthenticatorGetUserExpectation(UserInterface $user): void
     {
         $this->authenticator
             ->expects($this->once())

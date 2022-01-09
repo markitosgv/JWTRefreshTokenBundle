@@ -30,7 +30,6 @@ class RefreshTokenAuthenticatorTest extends TestCase
         /** @var UserCheckerInterface|MockObject $userChecker */
         $userChecker = $this->createMock(UserCheckerInterface::class);
 
-        /** @var ExtractorInterface|MockObject */
         $this->extractor = $this->createMock(ExtractorInterface::class);
 
         $this->refreshTokenAuthenticator = new RefreshTokenAuthenticator(
