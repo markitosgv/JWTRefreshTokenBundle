@@ -66,9 +66,6 @@ jobs:
         env:
           SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
-      - name: Run phpspec
-        run: bin/phpspec run -fpretty --verbose
-
       - name: Run PHPUnit
         run: bin/phpunit --verbose
         env:
