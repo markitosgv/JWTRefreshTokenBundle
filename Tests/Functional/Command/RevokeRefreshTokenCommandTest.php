@@ -15,7 +15,7 @@ final class RevokeRefreshTokenCommandTest extends TestCase
     {
         $token = 'refresh-token';
 
-        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
+        /** @var MockObject|RefreshTokenManagerInterface $refreshTokenManager */
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $refreshTokenManager->expects($this->once())
             ->method('get')
@@ -35,13 +35,13 @@ final class RevokeRefreshTokenCommandTest extends TestCase
     {
         $token = 'refresh-token';
 
-        /** @var MockObject&RefreshTokenInterface $refreshToken */
+        /** @var MockObject|RefreshTokenInterface $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
         $refreshToken->expects($this->once())
             ->method('getRefreshToken')
             ->willReturn($token);
 
-        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
+        /** @var MockObject|RefreshTokenManagerInterface $refreshTokenManager */
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $refreshTokenManager->expects($this->once())
             ->method('get')
