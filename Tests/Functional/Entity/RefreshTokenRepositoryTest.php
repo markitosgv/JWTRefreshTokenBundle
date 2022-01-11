@@ -4,9 +4,9 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Entity;
 
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\User;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\ORMTestCase;
 

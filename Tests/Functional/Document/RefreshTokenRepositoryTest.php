@@ -3,9 +3,9 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Document;
 
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
-use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Document\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Document\User;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\ODMTestCase;
 

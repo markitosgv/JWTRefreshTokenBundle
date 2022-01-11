@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- [B/C Break] Changed the object mappings to mapped superclasses, this requires updating your app's configuration
 - Added support for checking the request path in the `refresh_jwt` authenticator
 - Deprecated not configuring the request path to check in the `refresh_jwt` authenticator
 
