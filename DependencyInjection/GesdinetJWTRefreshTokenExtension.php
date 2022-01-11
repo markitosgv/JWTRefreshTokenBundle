@@ -11,7 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
-use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ORM\EntityManager;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
@@ -44,7 +45,8 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         $refreshTokenClass = RefreshTokenEntity::class;
         $objectManager = 'doctrine.orm.entity_manager';
 
-        if (!class_exists(DoctrineOrmMappingsPass::class) || 'mongodb' === strtolower($config['manager_type'])) {
+        // Change the refresh token and object manager to the MongoDB ODM if the configuration explicitly sets it or if the ORM is not installed and the MongoDB ODM is
+        if ('mongodb' === strtolower($config['manager_type']) || (!class_exists(EntityManager::class) && class_exists(DocumentManager::class))) {
             $refreshTokenClass = RefreshTokenDocument::class;
             $objectManager = 'doctrine_mongodb.odm.document_manager';
         }

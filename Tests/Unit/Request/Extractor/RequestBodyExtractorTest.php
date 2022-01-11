@@ -58,7 +58,7 @@ class RequestBodyExtractorTest extends TestCase
         $request = $this->createMock(Request::class);
 
         $request
-            ->expects($this->once())
+            ->expects($this->atLeastOnce())
             ->method('getContentType')
             ->willReturn($contentType);
 

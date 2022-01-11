@@ -18,10 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 
-/**
- * @final
- */
-/* final */ class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInterface
+final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInterface
 {
     public function getPriority(): int
     {
@@ -59,10 +56,7 @@ use Symfony\Component\DependencyInjection\Reference;
         ;
     }
 
-    /**
-     * @return string
-     */
-    public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId)
+    public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId): string
     {
         $authenticatorId = 'security.authenticator.refresh_jwt.'.$firewallName;
 

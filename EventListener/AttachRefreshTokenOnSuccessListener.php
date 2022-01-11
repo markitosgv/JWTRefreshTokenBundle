@@ -57,10 +57,7 @@ class AttachRefreshTokenOnSuccessListener
      */
     protected $extractor;
 
-    /**
-     * @var array
-     */
-    protected $cookieSettings;
+    protected array $cookieSettings;
 
     /**
      * @param int    $ttl
@@ -85,6 +82,7 @@ class AttachRefreshTokenOnSuccessListener
         $this->refreshTokenGenerator = $refreshTokenGenerator;
         $this->extractor = $extractor;
         $this->cookieSettings = array_merge([
+            'enabled' => false,
             'same_site' => 'lax',
             'path' => '/',
             'domain' => null,
@@ -104,6 +102,10 @@ class AttachRefreshTokenOnSuccessListener
 
         $data = $event->getData();
         $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request) {
+            return;
+        }
 
         // Extract refreshToken from the request
         $refreshTokenString = $this->extractor->getRefreshToken($request, $this->tokenParameterName);
@@ -130,7 +132,7 @@ class AttachRefreshTokenOnSuccessListener
         }
 
         // Add a response cookie if enabled
-        if (isset($this->cookieSettings['enabled']) && $this->cookieSettings['enabled']) {
+        if ($this->cookieSettings['enabled']) {
             $event->getResponse()->headers->setCookie(
                 new Cookie(
                     $this->tokenParameterName,

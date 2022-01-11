@@ -11,25 +11,19 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User implements UserInterface
 {
     /**
-     * @var int|null
-     *
      * @ODM\Id
      */
-    private $id;
+    private ?string $id = null;
 
     /**
-     * @var string
-     *
      * @ODM\Field
      */
-    private $email;
+    private string $email;
 
     /**
-     * @var string|null
-     *
      * @ODM\Field(nullable=true)
      */
-    private $password;
+    private ?string $password;
 
     public function __construct(string $email, ?string $password = null)
     {
@@ -37,7 +31,7 @@ class User implements UserInterface
         $this->password = $password;
     }
 
-    public function getId(): ?int
+    public function getId(): ?string
     {
         return $this->id;
     }
