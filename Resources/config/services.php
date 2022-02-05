@@ -4,6 +4,7 @@ use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener;
+use Gesdinet\JWTRefreshTokenBundle\EventListener\LogoutEventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -157,4 +158,17 @@ return static function (ContainerConfigurator $container) {
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
         ])
         ->tag('console.command');
+
+    $services->set(LogoutEventListener::class)
+        ->args([
+            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
+            new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
+            new Parameter('gesdinet_jwt_refresh_token.cookie'),
+            new Parameter('gesdinet_jwt_refresh_token.logout_firewall_context'),
+        ])
+        ->tag('kernel.event_listener', [
+            'event' => 'Symfony\Component\Security\Http\Event\LogoutEvent',
+            'method' => 'onLogout',
+        ]);
 };
