@@ -83,14 +83,16 @@ Open your routing configuration file and add the following route to it:
 
 ```yaml
 # config/routes.yaml
-gesdinet_jwt_refresh_token:
+api_refresh_token:
     path: /api/token/refresh
 # ...
 ```
 
 #### Configure the authenticator
 
-Add the below to your security configuration file:
+To enable the authenticator, you should add it to your API firewall(s) alongside the `json_login` and `jwt` authenticators.
+
+The complete firewall configuration should look similar to the following:
 
 ```yaml
 # config/packages/security.yaml
@@ -99,16 +101,22 @@ security:
     enable_authenticator_manager: true
 
     firewalls:
-        # put it before all your other firewall API entries
-        api_token_refresh:
-            pattern: ^/api/token/refresh
+        api:
+            pattern: ^/api
             stateless: true
-            refresh_jwt: ~
+            entry_point: jwt
+            json_login:
+                check_path: /api/login # or, if you have defined a route for your login path, the route name you used
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
+            refresh_jwt:
+                check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
     # ...
 
     access_control:
         # ...
-        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
+        - { path: ^/api/(login|token/refresh), roles: PUBLIC_ACCESS }
         # ...
 # ...
 ```
@@ -121,7 +129,7 @@ Open your routing configuration file and add the following route to it:
 
 ```yaml
 # config/routes.yaml
-gesdinet_jwt_refresh_token:
+api_refresh_token:
     path:       /api/token/refresh
     controller: gesdinet.jwtrefreshtoken::refresh
 # ...
@@ -216,16 +224,22 @@ gesdinet_jwt_refresh_token:
 
 #### Symfony 5.4+
 
-You can define a user provider to use for the authenticator its configuration:
+You can define a user provider to use for the authenticator its configuration.
+
+Note, if your application has multiple user providers, you **MUST** configure this value for either the firewall or the provider.
 
 ```yaml
 # app/config/security.yml or config/packages/security.yaml
 security:
     firewalls:
-        api_token_refresh:
-            pattern: ^/api/token/refresh
+        api:
+            pattern: ^/api
             stateless: true
+            entry_point: jwt
+            json_login: ~
+            jwt: ~
             refresh_jwt:
+                check_path: /api/token/refresh
                 provider: user_provider_service_id
 ```
 

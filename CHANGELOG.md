@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Added support for checking the request path in the `refresh_jwt` authenticator
+- Deprecated not configuring the request path to check in the `refresh_jwt` authenticator
+
+## 1.0.0
+
 - Dropped support for MongoDB ODM 1.x
 - Dropped support for Symfony 3.4
 - Added support for Symfony 6.0

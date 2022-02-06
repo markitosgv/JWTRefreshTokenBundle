@@ -35,6 +35,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Authenticator\Passport\UserPassportInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
@@ -53,6 +54,8 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
 
     private array $options;
 
+    private ?HttpUtils $httpUtils;
+
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
         EventDispatcherInterface $eventDispatcher,
@@ -60,7 +63,8 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
         UserProviderInterface $userProvider,
         AuthenticationSuccessHandlerInterface $successHandler,
         AuthenticationFailureHandlerInterface $failureHandler,
-        array $options
+        array $options,
+        ?HttpUtils $httpUtils = null
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->eventDispatcher = $eventDispatcher;
@@ -69,14 +73,26 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
         $this->successHandler = $successHandler;
         $this->failureHandler = $failureHandler;
         $this->options = array_merge([
+            'check_path' => null, // @todo in 2.0, change the default to `/login_check`
             'ttl' => 2592000,
             'ttl_update' => false,
             'token_parameter_name' => 'refresh_token',
         ], $options);
+        $this->httpUtils = $httpUtils;
+
+        if (null === $httpUtils) {
+            trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.1', 'Not passing an instance of "%s" to the "%s" constructor is deprecated, it will be required in 2.0.', HttpUtils::class, self::class);
+        }
     }
 
     public function supports(Request $request): bool
     {
+        if (null !== $this->httpUtils && null !== $this->options['check_path']) {
+            return $this->httpUtils->checkRequestPath($request, $this->options['check_path']);
+        }
+
+        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.1', 'Checking if the refresh token is in the request in %s() is deprecated, as of 2.0 only the request path will be checked.', __METHOD__);
+
         return null !== $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
     }
 
