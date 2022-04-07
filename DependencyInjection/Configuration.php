@@ -98,6 +98,10 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('remove_token_from_body')->defaultTrue()->end()
                     ->end()
                 ->end()
+                ->scalarNode('logout_firewall')
+                    ->defaultValue('api')
+                    ->info('Name of the firewall that triggers the logout event to hook into (default: api)')
+                ->end()
             ->end();
 
         return $treeBuilder;

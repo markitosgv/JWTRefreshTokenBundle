@@ -10,6 +10,7 @@
 - Dropped support for MongoDB ODM 1.x
 - Dropped support for Symfony 3.4
 - Added support for Symfony 6.0
+- Added a LogoutEventListener that will invalidate the supplied refresh token and clear the cookie (if configured) when a LogoutEvent is triggered on the configured firewall.
 
 ## 1.0.0-beta4
 

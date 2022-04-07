@@ -319,6 +319,8 @@ gesdinet_jwt_refresh_token:
 
 By default, the refresh token is returned in the body of a JSON response. You can use the following configuration to set it in a HttpOnly cookie instead. The refresh token is automatically extracted from the cookie during refresh.
 
+To allow users to logout when using cookies, you need to [configure the `LogoutEvent` to trigger on a specific route](#invalidate-refresh-token-on-logout), and call that route during logout.
+
 ```yaml
 gesdinet_jwt_refresh_token:
     cookie:
@@ -329,6 +331,50 @@ gesdinet_jwt_refresh_token:
       http_only: true              # default value
       secure: true                 # default value
       remove_token_from_body: true # default value
+```
+
+### Invalidate refresh token on logout
+
+This bundle automatically registers an `EventListener` which triggers on `LogoutEvent`s from a specific firewall (default: `api`).
+
+The `LogoutEventListener` automatically invalidates the given refresh token and, if enabled, unsets the cookie.
+If no refresh token is supplied, an error is returned and the cookie remains untouched. If the supplied refresh token is (already) invalid, the cookie is unset.
+
+All you have to do is make sure the `LogoutEvent` triggers on a specific route, and call that route during logout:
+
+```yaml
+# in security.yaml
+security:
+    firewalls:
+        api:
+            logout:
+                path: api_token_invalidate
+```
+```yaml
+# in routes.yaml
+api_token_invalidate:
+    path: /api/token/invalidate
+```
+
+If you want to configure the `LogoutEvent` to trigger on a different firewall, the name of the firewall has to be configured:
+
+```yaml
+# in security.yaml
+security:
+    firewalls:
+        myfirewall:
+            logout:
+                path: api_token_invalidate
+```
+```yaml
+# in routes.yaml
+api_token_invalidate:
+    path: /api/token/invalidate
+```
+```yaml
+# in gesdinet_jwt_refresh_token.yaml
+gesdinet_jwt_refresh_token:
+    logout_firewall: myfirewall
 ```
 
 ### Doctrine Manager Type
