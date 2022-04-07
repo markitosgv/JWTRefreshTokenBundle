@@ -54,6 +54,8 @@ return static function (ContainerConfigurator $container) {
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_generator'),
             new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
             new Parameter('gesdinet_jwt_refresh_token.cookie'),
+            new Parameter('gesdinet_jwt_refresh_token.return_expiration'),
+            new Parameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name'),
         ])
         ->tag('kernel.event_listener', [
             'event' => 'lexik_jwt_authentication.on_authentication_success',

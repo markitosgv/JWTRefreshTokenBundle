@@ -60,9 +60,21 @@ class AttachRefreshTokenOnSuccessListener
     protected array $cookieSettings;
 
     /**
+     * @var bool
+     */
+    protected $returnExpiration;
+
+    /**
+     * @var string
+     */
+    protected $returnExpirationParameterName;
+
+    /**
      * @param int    $ttl
      * @param string $tokenParameterName
      * @param bool   $singleUse
+     * @param bool   $returnExpiration
+     * @param string $returnExpirationParameterName
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
@@ -72,7 +84,9 @@ class AttachRefreshTokenOnSuccessListener
         $singleUse,
         RefreshTokenGeneratorInterface $refreshTokenGenerator,
         ExtractorInterface $extractor,
-        array $cookieSettings
+        array $cookieSettings,
+        $returnExpiration,
+        $returnExpirationParameterName
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
@@ -90,6 +104,8 @@ class AttachRefreshTokenOnSuccessListener
             'secure' => true,
             'remove_token_from_body' => true,
         ], $cookieSettings);
+        $this->returnExpiration = $returnExpiration;
+        $this->returnExpirationParameterName = $returnExpirationParameterName;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event): void
@@ -129,6 +145,10 @@ class AttachRefreshTokenOnSuccessListener
             $this->refreshTokenManager->save($refreshToken);
             $refreshTokenString = $refreshToken->getRefreshToken();
             $data[$this->tokenParameterName] = $refreshTokenString;
+        }
+
+        if ($this->returnExpiration) {
+            $data[$this->returnExpirationParameterName] = time() + $this->ttl;
         }
 
         // Add a response cookie if enabled

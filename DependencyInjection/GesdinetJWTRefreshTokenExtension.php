@@ -45,6 +45,8 @@ class GesdinetJWTRefreshTokenExtension extends Extension
             'security.firewall.map.context.%s',
             $config['logout_firewall']
         ));
+        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $config['return_expiration']);
+        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $config['return_expiration_parameter_name']);
 
         $refreshTokenClass = RefreshTokenEntity::class;
         $objectManager = 'doctrine.orm.entity_manager';

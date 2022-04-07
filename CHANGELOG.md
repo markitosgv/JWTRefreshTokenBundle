@@ -4,6 +4,7 @@
 
 - Added support for checking the request path in the `refresh_jwt` authenticator
 - Deprecated not configuring the request path to check in the `refresh_jwt` authenticator
+- Added feature to add the expiration timestamp on the response
 
 ## 1.0.0
 
