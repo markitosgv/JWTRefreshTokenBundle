@@ -32,6 +32,14 @@ return static function (ContainerConfigurator $container) {
         return [$message];
     };
 
+    $abstractArg = static function (string $description) {
+        if (function_exists('Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg')) {
+            return \Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg($description);
+        }
+
+        return null;
+    };
+
     $services = $container->services();
 
     $services->set('gesdinet.jwtrefreshtoken.send_token')
@@ -140,10 +148,11 @@ return static function (ContainerConfigurator $container) {
             new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
             new Reference('event_dispatcher'),
             new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
-            null, // User provider parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
-            null, // Success handler parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
-            null, // Failure handler parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
-            null, // Options parameter is replaced in the security factory, change to an abstract argument reference when Symfony 5.1 and newer are required
+            $abstractArg('user provider'),
+            $abstractArg('authentication success handler'),
+            $abstractArg('authentication failure handler'),
+            $abstractArg('options'),
+            new Reference('security.http_utils'),
         ]);
 
     $services->set(ClearInvalidRefreshTokensCommand::class)
