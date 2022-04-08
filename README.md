@@ -222,7 +222,7 @@ gesdinet_jwt_refresh_token:
 
 ### Return Expiration Timestamp
 
-If set to true, the expiration timestamp will be added to the response.
+If set to true, the expiration Unix timestamp will be added to the response.
 
 ```yaml
 gesdinet_jwt_refresh_token:

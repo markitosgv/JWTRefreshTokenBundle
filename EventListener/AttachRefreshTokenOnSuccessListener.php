@@ -59,15 +59,9 @@ class AttachRefreshTokenOnSuccessListener
 
     protected array $cookieSettings;
 
-    /**
-     * @var bool
-     */
-    protected $returnExpiration;
+    protected bool $returnExpiration;
 
-    /**
-     * @var string
-     */
-    protected $returnExpirationParameterName;
+    protected string $returnExpirationParameterName;
 
     /**
      * @param int    $ttl
@@ -85,8 +79,8 @@ class AttachRefreshTokenOnSuccessListener
         RefreshTokenGeneratorInterface $refreshTokenGenerator,
         ExtractorInterface $extractor,
         array $cookieSettings,
-        $returnExpiration,
-        $returnExpirationParameterName
+        bool $returnExpiration = false,
+        string $returnExpirationParameterName = 'refresh_token_expiration'
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->ttl = $ttl;
