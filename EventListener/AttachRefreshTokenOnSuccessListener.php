@@ -67,8 +67,6 @@ class AttachRefreshTokenOnSuccessListener
      * @param int    $ttl
      * @param string $tokenParameterName
      * @param bool   $singleUse
-     * @param bool   $returnExpiration
-     * @param string $returnExpirationParameterName
      */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
