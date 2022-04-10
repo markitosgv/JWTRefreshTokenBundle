@@ -28,7 +28,7 @@ final class RevokeRefreshTokenCommandTest extends TestCase
         $commandTester->execute(['refresh_token' => $token]);
 
         $this->assertSame(1, $commandTester->getStatusCode());
-        $this->assertStringContainsString('Not Found:', $commandTester->getDisplay());
+        $this->assertStringContainsString('does not exist', $commandTester->getDisplay());
     }
 
     public function test_revokes_a_token(): void
@@ -37,9 +37,6 @@ final class RevokeRefreshTokenCommandTest extends TestCase
 
         /** @var MockObject|RefreshTokenInterface $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
-        $refreshToken->expects($this->once())
-            ->method('getRefreshToken')
-            ->willReturn($token);
 
         /** @var MockObject|RefreshTokenManagerInterface $refreshTokenManager */
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
@@ -54,6 +51,6 @@ final class RevokeRefreshTokenCommandTest extends TestCase
         $commandTester->execute(['refresh_token' => $token]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
-        $this->assertStringContainsString('Revoked refresh-token', $commandTester->getDisplay());
+        $this->assertStringContainsString('Revoked refresh token', $commandTester->getDisplay());
     }
 }

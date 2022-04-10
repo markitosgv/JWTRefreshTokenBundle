@@ -11,11 +11,13 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ClearInvalidRefreshTokensCommand extends Command
 {
@@ -39,6 +41,8 @@ class ClearInvalidRefreshTokensCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $io = new SymfonyStyle($input, $output);
+
         /** @var string|null $datetime */
         $datetime = $input->getArgument('datetime');
 
@@ -50,8 +54,14 @@ class ClearInvalidRefreshTokensCommand extends Command
 
         $revokedTokens = $this->refreshTokenManager->revokeAllInvalid($datetime);
 
-        foreach ($revokedTokens as $revokedToken) {
-            $output->writeln(sprintf('Revoked <comment>%s</comment>', $revokedToken->getRefreshToken()));
+        if (0 === count($revokedTokens)) {
+            $io->info('There were no invalid tokens to revoke.');
+        } else {
+            $io->text(sprintf('Revoked %d invalid token(s)', count($revokedTokens)));
+            $io->listing(array_map(
+                static fn (RefreshTokenInterface $revokedToken): string => $revokedToken->getRefreshToken(),
+                $revokedTokens,
+            ));
         }
 
         return 0;
