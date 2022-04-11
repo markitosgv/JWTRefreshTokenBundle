@@ -75,7 +75,58 @@ return [
 ];
 ```
 
-### Step 3 (Symfony 5.4+)
+### Step 3: Configure the Bundle
+
+#### Symfony Flex Application
+
+For an application using Symfony Flex, a recipe should have been applied to your application. If not, you will need to make the following changes:
+
+1. Configure the refresh token class. Create the `config/packages/gesdinet_jwt_refresh_token.yaml` file with the below contents:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Entity\RefreshToken # This is the class name of the refresh token, you will need to adjust this to match the class your application will use
+```
+
+2. Create the object class. 
+
+If you are using the Doctrine ORM, the below contents should be placed at `src/Entity/RefreshToken.php`:
+
+```php
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as BaseRefreshToken;
+
+/**
+ * @ORM\Entity
+ */
+class RefreshToken extends BaseRefreshToken
+{
+}
+```
+
+If you are using the Doctrine MongoDB ODM, the below contents should be placed at `src/Document/RefreshToken.php` (remember to update the `refresh_token_class` configuration above to match):
+
+```php
+<?php
+
+namespace App\Document;
+
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as BaseRefreshToken;
+
+/**
+ * @ODM\Document
+ */
+class RefreshToken extends BaseRefreshToken
+{
+}
+```
+
+### Step 4 (Symfony 5.4+)
 
 #### Define the refresh token route
 
@@ -121,7 +172,7 @@ security:
 # ...
 ```
 
-### Step 3 (Symfony 4.4)
+### Step 4 (Symfony 4.4)
 
 #### Define the refresh token route
 
@@ -157,7 +208,7 @@ security:
 # ...
 ```
 
-### Step 4: Update your database schema
+### Step 5: Update your database schema
 
 You will need to add the table for the refresh tokens to your application's database.
 

@@ -52,6 +52,16 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('refresh_token_class')
                     ->defaultNull()
                     ->info(sprintf('Set the refresh token class to use (default: %s)', RefreshToken::class))
+                    ->validate()
+                        ->ifTrue(static fn ($v): bool => null === $v)
+                        ->then(static function () {
+                            trigger_deprecation(
+                                'gesdinet/jwt-refresh-token-bundle',
+                                '1.1',
+                                'Not setting the "refresh_token_class" option is deprecated, as of 2.0 a class must be set.'
+                            );
+                        })
+                    ->end()
                 ->end()
                 ->scalarNode('object_manager')
                     ->defaultNull()
