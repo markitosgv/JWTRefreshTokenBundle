@@ -102,6 +102,14 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('api')
                     ->info('Name of the firewall that triggers the logout event to hook into (default: api)')
                 ->end()
+                ->scalarNode('return_expiration')
+                    ->defaultFalse()
+                    ->info('When true, the response will include the token expiration timestamp')
+                ->end()
+                ->scalarNode('return_expiration_parameter_name')
+                    ->defaultValue('refresh_token_expiration')
+                    ->info('The default response parameter name containing the refresh token expiration timestamp')
+                ->end()
             ->end();
 
         return $treeBuilder;

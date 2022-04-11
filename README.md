@@ -220,6 +220,22 @@ gesdinet_jwt_refresh_token:
     token_parameter_name: refreshToken
 ```
 
+### Return Expiration Timestamp
+
+If set to true, the expiration Unix timestamp will be added to the response.
+
+```yaml
+gesdinet_jwt_refresh_token:
+    return_expiration: true
+```
+
+The default parameter name is `refresh_token_expiration`. You can change the parameter name by adding this line to your config and changing it:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    return_expiration_parameter_name: refresh_token_expiration
+```
+
 ### Set The User Provider
 
 #### Symfony 5.4+

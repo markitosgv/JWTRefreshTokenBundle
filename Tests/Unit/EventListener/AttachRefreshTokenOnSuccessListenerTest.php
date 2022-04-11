@@ -20,6 +20,8 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 {
     const TTL = 2592000;
     const TOKEN_PARAMETER_NAME = 'refresh_token';
+    const RETURN_EXPIRATION = false;
+    const RETURN_EXPIRATION_PARAMETER_NAME = 'refresh_token_ttl';
 
     /**
      * @var RefreshTokenManagerInterface|MockObject
@@ -58,7 +60,9 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             false,
             $this->refreshTokenGenerator,
             $this->extractor,
-            []
+            [],
+            self::RETURN_EXPIRATION,
+            self::RETURN_EXPIRATION_PARAMETER_NAME
         );
     }
 
@@ -154,7 +158,9 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             false,
             $this->refreshTokenGenerator,
             $this->extractor,
-            ['enabled' => true]
+            ['enabled' => true],
+            self::RETURN_EXPIRATION,
+            self::RETURN_EXPIRATION_PARAMETER_NAME
         ))->attachRefreshToken($event);
     }
 
