@@ -29,7 +29,7 @@ class LogoutEventListener
         ExtractorInterface $refreshTokenExtractor,
         string $tokenParameterName,
         array $cookieSettings,
-        string $logout_firewall_context,
+        string $logout_firewall_context
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->refreshTokenExtractor = $refreshTokenExtractor;
