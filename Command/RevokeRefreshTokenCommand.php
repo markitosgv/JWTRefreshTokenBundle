@@ -16,6 +16,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class RevokeRefreshTokenCommand extends Command
 {
@@ -39,20 +40,22 @@ class RevokeRefreshTokenCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $io = new SymfonyStyle($input, $output);
+
         /** @var string $refreshTokenParam */
         $refreshTokenParam = $input->getArgument('refresh_token');
 
         $refreshToken = $this->refreshTokenManager->get($refreshTokenParam);
 
         if (null === $refreshToken) {
-            $output->writeln(sprintf('<error>Not Found:</error> Refresh Token <comment>%s</comment> doesn\'t exist', $refreshTokenParam));
+            $io->error(sprintf('Refresh token "%s" does not exist', $refreshTokenParam));
 
             return 1;
         }
 
         $this->refreshTokenManager->delete($refreshToken);
 
-        $output->writeln(sprintf('Revoked <comment>%s</comment>', $refreshToken->getRefreshToken()));
+        $io->success(sprintf('Revoked refresh token "%s"', $refreshTokenParam));
 
         return 0;
     }

@@ -32,7 +32,11 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
-        $this->assertStringContainsString('Revoked refresh-token', $commandTester->getDisplay());
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString('Revoked 1 invalid token(s)', $output, 'The output should include a summary of the number of invalidated tokens');
+        $this->assertStringContainsString('* refresh-token', $output, 'The output should list all invalidated tokens');
     }
 
     public function test_clears_tokens_with_timestamp(): void
@@ -56,6 +60,10 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $commandTester->execute(['datetime' => '2021-01-01']);
 
         $this->assertSame(0, $commandTester->getStatusCode());
-        $this->assertStringContainsString('Revoked refresh-token', $commandTester->getDisplay());
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString('Revoked 1 invalid token(s)', $output, 'The output should include a summary of the number of invalidated tokens');
+        $this->assertStringContainsString('* refresh-token', $output, 'The output should list all invalidated tokens');
     }
 }
