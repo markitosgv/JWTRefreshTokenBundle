@@ -545,12 +545,12 @@ When you authenticate through /api/login_check with user/password credentials, L
 }
 ```
 
-The refresh token is persisted as a `RefreshTokenInterface` object. After that, when your JWT valid token expires, if you want to get a new one you can proceed in two ways:
+The refresh token is persisted as a `RefreshTokenInterface` object. When your JWT expires, you have two options:
 
-- Send you user credentials again to /api/login_check. This generates another JWT with another Refresh Token.
-- Ask to renew valid JWT with our refresh token. Make a POST call to /api/token/refresh url with refresh token as payload. In this way, you can always get a valid JWT without asking for user credentials. But **you must check** if the refresh token is still valid. Your refresh token will not change but its TTL will increase.
+- Generate a new JWT by re-authenticate with your credentials via `/api/login_check`. This will also generate a new refresh token.
+- Generate a new JWT by POSTing your valid refresh token to `/api/token/refresh`. This method does not require any user credentials. A refresh token can be used as long as it is not expired - it even can be used multiple times (*). On a successful refresh, the refresh tokens TTL will increase, but the refresh token itself will not change.
 
-***Note that when a refresh token is consumed and the config option `single_use` is set to `true` the token will no longer be valid.***
+***(\*) Note that when a refresh token is consumed and the config option `single_use` is set to `true` the token will no longer be valid.***
 
 ```bash
 curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886accb70850795fb311973c9d101fa0111f12eec739db063ec09d7dd79331e3148f5fc6e9cb362xxxx" 'http://xxxx/token/refresh'
