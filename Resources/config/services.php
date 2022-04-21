@@ -17,10 +17,7 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestParameterExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
-use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator as LegacyRefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
-use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
-use Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken;
 
 return static function (ContainerConfigurator $container) {
     $services = $container->services();
@@ -80,38 +77,6 @@ return static function (ContainerConfigurator $container) {
     $services->set('gesdinet.jwtrefreshtoken.request.extractor.request_cookie')
         ->class(RequestCookieExtractor::class)
         ->tag('gesdinet_jwt_refresh_token.request_extractor');
-
-    $services->set('gesdinet.jwtrefreshtoken')
-        ->deprecate('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%service_id%" service is deprecated.')
-        ->class(RefreshToken::class)
-        ->public()
-        ->args([
-            service('gesdinet.jwtrefreshtoken.authenticator'),
-            service('gesdinet.jwtrefreshtoken.user_provider'),
-            service('lexik_jwt_authentication.handler.authentication_success'),
-            service('lexik_jwt_authentication.handler.authentication_failure'),
-            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
-            param('gesdinet_jwt_refresh_token.ttl'),
-            param('gesdinet_jwt_refresh_token.security.firewall'),
-            param('gesdinet_jwt_refresh_token.ttl_update'),
-            service('event_dispatcher'),
-        ]);
-
-    $services->set('gesdinet.jwtrefreshtoken.user_provider')
-        ->deprecate('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%service_id%" service is deprecated.')
-        ->class(RefreshTokenProvider::class)
-        ->args([
-            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
-        ]);
-
-    $services->set('gesdinet.jwtrefreshtoken.authenticator')
-        ->deprecate('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%service_id%" service is deprecated.')
-        ->class(LegacyRefreshTokenAuthenticator::class)
-        ->args([
-            service('gesdinet.jwtrefreshtoken.user_checker'),
-            param('gesdinet_jwt_refresh_token.token_parameter_name'),
-            service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
-        ]);
 
     $services->set('gesdinet.jwtrefreshtoken.security.authentication.failure_handler')
         ->class(AuthenticationFailureHandler::class)

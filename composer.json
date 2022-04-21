@@ -36,8 +36,7 @@
     "matthiasnoback/symfony-config-test": "^4.2|^5.0",
     "matthiasnoback/symfony-dependency-injection-test": "^4.2|^5.0",
     "phpunit/phpunit": "^9.5",
-    "symfony/cache": "^5.4|^6.4|^7.2",
-    "symfony/security-guard": "^5.4"
+    "symfony/cache": "^5.4|^6.4|^7.2"
   },
   "conflict": {
     "doctrine/mongodb-odm": "<2.2",
