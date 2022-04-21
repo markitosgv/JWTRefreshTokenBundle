@@ -34,12 +34,8 @@ class GesdinetJWTRefreshTokenExtension extends Extension
 
         $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
         $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $config['ttl_update']);
-        $container->setParameter('gesdinet_jwt_refresh_token.security.firewall', $config['firewall']);
-        $container->setParameter('gesdinet_jwt_refresh_token.user_provider', $config['user_provider']);
-        $container->setParameter('gesdinet_jwt_refresh_token.user_identity_field', $config['user_identity_field']);
         $container->setParameter('gesdinet_jwt_refresh_token.single_use', $config['single_use']);
         $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $config['token_parameter_name']);
-        $container->setParameter('gesdinet_jwt_refresh_token.doctrine_mappings', $config['doctrine_mappings']);
         $container->setParameter('gesdinet_jwt_refresh_token.cookie', $config['cookie'] ?? []);
         $container->setParameter('gesdinet_jwt_refresh_token.logout_firewall_context', sprintf(
             'security.firewall.map.context.%s',
@@ -57,44 +53,15 @@ class GesdinetJWTRefreshTokenExtension extends Extension
             $objectManager = 'doctrine_mongodb.odm.document_manager';
         }
 
-        if (null !== $this->getRefreshTokenClass($config)) {
-            $refreshTokenClass = $this->getRefreshTokenClass($config);
+        if (null !== $config['refresh_token_class']) {
+            $refreshTokenClass = $config['refresh_token_class'];
         }
 
-        if (null !== $this->getObjectManager($config)) {
-            $objectManager = $this->getObjectManager($config);
+        if (null !== $config['object_manager']) {
+            $objectManager = $config['object_manager'];
         }
 
         $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $refreshTokenClass);
         $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
-        $container->setParameter('gesdinet.jwtrefreshtoken.user_checker.id', $config['user_checker']);
-    }
-
-    /**
-     * Get the refresh token class from configuration.
-     *
-     * Falls back to deprecated configuration nodes if necessary.
-     */
-    protected function getRefreshTokenClass(array $config): ?string
-    {
-        if (isset($config['refresh_token_class'])) {
-            return $config['refresh_token_class'];
-        }
-
-        return $config['refresh_token_entity'] ?: null;
-    }
-
-    /**
-     * Get object manager from configuration.
-     *
-     * Falls back to deprecated configuration nodes if necessary.
-     */
-    protected function getObjectManager(array $config): ?string
-    {
-        if (isset($config['object_manager'])) {
-            return $config['object_manager'];
-        }
-
-        return $config['entity_manager'] ?: null;
     }
 }
