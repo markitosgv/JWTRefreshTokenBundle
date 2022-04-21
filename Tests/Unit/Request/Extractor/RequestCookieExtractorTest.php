@@ -2,7 +2,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 
-use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -17,13 +16,7 @@ class RequestCookieExtractorTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->requestCookieExtractor = new RequestCookieExtractor();
-    }
-
-    public function testIsAnExtractor(): void
-    {
-        $this->assertInstanceOf(ExtractorInterface::class, $this->requestCookieExtractor);
     }
 
     public function testGetsTheTokenFromTheRequestCookies(): void

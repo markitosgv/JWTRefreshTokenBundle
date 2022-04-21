@@ -318,7 +318,6 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
     {
         $reflector = new ReflectionClass(AttachRefreshTokenOnSuccessListener::class);
         $property = $reflector->getProperty('singleUse');
-        $property->setAccessible(true);
         $property->setValue($this->attachRefreshTokenOnSuccessListener, $singleUse);
     }
 }

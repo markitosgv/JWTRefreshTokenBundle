@@ -19,11 +19,6 @@ class ChainExtractorTest extends TestCase
         $this->chainExtractor = new ChainExtractor();
     }
 
-    public function testIsAnExtractor(): void
-    {
-        $this->assertInstanceOf(ExtractorInterface::class, $this->chainExtractor);
-    }
-
     public function testGetsTheTokenFromTheFirstExtractorInTheChain(): void
     {
         /** @var ExtractorInterface|MockObject $firstExtractor */
