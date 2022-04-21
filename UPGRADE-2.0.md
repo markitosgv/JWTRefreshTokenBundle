@@ -30,3 +30,4 @@ The below guide will assist in upgrading from the 1.x versions to 2.0.
     - `entity_manager` - Use the `object_manager` node instead
     - `doctrine_mappings` - No replacement
     - `manager_type` - Set the `object_manager` when needed
+    - `logout_firewall` - Set the `invalidate_token_on_logout` config on the `refresh_jwt` authenticator instead

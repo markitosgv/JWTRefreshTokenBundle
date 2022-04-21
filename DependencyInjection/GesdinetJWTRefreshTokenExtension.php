@@ -34,10 +34,6 @@ class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.single_use', $mergedConfig['single_use']);
         $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $mergedConfig['token_parameter_name']);
         $container->setParameter('gesdinet_jwt_refresh_token.cookie', $mergedConfig['cookie'] ?? []);
-        $container->setParameter('gesdinet_jwt_refresh_token.logout_firewall_context', sprintf(
-            'security.firewall.map.context.%s',
-            $mergedConfig['logout_firewall']
-        ));
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $mergedConfig['return_expiration']);
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $mergedConfig['return_expiration_parameter_name']);
         $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $mergedConfig['refresh_token_class']);

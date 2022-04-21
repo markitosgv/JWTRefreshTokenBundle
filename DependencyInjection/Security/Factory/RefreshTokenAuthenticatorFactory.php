@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInterface
 {
@@ -41,6 +42,10 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
                 ->scalarNode('provider')->end()
                 ->scalarNode('success_handler')->end()
                 ->scalarNode('failure_handler')->end()
+                ->booleanNode('invalidate_token_on_logout')
+                    ->defaultTrue()
+                    ->info('When enabled, the refresh token will be invalided on logout.')
+                ->end()
                 /*
                 ->integerNode('ttl')
                     ->defaultNull()
@@ -76,6 +81,11 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
             ->replaceArgument(4, new Reference($this->createAuthenticationSuccessHandler($container, $firewallName, $config)))
             ->replaceArgument(5, new Reference($this->createAuthenticationFailureHandler($container, $firewallName, $config)))
             ->replaceArgument(6, $options);
+
+        if ($config['invalidate_token_on_logout']) {
+            $container->setDefinition('gesdinet.jwtrefreshtoken.security.listener.logout.'.$firewallName, new ChildDefinition('gesdinet.jwtrefreshtoken.security.listener.logout'))
+                ->addTag('kernel.event_listener', ['event' => LogoutEvent::class, 'method' => 'onLogout', 'dispatcher' => 'security.event_dispatcher.'.$firewallName]);
+        }
 
         return $authenticatorId;
     }
