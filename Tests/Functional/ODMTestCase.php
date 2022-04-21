@@ -2,11 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\Reader;
 use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\DocumentManager;
-use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AttributeDriver;
 use Doctrine\ODM\MongoDB\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
@@ -36,27 +33,15 @@ abstract class ODMTestCase extends TestCase
 
         $driverChain = new MappingDriverChain();
 
-        if (\PHP_VERSION_ID >= 80000 && class_exists(AttributeDriver::class)) {
-            $driverChain->addDriver(
-                new AttributeDriver([__DIR__.'/Fixtures/Document']),
-                'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Document'
-            );
-        } elseif (class_exists(AnnotationDriver::class) && interface_exists(Reader::class)) {
-            $driverChain->addDriver(
-                new AnnotationDriver(new AnnotationReader(), [__DIR__.'/Fixtures/Document']),
-                'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Document'
-            );
-        } else {
-            $this->markTestSkipped('Annotation and attribute drivers are not available for doctrine/mongodb-odm');
-        }
+        $attributeDriver = new AttributeDriver([__DIR__.'/Fixtures/Document']);
 
-        $driverChain->addDriver(
-            new SimplifiedXmlDriver(
-                [(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Document'],
-                '.mongodb.xml'
-            ),
-            'Gesdinet\\JWTRefreshTokenBundle\\Document'
+        $xmlDriver = new SimplifiedXmlDriver(
+            [(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Document'],
+            '.mongodb.xml'
         );
+
+        $driverChain->addDriver($attributeDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Document');
+        $driverChain->addDriver($xmlDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Document');
 
         $config->setMetadataDriverImpl($driverChain);
 
