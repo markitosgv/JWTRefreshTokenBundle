@@ -28,16 +28,11 @@ final class ConfigurationTest extends TestCase
             [
                 'ttl' => 123,
                 'ttl_update' => true,
-                'firewall' => 'main',
-                'user_provider' => 'my.user_provider',
-                'user_identity_field' => 'email',
                 'manager_type' => 'mongodb',
                 'refresh_token_class' => RefreshToken::class,
                 'object_manager' => 'doctrine_mongodb.odm.document_manager',
-                'user_checker' => 'my.user_checker',
                 'single_use' => true,
                 'token_parameter_name' => 'the_token',
-                'doctrine_mappings' => false,
                 'cookie' => [
                     'enabled' => true,
                     'same_site' => 'strict',
