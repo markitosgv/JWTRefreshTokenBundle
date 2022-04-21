@@ -36,7 +36,7 @@ class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.cookie', $mergedConfig['cookie'] ?? []);
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $mergedConfig['return_expiration']);
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $mergedConfig['return_expiration_parameter_name']);
-        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $mergedConfig['refresh_token_class']);
+        $container->setParameter('gesdinet_jwt_refresh_token.refresh_token.class', $mergedConfig['refresh_token_class']);
 
         /*
          * Configuration preference:
@@ -53,6 +53,6 @@ class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             throw new RuntimeException('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
         }
 
-        $container->setAlias('gesdinet.jwtrefreshtoken.object_manager', $objectManager);
+        $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $objectManager);
     }
 }
