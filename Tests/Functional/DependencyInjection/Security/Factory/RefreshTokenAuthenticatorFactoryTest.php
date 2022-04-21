@@ -34,7 +34,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             'test',
             [
                 'check_path' => '/login_check',
-                'invalidate_token_on_logout' => false,
+                'invalidate_token_on_logout' => true,
             ],
             'app.user_provider'
         );
@@ -88,10 +88,10 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             $this->container,
             'test',
             [
-                'check_path'      => '/login_check',
+                'check_path' => '/login_check',
                 'success_handler' => 'app.security.authentication.success_handler',
                 'failure_handler' => 'app.security.authentication.failure_handler',
-                'invalidate_token_on_logout' => false,
+                'invalidate_token_on_logout' => true,
             ],
             'app.user_provider'
         );

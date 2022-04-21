@@ -43,7 +43,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
                 ->scalarNode('success_handler')->end()
                 ->scalarNode('failure_handler')->end()
                 ->booleanNode('invalidate_token_on_logout')
-                    ->defaultFalse() // TODO - Enable by default in 2.0.
+                    ->defaultTrue()
                     ->info('When enabled, the refresh token will be invalided on logout.')
                 ->end()
                 /*

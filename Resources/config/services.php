@@ -127,6 +127,5 @@ return static function (ContainerConfigurator $container) {
             service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
             param('gesdinet_jwt_refresh_token.token_parameter_name'),
             param('gesdinet_jwt_refresh_token.cookie'),
-            param('gesdinet_jwt_refresh_token.logout_firewall_context'),
         ]);
 };
