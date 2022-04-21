@@ -29,3 +29,4 @@ The below guide will assist in upgrading from the 1.x versions to 2.0.
     - `refresh_token_entity` - Use the `refresh_token_class` node instead
     - `entity_manager` - Use the `object_manager` node instead
     - `doctrine_mappings` - No replacement
+    - `manager_type` - Set the `object_manager` when needed

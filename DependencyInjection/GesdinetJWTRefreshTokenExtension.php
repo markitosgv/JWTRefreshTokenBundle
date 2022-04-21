@@ -14,44 +14,47 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class GesdinetJWTRefreshTokenExtension extends Extension
+class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
-    public function load(array $configs, ContainerBuilder $container): void
+    protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        $config = $this->processConfiguration($this->getConfiguration($configs, $container), $configs);
-
         $loader = new Loader\PhpFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.php');
 
         $container->registerForAutoconfiguration(ExtractorInterface::class)->addTag('gesdinet_jwt_refresh_token.request_extractor');
 
-        $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
-        $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $config['ttl_update']);
-        $container->setParameter('gesdinet_jwt_refresh_token.single_use', $config['single_use']);
-        $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $config['token_parameter_name']);
-        $container->setParameter('gesdinet_jwt_refresh_token.cookie', $config['cookie'] ?? []);
+        $container->setParameter('gesdinet_jwt_refresh_token.ttl', $mergedConfig['ttl']);
+        $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $mergedConfig['ttl_update']);
+        $container->setParameter('gesdinet_jwt_refresh_token.single_use', $mergedConfig['single_use']);
+        $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $mergedConfig['token_parameter_name']);
+        $container->setParameter('gesdinet_jwt_refresh_token.cookie', $mergedConfig['cookie'] ?? []);
         $container->setParameter('gesdinet_jwt_refresh_token.logout_firewall_context', sprintf(
             'security.firewall.map.context.%s',
-            $config['logout_firewall']
+            $mergedConfig['logout_firewall']
         ));
-        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $config['return_expiration']);
-        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $config['return_expiration_parameter_name']);
-        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $config['refresh_token_class']);
+        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $mergedConfig['return_expiration']);
+        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $mergedConfig['return_expiration_parameter_name']);
+        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $mergedConfig['refresh_token_class']);
 
-        $objectManager = 'doctrine.orm.entity_manager';
-
-        // Change the object manager to the MongoDB ODM if the configuration explicitly sets it or if the ORM is not installed and the MongoDB ODM is
-        if ('mongodb' === strtolower($config['manager_type']) || (!class_exists(EntityManager::class) && class_exists(DocumentManager::class))) {
+        /*
+         * Configuration preference:
+         * - Explicitly configured "object_manager" node
+         * - Feature detection (ORM then MongoDB ODM)
+         */
+        if (null !== $mergedConfig['object_manager']) {
+            $objectManager = $mergedConfig['object_manager'];
+        } elseif (ContainerBuilder::willBeAvailable('doctrine/orm', EntityManager::class, ['doctrine/doctrine-bundle'])) {
+            $objectManager = 'doctrine.orm.entity_manager';
+        } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
             $objectManager = 'doctrine_mongodb.odm.document_manager';
-        }
-
-        if (null !== $config['object_manager']) {
-            $objectManager = $config['object_manager'];
+        } else {
+            throw new RuntimeException('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
         }
 
         $container->setAlias('gesdinet.jwtrefreshtoken.object_manager', $objectManager);

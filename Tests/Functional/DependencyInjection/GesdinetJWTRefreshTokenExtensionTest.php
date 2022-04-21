@@ -20,6 +20,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
     {
         $this->load([
             'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
         ]);
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.ttl', 2592000);
