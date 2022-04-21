@@ -7,6 +7,10 @@ The below guide will assist in upgrading from the 1.x versions to 2.0.
 - Symfony 5.4, 6.4, or 7.2+
 - PHP 8.2 or later
 
+## General changes
+
+- The `Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator::supports()` method now only checks if the request path matches the `check_path` configuration for the authenticator
+
 ## Removed Features
 
 - Removed classes supporting authentication for Symfony 5.3 and earlier

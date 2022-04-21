@@ -36,17 +36,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         $builder
             ->children()
                 ->scalarNode('check_path')
-                    ->defaultNull()
-                    ->validate()
-                        ->ifTrue(static fn ($v): bool => null === $v)
-                        ->then(static function () {
-                            trigger_deprecation(
-                                'gesdinet/jwt-refresh-token-bundle',
-                                '1.1',
-                                'Not setting the "check_path" option for the "refresh_jwt" authenticator is deprecated, as of 2.0 the authenticator will only check the request path.'
-                            );
-                        })
-                    ->end()
+                    ->defaultValue('/login_check')
                 ->end()
                 ->scalarNode('provider')->end()
                 ->scalarNode('success_handler')->end()
@@ -75,7 +65,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
 
         // When per-authenticator configuration is supported, this array should be updated to check the $config values before falling back to the bundle parameters
         $options = [
-            'check_path' => $config['check_path'] ?? null,
+            'check_path' => $config['check_path'],
             'ttl' => new Parameter('gesdinet_jwt_refresh_token.ttl'),
             'ttl_update' => new Parameter('gesdinet_jwt_refresh_token.ttl_update'),
             'token_parameter_name' => new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),

@@ -128,30 +128,6 @@ class RefreshTokenAuthenticatorTest extends TestCase
         $this->assertFalse($this->refreshTokenAuthenticator->supports($request));
     }
 
-    /**
-     * @group legacy
-     */
-    public function testReportsTheRequestAsSupportedWhenATokenIsPresent(): void
-    {
-        /** @var Request|MockObject $request */
-        $request = $this->createMock(Request::class);
-        $token = 'my-refresh-token';
-        $this->createExtractorGetRefreshTokenExpectation($request, $token);
-
-        $this->assertTrue($this->refreshTokenAuthenticator->supports($request));
-    }
-
-    /**
-     * @group legacy
-     */
-    public function testReportsTheRequestAsNotSupportedWhenATokenIsNotPresent(): void
-    {
-        /** @var Request|MockObject $request */
-        $request = $this->createMock(Request::class);
-        $this->createExtractorGetRefreshTokenExpectation($request, null);
-        $this->assertFalse($this->refreshTokenAuthenticator->supports($request));
-    }
-
     public function testAuthenticatesTheRequestWhenTtlUpdateIsDisabled(): void
     {
         /** @var Request|MockObject $request */
