@@ -54,6 +54,6 @@ class GesdinetJWTRefreshTokenExtension extends Extension
             $objectManager = $config['object_manager'];
         }
 
-        $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
+        $container->setAlias('gesdinet.jwtrefreshtoken.object_manager', $objectManager);
     }
 }
