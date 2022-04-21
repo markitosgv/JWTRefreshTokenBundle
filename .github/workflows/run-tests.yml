@@ -9,54 +9,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
-        symfony: ['5.4.*', '6.0.*', '6.1.*', '6.2.*', '6.3.*', '6.4.*', '7.0.*', '7.1.*', '7.2.*']
+        php: ['8.2', '8.3', '8.4']
+        symfony: ['5.4.*', '6.4.*', '7.2.*', '7.3.*']
         composer-flags: ['--prefer-stable']
         can-fail: [false]
         extensions: ['curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip']
         include:
-          - php: '7.4'
+          - php: '8.2'
             symfony: '5.4.*'
             composer-flags: '--prefer-stable --prefer-lowest'
             can-fail: false
             extensions: 'curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip'
-        exclude:
-          - php: '7.4'
-            symfony: '6.0.*'
-          - php: '7.4'
-            symfony: '6.1.*'
-          - php: '7.4'
-            symfony: '6.2.*'
-          - php: '7.4'
-            symfony: '6.3.*'
-          - php: '7.4'
-            symfony: '6.4.*'
-          - php: '7.4'
-            symfony: '7.0.*'
-          - php: '7.4'
-            symfony: '7.1.*'
-          - php: '7.4'
-            symfony: '7.2.*'
-          - php: '8.0'
-            symfony: '6.1.*'
-          - php: '8.0'
-            symfony: '6.2.*'
-          - php: '8.0'
-            symfony: '6.3.*'
-          - php: '8.0'
-            symfony: '6.4.*'
-          - php: '8.0'
-            symfony: '7.0.*'
-          - php: '8.0'
-            symfony: '7.1.*'
-          - php: '8.0'
-            symfony: '7.2.*'
-          - php: '8.1'
-            symfony: '7.0.*'
-          - php: '8.1'
-            symfony: '7.1.*'
-          - php: '8.1'
-            symfony: '7.2.*'
 
     name: "PHP ${{ matrix.php }} - Symfony ${{ matrix.symfony }}${{ matrix.composer-flags != '' && format(' - Composer {0}', matrix.composer-flags) || '' }}"
 
@@ -84,10 +47,6 @@ jobs:
         with:
           version: '6.0'
           topology: server
-
-      - name: Remove Guard (Symfony >=6.0)
-        if: contains(fromJSON('["6.0.*", "6.1.*", "6.2.*", "6.3.*", "6.4.*", "7.0.*", "7.1.*", "7.2.*"]'), matrix.symfony)
-        run: composer remove --dev --no-update symfony/security-guard
 
       - name: Install dependencies
         run: composer update ${{ matrix.composer-flags }} --prefer-dist --no-suggest
