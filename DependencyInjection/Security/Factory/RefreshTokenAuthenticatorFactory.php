@@ -76,7 +76,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
             'token_parameter_name' => new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
         ];
 
-        $container->setDefinition($authenticatorId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.refresh_token_authenticator'))
+        $container->setDefinition($authenticatorId, new ChildDefinition('gesdinet_jwt_refresh_token.security.refresh_token_authenticator'))
             ->replaceArgument(3, new Reference($userProviderId))
             ->replaceArgument(4, new Reference($this->createAuthenticationSuccessHandler($container, $firewallName, $config)))
             ->replaceArgument(5, new Reference($this->createAuthenticationFailureHandler($container, $firewallName, $config)))
@@ -100,7 +100,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
                 ->replaceArgument(1, [])
                 ->replaceArgument(2, $id);
         } else {
-            $container->setDefinition($successHandlerId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.authentication.success_handler'))
+            $container->setDefinition($successHandlerId, new ChildDefinition('gesdinet_jwt_refresh_token.security.authentication.success_handler'))
                 ->addMethodCall('setFirewallName', [$id]);
         }
 
@@ -116,7 +116,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
                 ->replaceArgument(0, new Reference($config['failure_handler']))
                 ->replaceArgument(1, []);
         } else {
-            $container->setDefinition($failureHandlerId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.authentication.failure_handler'));
+            $container->setDefinition($failureHandlerId, new ChildDefinition('gesdinet_jwt_refresh_token.security.authentication.failure_handler'));
         }
 
         return $failureHandlerId;
