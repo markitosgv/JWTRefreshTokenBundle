@@ -18,7 +18,9 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
 
     public function test_container_is_loaded_with_default_configuration(): void
     {
-        $this->load();
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+        ]);
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.ttl', 2592000);
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.ttl_update', false);
