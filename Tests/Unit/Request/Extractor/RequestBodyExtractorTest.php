@@ -2,7 +2,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 
-use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestBodyExtractor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -15,13 +14,7 @@ class RequestBodyExtractorTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->requestBodyExtractor = new RequestBodyExtractor();
-    }
-
-    public function testIsAnExtractor(): void
-    {
-        $this->assertInstanceOf(ExtractorInterface::class, $this->requestBodyExtractor);
     }
 
     public function testGetsTheTokenFromTheRequestBody(): void

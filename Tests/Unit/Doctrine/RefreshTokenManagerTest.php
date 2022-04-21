@@ -57,11 +57,6 @@ class RefreshTokenManagerTest extends TestCase
         );
     }
 
-    public function testIsARefreshTokenManager()
-    {
-        $this->assertInstanceOf(RefreshTokenManagerInterface::class, $this->refreshTokenManager);
-    }
-
     public function testRetrievesATokenFromStorage()
     {
         $token = 'token';

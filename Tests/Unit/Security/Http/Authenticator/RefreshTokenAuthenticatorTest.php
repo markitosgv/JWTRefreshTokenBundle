@@ -22,12 +22,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
-use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
-use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -62,10 +60,6 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     protected function setUp(): void
     {
-        if (!interface_exists(AuthenticatorInterface::class)) {
-            self::markTestSkipped('Test requires Symfony 5.4 and later.');
-        }
-
         $this->refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $this->extractor = $this->createMock(ExtractorInterface::class);
         $this->successHandler = $this->createMock(AuthenticationSuccessHandlerInterface::class);
@@ -82,16 +76,6 @@ class RefreshTokenAuthenticatorTest extends TestCase
             [],
             $this->httpUtils
         );
-    }
-
-    public function testAnAuthenticator(): void
-    {
-        $this->assertInstanceOf(AuthenticatorInterface::class, $this->refreshTokenAuthenticator);
-    }
-
-    public function testAnAuthenticationEntryPoint(): void
-    {
-        $this->assertInstanceOf(AuthenticationEntryPointInterface::class, $this->refreshTokenAuthenticator);
     }
 
     public function testReportsTheRequestAsSupportedWhenConfiguredToCheckThePathForPostRequestsOnly(): void
@@ -173,7 +157,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
             ->method('save')
             ->with($this->equalTo($refreshToken));
 
-        $this->assertInstanceOf(Passport::class, $this->refreshTokenAuthenticator->authenticate($request));
+        $this->assertInstanceOf(interface_exists(PassportInterface::class) ? PassportInterface::class : Passport::class, $this->refreshTokenAuthenticator->authenticate($request));
     }
 
     public function testDoesNotAuthenticateTheRequestWhenTheTokenIsNotValid(): void
@@ -257,10 +241,6 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testCreatesTheToken(): void
     {
-        if (!class_exists(Passport::class)) {
-            $this->markTestSkipped('Test only applies to Symfony 5.4 and later.');
-        }
-
         $username = 'username';
         $user = UserCreator::create($username);
         $passport = $this->createUserPassport($username, $user);
@@ -272,10 +252,6 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotCreateTheTokenWhenThePassportDoesNotHaveTheRefreshToken(): void
     {
-        if (!class_exists(Passport::class)) {
-            $this->markTestSkipped('Test only applies to Symfony 5.4 and later.');
-        }
-
         $username = 'username';
         $user = UserCreator::create($username);
         $passport = $this->createUserPassport($username, $user);
