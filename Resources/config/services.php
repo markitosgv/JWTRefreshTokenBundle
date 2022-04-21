@@ -18,6 +18,8 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
+use Lexik\Bundle\JWTAuthenticationBundle\Events;
+use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 return static function (ContainerConfigurator $container) {
     $services = $container->services();
@@ -37,7 +39,7 @@ return static function (ContainerConfigurator $container) {
             param('gesdinet_jwt_refresh_token.return_expiration_parameter_name'),
         ])
         ->tag('kernel.event_listener', [
-            'event' => 'lexik_jwt_authentication.on_authentication_success',
+            'event' => Events::AUTHENTICATION_SUCCESS,
             'method' => 'attachRefreshToken',
         ]);
 
@@ -125,5 +127,6 @@ return static function (ContainerConfigurator $container) {
             service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
             param('gesdinet_jwt_refresh_token.token_parameter_name'),
             param('gesdinet_jwt_refresh_token.cookie'),
+            param('gesdinet_jwt_refresh_token.logout_firewall_context'),
         ]);
 };

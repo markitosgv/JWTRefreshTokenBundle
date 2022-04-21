@@ -21,11 +21,9 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
      */
     public function findInvalid($datetime = null)
     {
-        $datetime = (null === $datetime) ? new DateTime() : $datetime;
-
         return $this->createQueryBuilder('u')
             ->where('u.valid < :datetime')
-            ->setParameter(':datetime', $datetime)
+            ->setParameter(':datetime', $datetime ?? new DateTime())
             ->getQuery()
             ->getResult();
     }

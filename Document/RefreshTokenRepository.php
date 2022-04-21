@@ -21,11 +21,10 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
      */
     public function findInvalid($datetime = null)
     {
-        $datetime = (null === $datetime) ? new DateTime() : $datetime;
-
-        $queryBuilder = $this->createQueryBuilder()
-            ->field('valid')->lt($datetime);
-
-        return $queryBuilder->getQuery()->execute();
+        return $this->createQueryBuilder()
+            ->field('valid')
+            ->lt($datetime ?? new DateTime())
+            ->getQuery()
+            ->execute();
     }
 }
