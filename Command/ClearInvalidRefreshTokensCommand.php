@@ -23,11 +23,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'gesdinet:jwt:clear', description: 'Clear invalid refresh tokens.')]
 class ClearInvalidRefreshTokensCommand extends Command
 {
-    /**
-     * @deprecated
-     */
-    protected static $defaultName = 'gesdinet:jwt:clear';
-
     private RefreshTokenManagerInterface $refreshTokenManager;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
@@ -39,23 +34,14 @@ class ClearInvalidRefreshTokensCommand extends Command
 
     protected function configure(): void
     {
-        $this
-            ->setDescription('Clear invalid refresh tokens.')
-            ->addArgument('datetime', InputArgument::OPTIONAL, 'An optional date, all tokens before this date will be removed; the value should be able to be parsed by DateTime.');
+        $this->addArgument('datetime', InputArgument::OPTIONAL, 'An optional date, all tokens before this date will be removed; the value should be able to be parsed by DateTime.', 'now');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        /** @var string|null $datetime */
-        $datetime = $input->getArgument('datetime');
-
-        if (null === $datetime) {
-            $datetime = new \DateTime();
-        } else {
-            $datetime = new \DateTime($datetime);
-        }
+        $datetime = new \DateTime($input->getArgument('datetime'));
 
         $revokedTokens = $this->refreshTokenManager->revokeAllInvalid($datetime);
 

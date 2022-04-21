@@ -19,14 +19,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(name: 'gesdinet:jwt:revoke', description: 'Revoke a refresh token')]
+#[AsCommand(name: 'gesdinet:jwt:revoke', description: 'Revoke a refresh token.')]
 class RevokeRefreshTokenCommand extends Command
 {
-    /**
-     * @deprecated
-     */
-    protected static $defaultName = 'gesdinet:jwt:revoke';
-
     private RefreshTokenManagerInterface $refreshTokenManager;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
@@ -38,9 +33,7 @@ class RevokeRefreshTokenCommand extends Command
 
     protected function configure(): void
     {
-        $this
-            ->setDescription('Revoke a refresh token')
-            ->addArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke');
+        $this->addArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
