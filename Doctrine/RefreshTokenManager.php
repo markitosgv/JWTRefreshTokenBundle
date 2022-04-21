@@ -12,7 +12,6 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
-use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 
@@ -36,7 +35,7 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * @param class-string<RefreshTokenInterface> $class
      *
-     * @throws \LogicException if the object repository does not implement `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface`
+     * @throws \LogicException if the object repository does not implement {@see RefreshTokenRepositoryInterface}
      */
     public function __construct(ObjectManager $om, $class)
     {

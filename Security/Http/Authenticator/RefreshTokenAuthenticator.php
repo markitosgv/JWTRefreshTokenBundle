@@ -138,7 +138,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
     }
 
     /**
-     * @deprecated to be removed in 2.0, use `createToken()` instead
+     * @deprecated to be removed when dropping support for Symfony 5.4, use {@see createToken()} instead
      */
     public function createAuthenticatedToken(PassportInterface $passport, string $firewallName): TokenInterface
     {
@@ -148,7 +148,19 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
 
         trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '"%s()" is deprecated, use "%s::createToken()" instead.', __METHOD__, __CLASS__);
 
-        return $this->createToken($passport, $firewallName);
+        /** @var RefreshTokenInterface|null $refreshToken */
+        $refreshToken = $passport->getAttribute('refreshToken');
+
+        if (null === $refreshToken) {
+            throw new LogicException('Passport does not contain the refresh token.');
+        }
+
+        return new PostRefreshTokenAuthenticationToken(
+            $passport->getUser(),
+            $firewallName,
+            $passport->getUser()->getRoles(),
+            $refreshToken
+        );
     }
 
     public function createToken(Passport $passport, string $firewallName): TokenInterface
