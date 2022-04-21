@@ -4,7 +4,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
@@ -26,13 +25,7 @@ abstract class ODMTestCase extends TestCase
     protected function setUp(): void
     {
         $config = new Configuration();
-
-        if (method_exists($config, 'setMetadataCache')) {
-            $config->setMetadataCache(new ArrayAdapter());
-        } else {
-            $config->setMetadataCacheImpl(DoctrineProvider::wrap(new ArrayAdapter()));
-        }
-
+        $config->setMetadataCache(new ArrayAdapter());
         $config->setProxyDir(sys_get_temp_dir().'/JWTRefreshTokenBundle/_files/Proxies');
         $config->setProxyNamespace(__NAMESPACE__.'\Proxies');
         $config->setHydratorDir(sys_get_temp_dir().'/JWTRefreshTokenBundle/_files/Hydrators');
@@ -53,6 +46,8 @@ abstract class ODMTestCase extends TestCase
                 new AnnotationDriver(new AnnotationReader(), [__DIR__.'/Fixtures/Document']),
                 'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Document'
             );
+        } else {
+            $this->markTestSkipped('Annotation and attribute drivers are not available for doctrine/mongodb-odm');
         }
 
         $driverChain->addDriver(
