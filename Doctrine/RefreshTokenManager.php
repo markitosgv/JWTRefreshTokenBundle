@@ -55,22 +55,6 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
-     * Creates an empty RefreshTokenInterface instance.
-     *
-     * @return RefreshTokenInterface
-     *
-     * @deprecated to be removed in 2.0, use a `Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface` instead.
-     */
-    public function create()
-    {
-        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '%s() is deprecated and will be removed in 2.0, use a "%s" instance to create new %s objects.', __METHOD__, RefreshTokenGeneratorInterface::class, RefreshTokenInterface::class);
-
-        $class = $this->getClass();
-
-        return new $class();
-    }
-
-    /**
      * @param string $refreshToken
      *
      * @return RefreshTokenInterface|null

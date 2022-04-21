@@ -20,15 +20,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Model;
 interface RefreshTokenManagerInterface
 {
     /**
-     * Creates an empty RefreshTokenInterface instance.
-     *
-     * @return RefreshTokenInterface
-     *
-     * @deprecated to be removed in 2.0, use a `Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface` instead.
-     */
-    public function create();
-
-    /**
      * @param string $refreshToken
      *
      * @return RefreshTokenInterface|null
