@@ -32,7 +32,7 @@
     "doctrine/annotations": "^1.13|^2.0",
     "doctrine/cache": "^1.11|^2.0",
     "doctrine/mongodb-odm": "^2.3",
-    "doctrine/orm": "^2.12|^3.0",
+    "doctrine/orm": "^2.14|^3.0",
     "matthiasnoback/symfony-config-test": "^5.1",
     "matthiasnoback/symfony-dependency-injection-test": "^5.1",
     "phpunit/phpunit": "^9.5",
@@ -40,7 +40,7 @@
   },
   "conflict": {
     "doctrine/mongodb-odm": "<2.3",
-    "doctrine/orm": "<2.12"
+    "doctrine/orm": "<2.14"
   },
   "config": {
     "allow-plugins": {
