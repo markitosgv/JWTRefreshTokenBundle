@@ -76,14 +76,8 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
     /**
      * {@inheritdoc}
      */
-    public function setRefreshToken($refreshToken = null)
+    public function setRefreshToken($refreshToken)
     {
-        if (null === $refreshToken || '' === $refreshToken) {
-            trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'Passing an empty token to %s() to automatically generate a token is deprecated.', __METHOD__);
-
-            $refreshToken = bin2hex(random_bytes(64));
-        }
-
         $this->refreshToken = $refreshToken;
 
         return $this;

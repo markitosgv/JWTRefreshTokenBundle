@@ -26,11 +26,11 @@ interface RefreshTokenInterface extends \Stringable
     public function getId();
 
     /**
-     * @param string|null $refreshToken
+     * @param string $refreshToken
      *
      * @return $this
      */
-    public function setRefreshToken($refreshToken = null);
+    public function setRefreshToken($refreshToken);
 
     /**
      * @return string|null
