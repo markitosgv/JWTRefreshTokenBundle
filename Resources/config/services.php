@@ -19,7 +19,6 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationFa
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
-use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 return static function (ContainerConfigurator $container) {
     $services = $container->services();
