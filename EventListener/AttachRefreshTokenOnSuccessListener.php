@@ -23,58 +23,32 @@ use Symfony\Component\HttpKernel\Kernel;
 
 final class AttachRefreshTokenOnSuccessListener
 {
-    /**
-     * @var RefreshTokenManagerInterface
-     */
-    protected $refreshTokenManager;
+    private RefreshTokenManagerInterface $refreshTokenManager;
 
-    /**
-     * @var int
-     */
-    protected $ttl;
+    private int $ttl;
 
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
+    private RequestStack $requestStack;
 
-    /**
-     * @var string
-     */
-    protected $tokenParameterName;
+    private string $tokenParameterName;
 
-    /**
-     * @var bool
-     */
-    protected $singleUse;
+    private bool $singleUse;
 
-    /**
-     * @var RefreshTokenGeneratorInterface
-     */
-    protected $refreshTokenGenerator;
+    private RefreshTokenGeneratorInterface $refreshTokenGenerator;
 
-    /**
-     * @var ExtractorInterface
-     */
-    protected $extractor;
+    private ExtractorInterface $extractor;
 
-    protected array $cookieSettings;
+    private array $cookieSettings;
 
-    protected bool $returnExpiration;
+    private bool $returnExpiration;
 
-    protected string $returnExpirationParameterName;
+    private string $returnExpirationParameterName;
 
-    /**
-     * @param int    $ttl
-     * @param string $tokenParameterName
-     * @param bool   $singleUse
-     */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
-        $ttl,
+        int $ttl,
         RequestStack $requestStack,
-        $tokenParameterName,
-        $singleUse,
+        string $tokenParameterName,
+        bool $singleUse,
         RefreshTokenGeneratorInterface $refreshTokenGenerator,
         ExtractorInterface $extractor,
         array $cookieSettings,

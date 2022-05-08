@@ -15,30 +15,18 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class AbstractRefreshToken implements RefreshTokenInterface
 {
-    /**
-     * @var int|string|null
-     */
-    protected $id;
+    protected int|string|null $id = null;
 
-    /**
-     * @var string|null
-     */
-    protected $refreshToken;
+    protected ?string $refreshToken = null;
 
-    /**
-     * @var string|null
-     */
-    protected $username;
+    protected ?string $username = null;
 
-    /**
-     * @var \DateTimeInterface|null
-     */
-    protected $valid;
+    protected ?\DateTimeInterface $valid = null;
 
     /**
      * Creates a new model instance based on the provided details.
      */
-    public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): RefreshTokenInterface
+    public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): static
     {
         $valid = new \DateTime();
 
@@ -57,80 +45,53 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $model;
     }
 
-    /**
-     * @return string Refresh Token
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getRefreshToken() ?: '';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
+    public function getId(): int|string|null
     {
         return $this->id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setRefreshToken($refreshToken)
+    public function setRefreshToken(string $refreshToken): static
     {
         $this->refreshToken = $refreshToken;
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getRefreshToken()
+    public function getRefreshToken(): ?string
     {
         return $this->refreshToken;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setValid($valid)
+    public function setValid(\DateTimeInterface $valid): static
     {
         $this->valid = $valid;
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getValid()
+    public function getValid(): ?\DateTimeInterface
     {
         return $this->valid;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setUsername($username)
+    public function setUsername(string $username): static
     {
         $this->username = $username;
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getUsername()
+    public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isValid()
+    public function isValid(): bool
     {
         return null !== $this->valid && $this->valid >= new \DateTime();
     }

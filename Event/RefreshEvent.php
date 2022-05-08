@@ -30,22 +30,9 @@ final class RefreshEvent extends Event
         $this->firewallName = $firewallName;
     }
 
-    /**
-     * @return RefreshTokenInterface
-     */
-    public function getRefreshToken()
+    public function getRefreshToken(): RefreshTokenInterface
     {
         return $this->refreshToken;
-    }
-
-    /**
-     * @return TokenInterface
-     *
-     * @deprecated use getToken() instead
-     */
-    public function getPreAuthenticatedToken()
-    {
-        return $this->getToken();
     }
 
     public function getToken(): TokenInterface
