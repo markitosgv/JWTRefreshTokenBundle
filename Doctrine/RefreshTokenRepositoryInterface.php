@@ -4,7 +4,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use DateTimeInterface;
 use Doctrine\Persistence\ObjectRepository;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
  * @template T of RefreshTokenInterface
@@ -14,9 +13,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 interface RefreshTokenRepositoryInterface extends ObjectRepository
 {
     /**
-     * @param DateTimeInterface|null $datetime
-     *
      * @return T[]
      */
-    public function findInvalid($datetime = null);
+    public function findInvalid(?DateTimeInterface $datetime = null): array;
 }

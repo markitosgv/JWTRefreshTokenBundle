@@ -12,6 +12,8 @@ The below guide will assist in upgrading from the 1.x versions to 2.0.
 - The `refresh_token_class` config node is now required and validates that the class implements `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface`
 - The `Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator::supports()` method now only checks if the request path matches the `check_path` configuration for the authenticator
 - Standardized all container IDs to use the `gesdinet_jwt_refresh_token` prefix
+- Made several classes final
+- Added parameter and return typehints
 
 ## Removed Features
 

@@ -14,6 +14,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class LogoutEventListener
@@ -57,7 +58,7 @@ final class LogoutEventListener
                         'code' => 400,
                         'message' => 'No refresh_token found.',
                     ],
-                    JsonResponse::HTTP_BAD_REQUEST
+                    Response::HTTP_BAD_REQUEST
                 )
             );
 
@@ -73,7 +74,7 @@ final class LogoutEventListener
                         'code' => 200,
                         'message' => 'The supplied refresh_token is already invalid.',
                     ],
-                    JsonResponse::HTTP_OK
+                    Response::HTTP_OK
                 )
             );
         } else {
@@ -84,7 +85,7 @@ final class LogoutEventListener
                         'code' => 200,
                         'message' => 'The supplied refresh_token has been invalidated.',
                     ],
-                    JsonResponse::HTTP_OK
+                    Response::HTTP_OK
                 )
             );
         }

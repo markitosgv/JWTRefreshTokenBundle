@@ -25,10 +25,7 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
 
     private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * @var string|null
-     */
-    protected $firewallName;
+    private ?string $firewallName = null;
 
     public function __construct(
         AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler,

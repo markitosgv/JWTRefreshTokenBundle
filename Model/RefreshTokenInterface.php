@@ -11,8 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
-use Stringable;
 use DateTimeInterface;
+use Stringable;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 interface RefreshTokenInterface extends Stringable
@@ -20,51 +20,21 @@ interface RefreshTokenInterface extends Stringable
     /**
      * Creates a new model instance based on the provided details.
      */
-    public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): RefreshTokenInterface;
+    public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): static;
 
-    /**
-     * @return int|string|null
-     */
-    public function getId();
+    public function getId(): int|string|null;
 
-    /**
-     * @param string $refreshToken
-     *
-     * @return $this
-     */
-    public function setRefreshToken($refreshToken);
+    public function setRefreshToken(string $refreshToken): static;
 
-    /**
-     * @return string|null
-     */
-    public function getRefreshToken();
+    public function getRefreshToken(): ?string;
 
-    /**
-     * @param DateTimeInterface|null $valid
-     *
-     * @return $this
-     */
-    public function setValid($valid);
+    public function setValid(DateTimeInterface $valid): static;
 
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getValid();
+    public function getValid(): ?DateTimeInterface;
 
-    /**
-     * @param string|null $username
-     *
-     * @return $this
-     */
-    public function setUsername($username);
+    public function setUsername(string $username): static;
 
-    /**
-     * @return string|null
-     */
-    public function getUsername();
+    public function getUsername(): ?string;
 
-    /**
-     * @return bool
-     */
-    public function isValid();
+    public function isValid(): bool;
 }
