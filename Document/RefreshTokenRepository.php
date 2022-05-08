@@ -13,9 +13,9 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 class RefreshTokenRepository extends DocumentRepository implements RefreshTokenRepositoryInterface
 {
     /**
-     * @return RefreshToken[]
+     * @return iterable<RefreshToken>
      */
-    public function findInvalid(?\DateTimeInterface $datetime = null): array
+    public function findInvalid(?\DateTimeInterface $datetime = null): iterable
     {
         return $this->createQueryBuilder()
             ->field('valid')

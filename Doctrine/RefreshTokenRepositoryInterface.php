@@ -12,7 +12,7 @@ use Doctrine\Persistence\ObjectRepository;
 interface RefreshTokenRepositoryInterface extends ObjectRepository
 {
     /**
-     * @return T[]
+     * @return iterable<T>
      */
-    public function findInvalid(?\DateTimeInterface $datetime = null): array;
+    public function findInvalid(?\DateTimeInterface $datetime = null): iterable;
 }
