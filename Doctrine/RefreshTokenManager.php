@@ -17,7 +17,7 @@ use LogicException;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 
-class RefreshTokenManager implements RefreshTokenManagerInterface
+final class RefreshTokenManager implements RefreshTokenManagerInterface
 {
     /**
      * @var ObjectManager

@@ -16,7 +16,7 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class LogoutEventListener
+final class LogoutEventListener
 {
     private RefreshTokenManagerInterface $refreshTokenManager;
     private ExtractorInterface $refreshTokenExtractor;

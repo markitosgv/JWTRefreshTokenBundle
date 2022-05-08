@@ -15,7 +15,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class RefreshEvent extends Event
+final class RefreshEvent extends Event
 {
     private RefreshTokenInterface $refreshToken;
 

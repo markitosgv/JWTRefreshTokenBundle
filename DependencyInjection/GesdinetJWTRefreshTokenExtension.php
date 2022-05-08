@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
+final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {

@@ -19,7 +19,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterface
+final class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterface
 {
     private EventDispatcherInterface $eventDispatcher;
 

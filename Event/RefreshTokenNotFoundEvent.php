@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class RefreshTokenNotFoundEvent extends Event
+final class RefreshTokenNotFoundEvent extends Event
 {
     private AuthenticationException $exception;
 
