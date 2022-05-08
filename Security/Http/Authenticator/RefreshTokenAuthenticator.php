@@ -38,7 +38,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
+final class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
     private RefreshTokenManagerInterface $refreshTokenManager;
 

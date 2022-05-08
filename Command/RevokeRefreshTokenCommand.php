@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(name: 'gesdinet:jwt:revoke', description: 'Revoke a refresh token.')]
-class RevokeRefreshTokenCommand extends Command
+final class RevokeRefreshTokenCommand extends Command
 {
     private RefreshTokenManagerInterface $refreshTokenManager;
 

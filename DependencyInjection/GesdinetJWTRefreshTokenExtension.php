@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
+final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {

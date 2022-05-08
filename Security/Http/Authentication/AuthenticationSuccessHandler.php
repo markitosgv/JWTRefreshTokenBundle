@@ -19,7 +19,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterface
+final class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
     private AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler;
 
