@@ -131,16 +131,21 @@ class AttachRefreshTokenOnSuccessListener
         // Set or create the refreshTokenString
         if ($refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
+
+            if ($this->returnExpiration) {
+                $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
+                $data[$this->returnExpirationParameterName] = ($refreshToken) ? $refreshToken->getValid()->getTimestamp() : 0;
+            }
         } else {
             $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, $this->ttl);
 
             $this->refreshTokenManager->save($refreshToken);
             $refreshTokenString = $refreshToken->getRefreshToken();
             $data[$this->tokenParameterName] = $refreshTokenString;
-        }
 
-        if ($this->returnExpiration) {
-            $data[$this->returnExpirationParameterName] = time() + $this->ttl;
+            if ($this->returnExpiration) {
+                $data[$this->returnExpirationParameterName] = $refreshToken->getValid()->getTimestamp();
+            }
         }
 
         // Add a response cookie if enabled
