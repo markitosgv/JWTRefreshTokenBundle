@@ -31,7 +31,7 @@
   },
   "require-dev": {
     "doctrine/cache": "^1.11|^2.0",
-    "doctrine/mongodb-odm": "^2.0",
+    "doctrine/mongodb-odm": "^2.2",
     "doctrine/orm": "^2.7",
     "matthiasnoback/symfony-config-test": "^4.2",
     "matthiasnoback/symfony-dependency-injection-test": "^4.2",
@@ -40,7 +40,7 @@
     "symfony/security-guard": "^4.4|^5.4"
   },
   "conflict": {
-    "doctrine/mongodb-odm": "<2.0",
+    "doctrine/mongodb-odm": "<2.2",
     "doctrine/orm": "<2.7"
   },
   "config": {
