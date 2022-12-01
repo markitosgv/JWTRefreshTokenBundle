@@ -16,7 +16,7 @@ use Doctrine\ORM\EntityManager;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Exception\RuntimeException;;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
