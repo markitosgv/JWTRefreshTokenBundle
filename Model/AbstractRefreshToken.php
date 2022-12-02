@@ -41,7 +41,13 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
     public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): RefreshTokenInterface
     {
         $valid = new \DateTime();
-        $valid->modify('+'.$ttl.' seconds');
+
+        // Explicitly check for a negative number based on a behavior change in PHP 8.2, see https://github.com/php/php-src/issues/9950
+        if ($ttl > 0) {
+            $valid->modify('+'.$ttl.' seconds');
+        } elseif ($ttl < 0) {
+            $valid->modify($ttl.' seconds');
+        }
 
         $model = new static();
         $model->setRefreshToken($refreshToken);

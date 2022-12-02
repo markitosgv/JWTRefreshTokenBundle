@@ -116,7 +116,14 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
 
         if ($this->options['ttl_update']) {
             $expirationDate = new \DateTime();
-            $expirationDate->modify(sprintf('+%d seconds', $this->options['ttl']));
+
+            // Explicitly check for a negative number based on a behavior change in PHP 8.2, see https://github.com/php/php-src/issues/9950
+            if ($this->options['ttl'] > 0) {
+                $expirationDate->modify(sprintf('+%d seconds', $this->options['ttl']));
+            } elseif ($this->options['ttl'] < 0) {
+                $expirationDate->modify(sprintf('%d seconds', $this->options['ttl']));
+            }
+
             $refreshToken->setValid($expirationDate);
 
             $this->refreshTokenManager->save($refreshToken);
