@@ -11,15 +11,18 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ChildDefinition;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Parameter;
+use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 class GesdinetJWTRefreshTokenExtension extends Extension
 {
@@ -47,6 +50,12 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         ));
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $config['return_expiration']);
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $config['return_expiration_parameter_name']);
+
+        if ($config['logout_firewall']) {
+            $container->setDefinition('gesdinet_jwt_refresh_token.security.listener.logout.legacy_config', new ChildDefinition('gesdinet_jwt_refresh_token.security.listener.logout'))
+                ->addArgument(new Parameter('gesdinet_jwt_refresh_token.logout_firewall_context'))
+                ->addTag('kernel.event_listener', ['event' => LogoutEvent::class, 'method' => 'onLogout']);
+        }
 
         $refreshTokenClass = RefreshTokenEntity::class;
         $objectManager = 'doctrine.orm.entity_manager';

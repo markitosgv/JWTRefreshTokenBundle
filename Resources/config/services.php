@@ -152,16 +152,13 @@ return static function (ContainerConfigurator $container) {
         ])
         ->tag('console.command');
 
-    $services->set(LogoutEventListener::class)
+    $services->set('gesdinet_jwt_refresh_token.security.listener.logout')
+        ->abstract()
+        ->class(LogoutEventListener::class)
         ->args([
             service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
             service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
             param('gesdinet_jwt_refresh_token.token_parameter_name'),
             param('gesdinet_jwt_refresh_token.cookie'),
-            param('gesdinet_jwt_refresh_token.logout_firewall_context'),
-        ])
-        ->tag('kernel.event_listener', [
-            'event' => 'Symfony\Component\Security\Http\Event\LogoutEvent',
-            'method' => 'onLogout',
         ]);
 };
