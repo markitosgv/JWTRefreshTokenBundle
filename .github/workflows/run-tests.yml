@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-20.04'
     continue-on-error: ${{ matrix.can-fail }}
     strategy:
       fail-fast: false
@@ -48,7 +48,7 @@ jobs:
         id: setup-mongodb
         uses: mongodb-labs/drivers-evergreen-tools@master
         with:
-          version: '4.4'
+          version: '5.0'
           topology: server
 
       - name: Remove Guard
