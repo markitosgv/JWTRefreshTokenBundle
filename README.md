@@ -523,7 +523,7 @@ gesdinet_jwt_refresh_token:
 
 ### Disable automatic Doctrine mappings
 
-*NOTE* This setting is deprecated and is no longer used
+*NOTE*: This setting is deprecated and is no longer used
 
 On some occasions, you may not want to have default Doctrine mappings of object manager enabled as you use neither ORM nor ODM but i.e. using DoctrineBundle for DBAL.
 
