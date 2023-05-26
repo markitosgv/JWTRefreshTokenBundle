@@ -13,16 +13,19 @@ namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(
+    name: 'gesdinet:jwt:clear',
+    description: 'Clear invalid refresh tokens.',
+)]
 class ClearInvalidRefreshTokensCommand extends Command
 {
-    protected static $defaultName = 'gesdinet:jwt:clear';
-
     private RefreshTokenManagerInterface $refreshTokenManager;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
@@ -35,7 +38,6 @@ class ClearInvalidRefreshTokensCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Clear invalid refresh tokens.')
             ->addArgument('datetime', InputArgument::OPTIONAL, 'An optional date, all tokens before this date will be removed; the value should be able to be parsed by DateTime.');
     }
 
