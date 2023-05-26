@@ -12,16 +12,19 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(
+    name: 'gesdinet:jwt:revoke',
+    description: 'Revoke a refresh token',
+)]
 class RevokeRefreshTokenCommand extends Command
 {
-    protected static $defaultName = 'gesdinet:jwt:revoke';
-
     private RefreshTokenManagerInterface $refreshTokenManager;
 
     public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
@@ -34,7 +37,6 @@ class RevokeRefreshTokenCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Revoke a refresh token')
             ->addArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke');
     }
 
