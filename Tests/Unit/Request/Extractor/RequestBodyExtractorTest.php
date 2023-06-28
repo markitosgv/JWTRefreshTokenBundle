@@ -59,7 +59,7 @@ class RequestBodyExtractorTest extends TestCase
 
         $request
             ->expects($this->atLeastOnce())
-            ->method('getContentType')
+            ->method(method_exists(Request::class, 'getContentTypeFormat') ? 'getContentTypeFormat' : 'getContentType')
             ->willReturn($contentType);
 
         if (is_array($jsonBodyData)) {

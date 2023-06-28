@@ -9,8 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.0', '8.1']
-        symfony: ['4.4.*', '5.4.*', '6.0.*']
+        php: ['7.4', '8.0', '8.1', '8.2']
+        symfony: ['4.4.*', '5.4.*', '6.0.*', '6.1.*', '6.2.*', '6.3.*']
         composer-flags: ['--prefer-stable']
         can-fail: [false]
         extensions: ['curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip']
@@ -23,15 +23,27 @@ jobs:
         exclude:
           - php: '7.4'
             symfony: '6.0.*'
+          - php: '7.4'
+            symfony: '6.1.*'
+          - php: '7.4'
+            symfony: '6.2.*'
+          - php: '7.4'
+            symfony: '6.3.*'
+          - php: '8.0'
+            symfony: '6.1.*'
+          - php: '8.0'
+            symfony: '6.2.*'
+          - php: '8.0'
+            symfony: '6.3.*'
 
     name: "PHP ${{ matrix.php }} - Symfony ${{ matrix.symfony }}${{ matrix.composer-flags != '' && format(' - Composer {0}', matrix.composer-flags) || '' }}"
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.composer/cache/files
           key: dependencies-symfony-${{ matrix.symfony }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}-flags-${{ matrix.composer-flags }}
@@ -52,7 +64,7 @@ jobs:
           topology: server
 
       - name: Remove Guard
-        if: matrix.symfony == '6.0.*'
+        if: contains(fromJSON('["6.0.*", "6.1.*", "6.2.*", "6.3.*"]'), matrix.symfony)
         run: composer remove --dev --no-update symfony/security-guard
 
       - name: Install dependencies
