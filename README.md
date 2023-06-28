@@ -90,8 +90,8 @@ gesdinet_jwt_refresh_token:
 
 2. Create the object class. 
 
-If you are using the Doctrine ORM, the below contents should be placed at `src/Entity/RefreshToken.php`:
-
+If you are using the Doctrine ORM, the below contents should be placed at `src/Entity/RefreshToken.php` (use annotations OR attributes):
+ 
 ```php
 <?php
 
@@ -104,6 +104,8 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as BaseRefreshToken;
  * @ORM\Entity
  * @ORM\Table("refresh_tokens")
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'refresh_tokens')]
 class RefreshToken extends BaseRefreshToken
 {
 }
