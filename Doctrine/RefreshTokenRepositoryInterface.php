@@ -7,6 +7,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
  * @template T of RefreshTokenInterface
+ *
  * @extends ObjectRepository<T>
  */
 interface RefreshTokenRepositoryInterface extends ObjectRepository

@@ -7,6 +7,7 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 
 /**
  * @extends DocumentRepository<RefreshToken>
+ *
  * @implements RefreshTokenRepositoryInterface<RefreshToken>
  */
 class RefreshTokenRepository extends DocumentRepository implements RefreshTokenRepositoryInterface
