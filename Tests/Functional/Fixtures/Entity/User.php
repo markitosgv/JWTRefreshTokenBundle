@@ -7,13 +7,16 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity()
+ *
  * @ORM\Table()
  */
 class User implements UserInterface
 {
     /**
      * @ORM\Column(type="integer")
+     *
      * @ORM\Id()
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private ?int $id = null;
