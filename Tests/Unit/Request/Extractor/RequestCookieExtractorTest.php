@@ -6,6 +6,7 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -29,13 +30,9 @@ class RequestCookieExtractorTest extends TestCase
     {
         $token = 'my-refresh-token';
 
-        /** @var ParameterBag|MockObject $cookieBag */
-        $cookieBag = $this->createMock(ParameterBag::class);
-        $cookieBag
-            ->expects($this->once())
-            ->method('get')
-            ->with(self::PARAMETER_NAME)
-            ->willReturn($token);
+        /** @var ParameterBag|InputBag $cookieBag */
+        $cookieBag = class_exists(InputBag::class) ? new InputBag() : new ParameterBag();
+        $cookieBag->set(self::PARAMETER_NAME, $token);
 
         /** @var Request|MockObject $request */
         $request = $this->createMock(Request::class);

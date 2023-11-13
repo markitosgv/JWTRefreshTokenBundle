@@ -298,6 +298,10 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testDoesNothingWhenThereIsNotAUser()
     {
+        if ((new \ReflectionClass(AuthenticationSuccessEvent::class))->getMethod('getUser')->hasReturnType()) {
+            $this->markTestSkipped(sprintf('%s::getUser() has a non-nullable return type in LexikJWTAuthenticationBundle 3.x', AuthenticationSuccessEvent::class));
+        }
+
         /** @var AuthenticationSuccessEvent|MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
 
