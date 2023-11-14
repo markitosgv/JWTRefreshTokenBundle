@@ -95,6 +95,7 @@ class AttachRefreshTokenOnSuccessListener
             'http_only' => true,
             'secure' => true,
             'remove_token_from_body' => true,
+            'partitioned' => false,
         ], $cookieSettings);
         $this->returnExpiration = $returnExpiration;
         $this->returnExpirationParameterName = $returnExpirationParameterName;
@@ -160,7 +161,8 @@ class AttachRefreshTokenOnSuccessListener
                     $this->cookieSettings['secure'],
                     $this->cookieSettings['http_only'],
                     false,
-                    $this->cookieSettings['same_site']
+                    $this->cookieSettings['same_site'],
+                    $this->cookieSettings['partitioned']
                 )
             );
 

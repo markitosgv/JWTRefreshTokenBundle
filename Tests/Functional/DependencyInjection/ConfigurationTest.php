@@ -45,6 +45,7 @@ final class ConfigurationTest extends TestCase
                     'domain' => 'example.com',
                     'secure' => false,
                     'http_only' => false,
+                    'partitioned' => true,
                 ],
             ],
         ]);
