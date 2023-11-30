@@ -19,6 +19,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Kernel;
 
 class AttachRefreshTokenOnSuccessListener
 {
@@ -99,6 +100,10 @@ class AttachRefreshTokenOnSuccessListener
         ], $cookieSettings);
         $this->returnExpiration = $returnExpiration;
         $this->returnExpirationParameterName = $returnExpirationParameterName;
+
+        if ($this->cookieSettings['partitioned'] && Kernel::VERSION < '6.4') {
+            throw new \LogicException(sprintf('The `partitioned` option for cookies is only available for Symfony 6.4 and above. You are currently on version %s', Kernel::VERSION));
+        }
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event): void
