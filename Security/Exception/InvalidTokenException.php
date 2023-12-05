@@ -18,7 +18,7 @@ class InvalidTokenException extends AuthenticationException
     /**
      * @return string
      */
-    public function getMessageKey()
+    public function getMessageKey(): string
     {
         return 'Invalid JWT Refresh Token';
     }
