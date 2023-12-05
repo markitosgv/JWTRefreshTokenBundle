@@ -167,7 +167,7 @@ class AttachRefreshTokenOnSuccessListener
                     $this->cookieSettings['http_only'],
                     false,
                     $this->cookieSettings['same_site'],
-                    $this->cookieSettings['partitioned']
+                    $this->cookieSettings['partitioned'],
                 )
             );
 
