@@ -41,6 +41,7 @@ class LogoutEventListener
             'domain' => null,
             'http_only' => true,
             'secure' => true,
+            'partitioned' => false,
             'remove_token_from_body' => true,
         ], $cookieSettings);
         $this->logout_firewall_context = $logout_firewall_context;

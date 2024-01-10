@@ -105,6 +105,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('domain')->defaultNull()->end()
                         ->scalarNode('http_only')->defaultTrue()->end()
                         ->scalarNode('secure')->defaultTrue()->end()
+                        ->scalarNode('partitioned')->defaultFalse()->end()
                         ->scalarNode('remove_token_from_body')->defaultTrue()->end()
                     ->end()
                 ->end()

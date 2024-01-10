@@ -400,6 +400,7 @@ gesdinet_jwt_refresh_token:
       domain: null                 # default value
       http_only: true              # default value
       secure: true                 # default value
+      partitioned: false           # default value
       remove_token_from_body: true # default value
 ```
 

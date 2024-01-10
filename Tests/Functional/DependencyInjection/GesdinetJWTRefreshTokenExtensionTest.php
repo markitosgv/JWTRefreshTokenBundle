@@ -37,6 +37,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'domain' => null,
                 'secure' => true,
                 'http_only' => true,
+                'partitioned' => false,
                 'remove_token_from_body' => true,
             ],
         );
@@ -68,6 +69,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'domain' => 'example.com',
                 'secure' => false,
                 'http_only' => false,
+                'partitioned' => true,
             ],
         ]);
 
@@ -88,6 +90,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'domain' => 'example.com',
                 'secure' => false,
                 'http_only' => false,
+                'partitioned' => true,
                 'remove_token_from_body' => true,
             ],
         );
