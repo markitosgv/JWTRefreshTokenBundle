@@ -2,9 +2,9 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional;
 
-use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use PHPUnit\Framework\TestCase;
@@ -20,35 +20,19 @@ abstract class ORMTestCase extends TestCase
     protected function setUp(): void
     {
         $config = new Configuration();
-
-        if (method_exists($config, 'setMetadataCache')) {
-            $config->setMetadataCache(new ArrayAdapter());
-        } else {
-            $config->setMetadataCacheImpl(DoctrineProvider::wrap(new ArrayAdapter()));
-        }
-
-        if (method_exists($config, 'setQueryCache')) {
-            $config->setQueryCache(new ArrayAdapter());
-        } else {
-            $config->setQueryCacheImpl(DoctrineProvider::wrap(new ArrayAdapter()));
-        }
-
-        if (method_exists($config, 'setResultCache')) {
-            $config->setResultCache(new ArrayAdapter());
-        } else {
-            $config->setResultCacheImpl(DoctrineProvider::wrap(new ArrayAdapter()));
-        }
-
+        $config->setMetadataCache(new ArrayAdapter());
+        $config->setQueryCache(new ArrayAdapter());
+        $config->setResultCache(new ArrayAdapter());
         $config->setProxyDir(sys_get_temp_dir().'/JWTRefreshTokenBundle/_files');
         $config->setProxyNamespace(__NAMESPACE__.'\Proxies');
 
         $driverChain = new MappingDriverChain();
 
-        $annotationDriver = $config->newDefaultAnnotationDriver([__DIR__.'/Fixtures/Entity'], false);
+        $attributeDriver = new AttributeDriver([__DIR__.'/Fixtures/Entity']);
 
         $xmlDriver = new SimplifiedXmlDriver([(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Entity']);
 
-        $driverChain->addDriver($annotationDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Entity');
+        $driverChain->addDriver($attributeDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Entity');
         $driverChain->addDriver($xmlDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Entity');
 
         $config->setMetadataDriverImpl($driverChain);

@@ -13,7 +13,7 @@ final class AddExtractorsToChainCompilerPassTest extends AbstractCompilerPassTes
 {
     public function test_extractors_are_added_to_the_chain(): void
     {
-        $this->registerService('gesdinet.jwtrefreshtoken.request.extractor.chain', ChainExtractor::class);
+        $this->registerService('gesdinet_jwt_refresh_token.request.extractor.chain', ChainExtractor::class);
         $this->registerService('test.extractor', ExtractorInterface::class)
             ->addTag('gesdinet_jwt_refresh_token.request_extractor');
 
@@ -21,7 +21,7 @@ final class AddExtractorsToChainCompilerPassTest extends AbstractCompilerPassTes
 
         $this->assertContainerBuilderHasService('test.extractor', ExtractorInterface::class);
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'gesdinet.jwtrefreshtoken.request.extractor.chain',
+            'gesdinet_jwt_refresh_token.request.extractor.chain',
             'addExtractor',
             [new Reference('test.extractor')]
         );

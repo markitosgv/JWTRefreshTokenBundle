@@ -15,7 +15,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class RefreshEvent extends Event
+final class RefreshEvent extends Event
 {
     private RefreshTokenInterface $refreshToken;
 
@@ -30,22 +30,9 @@ class RefreshEvent extends Event
         $this->firewallName = $firewallName;
     }
 
-    /**
-     * @return RefreshTokenInterface
-     */
-    public function getRefreshToken()
+    public function getRefreshToken(): RefreshTokenInterface
     {
         return $this->refreshToken;
-    }
-
-    /**
-     * @return TokenInterface
-     *
-     * @deprecated use getToken() instead
-     */
-    public function getPreAuthenticatedToken()
-    {
-        return $this->getToken();
     }
 
     public function getToken(): TokenInterface

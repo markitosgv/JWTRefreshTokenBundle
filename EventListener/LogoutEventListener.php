@@ -14,22 +14,21 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class LogoutEventListener
+final class LogoutEventListener
 {
     private RefreshTokenManagerInterface $refreshTokenManager;
     private ExtractorInterface $refreshTokenExtractor;
     private string $tokenParameterName;
     private array $cookieSettings;
-    private string $logout_firewall_context;
 
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
         ExtractorInterface $refreshTokenExtractor,
         string $tokenParameterName,
         array $cookieSettings,
-        string $logout_firewall_context
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->refreshTokenExtractor = $refreshTokenExtractor;
@@ -44,19 +43,14 @@ class LogoutEventListener
             'partitioned' => false,
             'remove_token_from_body' => true,
         ], $cookieSettings);
-        $this->logout_firewall_context = $logout_firewall_context;
     }
 
     public function onLogout(LogoutEvent $event): void
     {
         $request = $event->getRequest();
-        $current_firewall_context = $request->attributes->get('_firewall_context');
-
-        if ($current_firewall_context !== $this->logout_firewall_context) {
-            return;
-        }
 
         $tokenString = $this->refreshTokenExtractor->getRefreshToken($request, $this->tokenParameterName);
+
         if (null === $tokenString) {
             $event->setResponse(
                 new JsonResponse(
@@ -64,35 +58,36 @@ class LogoutEventListener
                         'code' => 400,
                         'message' => 'No refresh_token found.',
                     ],
-                    JsonResponse::HTTP_BAD_REQUEST
+                    Response::HTTP_BAD_REQUEST
                 )
             );
 
             return;
+        }
+
+        $refreshToken = $this->refreshTokenManager->get($tokenString);
+
+        if (null === $refreshToken) {
+            $event->setResponse(
+                new JsonResponse(
+                    [
+                        'code' => 200,
+                        'message' => 'The supplied refresh_token is already invalid.',
+                    ],
+                    Response::HTTP_OK
+                )
+            );
         } else {
-            $refreshToken = $this->refreshTokenManager->get($tokenString);
-            if (null === $refreshToken) {
-                $event->setResponse(
-                    new JsonResponse(
-                        [
-                            'code' => 200,
-                            'message' => 'The supplied refresh_token is already invalid.',
-                        ],
-                        JsonResponse::HTTP_OK
-                    )
-                );
-            } else {
-                $this->refreshTokenManager->delete($refreshToken);
-                $event->setResponse(
-                    new JsonResponse(
-                        [
-                            'code' => 200,
-                            'message' => 'The supplied refresh_token has been invalidated.',
-                        ],
-                        JsonResponse::HTTP_OK
-                    )
-                );
-            }
+            $this->refreshTokenManager->delete($refreshToken);
+            $event->setResponse(
+                new JsonResponse(
+                    [
+                        'code' => 200,
+                        'message' => 'The supplied refresh_token has been invalidated.',
+                    ],
+                    Response::HTTP_OK
+                )
+            );
         }
 
         if ($this->cookieSettings['enabled']) {

@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class RefreshAuthenticationFailureEvent extends Event
+final class RefreshAuthenticationFailureEvent extends Event
 {
     private AuthenticationException $exception;
 

@@ -2,7 +2,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 
-use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestParameterExtractor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -16,13 +15,7 @@ class RequestParameterExtractorTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->requestParameterExtractor = new RequestParameterExtractor();
-    }
-
-    public function testIsAnExtractor(): void
-    {
-        $this->assertInstanceOf(ExtractorInterface::class, $this->requestParameterExtractor);
     }
 
     public function testGetsTheTokenFromTheRequestParameters(): void

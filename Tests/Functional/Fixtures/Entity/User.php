@@ -5,30 +5,18 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @ORM\Entity()
- *
- * @ORM\Table()
- */
+#[ORM\Entity]
 class User implements UserInterface
 {
-    /**
-     * @ORM\Column(type="integer")
-     *
-     * @ORM\Id()
-     *
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Id]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
     private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column]
     private string $email;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(nullable: true)]
     private ?string $password;
 
     public function __construct(string $email, ?string $password = null)

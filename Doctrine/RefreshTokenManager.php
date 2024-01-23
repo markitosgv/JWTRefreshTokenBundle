@@ -12,33 +12,29 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
-use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 
-class RefreshTokenManager implements RefreshTokenManagerInterface
+final class RefreshTokenManager implements RefreshTokenManagerInterface
 {
-    /**
-     * @var ObjectManager
-     */
-    protected $objectManager;
+    private ObjectManager $objectManager;
 
     /**
      * @var class-string<RefreshTokenInterface>
      */
-    protected $class;
+    private string $class;
 
     /**
      * @var RefreshTokenRepositoryInterface<RefreshTokenInterface>
      */
-    protected $repository;
+    private RefreshTokenRepositoryInterface $repository;
 
     /**
      * @param class-string<RefreshTokenInterface> $class
      *
-     * @throws \LogicException if the object repository does not implement `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface`
+     * @throws \LogicException if the object repository does not implement {@see RefreshTokenRepositoryInterface}
      */
-    public function __construct(ObjectManager $om, $class)
+    public function __construct(ObjectManager $om, string $class)
     {
         $this->objectManager = $om;
 
@@ -54,48 +50,17 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
         $this->class = $metadata->getName();
     }
 
-    /**
-     * Creates an empty RefreshTokenInterface instance.
-     *
-     * @return RefreshTokenInterface
-     *
-     * @deprecated to be removed in 2.0, use a `Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface` instead.
-     */
-    public function create()
-    {
-        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '%s() is deprecated and will be removed in 2.0, use a "%s" instance to create new %s objects.', __METHOD__, RefreshTokenGeneratorInterface::class, RefreshTokenInterface::class);
-
-        $class = $this->getClass();
-
-        return new $class();
-    }
-
-    /**
-     * @param string $refreshToken
-     *
-     * @return RefreshTokenInterface|null
-     */
-    public function get($refreshToken)
+    public function get(string $refreshToken): ?RefreshTokenInterface
     {
         return $this->repository->findOneBy(['refreshToken' => $refreshToken]);
     }
 
-    /**
-     * @param string $username
-     *
-     * @return RefreshTokenInterface|null
-     */
-    public function getLastFromUsername($username)
+    public function getLastFromUsername(string $username): ?RefreshTokenInterface
     {
         return $this->repository->findOneBy(['username' => $username], ['valid' => 'DESC']);
     }
 
-    /**
-     * @param bool $andFlush
-     *
-     * @return void
-     */
-    public function save(RefreshTokenInterface $refreshToken, $andFlush = true)
+    public function save(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
     {
         $this->objectManager->persist($refreshToken);
 
@@ -104,12 +69,7 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
         }
     }
 
-    /**
-     * @param bool $andFlush
-     *
-     * @return void
-     */
-    public function delete(RefreshTokenInterface $refreshToken, $andFlush = true)
+    public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
     {
         $this->objectManager->remove($refreshToken);
 
@@ -119,12 +79,9 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
-     * @param \DateTimeInterface|null $datetime
-     * @param bool                    $andFlush
-     *
      * @return RefreshTokenInterface[]
      */
-    public function revokeAllInvalid($datetime = null, $andFlush = true)
+    public function revokeAllInvalid(?\DateTimeInterface $datetime = null, bool $andFlush = true): array
     {
         $invalidTokens = $this->repository->findInvalid($datetime);
 
@@ -140,11 +97,11 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
-     * Returns the RefreshToken fully qualified class name.
+     * Returns the fully qualified class name for a concrete RefreshTokenInterface class.
      *
      * @return class-string<RefreshTokenInterface>
      */
-    public function getClass()
+    public function getClass(): string
     {
         return $this->class;
     }

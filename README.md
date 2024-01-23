@@ -13,9 +13,9 @@ The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) i
 
 ## Prerequisites
 
-This bundle requires PHP 7.4 or later and Symfony 4.4, 5.4, or 6.0+.
+This bundle requires PHP 8.1 or later and Symfony 5.4, or 6.3+.
 
-For support with older Symfony versions, please use the 0.12 release.
+For support with older Symfony versions, please use the 1.x release.
 
 **Protip:** Though the bundle doesn't force you to do so, it is highly recommended to use HTTPS.
 
@@ -24,8 +24,6 @@ For support with older Symfony versions, please use the 0.12 release.
 ### Step 1: Download the Bundle
 
 **You must also install either the Doctrine ORM or MongoDB ODM, these packages are not installed automatically with this bundle. Failing to do so may trigger errors on installation.**
-
-If using Symfony 4.4, you will also need to install the `symfony/security-guard` package, it is only required for the legacy authentication API and is not compatible with Symfony 6.0.
 
 With Doctrine's ORM
 
@@ -44,11 +42,11 @@ Or, manually edit your project's `composer.json` file to add the required packag
 ```json
 {
   "require": {
-    "doctrine/doctrine-bundle": "^2.0",
-    "doctrine/mongodb-odm": "^2.0",
-    "doctrine/mongodb-odm-bundle": "^4.0",
-    "doctrine/orm": "^2.7",
-    "gesdinet/jwt-refresh-token-bundle": "^1.0"
+    "doctrine/doctrine-bundle": "^2.10",
+    "doctrine/mongodb-odm": "^2.3",
+    "doctrine/mongodb-odm-bundle": "^4.5",
+    "doctrine/orm": "^2.12",
+    "gesdinet/jwt-refresh-token-bundle": "^2.0"
   }
 }
 ```
@@ -129,7 +127,7 @@ class RefreshToken extends BaseRefreshToken
 }
 ```
 
-### Step 4 (Symfony 5.4+)
+### Step 4
 
 #### Define the refresh token route
 
@@ -171,42 +169,6 @@ security:
     access_control:
         # ...
         - { path: ^/api/(login|token/refresh), roles: PUBLIC_ACCESS }
-        # ...
-# ...
-```
-
-### Step 4 (Symfony 4.4)
-
-#### Define the refresh token route
-
-Open your routing configuration file and add the following route to it:
-
-```yaml
-# config/routes.yaml
-api_refresh_token:
-    path:       /api/token/refresh
-    controller: gesdinet.jwtrefreshtoken::refresh
-# ...
-```
-
-#### Configure the security firewall
-
-Add the below to your security configuration file:
-
-```yaml
-# config/packages/security.yaml
-security:
-    firewalls:
-        # put it before all your other firewall API entries
-        refresh:
-            pattern:  ^/api/token/refresh
-            stateless: true
-            anonymous: true
-    # ...
-
-    access_control:
-        # ...
-        - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         # ...
 # ...
 ```
@@ -292,8 +254,6 @@ gesdinet_jwt_refresh_token:
 
 ### Set The User Provider
 
-#### Symfony 5.4+
-
 You can define a user provider to use for the authenticator its configuration.
 
 Note, if your application has multiple user providers, you **MUST** configure this value for either the firewall or the provider.
@@ -315,38 +275,7 @@ security:
 
 By default, when a user provider is not specified, then the user provider for the firewall is used instead.
 
-#### Symfony 4.4
-
-*NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
-
-You can define your own user provider, by default the `gesdinet.jwtrefreshtoken.user_provider` service is used. You can change this value by adding this line to your config:
-
-```yaml
-gesdinet_jwt_refresh_token:
-    user_provider: user_provider_service_id
-```
-
-For example, if you are using FOSUserBundle, `user_provider` must be set to `fos_user.user_provider.username_email`.
-
-For Doctrine ORM UserProvider, `user_provider` must be set to `security.user.provider.concrete.<your_user_provider_name_in_security_yaml>`.
-
-For example, in your `config/packages/security.yaml` file:
-```yaml
-security:
-    # ...
-    providers:
-        app_user_provider:
-            # ...
-    firewalls:
-    # ...
-# ...
-```
-
-then your user_provider_service_id is `security.user.provider.concrete.app_user_provider`.
-
 ### Set The User Checker
-
-#### Symfony 5.4+
 
 You can define a user checker to use for the firewall as part of the firewall configuration:
 
@@ -360,19 +289,6 @@ security:
             user_checker: user_checker_service_id
             refresh_jwt: ~
 ```
-
-#### Symfony 4.4
-
-*NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
-
-You can define your own user checker, by default the `security.user_checker` service is used. You can change this value by adding this line to your config:
-
-```yaml
-gesdinet_jwt_refresh_token:
-    user_checker: user_checker_service_id
-```
-
-You will probably want to use a custom user provider along with your user checker to ensure that the checker receives the right type of user.
 
 ### Single Use Tokens
 

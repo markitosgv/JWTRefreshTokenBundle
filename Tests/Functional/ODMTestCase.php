@@ -2,9 +2,9 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional;
 
-use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Mapping\Driver\AttributeDriver;
 use Doctrine\ODM\MongoDB\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use MongoDB\Client;
@@ -22,13 +22,7 @@ abstract class ODMTestCase extends TestCase
     protected function setUp(): void
     {
         $config = new Configuration();
-
-        if (method_exists($config, 'setMetadataCache')) {
-            $config->setMetadataCache(new ArrayAdapter());
-        } else {
-            $config->setMetadataCacheImpl(DoctrineProvider::wrap(new ArrayAdapter()));
-        }
-
+        $config->setMetadataCache(new ArrayAdapter());
         $config->setProxyDir(sys_get_temp_dir().'/JWTRefreshTokenBundle/_files/Proxies');
         $config->setProxyNamespace(__NAMESPACE__.'\Proxies');
         $config->setHydratorDir(sys_get_temp_dir().'/JWTRefreshTokenBundle/_files/Hydrators');
@@ -39,17 +33,14 @@ abstract class ODMTestCase extends TestCase
 
         $driverChain = new MappingDriverChain();
 
-        $annotationDriver = $config->newDefaultAnnotationDriver([__DIR__.'/Fixtures/Document']);
+        $attributeDriver = new AttributeDriver([__DIR__.'/Fixtures/Document']);
 
         $xmlDriver = new SimplifiedXmlDriver(
             [(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Document'],
             '.mongodb.xml'
         );
 
-        $driverChain->addDriver(
-            $annotationDriver,
-            'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Document'
-        );
+        $driverChain->addDriver($attributeDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Document');
         $driverChain->addDriver($xmlDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Document');
 
         $config->setMetadataDriverImpl($driverChain);
