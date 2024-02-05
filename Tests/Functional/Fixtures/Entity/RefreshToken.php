@@ -8,6 +8,7 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as BaseRefreshToken;
 /**
  * @ORM\Entity()
  */
+#[ORM\Entity]
 class RefreshToken extends BaseRefreshToken
 {
 }

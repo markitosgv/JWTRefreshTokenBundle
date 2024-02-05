@@ -8,21 +8,25 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @ODM\Document
  */
+#[ODM\Document]
 class User implements UserInterface
 {
     /**
      * @ODM\Id
      */
+    #[ODM\Id]
     private ?string $id = null;
 
     /**
      * @ODM\Field
      */
+    #[ODM\Field]
     private string $email;
 
     /**
      * @ODM\Field(nullable=true)
      */
+    #[ODM\Field(nullable: true)]
     private ?string $password;
 
     public function __construct(string $email, ?string $password = null)
