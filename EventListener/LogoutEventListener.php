@@ -103,7 +103,8 @@ class LogoutEventListener
                 $this->cookieSettings['domain'],
                 $this->cookieSettings['secure'],
                 $this->cookieSettings['http_only'],
-                $this->cookieSettings['same_site']
+                $this->cookieSettings['same_site'],
+                $this->cookieSettings['partitioned']
             );
         }
     }
