@@ -2,9 +2,14 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use PHPUnit\Framework\TestCase;
@@ -44,12 +49,22 @@ abstract class ORMTestCase extends TestCase
 
         $driverChain = new MappingDriverChain();
 
-        $annotationDriver = $config->newDefaultAnnotationDriver([__DIR__.'/Fixtures/Entity'], false);
+        if (\PHP_VERSION_ID >= 80000 && class_exists(AttributeDriver::class)) {
+            $driverChain->addDriver(
+                new AttributeDriver([__DIR__.'/Fixtures/Entity']),
+                'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Entity'
+            );
+        } elseif (class_exists(AnnotationDriver::class) && interface_exists(Reader::class)) {
+            $driverChain->addDriver(
+                new AnnotationDriver(new AnnotationReader(), [__DIR__.'/Fixtures/Entity']),
+                'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Entity'
+            );
+        }
 
-        $xmlDriver = new SimplifiedXmlDriver([(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Entity']);
-
-        $driverChain->addDriver($annotationDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Entity');
-        $driverChain->addDriver($xmlDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Entity');
+        $driverChain->addDriver(
+            new SimplifiedXmlDriver([(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Entity']),
+            'Gesdinet\\JWTRefreshTokenBundle\\Entity'
+        );
 
         $config->setMetadataDriverImpl($driverChain);
 
@@ -58,6 +73,10 @@ abstract class ORMTestCase extends TestCase
             'memory' => true,
         ];
 
-        $this->entityManager = EntityManager::create($conn, $config);
+        if (method_exists(EntityManager::class, 'create')) {
+            $this->entityManager = EntityManager::create($conn, $config);
+        } else {
+            $this->entityManager = new EntityManager(DriverManager::getConnection($conn, $config), $config);
+        }
     }
 }

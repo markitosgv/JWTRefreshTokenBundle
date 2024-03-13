@@ -33,7 +33,7 @@
     "doctrine/annotations": "^1.13|^2.0",
     "doctrine/cache": "^1.11|^2.0",
     "doctrine/mongodb-odm": "^2.2",
-    "doctrine/orm": "^2.7",
+    "doctrine/orm": "^2.7|^3.0",
     "matthiasnoback/symfony-config-test": "^4.2|^5.0",
     "matthiasnoback/symfony-dependency-injection-test": "^4.2|^5.0",
     "phpunit/phpunit": "^9.5",

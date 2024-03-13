@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -10,6 +11,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @ORM\Table()
  */
+#[ORM\Entity]
+#[ORM\Table]
 class User implements UserInterface
 {
     /**
@@ -19,16 +22,21 @@ class User implements UserInterface
      *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?int $id = null;
 
     /**
      * @ORM\Column(type="string")
      */
+    #[ORM\Column(type: Types::STRING)]
     private string $email;
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
+    #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $password;
 
     public function __construct(string $email, ?string $password = null)
