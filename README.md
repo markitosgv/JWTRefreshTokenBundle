@@ -166,6 +166,8 @@ security:
             jwt: ~
             refresh_jwt:
                 check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
+                # or if you have more than one user provider
+                # provider: user_provider_name
     # ...
 
     access_control:
@@ -202,6 +204,8 @@ security:
             pattern:  ^/api/token/refresh
             stateless: true
             anonymous: true
+            # or if you have more than one user provider
+            #provider: user_provider_name
     # ...
 
     access_control:
