@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Service;
 
+use ReflectionClass;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
@@ -131,7 +132,7 @@ class RefreshTokenTest extends TestCase
 
     private function setTtlUpdateOnRefreshToken(bool $ttlUpdate): void
     {
-        $reflector = new \ReflectionClass(RefreshToken::class);
+        $reflector = new ReflectionClass(RefreshToken::class);
         $property = $reflector->getProperty('ttlUpdate');
         $property->setAccessible(true);
         $property->setValue($this->refreshToken, $ttlUpdate);

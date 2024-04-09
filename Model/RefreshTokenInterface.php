@@ -11,9 +11,11 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
+use Stringable;
+use DateTimeInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-interface RefreshTokenInterface extends \Stringable
+interface RefreshTokenInterface extends Stringable
 {
     /**
      * Creates a new model instance based on the provided details.
@@ -38,14 +40,14 @@ interface RefreshTokenInterface extends \Stringable
     public function getRefreshToken();
 
     /**
-     * @param \DateTimeInterface|null $valid
+     * @param DateTimeInterface|null $valid
      *
      * @return $this
      */
     public function setValid($valid);
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
     public function getValid();
 

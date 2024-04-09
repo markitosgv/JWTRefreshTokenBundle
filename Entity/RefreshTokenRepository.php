@@ -2,6 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
+use DateTimeInterface;
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 
@@ -13,13 +15,13 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 class RefreshTokenRepository extends EntityRepository implements RefreshTokenRepositoryInterface
 {
     /**
-     * @param \DateTimeInterface|null $datetime
+     * @param DateTimeInterface|null $datetime
      *
      * @return RefreshToken[]
      */
     public function findInvalid($datetime = null)
     {
-        $datetime = (null === $datetime) ? new \DateTime() : $datetime;
+        $datetime = (null === $datetime) ? new DateTime() : $datetime;
 
         return $this->createQueryBuilder('u')
             ->where('u.valid < :datetime')

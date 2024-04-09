@@ -2,6 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Security\Http\Authenticator;
 
+use DateTimeInterface;
+use ReflectionClass;
 use Gesdinet\JWTRefreshTokenBundle\Http\RefreshAuthenticationFailureResponse;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -190,7 +192,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
         $refreshToken
             ->expects($this->atLeastOnce())
             ->method('setValid')
-            ->with($this->isInstanceOf(\DateTimeInterface::class));
+            ->with($this->isInstanceOf(DateTimeInterface::class));
 
         $this->refreshTokenManager
             ->expects($this->atLeastOnce())
@@ -408,7 +410,7 @@ class RefreshTokenAuthenticatorTest extends TestCase
 
     private function appendOptionsOnRefreshTokenAuthenticator(array $options): void
     {
-        $reflector = new \ReflectionClass(RefreshTokenAuthenticator::class);
+        $reflector = new ReflectionClass(RefreshTokenAuthenticator::class);
         $property = $reflector->getProperty('options');
         $property->setAccessible(true);
 

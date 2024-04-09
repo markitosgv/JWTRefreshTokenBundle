@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Document;
 
+use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
@@ -93,7 +94,7 @@ final class RefreshTokenRepositoryTest extends ODMTestCase
         /** @var RefreshTokenRepository $repo */
         $repo = $this->documentManager->getRepository(RefreshToken::class);
 
-        $time = new \DateTime();
+        $time = new DateTime();
         $time->modify('+1200 seconds');
 
         $this->assertCount(5, $repo->findInvalid($time));

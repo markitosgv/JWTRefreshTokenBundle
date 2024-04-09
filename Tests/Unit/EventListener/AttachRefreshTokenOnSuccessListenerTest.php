@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\EventListener;
 
+use ReflectionClass;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -298,7 +299,7 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testDoesNothingWhenThereIsNotAUser()
     {
-        if ((new \ReflectionClass(AuthenticationSuccessEvent::class))->getMethod('getUser')->hasReturnType()) {
+        if ((new ReflectionClass(AuthenticationSuccessEvent::class))->getMethod('getUser')->hasReturnType()) {
             $this->markTestSkipped(sprintf('%s::getUser() has a non-nullable return type in LexikJWTAuthenticationBundle 3.x', AuthenticationSuccessEvent::class));
         }
 
@@ -315,7 +316,7 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     private function setSingleUseOnEventListener(bool $singleUse): void
     {
-        $reflector = new \ReflectionClass(AttachRefreshTokenOnSuccessListener::class);
+        $reflector = new ReflectionClass(AttachRefreshTokenOnSuccessListener::class);
         $property = $reflector->getProperty('singleUse');
         $property->setAccessible(true);
         $property->setValue($this->attachRefreshTokenOnSuccessListener, $singleUse);

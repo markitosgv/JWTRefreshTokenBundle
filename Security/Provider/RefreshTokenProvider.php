@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Provider;
 
+use ReflectionClass;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\User;
@@ -21,7 +22,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class is deprecated, configure the user provider for the `refresh_jwt` authenticator instead.', RefreshTokenProvider::class);
 
-if ((new \ReflectionClass(UserProviderInterface::class))->getMethod('supportsClass')->hasReturnType()) {
+if ((new ReflectionClass(UserProviderInterface::class))->getMethod('supportsClass')->hasReturnType()) {
     /**
      * Compatibility layer for Symfony 7.0 and later, where {@see UserProviderInterface::supportsClass()} has a return type.
      *
