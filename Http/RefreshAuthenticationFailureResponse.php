@@ -11,10 +11,11 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Http;
 
+use ReflectionMethod;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-if (80000 <= \PHP_VERSION_ID && (new \ReflectionMethod(JsonResponse::class, 'setData'))->hasReturnType()) {
+if (80000 <= \PHP_VERSION_ID && (new ReflectionMethod(JsonResponse::class, 'setData'))->hasReturnType()) {
     eval('
         namespace Gesdinet\JWTRefreshTokenBundle\Http;
 

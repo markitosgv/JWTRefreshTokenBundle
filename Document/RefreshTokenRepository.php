@@ -2,6 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
+use DateTimeInterface;
+use DateTime;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 
@@ -13,13 +15,13 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 class RefreshTokenRepository extends DocumentRepository implements RefreshTokenRepositoryInterface
 {
     /**
-     * @param \DateTimeInterface|null $datetime
+     * @param DateTimeInterface|null $datetime
      *
      * @return RefreshToken[]
      */
     public function findInvalid($datetime = null)
     {
-        $datetime = (null === $datetime) ? new \DateTime() : $datetime;
+        $datetime = (null === $datetime) ? new DateTime() : $datetime;
 
         $queryBuilder = $this->createQueryBuilder()
             ->field('valid')->lt($datetime);

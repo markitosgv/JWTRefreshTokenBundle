@@ -1,5 +1,6 @@
 <?php
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
 use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
@@ -35,7 +36,7 @@ return static function (ContainerConfigurator $container) {
 
     $abstractArg = static function (string $description) {
         if (function_exists('Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg')) {
-            return \Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg($description);
+            return abstract_arg($description);
         }
 
         return null;

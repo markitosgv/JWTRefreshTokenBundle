@@ -2,6 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit;
 
+use DateTimeInterface;
+use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\TestCase;
@@ -51,12 +53,12 @@ abstract class AbstractRefreshTokenTest extends TestCase
 
     public function testHasAValidTimestamp()
     {
-        $this->assertInstanceOf(\DateTimeInterface::class, $this->refreshToken->getValid());
+        $this->assertInstanceOf(DateTimeInterface::class, $this->refreshToken->getValid());
     }
 
     public function testValid()
     {
-        $date = new \DateTime();
+        $date = new DateTime();
         $date->modify('+1 day');
         $this->refreshToken->setValid($date);
         $this->assertTrue($this->refreshToken->isValid());
@@ -64,7 +66,7 @@ abstract class AbstractRefreshTokenTest extends TestCase
 
     public function testNotValid()
     {
-        $date = new \DateTime();
+        $date = new DateTime();
         $date->modify('-1 day');
         $this->refreshToken->setValid($date);
         $this->assertFalse($this->refreshToken->isValid());

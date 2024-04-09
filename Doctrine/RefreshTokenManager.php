@@ -11,6 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
+use LogicException;
+use DateTimeInterface;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -36,7 +38,7 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * @param class-string<RefreshTokenInterface> $class
      *
-     * @throws \LogicException if the object repository does not implement `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface`
+     * @throws LogicException if the object repository does not implement `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface`
      */
     public function __construct(ObjectManager $om, $class)
     {
@@ -45,7 +47,7 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
         $repository = $om->getRepository($class);
 
         if (!$repository instanceof RefreshTokenRepositoryInterface) {
-            throw new \LogicException(sprintf('Repository mapped for "%s" should implement %s.', $class, RefreshTokenRepositoryInterface::class));
+            throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $class, RefreshTokenRepositoryInterface::class));
         }
 
         $this->repository = $repository;
@@ -119,7 +121,7 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
-     * @param \DateTimeInterface|null $datetime
+     * @param DateTimeInterface|null $datetime
      * @param bool                    $andFlush
      *
      * @return RefreshTokenInterface[]

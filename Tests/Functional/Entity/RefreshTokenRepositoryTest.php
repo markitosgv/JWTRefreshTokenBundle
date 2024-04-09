@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Entity;
 
+use DateTime;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
@@ -89,7 +90,7 @@ final class RefreshTokenRepositoryTest extends ORMTestCase
         /** @var RefreshTokenRepository $repo */
         $repo = $this->entityManager->getRepository(RefreshToken::class);
 
-        $time = new \DateTime();
+        $time = new DateTime();
         $time->modify('+1200 seconds');
 
         $this->assertCount(5, $repo->findInvalid($time));
