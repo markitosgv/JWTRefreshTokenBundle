@@ -122,7 +122,7 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
 
     /**
      * @param DateTimeInterface|null $datetime
-     * @param bool                    $andFlush
+     * @param bool                   $andFlush
      *
      * @return RefreshTokenInterface[]
      */
