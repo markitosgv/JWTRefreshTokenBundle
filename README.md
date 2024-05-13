@@ -13,7 +13,7 @@ The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) i
 
 ## Prerequisites
 
-This bundle requires PHP 7.4 or later and Symfony 4.4, 5.4, or 6.0+.
+This bundle requires PHP 7.4 or later and Symfony 5.4 or later.
 
 For support with older Symfony versions, please use the 0.12 release.
 
@@ -25,7 +25,7 @@ For support with older Symfony versions, please use the 0.12 release.
 
 **You must also install either the Doctrine ORM or MongoDB ODM, these packages are not installed automatically with this bundle. Failing to do so may trigger errors on installation.**
 
-If using Symfony 4.4, you will also need to install the `symfony/security-guard` package, it is only required for the legacy authentication API and is not compatible with Symfony 6.0.
+If using Symfony 5.4 with the deprecated Guard authenticators, you will also need to install the `symfony/security-guard` package.  Note that it is only required for the legacy authentication API and is not compatible with Symfony 6.0.
 
 With Doctrine's ORM
 
@@ -177,7 +177,7 @@ security:
 # ...
 ```
 
-### Step 4 (Symfony 4.4)
+### Step 4 (Symfony 5.4 with Guard Authentication)
 
 #### Define the refresh token route
 
@@ -319,7 +319,7 @@ security:
 
 By default, when a user provider is not specified, then the user provider for the firewall is used instead.
 
-#### Symfony 4.4
+#### Symfony 5.4 with Guard Authentication
 
 *NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
 
@@ -365,7 +365,7 @@ security:
             refresh_jwt: ~
 ```
 
-#### Symfony 4.4
+#### Symfony 5.4 with Guard Authentication
 
 *NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
 

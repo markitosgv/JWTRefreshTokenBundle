@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Security\Http\RememberMe\RememberMeHandlerInterface;
 
 final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 {
@@ -20,13 +19,6 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
      * @var ContainerBuilder
      */
     private $container;
-
-    public static function setUpBeforeClass(): void
-    {
-        if (!interface_exists(RememberMeHandlerInterface::class)) {
-            self::markTestSkipped('Only applies to Symfony 5.3+');
-        }
-    }
 
     protected function setUp(): void
     {
