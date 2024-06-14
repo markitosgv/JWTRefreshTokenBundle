@@ -10,13 +10,13 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0', '8.1', '8.2', '8.3']
-        symfony: ['4.4.*', '5.4.*', '6.0.*', '6.1.*', '6.2.*', '6.3.*', '6.4.*', '7.0.*']
+        symfony: ['5.4.*', '6.0.*', '6.1.*', '6.2.*', '6.3.*', '6.4.*', '7.0.*']
         composer-flags: ['--prefer-stable']
         can-fail: [false]
         extensions: ['curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip']
         include:
           - php: '7.4'
-            symfony: '4.4.*'
+            symfony: '5.4.*'
             composer-flags: '--prefer-stable --prefer-lowest'
             can-fail: false
             extensions: 'curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip'
