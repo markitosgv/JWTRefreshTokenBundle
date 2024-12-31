@@ -4,6 +4,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use DateTimeInterface;
 use Doctrine\Persistence\ObjectRepository;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
  * @template T of RefreshTokenInterface
