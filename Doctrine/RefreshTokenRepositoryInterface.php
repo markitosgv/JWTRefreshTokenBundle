@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectRepository;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
  * @template T of RefreshTokenInterface
