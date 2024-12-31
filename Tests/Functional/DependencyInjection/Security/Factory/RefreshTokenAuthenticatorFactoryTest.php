@@ -31,7 +31,10 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->factory->createAuthenticator(
             $this->container,
             'test',
-            [],
+            [
+                'check_path' => '/login_check',
+                'invalidate_token_on_logout' => true,
+            ],
             'app.user_provider'
         );
 
@@ -41,11 +44,11 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 
         /** @var ChildDefinition $successHandler */
         $successHandler = $this->container->getDefinition('security.authentication.success_handler.test.refresh_jwt');
-        $this->assertSame('gesdinet.jwtrefreshtoken.security.authentication.success_handler', $successHandler->getParent());
+        $this->assertSame('gesdinet_jwt_refresh_token.security.authentication.success_handler', $successHandler->getParent());
 
         /** @var ChildDefinition $failureHandler */
         $failureHandler = $this->container->getDefinition('security.authentication.failure_handler.test.refresh_jwt');
-        $this->assertSame('gesdinet.jwtrefreshtoken.security.authentication.failure_handler', $failureHandler->getParent());
+        $this->assertSame('gesdinet_jwt_refresh_token.security.authentication.failure_handler', $failureHandler->getParent());
     }
 
     public function test_authenticator_service_is_created_with_custom_handlers(): void
@@ -54,6 +57,8 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             $this->container,
             'test',
             [
+                'check_path' => '/login_check',
+                'invalidate_token_on_logout' => true,
                 'success_handler' => 'app.security.authentication.success_handler',
                 'failure_handler' => 'app.security.authentication.failure_handler',
             ],
