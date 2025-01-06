@@ -10,7 +10,6 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory\RefreshT
 use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\Security\Http\RememberMe\RememberMeHandlerInterface;
 
 class GesdinetJWTRefreshTokenBundle extends Bundle
 {
@@ -23,11 +22,8 @@ class GesdinetJWTRefreshTokenBundle extends Bundle
         $container->addCompilerPass(new ObjectManagerCompilerPass());
         $container->addCompilerPass(new UserCheckerCompilerPass(true));
 
-        // Only register the security authenticator for Symfony 5.4+
-        if (interface_exists(RememberMeHandlerInterface::class)) {
-            /** @var SecurityExtension $extension */
-            $extension = $container->getExtension('security');
-            $extension->addAuthenticatorFactory(new RefreshTokenAuthenticatorFactory());
-        }
+        /** @var SecurityExtension $extension */
+        $extension = $container->getExtension('security');
+        $extension->addAuthenticatorFactory(new RefreshTokenAuthenticatorFactory());
     }
 }

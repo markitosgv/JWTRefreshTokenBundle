@@ -1,6 +1,7 @@
 <?php
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
 use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
@@ -20,43 +21,23 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthentica
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 use Gesdinet\JWTRefreshTokenBundle\Service\RefreshToken;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\DependencyInjection\Parameter;
-use Symfony\Component\DependencyInjection\Reference;
 
 return static function (ContainerConfigurator $container) {
-    $deprecateArgs = static function (string $version, string $message = 'The "%service_id%" service is deprecated.'): array {
-        if (method_exists(Definition::class, 'getDeprecation')) {
-            return ['gesdinet/jwt-refresh-token-bundle', $version, $message];
-        }
-
-        return [$message];
-    };
-
-    $abstractArg = static function (string $description) {
-        if (function_exists('Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg')) {
-            return abstract_arg($description);
-        }
-
-        return null;
-    };
-
     $services = $container->services();
 
     $services->set('gesdinet.jwtrefreshtoken.send_token')
         ->class(AttachRefreshTokenOnSuccessListener::class)
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
-            new Parameter('gesdinet_jwt_refresh_token.ttl'),
-            new Reference('request_stack'),
-            new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
-            new Parameter('gesdinet_jwt_refresh_token.single_use'),
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_generator'),
-            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
-            new Parameter('gesdinet_jwt_refresh_token.cookie'),
-            new Parameter('gesdinet_jwt_refresh_token.return_expiration'),
-            new Parameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            param('gesdinet_jwt_refresh_token.ttl'),
+            service('request_stack'),
+            param('gesdinet_jwt_refresh_token.token_parameter_name'),
+            param('gesdinet_jwt_refresh_token.single_use'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_generator'),
+            service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
+            param('gesdinet_jwt_refresh_token.cookie'),
+            param('gesdinet_jwt_refresh_token.return_expiration'),
+            param('gesdinet_jwt_refresh_token.return_expiration_parameter_name'),
         ])
         ->tag('kernel.event_listener', [
             'event' => 'lexik_jwt_authentication.on_authentication_success',
@@ -67,7 +48,7 @@ return static function (ContainerConfigurator $container) {
         ->class(RefreshTokenGenerator::class)
         ->public()
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
         ]);
 
     $services->alias(RefreshTokenGeneratorInterface::class, 'gesdinet.jwtrefreshtoken.refresh_token_generator');
@@ -76,8 +57,8 @@ return static function (ContainerConfigurator $container) {
         ->class(RefreshTokenManager::class)
         ->public()
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.object_manager'),
-            new Parameter('gesdinet.jwtrefreshtoken.refresh_token.class'),
+            service('gesdinet.jwtrefreshtoken.object_manager'),
+            param('gesdinet.jwtrefreshtoken.refresh_token.class'),
         ]);
 
     $services->alias(RefreshTokenManagerInterface::class, 'gesdinet.jwtrefreshtoken.refresh_token_manager');
@@ -101,83 +82,83 @@ return static function (ContainerConfigurator $container) {
         ->tag('gesdinet_jwt_refresh_token.request_extractor');
 
     $services->set('gesdinet.jwtrefreshtoken')
-        ->deprecate(...$deprecateArgs('1.0'))
+        ->deprecate('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%service_id%" service is deprecated.')
         ->class(RefreshToken::class)
         ->public()
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.authenticator'),
-            new Reference('gesdinet.jwtrefreshtoken.user_provider'),
-            new Reference('lexik_jwt_authentication.handler.authentication_success'),
-            new Reference('lexik_jwt_authentication.handler.authentication_failure'),
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
-            new Parameter('gesdinet_jwt_refresh_token.ttl'),
-            new Parameter('gesdinet_jwt_refresh_token.security.firewall'),
-            new Parameter('gesdinet_jwt_refresh_token.ttl_update'),
-            new Reference('event_dispatcher'),
+            service('gesdinet.jwtrefreshtoken.authenticator'),
+            service('gesdinet.jwtrefreshtoken.user_provider'),
+            service('lexik_jwt_authentication.handler.authentication_success'),
+            service('lexik_jwt_authentication.handler.authentication_failure'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            param('gesdinet_jwt_refresh_token.ttl'),
+            param('gesdinet_jwt_refresh_token.security.firewall'),
+            param('gesdinet_jwt_refresh_token.ttl_update'),
+            service('event_dispatcher'),
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.user_provider')
-        ->deprecate(...$deprecateArgs('1.0'))
+        ->deprecate('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%service_id%" service is deprecated.')
         ->class(RefreshTokenProvider::class)
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.authenticator')
-        ->deprecate(...$deprecateArgs('1.0'))
+        ->deprecate('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%service_id%" service is deprecated.')
         ->class(LegacyRefreshTokenAuthenticator::class)
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.user_checker'),
-            new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
-            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
+            service('gesdinet.jwtrefreshtoken.user_checker'),
+            param('gesdinet_jwt_refresh_token.token_parameter_name'),
+            service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.security.authentication.failure_handler')
         ->class(AuthenticationFailureHandler::class)
         ->args([
-            new Reference('event_dispatcher'),
+            service('event_dispatcher'),
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.security.authentication.success_handler')
         ->class(AuthenticationSuccessHandler::class)
         ->args([
-            new Reference('lexik_jwt_authentication.handler.authentication_success'),
-            new Reference('event_dispatcher'),
+            service('lexik_jwt_authentication.handler.authentication_success'),
+            service('event_dispatcher'),
         ]);
 
     $services->set('gesdinet.jwtrefreshtoken.security.refresh_token_authenticator')
         ->abstract()
         ->class(RefreshTokenAuthenticator::class)
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
-            new Reference('event_dispatcher'),
-            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
-            $abstractArg('user provider'),
-            $abstractArg('authentication success handler'),
-            $abstractArg('authentication failure handler'),
-            $abstractArg('options'),
-            new Reference('security.http_utils'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            service('event_dispatcher'),
+            service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
+            abstract_arg('user provider'),
+            abstract_arg('authentication success handler'),
+            abstract_arg('authentication failure handler'),
+            abstract_arg('options'),
+            service('security.http_utils'),
         ]);
 
     $services->set(ClearInvalidRefreshTokensCommand::class)
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
         ])
         ->tag('console.command');
 
     $services->set(RevokeRefreshTokenCommand::class)
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
         ])
         ->tag('console.command');
 
     $services->set(LogoutEventListener::class)
         ->args([
-            new Reference('gesdinet.jwtrefreshtoken.refresh_token_manager'),
-            new Reference('gesdinet.jwtrefreshtoken.request.extractor.chain'),
-            new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
-            new Parameter('gesdinet_jwt_refresh_token.cookie'),
-            new Parameter('gesdinet_jwt_refresh_token.logout_firewall_context'),
+            service('gesdinet.jwtrefreshtoken.refresh_token_manager'),
+            service('gesdinet.jwtrefreshtoken.request.extractor.chain'),
+            param('gesdinet_jwt_refresh_token.token_parameter_name'),
+            param('gesdinet_jwt_refresh_token.cookie'),
+            param('gesdinet_jwt_refresh_token.logout_firewall_context'),
         ])
         ->tag('kernel.event_listener', [
             'event' => 'Symfony\Component\Security\Http\Event\LogoutEvent',
