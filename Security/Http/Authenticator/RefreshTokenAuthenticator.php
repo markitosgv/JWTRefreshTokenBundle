@@ -178,7 +178,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
         return $this->failureHandler->onAuthenticationFailure($request, $exception);
     }
 
-    public function start(Request $request, AuthenticationException $authException = null): Response
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         $event = new RefreshTokenNotFoundEvent(
             new MissingTokenException('JWT Refresh Token not found', 0, $authException),

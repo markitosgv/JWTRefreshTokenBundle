@@ -146,7 +146,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     /**
      * @return Response
      */
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, ?AuthenticationException $authException = null)
     {
         $data = [
             // you might translate this message
