@@ -22,14 +22,18 @@ class LogoutEventListener
     private ExtractorInterface $refreshTokenExtractor;
     private string $tokenParameterName;
     private array $cookieSettings;
-    private string $logout_firewall_context;
+
+    /**
+     * @deprecated to be removed in 2.0
+     */
+    private ?string $logoutFirewallContext;
 
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
         ExtractorInterface $refreshTokenExtractor,
         string $tokenParameterName,
         array $cookieSettings,
-        string $logout_firewall_context
+        ?string $logoutFirewallContext = null
     ) {
         $this->refreshTokenManager = $refreshTokenManager;
         $this->refreshTokenExtractor = $refreshTokenExtractor;
@@ -44,15 +48,24 @@ class LogoutEventListener
             'partitioned' => false,
             'remove_token_from_body' => true,
         ], $cookieSettings);
-        $this->logout_firewall_context = $logout_firewall_context;
+        $this->logoutFirewallContext = $logoutFirewallContext;
+
+        if (null !== $logoutFirewallContext) {
+            trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.5', 'Passing the logout firewall context to "%s" is deprecated and will not be supported in 2.0.', self::class);
+        }
     }
 
     public function onLogout(LogoutEvent $event): void
     {
         $request = $event->getRequest();
-        $current_firewall_context = $request->attributes->get('_firewall_context');
 
-        if ($current_firewall_context !== $this->logout_firewall_context) {
+        /*
+         * This listener should only act in one of two conditions:
+         *
+         * 1) If the firewall context is not configured (this implies the listener is registered to the firewall specific event dispatcher)
+         * 2) (Deprecated) The request's firewall context matches the configured firewall context
+         */
+        if (null !== $this->logoutFirewallContext && $request->attributes->get('_firewall_context') !== $this->logoutFirewallContext) {
             return;
         }
 
