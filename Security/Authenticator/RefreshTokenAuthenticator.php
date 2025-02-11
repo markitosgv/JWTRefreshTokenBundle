@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Authenticator;
 
+use InvalidArgumentException;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownRefreshTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Exception\UnknownUserFromRefreshTokenException;
@@ -83,7 +84,7 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         if (!$userProvider instanceof RefreshTokenProvider) {
-            throw new \InvalidArgumentException(sprintf('The user provider must be an instance of RefreshTokenProvider (%s was given).', get_class($userProvider)));
+            throw new InvalidArgumentException(sprintf('The user provider must be an instance of RefreshTokenProvider (%s was given).', get_class($userProvider)));
         }
 
         $refreshToken = $credentials['token'] ?? null;

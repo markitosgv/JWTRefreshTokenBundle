@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Command;
 
+use DateTimeInterface;
 use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -23,7 +24,7 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $refreshTokenManager->expects($this->once())
             ->method('revokeAllInvalid')
-            ->with($this->isInstanceOf(\DateTimeInterface::class))
+            ->with($this->isInstanceOf(DateTimeInterface::class))
             ->willReturn([$refreshToken]);
 
         $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager);
@@ -51,7 +52,7 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $refreshTokenManager->expects($this->once())
             ->method('revokeAllInvalid')
-            ->with($this->isInstanceOf(\DateTimeInterface::class))
+            ->with($this->isInstanceOf(DateTimeInterface::class))
             ->willReturn([$refreshToken]);
 
         $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager);

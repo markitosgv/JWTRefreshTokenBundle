@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Service;
 
+use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Gesdinet\JWTRefreshTokenBundle\Security\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Exception\InvalidRefreshTokenException;
@@ -106,7 +107,7 @@ class RefreshToken
         }
 
         if ($this->ttlUpdate) {
-            $expirationDate = new \DateTime();
+            $expirationDate = new DateTime();
             $expirationDate->modify(sprintf('+%d seconds', $this->ttl));
             $refreshToken->setValid($expirationDate);
 
