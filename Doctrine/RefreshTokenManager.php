@@ -17,10 +17,8 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
 
-final class RefreshTokenManager implements RefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 {
-    private ObjectManager $objectManager;
-
     /**
      * @var class-string<RefreshTokenInterface>
      */
@@ -36,11 +34,9 @@ final class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @throws LogicException if the object repository does not implement {@see RefreshTokenRepositoryInterface}
      */
-    public function __construct(ObjectManager $om, string $class)
+    public function __construct(private ObjectManager $objectManager, string $class)
     {
-        $this->objectManager = $om;
-
-        $repository = $om->getRepository($class);
+        $repository = $this->objectManager->getRepository($class);
 
         if (!$repository instanceof RefreshTokenRepositoryInterface) {
             throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $class, RefreshTokenRepositoryInterface::class));
@@ -48,7 +44,7 @@ final class RefreshTokenManager implements RefreshTokenManagerInterface
 
         $this->repository = $repository;
 
-        $this->class = $om->getClassMetadata($class)->getName();
+        $this->class = $this->objectManager->getClassMetadata($class)->getName();
     }
 
     public function get(string $refreshToken): ?RefreshTokenInterface

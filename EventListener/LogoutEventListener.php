@@ -22,20 +22,14 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
  */
 final class LogoutEventListener
 {
-    private RefreshTokenManagerInterface $refreshTokenManager;
-    private ExtractorInterface $refreshTokenExtractor;
-    private string $tokenParameterName;
     private array $cookieSettings;
 
     public function __construct(
-        RefreshTokenManagerInterface $refreshTokenManager,
-        ExtractorInterface $refreshTokenExtractor,
-        string $tokenParameterName,
+        private readonly RefreshTokenManagerInterface $refreshTokenManager,
+        private readonly ExtractorInterface $refreshTokenExtractor,
+        private readonly string $tokenParameterName,
         array $cookieSettings
     ) {
-        $this->refreshTokenManager = $refreshTokenManager;
-        $this->refreshTokenExtractor = $refreshTokenExtractor;
-        $this->tokenParameterName = $tokenParameterName;
         $this->cookieSettings = array_merge([
             'enabled' => false,
             'same_site' => 'lax',

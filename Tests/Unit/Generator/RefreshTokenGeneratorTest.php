@@ -24,7 +24,7 @@ final class RefreshTokenGeneratorTest extends TestCase
         $this->refreshTokenGenerator = new RefreshTokenGenerator($this->manager);
     }
 
-    public function testGeneratesARefreshTokenWhenThereAreNoExistingTokens()
+    public function testGeneratesARefreshTokenWhenThereAreNoExistingTokens(): void
     {
         $this->manager
             ->expects($this->once())
@@ -43,7 +43,7 @@ final class RefreshTokenGeneratorTest extends TestCase
         );
     }
 
-    public function testGeneratesARefreshTokenWhenThereIsAnExistingTokenMatchingTheGeneratedToken()
+    public function testGeneratesARefreshTokenWhenThereIsAnExistingTokenMatchingTheGeneratedToken(): void
     {
         /** @var RefreshTokenInterface&MockObject $existingRefreshToken */
         $existingRefreshToken = $this->createMock(RefreshTokenInterface::class);

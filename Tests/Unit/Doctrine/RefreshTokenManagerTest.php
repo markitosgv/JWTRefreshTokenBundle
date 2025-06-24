@@ -50,7 +50,7 @@ class RefreshTokenManagerTest extends TestCase
         );
     }
 
-    public function testRetrievesATokenFromStorage()
+    public function testRetrievesATokenFromStorage(): void
     {
         $token = 'token';
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -64,7 +64,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertSame($refreshToken, $this->refreshTokenManager->get($token));
     }
 
-    public function testReturnsNullWhenTheTokenDoesNotExistInStorage()
+    public function testReturnsNullWhenTheTokenDoesNotExistInStorage(): void
     {
         $token = 'token';
         $this->repository
@@ -76,7 +76,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertNull($this->refreshTokenManager->get($token));
     }
 
-    public function testRetrievesTheLastTokenForAUserFromStorage()
+    public function testRetrievesTheLastTokenForAUserFromStorage(): void
     {
         $username = 'test';
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -90,7 +90,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertSame($refreshToken, $this->refreshTokenManager->getLastFromUsername($username));
     }
 
-    public function testReturnsNullWhenAUserDoesNotHaveATokenInStorage()
+    public function testReturnsNullWhenAUserDoesNotHaveATokenInStorage(): void
     {
         $username = 'test';
 
@@ -103,7 +103,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertNull($this->refreshTokenManager->getLastFromUsername($username));
     }
 
-    public function testSavesTheRefreshTokenAndFlushesTheObjectManager()
+    public function testSavesTheRefreshTokenAndFlushesTheObjectManager(): void
     {
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
@@ -119,7 +119,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->refreshTokenManager->save($refreshToken, true);
     }
 
-    public function testDeletesTheRefreshTokenAndFlushesTheObjectManager()
+    public function testDeletesTheRefreshTokenAndFlushesTheObjectManager(): void
     {
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
@@ -135,7 +135,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->refreshTokenManager->delete($refreshToken, true);
     }
 
-    public function testRevokesAllInvalidTokensAndFlushesTheObjectManager()
+    public function testRevokesAllInvalidTokensAndFlushesTheObjectManager(): void
     {
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
@@ -157,7 +157,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->refreshTokenManager->revokeAllInvalid(null, true);
     }
 
-    public function testProvidesTheModelClass()
+    public function testProvidesTheModelClass(): void
     {
         $this->assertSame(static::REFRESH_TOKEN_ENTITY_CLASS, $this->refreshTokenManager->getClass());
     }

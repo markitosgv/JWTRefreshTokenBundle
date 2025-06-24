@@ -20,7 +20,7 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSu
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 
-return static function (ContainerConfigurator $container) {
+return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
     $services->set('gesdinet_jwt_refresh_token.event_listener.attach_refresh_token')

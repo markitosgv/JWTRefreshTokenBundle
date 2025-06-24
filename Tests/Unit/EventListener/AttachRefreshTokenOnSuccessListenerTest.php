@@ -55,7 +55,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         );
     }
 
-    public function testAttachesTheTokenToTheResponseBodyOnRefresh()
+    public function testAttachesTheTokenToTheResponseBodyOnRefresh(): void
     {
         /** @var UserInterface&MockObject $user */
         $user = $this->createMock(UserInterface::class);
@@ -96,7 +96,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }
 
-    public function testAddsTheTokenToTheResponseCookiesOnRefresh()
+    public function testAddsTheTokenToTheResponseCookiesOnRefresh(): void
     {
         /** @var UserInterface&MockObject $user */
         $user = $this->createMock(UserInterface::class);
@@ -153,7 +153,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         ))->attachRefreshToken($event);
     }
 
-    public function testAttachTokenOnRefreshWithSingleUseToken()
+    public function testAttachTokenOnRefreshWithSingleUseToken(): void
     {
         $this->setSingleUseOnEventListener(true);
 
@@ -228,7 +228,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }
 
-    public function testAttachesTheTokenToTheResponseBodyOnCredentialsAuth()
+    public function testAttachesTheTokenToTheResponseBodyOnCredentialsAuth(): void
     {
         /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);

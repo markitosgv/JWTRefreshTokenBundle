@@ -14,16 +14,13 @@ class User implements UserInterface
     #[ORM\GeneratedValue]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private string $email;
-
-    #[ORM\Column(nullable: true)]
-    private ?string $password;
-
-    public function __construct(string $email, ?string $password = null)
+    public function __construct(
+        #[ORM\Column]
+        private string $email,
+        #[ORM\Column(nullable: true)]
+        private ?string $password = null
+    )
     {
-        $this->email = $email;
-        $this->password = $password;
     }
 
     public function getId(): ?int

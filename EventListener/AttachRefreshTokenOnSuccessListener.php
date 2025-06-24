@@ -24,45 +24,20 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 final class AttachRefreshTokenOnSuccessListener
 {
-    private RefreshTokenManagerInterface $refreshTokenManager;
-
-    private int $ttl;
-
-    private RequestStack $requestStack;
-
-    private string $tokenParameterName;
-
-    private bool $singleUse;
-
-    private RefreshTokenGeneratorInterface $refreshTokenGenerator;
-
-    private ExtractorInterface $extractor;
-
     private array $cookieSettings;
 
-    private bool $returnExpiration;
-
-    private string $returnExpirationParameterName;
-
     public function __construct(
-        RefreshTokenManagerInterface $refreshTokenManager,
-        int $ttl,
-        RequestStack $requestStack,
-        string $tokenParameterName,
-        bool $singleUse,
-        RefreshTokenGeneratorInterface $refreshTokenGenerator,
-        ExtractorInterface $extractor,
+        private readonly RefreshTokenManagerInterface $refreshTokenManager,
+        private readonly int $ttl,
+        private readonly RequestStack $requestStack,
+        private readonly string $tokenParameterName,
+        private readonly bool $singleUse,
+        private readonly RefreshTokenGeneratorInterface $refreshTokenGenerator,
+        private readonly ExtractorInterface $extractor,
         array $cookieSettings,
-        bool $returnExpiration = false,
-        string $returnExpirationParameterName = 'refresh_token_expiration'
+        private readonly bool $returnExpiration = false,
+        private readonly string $returnExpirationParameterName = 'refresh_token_expiration'
     ) {
-        $this->refreshTokenManager = $refreshTokenManager;
-        $this->ttl = $ttl;
-        $this->requestStack = $requestStack;
-        $this->tokenParameterName = $tokenParameterName;
-        $this->singleUse = $singleUse;
-        $this->refreshTokenGenerator = $refreshTokenGenerator;
-        $this->extractor = $extractor;
         $this->cookieSettings = array_merge([
             'enabled' => false,
             'same_site' => 'lax',
@@ -73,8 +48,6 @@ final class AttachRefreshTokenOnSuccessListener
             'remove_token_from_body' => true,
             'partitioned' => false,
         ], $cookieSettings);
-        $this->returnExpiration = $returnExpiration;
-        $this->returnExpirationParameterName = $returnExpirationParameterName;
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event): void

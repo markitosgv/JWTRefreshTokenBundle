@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Entity;
 
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use DateTime;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
@@ -11,9 +12,7 @@ use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\RefreshToken
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\User;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\ORMTestCase;
 
-/**
- * @requires extension pdo_sqlite
- */
+#[RequiresPhpExtension('pdo_sqlite')]
 final class RefreshTokenRepositoryTest extends ORMTestCase
 {
     private RefreshTokenGenerator $generator;

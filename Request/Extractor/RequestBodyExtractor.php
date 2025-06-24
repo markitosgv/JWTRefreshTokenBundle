@@ -26,6 +26,6 @@ final class RequestBodyExtractor implements ExtractorInterface
         $content = $request->getContent();
         $params = !empty($content) ? json_decode($content, true) : [];
 
-        return isset($params[$parameter]) ? trim($params[$parameter]) : null;
+        return isset($params[$parameter]) ? trim((string) $params[$parameter]) : null;
     }
 }

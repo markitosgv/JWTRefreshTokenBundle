@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Document;
 
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshTokenRepository;
@@ -10,9 +11,7 @@ use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Document\RefreshTok
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Document\User;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\ODMTestCase;
 
-/**
- * @requires extension mongodb
- */
+#[RequiresPhpExtension('mongodb')]
 final class RefreshTokenRepositoryTest extends ODMTestCase
 {
     private RefreshTokenGenerator $generator;

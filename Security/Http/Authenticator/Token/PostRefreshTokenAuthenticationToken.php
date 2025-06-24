@@ -17,8 +17,6 @@ use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 
 class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
 {
-    private RefreshTokenInterface $refreshToken;
-
     /**
      * @param string[] $roles An array of roles
      */
@@ -26,11 +24,9 @@ class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
         UserInterface $user,
         string $firewallName,
         array $roles,
-        RefreshTokenInterface $refreshToken
+        private RefreshTokenInterface $refreshToken
     ) {
         parent::__construct($user, $firewallName, $roles);
-
-        $this->refreshToken = $refreshToken;
     }
 
     public function getRefreshToken(): RefreshTokenInterface

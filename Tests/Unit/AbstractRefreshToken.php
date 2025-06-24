@@ -24,33 +24,33 @@ abstract class AbstractRefreshToken extends TestCase
         int $ttl
     ): RefreshTokenInterface;
 
-    public function testCanBeConvertedToAString()
+    public function testCanBeConvertedToAString(): void
     {
         $this->assertSame('token', $this->refreshToken->__toString());
     }
 
-    public function testHasNoIdByDefault()
+    public function testHasNoIdByDefault(): void
     {
         $this->assertNull($this->refreshToken->getId());
     }
 
-    public function testHasACustomRefreshToken()
+    public function testHasACustomRefreshToken(): void
     {
         $this->assertSame($this->refreshToken, $this->refreshToken->setRefreshToken('custom-token'));
         $this->assertSame('custom-token', $this->refreshToken->getRefreshToken());
     }
 
-    public function testHasUsername()
+    public function testHasUsername(): void
     {
         $this->assertSame('username', $this->refreshToken->getUsername());
     }
 
-    public function testHasAValidTimestamp()
+    public function testHasAValidTimestamp(): void
     {
         $this->assertInstanceOf(DateTimeInterface::class, $this->refreshToken->getValid());
     }
 
-    public function testValid()
+    public function testValid(): void
     {
         $date = new DateTime();
         $date->modify('+1 day');
@@ -58,7 +58,7 @@ abstract class AbstractRefreshToken extends TestCase
         $this->assertTrue($this->refreshToken->isValid());
     }
 
-    public function testNotValid()
+    public function testNotValid(): void
     {
         $date = new DateTime();
         $date->modify('-1 day');
