@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
+use LogicException;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -102,7 +103,7 @@ class AttachRefreshTokenOnSuccessListener
         $this->returnExpirationParameterName = $returnExpirationParameterName;
 
         if ($this->cookieSettings['partitioned'] && Kernel::VERSION < '6.4') {
-            throw new \LogicException(sprintf('The `partitioned` option for cookies is only available for Symfony 6.4 and above. You are currently on version %s', Kernel::VERSION));
+            throw new LogicException(sprintf('The `partitioned` option for cookies is only available for Symfony 6.4 and above. You are currently on version %s', Kernel::VERSION));
         }
     }
 

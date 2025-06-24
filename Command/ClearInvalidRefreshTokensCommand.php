@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
+use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -52,9 +53,9 @@ class ClearInvalidRefreshTokensCommand extends Command
         $datetime = $input->getArgument('datetime');
 
         if (null === $datetime) {
-            $datetime = new \DateTime();
+            $datetime = new DateTime();
         } else {
-            $datetime = new \DateTime($datetime);
+            $datetime = new DateTime($datetime);
         }
 
         $revokedTokens = $this->refreshTokenManager->revokeAllInvalid($datetime);

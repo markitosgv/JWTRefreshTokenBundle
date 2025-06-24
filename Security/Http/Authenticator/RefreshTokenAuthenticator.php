@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator;
 
+use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenNotFoundEvent;
 use Gesdinet\JWTRefreshTokenBundle\Http\RefreshAuthenticationFailureResponse;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -115,7 +116,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
         }
 
         if ($this->options['ttl_update']) {
-            $expirationDate = new \DateTime();
+            $expirationDate = new DateTime();
 
             // Explicitly check for a negative number based on a behavior change in PHP 8.2, see https://github.com/php/php-src/issues/9950
             if ($this->options['ttl'] > 0) {
