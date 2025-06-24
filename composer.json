@@ -35,7 +35,8 @@
     "matthiasnoback/symfony-dependency-injection-test": "^5.1",
     "phpunit/phpunit": "^9.6",
     "symfony/cache": "^6.4|^7.2",
-    "rector/rector": "^2.0"
+    "rector/rector": "^2.0",
+    "rector/jack": "^0.2.5"
   },
   "conflict": {
     "doctrine/mongodb-odm": "<2.7",
