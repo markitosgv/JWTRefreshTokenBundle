@@ -4,10 +4,10 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Document;
 
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
-use Gesdinet\JWTRefreshTokenBundle\Tests\Unit\AbstractRefreshTokenTest;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Unit\AbstractRefreshToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class RefreshTokenTest extends AbstractRefreshTokenTest
+class RefreshTokenTest extends AbstractRefreshToken
 {
     protected function createRefreshToken(string $refreshToken, UserInterface $user, int $ttl): RefreshTokenInterface
     {

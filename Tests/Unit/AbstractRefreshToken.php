@@ -9,7 +9,7 @@ use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-abstract class AbstractRefreshTokenTest extends TestCase
+abstract class AbstractRefreshToken extends TestCase
 {
     private RefreshTokenInterface $refreshToken;
 

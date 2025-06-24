@@ -54,6 +54,6 @@ jobs:
           SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
       - name: Run PHPUnit
-        run: bin/phpunit --dont-report-useless-tests
+        run: bin/phpunit
         env:
           DOCTRINE_MONGODB_SERVER: ${{ steps.setup-mongodb.outputs.cluster-uri }}
