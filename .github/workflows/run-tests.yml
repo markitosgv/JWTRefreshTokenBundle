@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: 'ubuntu-24.10'
+    runs-on: 'ubuntu-22.04'
     continue-on-error: ${{ matrix.can-fail }}
     strategy:
       fail-fast: false
