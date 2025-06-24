@@ -13,8 +13,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
-use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -46,6 +44,7 @@ class GesdinetJWTRefreshTokenExtension extends Extension
         ));
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $config['return_expiration']);
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $config['return_expiration_parameter_name']);
+        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $config['refresh_token_class']);
 
         if ($config['logout_firewall']) {
             $container->setDefinition('gesdinet_jwt_refresh_token.security.listener.logout.legacy_config', new ChildDefinition('gesdinet_jwt_refresh_token.security.listener.logout'))
@@ -53,24 +52,17 @@ class GesdinetJWTRefreshTokenExtension extends Extension
                 ->addTag('kernel.event_listener', ['event' => LogoutEvent::class, 'method' => 'onLogout']);
         }
 
-        $refreshTokenClass = RefreshTokenEntity::class;
         $objectManager = 'doctrine.orm.entity_manager';
 
-        // Change the refresh token and object manager to the MongoDB ODM if the configuration explicitly sets it or if the ORM is not installed and the MongoDB ODM is
+        // Change the object manager to the MongoDB ODM if the configuration explicitly sets it or if the ORM is not installed and the MongoDB ODM is
         if ('mongodb' === strtolower($config['manager_type']) || (!class_exists(EntityManager::class) && class_exists(DocumentManager::class))) {
-            $refreshTokenClass = RefreshTokenDocument::class;
             $objectManager = 'doctrine_mongodb.odm.document_manager';
-        }
-
-        if (null !== $config['refresh_token_class']) {
-            $refreshTokenClass = $config['refresh_token_class'];
         }
 
         if (null !== $config['object_manager']) {
             $objectManager = $config['object_manager'];
         }
 
-        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $refreshTokenClass);
         $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
     }
 }

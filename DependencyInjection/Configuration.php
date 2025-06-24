@@ -11,7 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -37,17 +37,12 @@ class Configuration implements ConfigurationInterface
                     ->info('Set the type of object manager to use (default: orm)')
                 ->end()
                 ->scalarNode('refresh_token_class')
-                    ->defaultNull()
-                    ->info(sprintf('Set the refresh token class to use (default: %s)', RefreshToken::class))
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                    ->info('Set the refresh token class to use')
                     ->validate()
-                        ->ifTrue(static fn ($v): bool => null === $v)
-                        ->then(static function () {
-                            trigger_deprecation(
-                                'gesdinet/jwt-refresh-token-bundle',
-                                '1.1',
-                                'Not setting the "refresh_token_class" option is deprecated, as of 2.0 a class must be set.'
-                            );
-                        })
+                        ->ifTrue(static fn ($v): bool => null === $v || !\in_array(RefreshTokenInterface::class, class_implements($v), true))
+                        ->thenInvalid(sprintf('The "refresh_token_class" class must implement "%s".', RefreshTokenInterface::class))
                     ->end()
                 ->end()
                 ->scalarNode('object_manager')
