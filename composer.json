@@ -31,9 +31,9 @@
   "require-dev": {
     "doctrine/mongodb-odm": "^2.7",
     "doctrine/orm": "^2.20|^3.0",
-    "matthiasnoback/symfony-config-test": "^5.1",
-    "matthiasnoback/symfony-dependency-injection-test": "^5.1",
-    "phpunit/phpunit": "^9.6",
+    "matthiasnoback/symfony-config-test": "^5.1|^6.0",
+    "matthiasnoback/symfony-dependency-injection-test": "^5.1|^6.0",
+    "phpunit/phpunit": "^9.6|^10.0",
     "symfony/cache": "^6.4|^7.2",
     "rector/rector": "^2.0",
     "rector/jack": "^0.2.5"
@@ -69,3 +69,4 @@
   "minimum-stability": "dev",
   "prefer-stable": true
 }
+
