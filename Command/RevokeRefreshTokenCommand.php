@@ -22,13 +22,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'gesdinet:jwt:revoke', description: 'Revoke a refresh token.')]
 final class RevokeRefreshTokenCommand extends Command
 {
-    private RefreshTokenManagerInterface $refreshTokenManager;
-
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
+    public function __construct(private readonly RefreshTokenManagerInterface $refreshTokenManager)
     {
         parent::__construct();
-
-        $this->refreshTokenManager = $refreshTokenManager;
     }
 
     protected function configure(): void

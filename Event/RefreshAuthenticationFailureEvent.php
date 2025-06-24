@@ -17,15 +17,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class RefreshAuthenticationFailureEvent extends Event
 {
-    private AuthenticationException $exception;
-
-    private Response $response;
-
-    public function __construct(AuthenticationException $exception, Response $response)
-    {
-        $this->exception = $exception;
-        $this->response = $response;
-    }
+    public function __construct(
+        private readonly AuthenticationException $exception,
+        private Response $response
+    ) {}
 
     public function getException(): AuthenticationException
     {

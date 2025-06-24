@@ -15,10 +15,7 @@ use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\ODMTestCase;
  */
 final class RefreshTokenRepositoryTest extends ODMTestCase
 {
-    /**
-     * @var RefreshTokenGenerator
-     */
-    private $generator;
+    private RefreshTokenGenerator $generator;
 
     protected function setUp(): void
     {

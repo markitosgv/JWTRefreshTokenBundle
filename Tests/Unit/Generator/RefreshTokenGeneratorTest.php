@@ -11,12 +11,9 @@ use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class RefreshTokenGeneratorTest extends TestCase
+final class RefreshTokenGeneratorTest extends TestCase
 {
-    /**
-     * @var RefreshTokenManagerInterface|MockObject
-     */
-    private RefreshTokenManagerInterface $manager;
+    private MockObject&RefreshTokenManagerInterface $manager;
 
     private RefreshTokenGeneratorInterface $refreshTokenGenerator;
 
@@ -48,7 +45,7 @@ class RefreshTokenGeneratorTest extends TestCase
 
     public function testGeneratesARefreshTokenWhenThereIsAnExistingTokenMatchingTheGeneratedToken()
     {
-        /** @var RefreshTokenInterface|MockObject $existingRefreshToken */
+        /** @var RefreshTokenInterface&MockObject $existingRefreshToken */
         $existingRefreshToken = $this->createMock(RefreshTokenInterface::class);
 
         $this->manager

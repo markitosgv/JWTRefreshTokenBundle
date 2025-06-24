@@ -14,13 +14,13 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
 {
     public function test_clears_tokens_without_timestamp(): void
     {
-        /** @var MockObject|RefreshTokenInterface $refreshToken */
+        /** @var MockObject&RefreshTokenInterface $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
         $refreshToken->expects($this->once())
             ->method('getRefreshToken')
             ->willReturn('refresh-token');
 
-        /** @var MockObject|RefreshTokenManagerInterface $refreshTokenManager */
+        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $refreshTokenManager->expects($this->once())
             ->method('revokeAllInvalid')
@@ -42,13 +42,13 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
 
     public function test_clears_tokens_with_timestamp(): void
     {
-        /** @var MockObject|RefreshTokenInterface $refreshToken */
+        /** @var MockObject&RefreshTokenInterface $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
         $refreshToken->expects($this->once())
             ->method('getRefreshToken')
             ->willReturn('refresh-token');
 
-        /** @var MockObject|RefreshTokenManagerInterface $refreshTokenManager */
+        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $refreshTokenManager->expects($this->once())
             ->method('revokeAllInvalid')

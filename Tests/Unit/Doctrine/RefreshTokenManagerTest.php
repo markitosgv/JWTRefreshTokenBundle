@@ -15,15 +15,9 @@ class RefreshTokenManagerTest extends TestCase
 {
     const REFRESH_TOKEN_ENTITY_CLASS = RefreshToken::class;
 
-    /**
-     * @var RefreshTokenRepository|MockObject
-     */
-    private $repository;
+    private MockObject&RefreshTokenRepository $repository;
 
-    /**
-     * @var ObjectManager|MockObject
-     */
-    private $objectManager;
+    private MockObject&ObjectManager $objectManager;
 
     private RefreshTokenManager $refreshTokenManager;
 

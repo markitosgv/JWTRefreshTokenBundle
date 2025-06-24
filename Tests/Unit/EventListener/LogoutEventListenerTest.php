@@ -17,15 +17,9 @@ final class LogoutEventListenerTest extends TestCase
 {
     const TOKEN_PARAMETER_NAME = 'refresh_token';
 
-    /**
-     * @var RefreshTokenManagerInterface|MockObject
-     */
-    private $refreshTokenManager;
+    private MockObject&RefreshTokenManagerInterface $refreshTokenManager;
 
-    /**
-     * @var ExtractorInterface|MockObject
-     */
-    private $extractor;
+    private MockObject&ExtractorInterface $extractor;
 
     protected function setUp(): void
     {
@@ -47,7 +41,7 @@ final class LogoutEventListenerTest extends TestCase
             ->with($request, self::TOKEN_PARAMETER_NAME)
             ->willReturn($refreshTokenString);
 
-        /** @var RefreshTokenInterface|MockObject $refreshToken */
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
         $this->refreshTokenManager
@@ -93,7 +87,7 @@ final class LogoutEventListenerTest extends TestCase
             ->with($request, self::TOKEN_PARAMETER_NAME)
             ->willReturn($refreshTokenString);
 
-        /** @var RefreshTokenInterface|MockObject $refreshToken */
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
         $this->refreshTokenManager

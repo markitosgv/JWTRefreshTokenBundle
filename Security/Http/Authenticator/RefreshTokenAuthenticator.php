@@ -32,54 +32,31 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerI
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
-use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
-use Symfony\Component\Security\Http\Authenticator\Passport\UserPassportInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
-    private RefreshTokenManagerInterface $refreshTokenManager;
-
-    private EventDispatcherInterface $eventDispatcher;
-
-    private ExtractorInterface $extractor;
-
-    private UserProviderInterface $userProvider;
-
-    private AuthenticationSuccessHandlerInterface $successHandler;
-
-    private AuthenticationFailureHandlerInterface $failureHandler;
-
     private array $options;
 
-    private ?HttpUtils $httpUtils;
-
     public function __construct(
-        RefreshTokenManagerInterface $refreshTokenManager,
-        EventDispatcherInterface $eventDispatcher,
-        ExtractorInterface $extractor,
-        UserProviderInterface $userProvider,
-        AuthenticationSuccessHandlerInterface $successHandler,
-        AuthenticationFailureHandlerInterface $failureHandler,
+        private readonly RefreshTokenManagerInterface $refreshTokenManager,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ExtractorInterface $extractor,
+        private readonly UserProviderInterface $userProvider,
+        private readonly AuthenticationSuccessHandlerInterface $successHandler,
+        private readonly AuthenticationFailureHandlerInterface $failureHandler,
         array $options,
-        HttpUtils $httpUtils
+        private readonly HttpUtils $httpUtils
     ) {
-        $this->refreshTokenManager = $refreshTokenManager;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->extractor = $extractor;
-        $this->userProvider = $userProvider;
-        $this->successHandler = $successHandler;
-        $this->failureHandler = $failureHandler;
         $this->options = array_merge([
             'check_path' => '/login_check',
             'ttl' => 2592000,
             'ttl_update' => false,
             'token_parameter_name' => 'refresh_token',
         ], $options);
-        $this->httpUtils = $httpUtils;
     }
 
     public function supports(Request $request): bool

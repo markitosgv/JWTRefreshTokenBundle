@@ -15,14 +15,9 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final class RefreshTokenGenerator implements RefreshTokenGeneratorInterface
+final readonly class RefreshTokenGenerator implements RefreshTokenGeneratorInterface
 {
-    private RefreshTokenManagerInterface $manager;
-
-    public function __construct(RefreshTokenManagerInterface $manager)
-    {
-        $this->manager = $manager;
-    }
+    public function __construct(private RefreshTokenManagerInterface $manager) {}
 
     public function createForUserWithTtl(UserInterface $user, int $ttl): RefreshTokenInterface
     {

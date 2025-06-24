@@ -21,19 +21,12 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
-    private AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler;
-
-    private EventDispatcherInterface $eventDispatcher;
-
     private ?string $firewallName = null;
 
     public function __construct(
-        AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler,
-        EventDispatcherInterface $eventDispatcher
-    ) {
-        $this->lexikAuthenticationSuccessHandler = $lexikAuthenticationSuccessHandler;
-        $this->eventDispatcher = $eventDispatcher;
-    }
+        private readonly AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler,
+        private readonly EventDispatcherInterface $eventDispatcher
+    ) {}
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
     {

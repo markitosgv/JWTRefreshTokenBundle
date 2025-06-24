@@ -48,8 +48,7 @@ final class RefreshTokenManager implements RefreshTokenManagerInterface
 
         $this->repository = $repository;
 
-        $metadata = $om->getClassMetadata($class);
-        $this->class = $metadata->getName();
+        $this->class = $om->getClassMetadata($class)->getName();
     }
 
     public function get(string $refreshToken): ?RefreshTokenInterface

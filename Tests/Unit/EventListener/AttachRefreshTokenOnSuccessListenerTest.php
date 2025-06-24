@@ -17,32 +17,20 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class AttachRefreshTokenOnSuccessListenerTest extends TestCase
+final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 {
     const TTL = 2592000;
     const TOKEN_PARAMETER_NAME = 'refresh_token';
     const RETURN_EXPIRATION = false;
     const RETURN_EXPIRATION_PARAMETER_NAME = 'refresh_token_ttl';
 
-    /**
-     * @var RefreshTokenManagerInterface|MockObject
-     */
-    private $refreshTokenManager;
+    private MockObject&RefreshTokenManagerInterface $refreshTokenManager;
 
-    /**
-     * @var MockObject|RequestStack
-     */
-    private $requestStack;
+    private MockObject&RequestStack $requestStack;
 
-    /**
-     * @var RefreshTokenGeneratorInterface|MockObject
-     */
-    private $refreshTokenGenerator;
+    private MockObject&RefreshTokenGeneratorInterface $refreshTokenGenerator;
 
-    /**
-     * @var ExtractorInterface|MockObject
-     */
-    private $extractor;
+    private MockObject&ExtractorInterface $extractor;
 
     private AttachRefreshTokenOnSuccessListener $attachRefreshTokenOnSuccessListener;
 
@@ -69,10 +57,10 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testAttachesTheTokenToTheResponseBodyOnRefresh()
     {
-        /** @var UserInterface|MockObject $user */
+        /** @var UserInterface&MockObject $user */
         $user = $this->createMock(UserInterface::class);
 
-        /** @var AuthenticationSuccessEvent|MockObject $event */
+        /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
 
         $event
@@ -110,10 +98,10 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testAddsTheTokenToTheResponseCookiesOnRefresh()
     {
-        /** @var UserInterface|MockObject $user */
+        /** @var UserInterface&MockObject $user */
         $user = $this->createMock(UserInterface::class);
 
-        /** @var AuthenticationSuccessEvent|MockObject $event */
+        /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
 
         $event
@@ -169,13 +157,13 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
     {
         $this->setSingleUseOnEventListener(true);
 
-        /** @var AuthenticationSuccessEvent|MockObject $event */
+        /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
 
-        /** @var RefreshTokenInterface|MockObject $oldRefreshToken */
+        /** @var RefreshTokenInterface&MockObject $oldRefreshToken */
         $oldRefreshToken = $this->createMock(RefreshTokenInterface::class);
 
-        /** @var RefreshTokenInterface|MockObject $newRefreshToken */
+        /** @var RefreshTokenInterface&MockObject $newRefreshToken */
         $newRefreshToken = $this->createMock(RefreshTokenInterface::class);
 
         $user = UserCreator::create();
@@ -242,13 +230,13 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testAttachesTheTokenToTheResponseBodyOnCredentialsAuth()
     {
-        /** @var AuthenticationSuccessEvent|MockObject $event */
+        /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
 
-        /** @var UserInterface|MockObject $user */
+        /** @var UserInterface&MockObject $user */
         $user = $this->createMock(UserInterface::class);
 
-        /** @var RefreshTokenInterface|MockObject $refreshToken */
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
         $event
@@ -293,23 +281,6 @@ class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ->expects($this->atLeastOnce())
             ->method('setData')
             ->with($this->isType('array'));
-
-        $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
-    }
-
-    public function testDoesNothingWhenThereIsNotAUser()
-    {
-        if ((new ReflectionClass(AuthenticationSuccessEvent::class))->getMethod('getUser')->hasReturnType()) {
-            $this->markTestSkipped(sprintf('%s::getUser() has a non-nullable return type in LexikJWTAuthenticationBundle 3.x', AuthenticationSuccessEvent::class));
-        }
-
-        /** @var AuthenticationSuccessEvent|MockObject $event */
-        $event = $this->createMock(AuthenticationSuccessEvent::class);
-
-        $event
-            ->expects($this->once())
-            ->method('getUser')
-            ->willReturn(null);
 
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }

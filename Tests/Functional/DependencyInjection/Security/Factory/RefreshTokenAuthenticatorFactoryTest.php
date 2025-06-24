@@ -11,15 +11,9 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 {
-    /**
-     * @var RefreshTokenAuthenticatorFactory
-     */
-    private $factory;
+    private RefreshTokenAuthenticatorFactory $factory;
 
-    /**
-     * @var ContainerBuilder
-     */
-    private $container;
+    private ContainerBuilder $container;
 
     protected function setUp(): void
     {

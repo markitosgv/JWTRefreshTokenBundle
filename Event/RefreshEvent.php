@@ -17,18 +17,11 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class RefreshEvent extends Event
 {
-    private RefreshTokenInterface $refreshToken;
-
-    private TokenInterface $token;
-
-    private ?string $firewallName;
-
-    public function __construct(RefreshTokenInterface $refreshToken, TokenInterface $token, ?string $firewallName = null)
-    {
-        $this->refreshToken = $refreshToken;
-        $this->token = $token;
-        $this->firewallName = $firewallName;
-    }
+    public function __construct(
+        private readonly RefreshTokenInterface $refreshToken,
+        private readonly TokenInterface $token,
+        private readonly ?string $firewallName = null
+    ) {}
 
     public function getRefreshToken(): RefreshTokenInterface
     {

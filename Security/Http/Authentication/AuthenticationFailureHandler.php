@@ -19,14 +19,9 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-final class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterface
+final readonly class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterface
 {
-    private EventDispatcherInterface $eventDispatcher;
-
-    public function __construct(EventDispatcherInterface $eventDispatcher)
-    {
-        $this->eventDispatcher = $eventDispatcher;
-    }
+    public function __construct(private EventDispatcherInterface $eventDispatcher) {}
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {

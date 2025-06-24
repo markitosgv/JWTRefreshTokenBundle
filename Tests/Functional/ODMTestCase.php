@@ -14,10 +14,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 abstract class ODMTestCase extends TestCase
 {
-    /**
-     * @var DocumentManager
-     */
-    protected $documentManager;
+    protected DocumentManager $documentManager;
 
     protected function setUp(): void
     {

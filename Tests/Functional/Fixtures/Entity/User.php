@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity;
 
+use Deprecated;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -44,6 +45,7 @@ class User implements UserInterface
     {
     }
 
+    #[Deprecated]
     public function eraseCredentials(): void
     {
     }

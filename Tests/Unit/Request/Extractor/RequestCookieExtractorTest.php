@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
-class RequestCookieExtractorTest extends TestCase
+final class RequestCookieExtractorTest extends TestCase
 {
     private const PARAMETER_NAME = 'refresh_token';
     private RequestCookieExtractor $requestCookieExtractor;
@@ -23,11 +23,10 @@ class RequestCookieExtractorTest extends TestCase
     {
         $token = 'my-refresh-token';
 
-        /** @var ParameterBag|InputBag $cookieBag */
-        $cookieBag = class_exists(InputBag::class) ? new InputBag() : new ParameterBag();
+        $cookieBag = new InputBag();
         $cookieBag->set(self::PARAMETER_NAME, $token);
 
-        /** @var Request|MockObject $request */
+        /** @var Request&MockObject $request */
         $request = $this->createMock(Request::class);
         $request->cookies = $cookieBag;
 

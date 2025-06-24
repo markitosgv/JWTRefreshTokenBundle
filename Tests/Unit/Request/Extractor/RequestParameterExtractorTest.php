@@ -7,7 +7,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-class RequestParameterExtractorTest extends TestCase
+final class RequestParameterExtractorTest extends TestCase
 {
     private const PARAMETER_NAME = 'refresh_token';
 
@@ -20,7 +20,7 @@ class RequestParameterExtractorTest extends TestCase
 
     public function testGetsTheTokenFromTheRequestParameters(): void
     {
-        /** @var Request|MockObject $request */
+        /** @var Request&MockObject $request */
         $request = $this->createMock(Request::class);
         $token = 'my-refresh-token';
 

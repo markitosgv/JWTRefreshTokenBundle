@@ -24,13 +24,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'gesdinet:jwt:clear', description: 'Clear invalid refresh tokens.')]
 final class ClearInvalidRefreshTokensCommand extends Command
 {
-    private RefreshTokenManagerInterface $refreshTokenManager;
-
-    public function __construct(RefreshTokenManagerInterface $refreshTokenManager)
+    public function __construct(private readonly RefreshTokenManagerInterface $refreshTokenManager)
     {
         parent::__construct();
-
-        $this->refreshTokenManager = $refreshTokenManager;
     }
 
     protected function configure(): void

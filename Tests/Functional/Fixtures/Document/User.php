@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Document;
 
+use Deprecated;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -42,6 +43,7 @@ class User implements UserInterface
     {
     }
 
+    #[Deprecated]
     public function eraseCredentials(): void
     {
     }
