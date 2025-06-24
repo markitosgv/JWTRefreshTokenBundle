@@ -17,8 +17,7 @@ class User implements UserInterface
         private string $email,
         #[ODM\Field(nullable: true)]
         private ?string $password = null
-    )
-    {
+    ) {
     }
 
     public function getId(): ?string

@@ -62,7 +62,7 @@ abstract class ODMTestCase extends TestCase
 
         $client = $this->documentManager->getClient();
         $databaseNames = array_map(
-            static fn(DatabaseInfo $database): string => $database->getName(),
+            static fn (DatabaseInfo $database): string => $database->getName(),
             iterator_to_array($client->listDatabases())
         );
 

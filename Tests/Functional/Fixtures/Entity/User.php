@@ -19,8 +19,7 @@ class User implements UserInterface
         private string $email,
         #[ORM\Column(nullable: true)]
         private ?string $password = null
-    )
-    {
+    ) {
     }
 
     public function getId(): ?int

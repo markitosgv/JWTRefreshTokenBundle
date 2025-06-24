@@ -2,7 +2,6 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\EventListener;
 
-use ReflectionClass;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
