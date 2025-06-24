@@ -6,6 +6,7 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenEx
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCase
 {
@@ -41,10 +42,13 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'remove_token_from_body' => true,
             ],
         );
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.logout_firewall_context', 'security.firewall.map.context.');
 
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.refresh_token.class', RefreshTokenEntity::class);
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.object_manager.id', 'doctrine.orm.entity_manager');
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.user_checker.id', 'security.user_checker');
+
+        $this->assertContainerBuilderNotHasService('gesdinet_jwt_refresh_token.security.listener.logout.legacy_config');
     }
 
     public function test_container_is_loaded_with_custom_configuration(): void
@@ -94,10 +98,13 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'remove_token_from_body' => true,
             ],
         );
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.logout_firewall_context', 'security.firewall.map.context.');
 
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.refresh_token.class', RefreshTokenDocument::class);
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.object_manager.id', 'doctrine_mongodb.odm.document_manager');
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.user_checker.id', 'my.user_checker');
+
+        $this->assertContainerBuilderNotHasService('gesdinet_jwt_refresh_token.security.listener.logout.legacy_config');
     }
 
     public function test_container_is_loaded_with_deprecated_parameters(): void
@@ -106,9 +113,13 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'manager_type' => 'mongodb',
             'refresh_token_entity' => RefreshTokenDocument::class,
             'entity_manager' => 'doctrine_mongodb.odm.document_manager',
+            'logout_firewall' => 'api',
         ]);
 
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.logout_firewall_context', 'security.firewall.map.context.api');
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.refresh_token.class', RefreshTokenDocument::class);
         $this->assertContainerBuilderHasParameter('gesdinet.jwtrefreshtoken.object_manager.id', 'doctrine_mongodb.odm.document_manager');
+
+        $this->assertContainerBuilderHasServiceDefinitionWithTag('gesdinet_jwt_refresh_token.security.listener.logout.legacy_config', 'kernel.event_listener', ['event' => LogoutEvent::class, 'method' => 'onLogout']);
     }
 }
