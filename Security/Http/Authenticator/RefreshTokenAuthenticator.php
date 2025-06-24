@@ -136,7 +136,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
     {
         $event = new RefreshTokenNotFoundEvent(
             new MissingTokenException('JWT Refresh Token not found', 0, $authException),
-            new RefreshAuthenticationFailureResponse($authException ? $authException->getMessageKey() : 'Authentication error')
+            new RefreshAuthenticationFailureResponse($authException instanceof AuthenticationException ? $authException->getMessageKey() : 'Authentication error')
         );
 
         $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token_not_found');

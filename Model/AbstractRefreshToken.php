@@ -49,7 +49,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
 
     public function __toString(): string
     {
-        return $this->getRefreshToken() ?: '';
+        return !in_array($this->getRefreshToken(), [null, '', '0'], true) ? $this->getRefreshToken() : '';
     }
 
     public function getId(): int|string|null
