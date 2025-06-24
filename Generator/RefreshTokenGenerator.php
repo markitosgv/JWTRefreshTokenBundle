@@ -17,7 +17,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 final readonly class RefreshTokenGenerator implements RefreshTokenGeneratorInterface
 {
-    public function __construct(private RefreshTokenManagerInterface $manager) {}
+    public function __construct(private RefreshTokenManagerInterface $manager)
+    {
+    }
 
     public function createForUserWithTtl(UserInterface $user, int $ttl): RefreshTokenInterface
     {

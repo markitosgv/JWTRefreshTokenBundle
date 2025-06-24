@@ -6,7 +6,6 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\InputBag;
-use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
 final class RequestCookieExtractorTest extends TestCase

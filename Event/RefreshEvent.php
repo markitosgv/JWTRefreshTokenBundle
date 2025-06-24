@@ -21,7 +21,8 @@ final class RefreshEvent extends Event
         private readonly RefreshTokenInterface $refreshToken,
         private readonly TokenInterface $token,
         private readonly ?string $firewallName = null
-    ) {}
+    ) {
+    }
 
     public function getRefreshToken(): RefreshTokenInterface
     {

@@ -21,7 +21,9 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterface
 {
-    public function __construct(private EventDispatcherInterface $eventDispatcher) {}
+    public function __construct(private EventDispatcherInterface $eventDispatcher)
+    {
+    }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
