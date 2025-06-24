@@ -2,26 +2,20 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 
-use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestBodyExtractor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-class RequestBodyExtractorTest extends TestCase
+final class RequestBodyExtractorTest extends TestCase
 {
     private const PARAMETER_NAME = 'refresh_token';
+
     private RequestBodyExtractor $requestBodyExtractor;
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->requestBodyExtractor = new RequestBodyExtractor();
-    }
-
-    public function testIsAnExtractor(): void
-    {
-        $this->assertInstanceOf(ExtractorInterface::class, $this->requestBodyExtractor);
     }
 
     public function testGetsTheTokenFromTheRequestBody(): void
@@ -49,20 +43,17 @@ class RequestBodyExtractorTest extends TestCase
         $this->assertNull($this->requestBodyExtractor->getRefreshToken($request, self::PARAMETER_NAME));
     }
 
-    /**
-     * @return Request|MockObject
-     */
-    private function createMockRequest(?string $contentType, ?array $jsonBodyData = null): MockObject
+    private function createMockRequest(?string $contentType, ?array $jsonBodyData = null): MockObject&Request
     {
-        /** @var Request|MockObject $request */
+        /** @var Request&MockObject $request */
         $request = $this->createMock(Request::class);
 
         $request
             ->expects($this->atLeastOnce())
-            ->method(method_exists(Request::class, 'getContentTypeFormat') ? 'getContentTypeFormat' : 'getContentType')
+            ->method('getContentTypeFormat')
             ->willReturn($contentType);
 
-        if (is_array($jsonBodyData)) {
+        if (null !== $jsonBodyData) {
             $request
                 ->expects($this->once())
                 ->method('getContent')

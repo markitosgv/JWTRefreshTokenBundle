@@ -14,9 +14,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 interface RefreshTokenRepositoryInterface extends ObjectRepository
 {
     /**
-     * @param DateTimeInterface|null $datetime
-     *
-     * @return T[]
+     * @return iterable<T>
      */
-    public function findInvalid($datetime = null);
+    public function findInvalid(?DateTimeInterface $datetime = null): iterable;
 }

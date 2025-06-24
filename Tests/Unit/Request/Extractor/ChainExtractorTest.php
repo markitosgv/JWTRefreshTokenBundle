@@ -8,7 +8,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-class ChainExtractorTest extends TestCase
+final class ChainExtractorTest extends TestCase
 {
     private const PARAMETER_NAME = 'refresh_token';
 
@@ -19,23 +19,18 @@ class ChainExtractorTest extends TestCase
         $this->chainExtractor = new ChainExtractor();
     }
 
-    public function testIsAnExtractor(): void
-    {
-        $this->assertInstanceOf(ExtractorInterface::class, $this->chainExtractor);
-    }
-
     public function testGetsTheTokenFromTheFirstExtractorInTheChain(): void
     {
-        /** @var ExtractorInterface|MockObject $firstExtractor */
+        /** @var ExtractorInterface&MockObject $firstExtractor */
         $firstExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var ExtractorInterface|MockObject $secondExtractor */
+        /** @var ExtractorInterface&MockObject $secondExtractor */
         $secondExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var ExtractorInterface|MockObject $thirdExtractor */
+        /** @var ExtractorInterface&MockObject $thirdExtractor */
         $thirdExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var Request|MockObject $request */
+        /** @var Request&MockObject $request */
         $request = $this->createMock(Request::class);
 
         $token = 'my-refresh-token';
@@ -55,16 +50,16 @@ class ChainExtractorTest extends TestCase
 
     public function testProvidesNoTokenIfNoneOfTheExtractorsReturnsOne(): void
     {
-        /** @var ExtractorInterface|MockObject $firstExtractor */
+        /** @var ExtractorInterface&MockObject $firstExtractor */
         $firstExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var ExtractorInterface|MockObject $secondExtractor */
+        /** @var ExtractorInterface&MockObject $secondExtractor */
         $secondExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var ExtractorInterface|MockObject $thirdExtractor */
+        /** @var ExtractorInterface&MockObject $thirdExtractor */
         $thirdExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var Request|MockObject $request */
+        /** @var Request&MockObject $request */
         $request = $this->createMock(Request::class);
 
         $this->createExtractorGetRefreshTokenExpectation($firstExtractor, null);

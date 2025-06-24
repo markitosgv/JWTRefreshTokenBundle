@@ -11,71 +11,45 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
-use LogicException;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Kernel;
 
-class AttachRefreshTokenOnSuccessListener
+/**
+ * @internal
+ */
+final class AttachRefreshTokenOnSuccessListener
 {
-    /**
-     * @var RefreshTokenManagerInterface
-     */
-    protected $refreshTokenManager;
+    private RefreshTokenManagerInterface $refreshTokenManager;
 
-    /**
-     * @var int
-     */
-    protected $ttl;
+    private int $ttl;
 
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
+    private RequestStack $requestStack;
 
-    /**
-     * @var string
-     */
-    protected $tokenParameterName;
+    private string $tokenParameterName;
 
-    /**
-     * @var bool
-     */
-    protected $singleUse;
+    private bool $singleUse;
 
-    /**
-     * @var RefreshTokenGeneratorInterface
-     */
-    protected $refreshTokenGenerator;
+    private RefreshTokenGeneratorInterface $refreshTokenGenerator;
 
-    /**
-     * @var ExtractorInterface
-     */
-    protected $extractor;
+    private ExtractorInterface $extractor;
 
-    protected array $cookieSettings;
+    private array $cookieSettings;
 
-    protected bool $returnExpiration;
+    private bool $returnExpiration;
 
-    protected string $returnExpirationParameterName;
+    private string $returnExpirationParameterName;
 
-    /**
-     * @param int    $ttl
-     * @param string $tokenParameterName
-     * @param bool   $singleUse
-     */
     public function __construct(
         RefreshTokenManagerInterface $refreshTokenManager,
-        $ttl,
+        int $ttl,
         RequestStack $requestStack,
-        $tokenParameterName,
-        $singleUse,
+        string $tokenParameterName,
+        bool $singleUse,
         RefreshTokenGeneratorInterface $refreshTokenGenerator,
         ExtractorInterface $extractor,
         array $cookieSettings,
@@ -101,26 +75,18 @@ class AttachRefreshTokenOnSuccessListener
         ], $cookieSettings);
         $this->returnExpiration = $returnExpiration;
         $this->returnExpirationParameterName = $returnExpirationParameterName;
-
-        if ($this->cookieSettings['partitioned'] && Kernel::VERSION < '6.4') {
-            throw new LogicException(sprintf('The `partitioned` option for cookies is only available for Symfony 6.4 and above. You are currently on version %s', Kernel::VERSION));
-        }
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event): void
     {
-        $user = $event->getUser();
-
-        if (!$user instanceof UserInterface) {
-            return;
-        }
-
-        $data = $event->getData();
         $request = $this->requestStack->getCurrentRequest();
 
         if (null === $request) {
             return;
         }
+
+        $user = $event->getUser();
+        $data = $event->getData();
 
         // Extract refreshToken from the request
         $refreshTokenString = $this->extractor->getRefreshToken($request, $this->tokenParameterName);

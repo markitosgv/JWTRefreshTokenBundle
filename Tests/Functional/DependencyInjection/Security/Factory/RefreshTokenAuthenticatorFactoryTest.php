@@ -11,15 +11,9 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 {
-    /**
-     * @var RefreshTokenAuthenticatorFactory
-     */
-    private $factory;
+    private RefreshTokenAuthenticatorFactory $factory;
 
-    /**
-     * @var ContainerBuilder
-     */
-    private $container;
+    private ContainerBuilder $container;
 
     protected function setUp(): void
     {
@@ -33,31 +27,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             $this->container,
             'test',
             [
-                'invalidate_token_on_logout' => false,
-            ],
-            'app.user_provider'
-        );
-
-        $this->assertTrue($this->container->hasDefinition('security.authenticator.refresh_jwt.test'));
-        $this->assertTrue($this->container->hasDefinition('security.authentication.success_handler.test.refresh_jwt'));
-        $this->assertTrue($this->container->hasDefinition('security.authentication.failure_handler.test.refresh_jwt'));
-        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.security.listener.logout.test'));
-
-        /** @var ChildDefinition $successHandler */
-        $successHandler = $this->container->getDefinition('security.authentication.success_handler.test.refresh_jwt');
-        $this->assertSame('gesdinet.jwtrefreshtoken.security.authentication.success_handler', $successHandler->getParent());
-
-        /** @var ChildDefinition $failureHandler */
-        $failureHandler = $this->container->getDefinition('security.authentication.failure_handler.test.refresh_jwt');
-        $this->assertSame('gesdinet.jwtrefreshtoken.security.authentication.failure_handler', $failureHandler->getParent());
-    }
-
-    public function test_authenticator_service_is_created_and_logout_listener_registered_to_firewall_dispatcher(): void
-    {
-        $this->factory->createAuthenticator(
-            $this->container,
-            'test',
-            [
+                'check_path' => '/login_check',
                 'invalidate_token_on_logout' => true,
             ],
             'app.user_provider'
@@ -70,11 +40,11 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 
         /** @var ChildDefinition $successHandler */
         $successHandler = $this->container->getDefinition('security.authentication.success_handler.test.refresh_jwt');
-        $this->assertSame('gesdinet.jwtrefreshtoken.security.authentication.success_handler', $successHandler->getParent());
+        $this->assertSame('gesdinet_jwt_refresh_token.security.authentication.success_handler', $successHandler->getParent());
 
         /** @var ChildDefinition $failureHandler */
         $failureHandler = $this->container->getDefinition('security.authentication.failure_handler.test.refresh_jwt');
-        $this->assertSame('gesdinet.jwtrefreshtoken.security.authentication.failure_handler', $failureHandler->getParent());
+        $this->assertSame('gesdinet_jwt_refresh_token.security.authentication.failure_handler', $failureHandler->getParent());
 
         /** @var ChildDefinition $logoutListener */
         $logoutListener = $this->container->getDefinition('gesdinet_jwt_refresh_token.security.listener.logout.test');
@@ -87,9 +57,10 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             $this->container,
             'test',
             [
+                'check_path' => '/login_check',
                 'success_handler' => 'app.security.authentication.success_handler',
                 'failure_handler' => 'app.security.authentication.failure_handler',
-                'invalidate_token_on_logout' => false,
+                'invalidate_token_on_logout' => true,
             ],
             'app.user_provider'
         );
@@ -97,7 +68,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->assertTrue($this->container->hasDefinition('security.authenticator.refresh_jwt.test'));
         $this->assertTrue($this->container->hasDefinition('security.authentication.success_handler.test.refresh_jwt'));
         $this->assertTrue($this->container->hasDefinition('security.authentication.failure_handler.test.refresh_jwt'));
-        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.security.listener.logout.test'));
+        $this->assertTrue($this->container->hasDefinition('gesdinet_jwt_refresh_token.security.listener.logout.test'));
 
         /** @var ChildDefinition $successHandler */
         $successHandler = $this->container->getDefinition('security.authentication.success_handler.test.refresh_jwt');

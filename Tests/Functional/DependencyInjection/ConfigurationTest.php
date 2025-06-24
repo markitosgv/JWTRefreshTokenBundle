@@ -19,7 +19,11 @@ final class ConfigurationTest extends TestCase
 
     public function test_default_configuration_is_valid(): void
     {
-        $this->assertConfigurationIsValid([]);
+        $this->assertConfigurationIsValid([
+            [
+                'refresh_token_class' => RefreshToken::class,
+            ],
+        ]);
     }
 
     public function test_custom_configuration_is_valid(): void
@@ -28,16 +32,11 @@ final class ConfigurationTest extends TestCase
             [
                 'ttl' => 123,
                 'ttl_update' => true,
-                'firewall' => 'main',
-                'user_provider' => 'my.user_provider',
-                'user_identity_field' => 'email',
                 'manager_type' => 'mongodb',
                 'refresh_token_class' => RefreshToken::class,
                 'object_manager' => 'doctrine_mongodb.odm.document_manager',
-                'user_checker' => 'my.user_checker',
                 'single_use' => true,
                 'token_parameter_name' => 'the_token',
-                'doctrine_mappings' => false,
                 'cookie' => [
                     'enabled' => true,
                     'same_site' => 'strict',
@@ -47,6 +46,15 @@ final class ConfigurationTest extends TestCase
                     'http_only' => false,
                     'partitioned' => true,
                 ],
+            ],
+        ]);
+    }
+
+    public function test_configuration_is_invalid_when_refresh_token_class_does_not_implement_the_required_interface(): void
+    {
+        $this->assertConfigurationIsInvalid([
+            [
+                'refresh_token_class' => Configuration::class,
             ],
         ]);
     }

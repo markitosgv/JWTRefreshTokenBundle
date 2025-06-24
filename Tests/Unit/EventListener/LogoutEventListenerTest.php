@@ -17,15 +17,9 @@ final class LogoutEventListenerTest extends TestCase
 {
     const TOKEN_PARAMETER_NAME = 'refresh_token';
 
-    /**
-     * @var RefreshTokenManagerInterface|MockObject
-     */
-    private $refreshTokenManager;
+    private MockObject&RefreshTokenManagerInterface $refreshTokenManager;
 
-    /**
-     * @var ExtractorInterface|MockObject
-     */
-    private $extractor;
+    private MockObject&ExtractorInterface $extractor;
 
     protected function setUp(): void
     {
@@ -47,7 +41,7 @@ final class LogoutEventListenerTest extends TestCase
             ->with($request, self::TOKEN_PARAMETER_NAME)
             ->willReturn($refreshTokenString);
 
-        /** @var RefreshTokenInterface|MockObject $refreshToken */
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
         $this->refreshTokenManager
@@ -93,7 +87,7 @@ final class LogoutEventListenerTest extends TestCase
             ->with($request, self::TOKEN_PARAMETER_NAME)
             ->willReturn($refreshTokenString);
 
-        /** @var RefreshTokenInterface|MockObject $refreshToken */
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
         $this->refreshTokenManager
@@ -202,90 +196,5 @@ final class LogoutEventListenerTest extends TestCase
 
         $this->assertSame('{"code":400,"message":"No refresh_token found."}', $response->getContent());
         $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-    }
-
-    /**
-     * @group legacy
-     */
-    public function testInvalidatesTokenAndClearsCookieFromResponseWhenFirewallContextIsConfigured(): void
-    {
-        $refreshTokenString = 'thepreviouslyissuedrefreshtoken';
-        $refreshTokenArray = [self::TOKEN_PARAMETER_NAME => $refreshTokenString];
-        $request = Request::create('/', 'POST', $refreshTokenArray);
-        $request->attributes->set('_firewall_context', 'security.firewall.map.context.api');
-
-        $event = new LogoutEvent($request, null);
-
-        $this->extractor
-            ->expects($this->once())
-            ->method('getRefreshToken')
-            ->with($request, self::TOKEN_PARAMETER_NAME)
-            ->willReturn($refreshTokenString);
-
-        /** @var RefreshTokenInterface|MockObject $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
-
-        $this->refreshTokenManager
-            ->expects($this->once())
-            ->method('get')
-            ->willReturn($refreshToken);
-
-        $this->refreshTokenManager
-            ->expects($this->once())
-            ->method('delete')
-            ->with($this->equalTo($refreshToken));
-
-        $listener = new LogoutEventListener(
-            $this->refreshTokenManager,
-            $this->extractor,
-            self::TOKEN_PARAMETER_NAME,
-            [
-                'enabled' => true,
-            ],
-            'security.firewall.map.context.api'
-        );
-        $listener->onLogout($event);
-
-        /** @var JsonResponse|null $response */
-        $response = $event->getResponse();
-
-        $this->assertNotNull($response);
-
-        $this->assertSame('{"code":200,"message":"The supplied refresh_token has been invalidated."}', $response->getContent());
-        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
-    }
-
-    /**
-     * @group legacy
-     */
-    public function testDoesNotInvalidateTokenWhenEventIsEmittedFromUnsupportedFirewallContext(): void
-    {
-        $refreshTokenString = 'thepreviouslyissuedrefreshtoken';
-        $refreshTokenArray = [self::TOKEN_PARAMETER_NAME => $refreshTokenString];
-        $request = Request::create('/', 'POST', $refreshTokenArray);
-        $request->attributes->set('_firewall_context', 'security.firewall.map.context.api');
-
-        $event = new LogoutEvent($request, null);
-
-        $this->extractor
-            ->expects($this->never())
-            ->method('getRefreshToken');
-
-        $this->refreshTokenManager
-            ->expects($this->never())
-            ->method('get');
-
-        $listener = new LogoutEventListener(
-            $this->refreshTokenManager,
-            $this->extractor,
-            self::TOKEN_PARAMETER_NAME,
-            [
-                'enabled' => true,
-            ],
-            'security.firewall.map.context.main'
-        );
-        $listener->onLogout($event);
-
-        $this->assertNull($event->getResponse());
     }
 }

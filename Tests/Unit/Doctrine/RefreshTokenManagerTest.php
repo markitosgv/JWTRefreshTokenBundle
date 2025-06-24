@@ -8,7 +8,6 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -16,15 +15,9 @@ class RefreshTokenManagerTest extends TestCase
 {
     const REFRESH_TOKEN_ENTITY_CLASS = RefreshToken::class;
 
-    /**
-     * @var RefreshTokenRepository|MockObject
-     */
-    private $repository;
+    private MockObject&RefreshTokenRepository $repository;
 
-    /**
-     * @var ObjectManager|MockObject
-     */
-    private $objectManager;
+    private MockObject&ObjectManager $objectManager;
 
     private RefreshTokenManager $refreshTokenManager;
 
@@ -55,16 +48,6 @@ class RefreshTokenManagerTest extends TestCase
             $this->objectManager,
             static::REFRESH_TOKEN_ENTITY_CLASS
         );
-    }
-
-    public function testIsARefreshTokenManager()
-    {
-        $this->assertInstanceOf(RefreshTokenManagerInterface::class, $this->refreshTokenManager);
-    }
-
-    public function testCreatesAToken()
-    {
-        $this->assertInstanceOf(static::REFRESH_TOKEN_ENTITY_CLASS, $this->refreshTokenManager->create());
     }
 
     public function testRetrievesATokenFromStorage()

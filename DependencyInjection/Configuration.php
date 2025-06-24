@@ -11,11 +11,14 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class Configuration implements ConfigurationInterface
+/**
+ * @internal
+ */
+final class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -32,53 +35,22 @@ class Configuration implements ConfigurationInterface
                     ->defaultFalse()
                     ->info('The default update TTL flag for all authenticators.')
                 ->end()
-                ->scalarNode('firewall')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%node%" node is deprecated without replacement.')
-                    ->defaultValue('api')
-                ->end()
-                ->scalarNode('user_provider')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%node%" node is deprecated without replacement.')
-                    ->defaultNull()
-                ->end()
-                ->scalarNode('user_identity_field')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%node%" node is deprecated without replacement.')
-                    ->defaultValue('username')
-                ->end()
                 ->scalarNode('manager_type')
                     ->defaultValue('orm')
                     ->info('Set the type of object manager to use (default: orm)')
                 ->end()
                 ->scalarNode('refresh_token_class')
-                    ->defaultNull()
-                    ->info(sprintf('Set the refresh token class to use (default: %s)', RefreshToken::class))
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                    ->info('Set the refresh token class to use')
                     ->validate()
-                        ->ifTrue(static fn ($v): bool => null === $v)
-                        ->then(static function () {
-                            trigger_deprecation(
-                                'gesdinet/jwt-refresh-token-bundle',
-                                '1.1',
-                                'Not setting the "refresh_token_class" option is deprecated, as of 2.0 a class must be set.'
-                            );
-                        })
+                        ->ifTrue(static fn ($v): bool => null === $v || !\in_array(RefreshTokenInterface::class, class_implements($v), true))
+                        ->thenInvalid(sprintf('The "refresh_token_class" class must implement "%s".', RefreshTokenInterface::class))
                     ->end()
                 ->end()
                 ->scalarNode('object_manager')
                     ->defaultNull()
                     ->info('Set the object manager to use (default: doctrine.orm.entity_manager)')
-                ->end()
-                ->scalarNode('user_checker')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%node%" node is deprecated without replacement.')
-                    ->defaultValue('security.user_checker')
-                ->end()
-                ->scalarNode('refresh_token_entity')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '0.5', 'The "%node%" node is deprecated, use the "refresh_token_class" node instead.')
-                    ->defaultNull()
-                    ->info(sprintf('Set the refresh token class to use (default: %s)', RefreshToken::class))
-                ->end()
-                ->scalarNode('entity_manager')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '0.5', 'The "%node%" node is deprecated, use the "object_manager" node instead.')
-                    ->defaultNull()
-                    ->info('Set the entity manager to use')
                 ->end()
                 ->scalarNode('single_use')
                     ->defaultFalse()
@@ -87,11 +59,6 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('token_parameter_name')
                     ->defaultValue('refresh_token')
                     ->info('The default request parameter name containing the refresh token for all authenticators.')
-                ->end()
-                ->booleanNode('doctrine_mappings')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%node%" node is deprecated without replacement.')
-                    ->info('When true, resolving of Doctrine mapping is done automatically to use either ORM or ODM object manager')
-                    ->defaultTrue()
                 ->end()
                 ->arrayNode('cookie')
                     ->canBeEnabled()
@@ -107,11 +74,6 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('partitioned')->defaultFalse()->end()
                         ->scalarNode('remove_token_from_body')->defaultTrue()->end()
                     ->end()
-                ->end()
-                ->scalarNode('logout_firewall')
-                    ->setDeprecated('gesdinet/jwt-refresh-token-bundle', '1.5', 'The "%node%" node is deprecated, enable the "invalidate_token_on_logout" option on the "refresh_jwt" firewall instead.')
-                    ->defaultNull()
-                    ->info('Name of the firewall that triggers the logout event to hook into')
                 ->end()
                 ->scalarNode('return_expiration')
                     ->defaultFalse()

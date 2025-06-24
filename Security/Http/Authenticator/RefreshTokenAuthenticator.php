@@ -32,69 +32,36 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerI
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
-use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
-use Symfony\Component\Security\Http\Authenticator\Passport\UserPassportInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
+final class RefreshTokenAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
-    private RefreshTokenManagerInterface $refreshTokenManager;
-
-    private EventDispatcherInterface $eventDispatcher;
-
-    private ExtractorInterface $extractor;
-
-    private UserProviderInterface $userProvider;
-
-    private AuthenticationSuccessHandlerInterface $successHandler;
-
-    private AuthenticationFailureHandlerInterface $failureHandler;
-
     private array $options;
 
-    private ?HttpUtils $httpUtils;
-
     public function __construct(
-        RefreshTokenManagerInterface $refreshTokenManager,
-        EventDispatcherInterface $eventDispatcher,
-        ExtractorInterface $extractor,
-        UserProviderInterface $userProvider,
-        AuthenticationSuccessHandlerInterface $successHandler,
-        AuthenticationFailureHandlerInterface $failureHandler,
+        private readonly RefreshTokenManagerInterface $refreshTokenManager,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ExtractorInterface $extractor,
+        private readonly UserProviderInterface $userProvider,
+        private readonly AuthenticationSuccessHandlerInterface $successHandler,
+        private readonly AuthenticationFailureHandlerInterface $failureHandler,
         array $options,
-        ?HttpUtils $httpUtils = null
+        private readonly HttpUtils $httpUtils
     ) {
-        $this->refreshTokenManager = $refreshTokenManager;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->extractor = $extractor;
-        $this->userProvider = $userProvider;
-        $this->successHandler = $successHandler;
-        $this->failureHandler = $failureHandler;
         $this->options = array_merge([
-            'check_path' => null, // @todo in 2.0, change the default to `/login_check`
+            'check_path' => '/login_check',
             'ttl' => 2592000,
             'ttl_update' => false,
             'token_parameter_name' => 'refresh_token',
         ], $options);
-        $this->httpUtils = $httpUtils;
-
-        if (null === $httpUtils) {
-            trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.1', 'Not passing an instance of "%s" to the "%s" constructor is deprecated, it will be required in 2.0.', HttpUtils::class, self::class);
-        }
     }
 
     public function supports(Request $request): bool
     {
-        if (null !== $this->httpUtils && null !== $this->options['check_path']) {
-            return $this->httpUtils->checkRequestPath($request, $this->options['check_path']);
-        }
-
-        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.1', 'Checking if the refresh token is in the request in %s() is deprecated, as of 2.0 only the request path will be checked.', __METHOD__);
-
-        return null !== $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
+        return $this->httpUtils->checkRequestPath($request, $this->options['check_path']);
     }
 
     public function authenticate(Request $request): Passport
@@ -136,20 +103,6 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator implements Authent
         $passport->setAttribute('refreshToken', $refreshToken);
 
         return $passport;
-    }
-
-    /**
-     * @deprecated to be removed in 2.0, use `createToken()` instead
-     */
-    public function createAuthenticatedToken(PassportInterface $passport, string $firewallName): TokenInterface
-    {
-        if (!$passport instanceof UserPassportInterface) {
-            throw new LogicException(sprintf('Passport does not contain a user, overwrite "createToken()" in "%s" to create a custom authentication token.', static::class));
-        }
-
-        trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', '"%s()" is deprecated, use "%s::createToken()" instead.', __METHOD__, __CLASS__);
-
-        return $this->createToken($passport, $firewallName);
     }
 
     public function createToken(Passport $passport, string $firewallName): TokenInterface

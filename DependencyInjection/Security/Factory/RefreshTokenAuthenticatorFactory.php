@@ -37,23 +37,13 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         $builder
             ->children()
                 ->scalarNode('check_path')
-                    ->defaultNull()
-                    ->validate()
-                        ->ifTrue(static fn ($v): bool => null === $v)
-                        ->then(static function () {
-                            trigger_deprecation(
-                                'gesdinet/jwt-refresh-token-bundle',
-                                '1.1',
-                                'Not setting the "check_path" option for the "refresh_jwt" authenticator is deprecated, as of 2.0 the authenticator will only check the request path.'
-                            );
-                        })
-                    ->end()
+                    ->defaultValue('/login_check')
                 ->end()
                 ->scalarNode('provider')->end()
                 ->scalarNode('success_handler')->end()
                 ->scalarNode('failure_handler')->end()
                 ->booleanNode('invalidate_token_on_logout')
-                    ->defaultFalse() // TODO - Enable by default in 2.0.
+                    ->defaultTrue()
                     ->info('When enabled, the refresh token will be invalided on logout.')
                 ->end()
                 /*
@@ -80,13 +70,13 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
 
         // When per-authenticator configuration is supported, this array should be updated to check the $config values before falling back to the bundle parameters
         $options = [
-            'check_path' => $config['check_path'] ?? null,
+            'check_path' => $config['check_path'],
             'ttl' => new Parameter('gesdinet_jwt_refresh_token.ttl'),
             'ttl_update' => new Parameter('gesdinet_jwt_refresh_token.ttl_update'),
             'token_parameter_name' => new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
         ];
 
-        $container->setDefinition($authenticatorId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.refresh_token_authenticator'))
+        $container->setDefinition($authenticatorId, new ChildDefinition('gesdinet_jwt_refresh_token.security.refresh_token_authenticator'))
             ->replaceArgument(3, new Reference($userProviderId))
             ->replaceArgument(4, new Reference($this->createAuthenticationSuccessHandler($container, $firewallName, $config)))
             ->replaceArgument(5, new Reference($this->createAuthenticationFailureHandler($container, $firewallName, $config)))
@@ -110,7 +100,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
                 ->replaceArgument(1, [])
                 ->replaceArgument(2, $id);
         } else {
-            $container->setDefinition($successHandlerId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.authentication.success_handler'))
+            $container->setDefinition($successHandlerId, new ChildDefinition('gesdinet_jwt_refresh_token.security.authentication.success_handler'))
                 ->addMethodCall('setFirewallName', [$id]);
         }
 
@@ -126,7 +116,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
                 ->replaceArgument(0, new Reference($config['failure_handler']))
                 ->replaceArgument(1, []);
         } else {
-            $container->setDefinition($failureHandlerId, new ChildDefinition('gesdinet.jwtrefreshtoken.security.authentication.failure_handler'));
+            $container->setDefinition($failureHandlerId, new ChildDefinition('gesdinet_jwt_refresh_token.security.authentication.failure_handler'));
         }
 
         return $failureHandlerId;

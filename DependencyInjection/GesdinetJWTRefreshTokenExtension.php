@@ -13,97 +13,49 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
-use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\DependencyInjection\Parameter;
-use Symfony\Component\Security\Http\Event\LogoutEvent;
+use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class GesdinetJWTRefreshTokenExtension extends Extension
+/**
+ * @internal
+ */
+final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
-    public function load(array $configs, ContainerBuilder $container): void
+    protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        $config = $this->processConfiguration($this->getConfiguration($configs, $container), $configs);
-
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.php');
 
         $container->registerForAutoconfiguration(ExtractorInterface::class)->addTag('gesdinet_jwt_refresh_token.request_extractor');
 
-        $container->setParameter('gesdinet_jwt_refresh_token.ttl', $config['ttl']);
-        $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $config['ttl_update']);
-        $container->setParameter('gesdinet_jwt_refresh_token.security.firewall', $config['firewall']);
-        $container->setParameter('gesdinet_jwt_refresh_token.user_provider', $config['user_provider']);
-        $container->setParameter('gesdinet_jwt_refresh_token.user_identity_field', $config['user_identity_field']);
-        $container->setParameter('gesdinet_jwt_refresh_token.single_use', $config['single_use']);
-        $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $config['token_parameter_name']);
-        $container->setParameter('gesdinet_jwt_refresh_token.doctrine_mappings', $config['doctrine_mappings']);
-        $container->setParameter('gesdinet_jwt_refresh_token.cookie', $config['cookie'] ?? []);
-        $container->setParameter('gesdinet_jwt_refresh_token.logout_firewall_context', sprintf(
-            'security.firewall.map.context.%s',
-            $config['logout_firewall']
-        ));
-        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $config['return_expiration']);
-        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $config['return_expiration_parameter_name']);
+        $container->setParameter('gesdinet_jwt_refresh_token.ttl', $mergedConfig['ttl']);
+        $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $mergedConfig['ttl_update']);
+        $container->setParameter('gesdinet_jwt_refresh_token.single_use', $mergedConfig['single_use']);
+        $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $mergedConfig['token_parameter_name']);
+        $container->setParameter('gesdinet_jwt_refresh_token.cookie', $mergedConfig['cookie'] ?? []);
+        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $mergedConfig['return_expiration']);
+        $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $mergedConfig['return_expiration_parameter_name']);
+        $container->setParameter('gesdinet_jwt_refresh_token.refresh_token.class', $mergedConfig['refresh_token_class']);
 
-        if ($config['logout_firewall']) {
-            $container->setDefinition('gesdinet_jwt_refresh_token.security.listener.logout.legacy_config', new ChildDefinition('gesdinet_jwt_refresh_token.security.listener.logout'))
-                ->addArgument(new Parameter('gesdinet_jwt_refresh_token.logout_firewall_context'))
-                ->addTag('kernel.event_listener', ['event' => LogoutEvent::class, 'method' => 'onLogout']);
-        }
-
-        $refreshTokenClass = RefreshTokenEntity::class;
-        $objectManager = 'doctrine.orm.entity_manager';
-
-        // Change the refresh token and object manager to the MongoDB ODM if the configuration explicitly sets it or if the ORM is not installed and the MongoDB ODM is
-        if ('mongodb' === strtolower($config['manager_type']) || (!class_exists(EntityManager::class) && class_exists(DocumentManager::class))) {
-            $refreshTokenClass = RefreshTokenDocument::class;
+        /*
+         * Configuration preference:
+         * - Explicitly configured "object_manager" node
+         * - Feature detection (ORM then MongoDB ODM)
+         */
+        if (null !== $mergedConfig['object_manager']) {
+            $objectManager = $mergedConfig['object_manager'];
+        } elseif (ContainerBuilder::willBeAvailable('doctrine/orm', EntityManager::class, ['doctrine/doctrine-bundle'])) {
+            $objectManager = 'doctrine.orm.entity_manager';
+        } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
             $objectManager = 'doctrine_mongodb.odm.document_manager';
+        } else {
+            throw new RuntimeException('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
         }
 
-        if (null !== $this->getRefreshTokenClass($config)) {
-            $refreshTokenClass = $this->getRefreshTokenClass($config);
-        }
-
-        if (null !== $this->getObjectManager($config)) {
-            $objectManager = $this->getObjectManager($config);
-        }
-
-        $container->setParameter('gesdinet.jwtrefreshtoken.refresh_token.class', $refreshTokenClass);
-        $container->setParameter('gesdinet.jwtrefreshtoken.object_manager.id', $objectManager);
-        $container->setParameter('gesdinet.jwtrefreshtoken.user_checker.id', $config['user_checker']);
-    }
-
-    /**
-     * Get the refresh token class from configuration.
-     *
-     * Falls back to deprecated configuration nodes if necessary.
-     */
-    protected function getRefreshTokenClass(array $config): ?string
-    {
-        if (isset($config['refresh_token_class'])) {
-            return $config['refresh_token_class'];
-        }
-
-        return $config['refresh_token_entity'] ?: null;
-    }
-
-    /**
-     * Get object manager from configuration.
-     *
-     * Falls back to deprecated configuration nodes if necessary.
-     */
-    protected function getObjectManager(array $config): ?string
-    {
-        if (isset($config['object_manager'])) {
-            return $config['object_manager'];
-        }
-
-        return $config['entity_manager'] ?: null;
+        $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $objectManager);
     }
 }

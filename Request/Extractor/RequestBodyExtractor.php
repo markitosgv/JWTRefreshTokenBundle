@@ -17,9 +17,9 @@ final class RequestBodyExtractor implements ExtractorInterface
 {
     public function getRefreshToken(Request $request, string $parameter): ?string
     {
-        $contentType = method_exists(Request::class, 'getContentTypeFormat') ? $request->getContentTypeFormat() : $request->getContentType();
+        $contentType = $request->getContentTypeFormat();
 
-        if (null === $contentType || false === strpos($contentType, 'json')) {
+        if (null === $contentType || !str_contains($contentType, 'json')) {
             return null;
         }
 

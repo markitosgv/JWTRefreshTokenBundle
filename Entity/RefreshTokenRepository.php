@@ -15,17 +15,13 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 class RefreshTokenRepository extends EntityRepository implements RefreshTokenRepositoryInterface
 {
     /**
-     * @param DateTimeInterface|null $datetime
-     *
-     * @return RefreshToken[]
+     * @return iterable<RefreshToken>
      */
-    public function findInvalid($datetime = null)
+    public function findInvalid(?DateTimeInterface $datetime = null): iterable
     {
-        $datetime = (null === $datetime) ? new DateTime() : $datetime;
-
         return $this->createQueryBuilder('u')
             ->where('u.valid < :datetime')
-            ->setParameter(':datetime', $datetime)
+            ->setParameter(':datetime', $datetime ?? new DateTime())
             ->getQuery()
             ->getResult();
     }

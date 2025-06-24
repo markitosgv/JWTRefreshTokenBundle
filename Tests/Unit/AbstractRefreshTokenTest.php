@@ -40,12 +40,6 @@ abstract class AbstractRefreshTokenTest extends TestCase
         $this->assertSame('custom-token', $this->refreshToken->getRefreshToken());
     }
 
-    public function testGeneratesARefreshToken()
-    {
-        $this->assertSame($this->refreshToken, $this->refreshToken->setRefreshToken());
-        $this->assertIsString($this->refreshToken->getRefreshToken());
-    }
-
     public function testHasUsername()
     {
         $this->assertSame('username', $this->refreshToken->getUsername());
