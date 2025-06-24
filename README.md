@@ -13,7 +13,7 @@ The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) i
 
 ## Prerequisites
 
-This bundle requires PHP 8.2 or later and Symfony 5.4, 6.4, or 7.2+.
+This bundle requires PHP 8.2 or later and Symfony 6.4, or 7.2+.
 
 For support with older Symfony versions, please use the 1.x release.
 
@@ -35,20 +35,6 @@ With Doctrine's MongoDB ODM
 
 ```bash
 composer require doctrine/mongodb-odm doctrine/mongodb-odm-bundle gesdinet/jwt-refresh-token-bundle
-```
-
-Or, manually edit your project's `composer.json` file to add the required packages:
-
-```json
-{
-  "require": {
-    "doctrine/doctrine-bundle": "^2.10",
-    "doctrine/mongodb-odm": "^2.3",
-    "doctrine/mongodb-odm-bundle": "^5.0",
-    "doctrine/orm": "^2.14",
-    "gesdinet/jwt-refresh-token-bundle": "^2.0"
-  }
-}
 ```
 
 Alternatively, a custom persistence layer can be used.
@@ -88,29 +74,7 @@ gesdinet_jwt_refresh_token:
 
 2. Create the object class. 
 
-If you are using the Doctrine ORM, the below contents should be placed at `src/Entity/RefreshToken.php` (use annotations OR attributes):
-
-via annotations:
-```php
-<?php
-
-namespace App\Entity;
-
-use Doctrine\ORM\Mapping as ORM;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as BaseRefreshToken;
-
-/**
- * @ORM\Entity
- * @ORM\Table("refresh_tokens")
- */
-#[ORM\Entity]
-#[ORM\Table(name: 'refresh_tokens')]
-class RefreshToken extends BaseRefreshToken
-{
-}
-```
-
-via attributes:
+If you are using the Doctrine ORM, the below contents should be placed at `src/Entity/RefreshToken.php`:
 
 ```php
 <?php
@@ -137,9 +101,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as BaseRefreshToken;
 
-/**
- * @ODM\Document(collection="refresh_tokens")
- */
+#[ODM\Document(collection: 'refresh_tokens')]
 class RefreshToken extends BaseRefreshToken
 {
 }
@@ -167,9 +129,6 @@ The complete firewall configuration should look similar to the following:
 ```yaml
 # config/packages/security.yaml
 security:
-    # this config is only required on Symfony 5.4, you can leave it out on Symfony 6
-    enable_authenticator_manager: true
-
     firewalls:
         api:
             pattern: ^/api
@@ -236,17 +195,6 @@ gesdinet_jwt_refresh_token:
     ttl_update: true
 ```
 
-### Config Firewall Name
-
-*NOTE* This setting is deprecated and is not used with the `refresh_jwt` authenticator
-
-You can define Firewall name. Default value is `api`. You can change this value adding this line to your config:
-
-```yaml
-gesdinet_jwt_refresh_token:
-    firewall: api
-```
-
 ### Refresh Token Parameter Name
 
 You can define the parameter name for the refresh token when it is read from the request, the default value is `refresh_token`. You can change this value adding this line to your config:
@@ -279,7 +227,7 @@ You can define a user provider to use for the authenticator its configuration.
 Note, if your application has multiple user providers, you **MUST** configure this value for either the firewall or the provider.
 
 ```yaml
-# app/config/security.yml or config/packages/security.yaml
+# config/packages/security.yaml
 security:
     firewalls:
         api:
@@ -300,7 +248,7 @@ By default, when a user provider is not specified, then the user provider for th
 You can define a user checker to use for the firewall as part of the firewall configuration:
 
 ```yaml
-# app/config/security.yml or config/packages/security.yaml
+# config/packages/security.yaml
 security:
     firewalls:
         api_token_refresh:
@@ -350,7 +298,7 @@ If no refresh token is supplied, an error is returned and the cookie remains unt
 All you have to do is make sure the `LogoutEvent` triggers on a specific route, and call that route during logout:
 
 ```yaml
-# in security.yaml
+# config/packages/security.yaml
 security:
     firewalls:
         api:
@@ -358,7 +306,7 @@ security:
                 path: api_token_invalidate
 ```
 ```yaml
-# in routes.yaml
+# config/routes.yaml
 api_token_invalidate:
     path: /api/token/invalidate
 ```
@@ -366,7 +314,7 @@ api_token_invalidate:
 If you want to configure the `LogoutEvent` to trigger on a different firewall, the name of the firewall has to be configured:
 
 ```yaml
-# in security.yaml
+# config/packages/security.yaml
 security:
     firewalls:
         myfirewall:
@@ -374,12 +322,13 @@ security:
                 path: api_token_invalidate
 ```
 ```yaml
-# in routes.yaml
+# config/routes.yaml
 api_token_invalidate:
     path: /api/token/invalidate
 ```
+
 ```yaml
-# in gesdinet_jwt_refresh_token.yaml
+# config/packages/gesdinet_jwt_refresh_token.yaml
 gesdinet_jwt_refresh_token:
     logout_firewall: myfirewall
 ```
@@ -424,9 +373,8 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 
 /**
  * This class extends Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken to have another table name.
- *
- * @ORM\Table("jwt_refresh_token")
  */
+#[ORM\Table('jwt_refresh_token')]
 class JwtRefreshToken extends RefreshToken
 {
 }
@@ -439,14 +387,13 @@ When using the Doctrine MongoDB ODM, create a class extending `Gesdinet\JWTRefre
 
 namespace App\Document;
 
-use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken;
 
 /**
  * This class extends Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken to have another collection name.
- *
- * @MongoDB\Document(collection="jwt_refresh_token")
  */
+#[ODM\Document(collection: 'jwt_refresh_token')]
 class JwtRefreshToken extends RefreshToken
 {
 }
@@ -531,13 +478,9 @@ When a token is refreshed, the `gesdinet.refresh_token` event is dispatched with
 
 ### Refresh Token Failure
 
-*NOTE* This event is only available when using the `refresh_jwt` authenticator with Symfony 5.4+.
-
 When there is a failure authenticating the refresh token, the `gesdinet.refresh_token_failure` event is dispatched with a `Gesdinet\JWTRefreshTokenBundle\Event\RefreshAuthenticationFailureEvent` object.
 
 ### Refresh Token Not Found
-
-*NOTE* This event is only available when using the `refresh_jwt` authenticator with Symfony 5.4+.
 
 When there is a failure authenticating the refresh token, the `gesdinet.refresh_token_not_found` event is dispatched with a `Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenNotFoundEvent` object.
 
