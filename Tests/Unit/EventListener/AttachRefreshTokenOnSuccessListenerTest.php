@@ -287,8 +287,17 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     private function setSingleUseOnEventListener(bool $singleUse): void
     {
-        $reflector = new ReflectionClass(AttachRefreshTokenOnSuccessListener::class);
-        $property = $reflector->getProperty('singleUse');
-        $property->setValue($this->attachRefreshTokenOnSuccessListener, $singleUse);
+        $this->attachRefreshTokenOnSuccessListener = new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            $singleUse,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            self::RETURN_EXPIRATION,
+            self::RETURN_EXPIRATION_PARAMETER_NAME
+        );
     }
 }
