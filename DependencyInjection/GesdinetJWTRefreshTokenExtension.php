@@ -41,12 +41,6 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $mergedConfig['return_expiration_parameter_name']);
         $container->setParameter('gesdinet_jwt_refresh_token.refresh_token.class', $mergedConfig['refresh_token_class']);
 
-        if ($mergedConfig['logout_firewall']) {
-            $container->setDefinition('gesdinet_jwt_refresh_token.security.listener.logout.legacy_config', new ChildDefinition('gesdinet_jwt_refresh_token.security.listener.logout'))
-                ->addArgument(new Parameter('gesdinet_jwt_refresh_token.logout_firewall_context'))
-                ->addTag('kernel.event_listener', ['event' => LogoutEvent::class, 'method' => 'onLogout']);
-        }
-
         /*
          * Configuration preference:
          * - Explicitly configured "object_manager" node

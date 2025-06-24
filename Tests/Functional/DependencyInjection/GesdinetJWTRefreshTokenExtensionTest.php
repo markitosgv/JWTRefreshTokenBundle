@@ -41,7 +41,6 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'remove_token_from_body' => true,
             ],
         );
-        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.logout_firewall_context', 'security.firewall.map.context.');
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.refresh_token.class', RefreshTokenEntity::class);
         $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine.orm.entity_manager');
@@ -85,7 +84,6 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'remove_token_from_body' => true,
             ],
         );
-        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.logout_firewall_context', 'security.firewall.map.context.');
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.refresh_token.class', RefreshTokenDocument::class);
         $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine_mongodb.odm.document_manager');
