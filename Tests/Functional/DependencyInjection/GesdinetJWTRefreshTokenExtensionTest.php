@@ -6,7 +6,6 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenEx
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
-use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCase
 {

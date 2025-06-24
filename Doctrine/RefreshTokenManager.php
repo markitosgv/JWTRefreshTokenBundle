@@ -13,9 +13,9 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use DateTimeInterface;
 use Doctrine\Persistence\ObjectManager;
-use LogicException;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use LogicException;
 
 final class RefreshTokenManager implements RefreshTokenManagerInterface
 {
