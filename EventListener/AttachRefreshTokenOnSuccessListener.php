@@ -75,7 +75,7 @@ final class AttachRefreshTokenOnSuccessListener
         }
 
         // Set or create the refreshTokenString
-        if ($refreshTokenString !== null && $refreshTokenString !== '' && $refreshTokenString !== '0') {
+        if (null !== $refreshTokenString && '' !== $refreshTokenString && '0' !== $refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
 
             if ($this->returnExpiration) {
