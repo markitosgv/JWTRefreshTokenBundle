@@ -21,8 +21,15 @@ abstract class ORMTestCase extends TestCase
         $config->setMetadataCache(new ArrayAdapter());
         $config->setQueryCache(new ArrayAdapter());
         $config->setResultCache(new ArrayAdapter());
-        $config->setProxyDir(sys_get_temp_dir().'/JWTRefreshTokenBundle/_files');
-        $config->setProxyNamespace(__NAMESPACE__.'\Proxies');
+
+        if (PHP_VERSION_ID >= 80400 && method_exists($config, 'enableNativeLazyObjects')) {
+            $config->enableNativeLazyObjects(true);
+        } else {
+            $config->setLazyGhostObjectEnabled(true);
+            $config->setAutoGenerateProxyClasses(true);
+            $config->setProxyDir(sys_get_temp_dir().'/JWTRefreshTokenBundle/_files');
+            $config->setProxyNamespace(__NAMESPACE__.'\Proxies');
+        }
 
         $driverChain = new MappingDriverChain();
 
