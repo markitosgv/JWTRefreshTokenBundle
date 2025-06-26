@@ -33,7 +33,7 @@ abstract class ODMTestCase extends TestCase
         $attributeDriver = new AttributeDriver([__DIR__.'/Fixtures/Document']);
 
         $xmlDriver = new SimplifiedXmlDriver(
-            [(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Document'],
+            [(\dirname(__DIR__, 2).'/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Document'],
             '.mongodb.xml'
         );
 
