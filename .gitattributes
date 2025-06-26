@@ -1,5 +1,5 @@
 /.github export-ignore
-/Tests export-ignore
+/tests export-ignore
 /.gitignore export-ignore
 /CHANGELOG.md export-ignore
 /phpunit.xml.dist export-ignore

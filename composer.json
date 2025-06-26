@@ -50,15 +50,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Gesdinet\\JWTRefreshTokenBundle\\": ""
-    },
-    "exclude-from-classmap": [
-      "/Tests/"
-    ]
+      "Gesdinet\\JWTRefreshTokenBundle\\": "src/"
+    }
   },
   "autoload-dev": {
     "psr-4": {
-      "Gesdinet\\JWTRefreshTokenBundle\\Tests\\": "Tests/"
+      "Gesdinet\\JWTRefreshTokenBundle\\Tests\\": "tests/"
     }
   },
   "extra" : {

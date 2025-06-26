@@ -20,4 +20,9 @@ class GesdinetJWTRefreshTokenBundle extends Bundle
         $extension = $container->getExtension('security');
         $extension->addAuthenticatorFactory(new RefreshTokenAuthenticatorFactory());
     }
+
+    public function getPath(): string
+    {
+        return \dirname(__DIR__);
+    }
 }

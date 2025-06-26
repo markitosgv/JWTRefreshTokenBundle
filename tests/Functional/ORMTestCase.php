@@ -28,7 +28,7 @@ abstract class ORMTestCase extends TestCase
 
         $attributeDriver = new AttributeDriver([__DIR__.'/Fixtures/Entity']);
 
-        $xmlDriver = new SimplifiedXmlDriver([(\dirname(__DIR__, 2).'/Resources/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Entity']);
+        $xmlDriver = new SimplifiedXmlDriver([(\dirname(__DIR__, 2).'/config/doctrine') => 'Gesdinet\\JWTRefreshTokenBundle\\Entity']);
 
         $driverChain->addDriver($attributeDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Tests\\Functional\\Fixtures\\Entity');
         $driverChain->addDriver($xmlDriver, 'Gesdinet\\JWTRefreshTokenBundle\\Entity');

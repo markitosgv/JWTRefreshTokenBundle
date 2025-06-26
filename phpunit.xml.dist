@@ -7,19 +7,14 @@
 >
     <testsuites>
         <testsuite name="GesdinetJWTRefreshTokenBundle Test Suite">
-            <directory>./Tests</directory>
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
 
     <coverage processUncoveredFiles="true">
         <include>
-            <directory suffix=".php">./</directory>
+            <directory suffix=".php">./src</directory>
         </include>
-        <exclude>
-            <directory>./Resources</directory>
-            <directory>./Tests</directory>
-            <directory>./vendor</directory>
-        </exclude>
     </coverage>
 
     <php>
