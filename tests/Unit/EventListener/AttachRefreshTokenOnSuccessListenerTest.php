@@ -18,10 +18,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 {
-    const TTL = 2592000;
-    const TOKEN_PARAMETER_NAME = 'refresh_token';
-    const RETURN_EXPIRATION = false;
-    const RETURN_EXPIRATION_PARAMETER_NAME = 'refresh_token_ttl';
+    public const TTL = 2592000;
+    public const TOKEN_PARAMETER_NAME = 'refresh_token';
+    public const RETURN_EXPIRATION = false;
+    public const RETURN_EXPIRATION_PARAMETER_NAME = 'refresh_token_ttl';
 
     private MockObject&RefreshTokenManagerInterface $refreshTokenManager;
 

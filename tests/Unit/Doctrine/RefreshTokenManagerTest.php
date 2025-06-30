@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 class RefreshTokenManagerTest extends TestCase
 {
-    const REFRESH_TOKEN_ENTITY_CLASS = RefreshToken::class;
+    public const REFRESH_TOKEN_ENTITY_CLASS = RefreshToken::class;
 
     private MockObject&RefreshTokenRepository $repository;
 
