@@ -11,9 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
-use DateTimeInterface;
 use Doctrine\Persistence\ObjectManager;
-use Doctrine\ORM\QueryBuilder;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
@@ -77,10 +75,11 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
-     * Revokes all invalid (expired) refresh tokens in batches. 
+     * Revokes all invalid (expired) refresh tokens in batches.
      *
-     * @param bool $andFlush Whether to flush the object manager after revoking
-     * @param ?int  $batchSize Number of tokens to process per batch
+     * @param bool $andFlush  Whether to flush the object manager after revoking
+     * @param ?int $batchSize Number of tokens to process per batch
+     *
      * @return RefreshTokenInterface[]
      */
     public function revokeAllInvalid($andFlush = true, ?int $batchSize = self::MAX_BATCH_SIZE): array
