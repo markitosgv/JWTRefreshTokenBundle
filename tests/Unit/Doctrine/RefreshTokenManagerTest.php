@@ -33,7 +33,6 @@ class RefreshTokenManagerTest extends TestCase
 
         $this->objectManager = $this->createMock(ObjectManager::class);
         $this->objectManager
-            ->expects($this->once())
             ->method('getRepository')
             ->with(static::REFRESH_TOKEN_ENTITY_CLASS)
             ->willReturn($this->repository);
@@ -155,6 +154,33 @@ class RefreshTokenManagerTest extends TestCase
             ->method('flush');
 
         $this->refreshTokenManager->revokeAllInvalid(null, true);
+    }
+
+    public function testRevokesAllInvalidTokensInBatchesAndFlushesTheObjectManager(): void
+    {
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $this->repository
+            ->expects($this->exactly(2))
+            ->method('findInvalidBatch')
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($refreshToken) {
+                if ($arg1 === null && $arg2 === 1000 && $arg3 === 0) {
+                    return [$refreshToken];
+                }
+                if ($arg1 === null && $arg2 === 1000 && $arg3 === 1000) {
+                    return [];
+                }
+                return null;
+            });
+
+        $this->objectManager
+            ->expects($this->once())
+            ->method('remove')
+            ->with($refreshToken);
+
+        $this->objectManager
+            ->method('flush');
+
+        $this->refreshTokenManager->revokeAllInvalidBatch(null, 1000, 0, true);
     }
 
     public function testProvidesTheModelClass(): void

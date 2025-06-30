@@ -15,6 +15,7 @@ use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
+use DateTimeInterface;
 
 final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 {
@@ -77,24 +78,19 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Revokes all invalid (expired) refresh tokens in batches.
      *
+     * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
+     * @param ?int $batchSize Number of tokens to process per batch, defaults to self::MAX_BATCH_SIZE if not provided
+     * @param ?int $offset    The offset to start processing from, defaults to 0
      * @param bool $andFlush  Whether to flush the object manager after revoking
-     * @param ?int $batchSize Number of tokens to process per batch
      *
      * @return RefreshTokenInterface[]
      */
-    public function revokeAllInvalid($andFlush = true, ?int $batchSize = self::MAX_BATCH_SIZE): array
+    public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = self::MAX_BATCH_SIZE, ?int $offset = 0, bool $andFlush = true): array
     {
-        $repository = $this->objectManager->getRepository($this->class);
         $count = 0;
-        $offset = 0;
 
         do {
-            $invalidTokens = $repository->findBy(
-                ['valid' => ['operator' => '<', 'value' => new \DateTime()]],
-                null,
-                $batchSize,
-                $offset
-            );
+            $invalidTokens = $this->repository->findInvalidBatch($datetime, $batchSize, $offset);
 
             foreach ($invalidTokens as $invalidToken) {
                 $this->objectManager->remove($invalidToken);
@@ -109,7 +105,33 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             $offset += $batchSize;
         } while (!empty($invalidTokens));
 
-        return $$invalidTokens;
+        return $invalidTokens ?? [];
+    }
+
+    /**
+     * Revokes all invalid (expired) refresh tokens.
+     *
+     * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
+     * @param ?int $batchSize Number of tokens to process per batch
+     * @param bool $andFlush  Whether to flush the object manager after revoking
+     *
+     * @return RefreshTokenInterface[]
+     */
+    public function revokeAllInvalid(?DateTimeInterface $datetime = null, bool $andFlush = true): array
+    {
+        $invalidTokens = $this->repository->findInvalid($datetime);
+
+        foreach ($invalidTokens as $invalidToken) {
+            $this->objectManager->remove($invalidToken);
+        }
+
+        if ($andFlush && !empty($invalidToken)) 
+        {
+                $this->objectManager->flush();
+                $this->objectManager->clear();
+        }
+
+        return $invalidTokens ?? [];
     }
 
     /**
