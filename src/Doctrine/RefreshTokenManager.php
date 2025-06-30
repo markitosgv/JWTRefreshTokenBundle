@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use DateTimeInterface;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\ORM\QueryBuilder;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
@@ -76,21 +77,40 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
+     * Revokes all invalid (expired) refresh tokens in batches. 
+     *
+     * @param bool $andFlush Whether to flush the object manager after revoking
+     * @param ?int  $batchSize Number of tokens to process per batch
      * @return RefreshTokenInterface[]
      */
-    public function revokeAllInvalid(?DateTimeInterface $datetime = null, bool $andFlush = true): array
+    public function revokeAllInvalid($andFlush = true, ?int $batchSize = self::MAX_BATCH_SIZE): array
     {
-        $invalidTokens = $this->repository->findInvalid($datetime);
+        $repository = $this->objectManager->getRepository($this->class);
+        $count = 0;
+        $offset = 0;
 
-        foreach ($invalidTokens as $invalidToken) {
-            $this->objectManager->remove($invalidToken);
-        }
+        do {
+            $invalidTokens = $repository->findBy(
+                ['valid' => ['operator' => '<', 'value' => new \DateTime()]],
+                null,
+                $batchSize,
+                $offset
+            );
 
-        if ($andFlush) {
-            $this->objectManager->flush();
-        }
+            foreach ($invalidTokens as $invalidToken) {
+                $this->objectManager->remove($invalidToken);
+                ++$count;
+            }
 
-        return $invalidTokens;
+            if ($andFlush && !empty($invalidToken)) {
+                $this->objectManager->flush();
+                $this->objectManager->clear();
+            }
+
+            $offset += $batchSize;
+        } while (!empty($invalidTokens));
+
+        return $$invalidTokens;
     }
 
     /**

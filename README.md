@@ -1,4 +1,4 @@
-JWTRefreshTokenBundle
+*JWTRefreshTokenBundle
 =====================
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
@@ -407,6 +407,32 @@ gesdinet_jwt_refresh_token:
 
 *NOTE* If using another object manager, it is recommended your object class extends from `Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken` which implements all required methods from `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface`.
 
+### Clearing Expired Refresh Tokens
+
+The `gesdinet:jwt:clear` command removes expired refresh tokens from the database. For large datasets (e.g., millions of records), the command now processes tokens in batches to prevent memory issues. You can configure the batch size by extending the `RefreshTokenManager` and overriding the `revokeAllInvalid` method:
+
+```php
+namespace App\Service;
+
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager as BaseRefreshTokenManager;
+
+class RefreshTokenManager extends BaseRefreshTokenManager
+{
+    public function revokeAllInvalid($andFlush = true, $batchSize = 500)
+    {
+        return parent::revokeAllInvalid($andFlush, $batchSize);
+    }
+}
+```
+
+Register the custom service in `config/services.yaml`:
+```yaml
+services:
+    gesdinet.jwtrefreshtoken.refresh_token_manager:
+        class: App\Service\RefreshTokenManager
+        arguments: ['@doctrine.orm.default_entity_manager', '%gesdinet.jwtrefreshtoken.refresh_token.class%']
+```
+
 ### Disable automatic Doctrine mappings
 
 *NOTE*: This setting is deprecated and is no longer used
@@ -528,3 +554,4 @@ services:
         tags:
             - { name: gesdinet_jwt_refresh_token.request_extractor, priority: 25 }
 ```
+*

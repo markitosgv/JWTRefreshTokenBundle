@@ -21,6 +21,8 @@ use DateTimeInterface;
  */
 interface RefreshTokenManagerInterface
 {
+    public const int MAX_BATCH_SIZE = 1000;
+
     public function get(string $refreshToken): ?RefreshTokenInterface;
 
     public function getLastFromUsername(string $username): ?RefreshTokenInterface;
@@ -32,7 +34,7 @@ interface RefreshTokenManagerInterface
     /**
      * @return RefreshTokenInterface[]
      */
-    public function revokeAllInvalid(?DateTimeInterface $datetime = null): array;
+    public function revokeAllInvalid(?DateTimeInterface $datetime = null, ?int $batchSize = self::MAX_BATCH_SIZE): array;
 
     /**
      * Returns the fully qualified class name for a concrete RefreshTokenInterface class.
