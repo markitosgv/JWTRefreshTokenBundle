@@ -163,12 +163,13 @@ class RefreshTokenManagerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('findInvalidBatch')
             ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($refreshToken) {
-                if ($arg1 === null && $arg2 === 1000 && $arg3 === 0) {
+                if (null === $arg1 && 1000 === $arg2 && 0 === $arg3) {
                     return [$refreshToken];
                 }
-                if ($arg1 === null && $arg2 === 1000 && $arg3 === 1000) {
+                if (null === $arg1 && 1000 === $arg2 && 1000 === $arg3) {
                     return [];
                 }
+
                 return null;
             });
 

@@ -78,10 +78,10 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Revokes all invalid (expired) refresh tokens in batches.
      *
-     * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
-     * @param ?int $batchSize Number of tokens to process per batch, defaults to self::MAX_BATCH_SIZE if not provided
-     * @param ?int $offset    The offset to start processing from, defaults to 0
-     * @param bool $andFlush  Whether to flush the object manager after revoking
+     * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
+     * @param ?int               $batchSize Number of tokens to process per batch, defaults to self::MAX_BATCH_SIZE if not provided
+     * @param ?int               $offset    The offset to start processing from, defaults to 0
+     * @param bool               $andFlush  Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      */
@@ -111,9 +111,9 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Revokes all invalid (expired) refresh tokens.
      *
-     * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
-     * @param ?int $batchSize Number of tokens to process per batch
-     * @param bool $andFlush  Whether to flush the object manager after revoking
+     * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
+     * @param ?int               $batchSize Number of tokens to process per batch
+     * @param bool               $andFlush  Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      */
@@ -125,10 +125,9 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             $this->objectManager->remove($invalidToken);
         }
 
-        if ($andFlush && !empty($invalidToken)) 
-        {
-                $this->objectManager->flush();
-                $this->objectManager->clear();
+        if ($andFlush && !empty($invalidToken)) {
+            $this->objectManager->flush();
+            $this->objectManager->clear();
         }
 
         return $invalidTokens ?? [];

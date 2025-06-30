@@ -33,10 +33,10 @@ interface RefreshTokenManagerInterface
 
     /**
      * Revokes all invalid (expired) refresh tokens.
-     * 
-     * @param DateTimeInterface|null $datetime The date and time to consider for invalidation.
-     * @param bool $andFlush Whether to flush the object manager after revoking.
-     * 
+     *
+     * @param DateTimeInterface|null $datetime the date and time to consider for invalidation
+     * @param bool                   $andFlush whether to flush the object manager after revoking
+     *
      * @return RefreshTokenInterface[]
      */
     public function revokeAllInvalid(?DateTimeInterface $datetime = null, bool $andFlush = true): array;
@@ -44,14 +44,14 @@ interface RefreshTokenManagerInterface
     /**
      * Revokes all invalid refresh tokens in batches.
      *
-     * @param DateTimeInterface|null $datetime The date and time to consider for invalidation.
-     * @param int|null $batchSize The number of tokens to process in each batch.
-     *                            Defaults to self::MAX_BATCH_SIZE if not provided.
-     * @param int|null $offset The offset to start processing from.
-     *                            Defaults to 0 if not provided.
-     * @param bool $andFlush Whether to flush the object manager after revoking.
+     * @param DateTimeInterface|null $datetime  the date and time to consider for invalidation
+     * @param int|null               $batchSize The number of tokens to process in each batch.
+     *                                          Defaults to self::MAX_BATCH_SIZE if not provided.
+     * @param int|null               $offset    The offset to start processing from.
+     *                                          Defaults to 0 if not provided.
+     * @param bool                   $andFlush  whether to flush the object manager after revoking
      *
-     * @return RefreshTokenInterface[] An array of revoked refresh tokens.
+     * @return RefreshTokenInterface[] an array of revoked refresh tokens
      */
     public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = self::MAX_BATCH_SIZE, ?int $offset = 0, bool $andFlush = true): array;
 

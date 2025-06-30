@@ -27,8 +27,6 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
     }
 
     /**
-     * @param int $batchSize
-     * @param int $offset
      * @return iterable<RefreshToken>
      */
     public function findInvalidBatch(?DateTimeInterface $datetime = null, int $batchSize, int $offset): iterable
