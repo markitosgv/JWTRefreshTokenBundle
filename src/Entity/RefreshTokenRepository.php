@@ -40,7 +40,7 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
      *
      * @return iterable<RefreshToken>
      */
-    public function findInvalidBatch(?DateTimeInterface $datetime = null, int $batchSize, int $offset): iterable
+    public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
     {
         return $this->createQueryBuilder('u')
             ->where('u.valid < :datetime')

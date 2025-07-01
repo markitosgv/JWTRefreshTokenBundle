@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -82,6 +83,11 @@ final class Configuration implements ConfigurationInterface
                 ->scalarNode('return_expiration_parameter_name')
                     ->defaultValue('refresh_token_expiration')
                     ->info('The default response parameter name containing the refresh token expiration timestamp')
+                ->end()
+                ->integerNode('default_invalid_batch_size')
+                    ->defaultValue(RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE)
+                    ->info('The default batch size when clearing invalid tokens')
+                    ->min(0)
                 ->end()
             ->end();
 

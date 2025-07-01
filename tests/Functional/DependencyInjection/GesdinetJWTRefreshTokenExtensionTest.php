@@ -5,6 +5,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\DependencyInjection;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenExtension;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 
 final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCase
@@ -42,6 +43,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         );
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.refresh_token.class', RefreshTokenEntity::class);
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.default_invalid_batch_size', RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
         $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine.orm.entity_manager');
     }
 
@@ -64,6 +66,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
                 'http_only' => false,
                 'partitioned' => true,
             ],
+            'default_invalid_batch_size' => 42,
         ]);
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.ttl', 123);
@@ -85,6 +88,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         );
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.refresh_token.class', RefreshTokenDocument::class);
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.default_invalid_batch_size', 42);
         $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine_mongodb.odm.document_manager');
     }
 }

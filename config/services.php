@@ -57,6 +57,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service('gesdinet_jwt_refresh_token.object_manager'),
             param('gesdinet_jwt_refresh_token.refresh_token.class'),
+            param('gesdinet_jwt_refresh_token.default_invalid_batch_size'),
         ]);
 
     $services->alias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
@@ -109,6 +110,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set(ClearInvalidRefreshTokensCommand::class)
         ->args([
             service('gesdinet_jwt_refresh_token.refresh_token_manager'),
+            param('gesdinet_jwt_refresh_token.default_invalid_batch_size'),
         ])
         ->tag('console.command');
 

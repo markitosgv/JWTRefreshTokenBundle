@@ -21,7 +21,7 @@ use DateTimeInterface;
  */
 interface RefreshTokenManagerInterface
 {
-    public const MAX_BATCH_SIZE = 1000;
+    public const DEFAULT_BATCH_SIZE = 1000;
 
     public function get(string $refreshToken): ?RefreshTokenInterface;
 
@@ -47,13 +47,13 @@ interface RefreshTokenManagerInterface
      * @param DateTimeInterface|null $datetime  the date and time to consider for invalidation
      * @param int|null               $batchSize The number of tokens to process in each batch.
      *                                          Defaults to self::MAX_BATCH_SIZE if not provided.
-     * @param int|null               $offset    The offset to start processing from.
+     * @param int                    $offset    The offset to start processing from.
      *                                          Defaults to 0 if not provided.
      * @param bool                   $andFlush  whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[] an array of revoked refresh tokens
      */
-    public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = self::MAX_BATCH_SIZE, ?int $offset = 0, bool $andFlush = true): array;
+    public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array;
 
     /**
      * Returns the fully qualified class name for a concrete RefreshTokenInterface class.

@@ -29,14 +29,20 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
     /**
      * @return iterable<RefreshToken>
      */
-    public function findInvalidBatch(?DateTimeInterface $datetime = null, int $batchSize, int $offset): iterable
+    public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
     {
-        return $this->createQueryBuilder()
+        $qb = $this->createQueryBuilder()
             ->field('valid')
-            ->lt($datetime ?? new DateTime())
-            ->skip($offset)
-            ->limit($batchSize)
-            ->getQuery()
-            ->execute();
+            ->lt($datetime ?? new DateTime());
+
+        if (null !== $batchSize) {
+            $qb->limit($batchSize);
+        }
+
+        if ($offset > 0) {
+            $qb->skip($offset);
+        }
+
+        return $qb->getQuery()->execute();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Entity;
 
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use DateTime;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -27,7 +28,7 @@ final class RefreshTokenRepositoryTest extends ORMTestCase
         ]);
 
         $this->generator = new RefreshTokenGenerator(
-            new RefreshTokenManager($this->entityManager, RefreshToken::class)
+            new RefreshTokenManager($this->entityManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE),
         );
     }
 

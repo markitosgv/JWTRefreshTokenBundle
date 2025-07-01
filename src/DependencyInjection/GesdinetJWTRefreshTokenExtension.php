@@ -40,6 +40,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $mergedConfig['return_expiration']);
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration_parameter_name', $mergedConfig['return_expiration_parameter_name']);
         $container->setParameter('gesdinet_jwt_refresh_token.refresh_token.class', $mergedConfig['refresh_token_class']);
+        $container->setParameter('gesdinet_jwt_refresh_token.default_invalid_batch_size', $mergedConfig['default_invalid_batch_size']);
 
         /*
          * Configuration preference:

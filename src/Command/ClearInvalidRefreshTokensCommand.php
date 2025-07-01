@@ -25,15 +25,20 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'gesdinet:jwt:clear', description: 'Clear invalid refresh tokens.')]
 final class ClearInvalidRefreshTokensCommand extends Command
 {
-    public function __construct(private readonly RefreshTokenManagerInterface $refreshTokenManager)
-    {
+    /**
+     * @param positive-int $defaultBatchSize
+     */
+    public function __construct(
+        private readonly RefreshTokenManagerInterface $refreshTokenManager,
+        private readonly int $defaultBatchSize,
+    ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
         $this->addArgument('datetime', InputArgument::OPTIONAL, 'An optional date, all tokens before this date will be removed; the value should be able to be parsed by DateTime.', 'now');
-        $this->addOption('batch-size', 'b', InputOption::VALUE_REQUIRED, 'Number of tokens to process per batch', RefreshTokenManagerInterface::MAX_BATCH_SIZE);
+        $this->addOption('batch-size', 'b', InputOption::VALUE_REQUIRED, 'Number of tokens to process per batch', $this->defaultBatchSize);
         $this->setHelp(
             <<<'EOT'
             The <info>%command.name%</info> command revokes all invalid (expired) refresh tokens.
@@ -53,7 +58,7 @@ final class ClearInvalidRefreshTokensCommand extends Command
         $datetime = new DateTime($input->getArgument('datetime'));
         $batchSize = (int) $input->getOption('batch-size');
 
-        $revokedTokens = $this->refreshTokenManager->revokeAllInvalid($datetime, $batchSize);
+        $revokedTokens = $this->refreshTokenManager->revokeAllInvalidBatch($datetime, $batchSize);
 
         if (0 === count($revokedTokens)) {
             $io->info('There were no invalid tokens to revoke.');
