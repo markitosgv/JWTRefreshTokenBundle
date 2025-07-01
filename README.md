@@ -555,3 +555,136 @@ services:
             - { name: gesdinet_jwt_refresh_token.request_extractor, priority: 25 }
 ```
 *
+
+# Logout Configuration for JWTRefreshTokenBundle
+
+The `gesdinet_jwt_refresh_token` configuration in your Symfony application's `config/packages/gesdinet_jwt_refresh_token.yaml` file allows you to customize the logout behavior when using the JWTRefreshTokenBundle. Below is a comprehensive list of the available options for the `logout` section, which can be used to fine-tune the logout process, including session management, cookie handling, and CSRF protection.
+
+## Configuration Options
+
+The `logout` configuration options can be defined under the `gesdinet_jwt_refresh_token.logout` key in your YAML configuration file. Below is an explanation of each option, its purpose, and its default value (if applicable).
+
+### `clear_site_data`
+- **Type**: Array or String
+- **Default**: `[]`
+- **Description**: Specifies the types of site data to clear when a user logs out, as part of the `Clear-Site-Data` HTTP header. This header instructs the browser to clear specific types of data, such as cookies, cache, or storage. Valid values include `"cache"`, `"cookies"`, `"storage"`, or `"executionContexts"`. You can specify one or multiple values as an array. For example, setting `clear_site_data: ["cookies", "storage"]` will clear cookies and web storage upon logout.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      clear_site_data: ["cookies", "storage"]
+  ```
+
+### `csrf_parameter`
+- **Type**: String
+- **Default**: `_csrf_token`
+- **Description**: Defines the name of the CSRF token parameter expected in the logout request (e.g., in a POST form or query string). This is used when CSRF protection is enabled to validate the logout request.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      csrf_parameter: "_logout_csrf"
+  ```
+
+### `csrf_token_id`
+- **Type**: String
+- **Default**: `logout`
+- **Description**: Specifies the identifier for the CSRF token used during logout. This allows the bundle to distinguish the CSRF token for logout from other CSRF tokens in your application. It is used in conjunction with the `csrf_token_manager`.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      csrf_token_id: "logout_token"
+  ```
+
+### `csrf_token_manager`
+- **Type**: String
+- **Default**: `security.csrf.token_manager`
+- **Description**: References the service ID of the CSRF token manager used to generate and validate CSRF tokens for logout requests. By default, it uses Symfony’s built-in CSRF token manager. You can override this to use a custom CSRF token manager service if needed.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      csrf_token_manager: "custom.csrf.token_manager"
+  ```
+
+### `delete_cookies`
+- **Type**: Array
+- **Default**: `[]`
+- **Description**: Lists the names of cookies to delete during the logout process. This is useful for removing specific cookies, such as those used for authentication or refresh tokens, to ensure a clean logout. Provide an array of cookie names to be deleted.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      delete_cookies: ["refresh_token", "session_cookie"]
+  ```
+
+### `enable_csrf`
+- **Type**: Boolean
+- **Default**: `false`
+- **Description**: Enables or disables CSRF protection for the logout endpoint. When set to `true`, the bundle requires a valid CSRF token (based on `csrf_parameter` and `csrf_token_id`) to process the logout request, enhancing security against cross-site request forgery attacks.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      enable_csrf: true
+  ```
+
+### `invalidate_session`
+- **Type**: Boolean
+- **Default**: `true`
+- **Description**: Determines whether the user’s session should be invalidated during logout. When set to `true`, the session is destroyed, ensuring that any session-based data is cleared. Set to `false` if you want to preserve the session for specific use cases.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      invalidate_session: false
+  ```
+
+### `path`
+- **Type**: String
+- **Default**: `/logout`
+- **Description**: Defines the URL path for the logout endpoint. This is the route that handles logout requests. You can customize it to match your application’s routing structure.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      path: "/api/logout"
+  ```
+
+### `target`
+- **Type**: String
+- **Default**: `/`
+- **Description**: Specifies the URL to redirect to after a successful logout. This can be a relative path, an absolute URL, or a named route. Use this to direct users to a specific page, such as a login page or homepage, after logging out.
+- **Example**:
+  ```yaml
+  gesdinet_jwt_refresh_token:
+    logout:
+      target: "/login"
+  ```
+
+## Example Configuration
+
+Here’s an example of a complete `logout` configuration in `config/packages/gesdinet_jwt_refresh_token.yaml`:
+
+```yaml
+gesdinet_jwt_refresh_token:
+  logout:
+    clear_site_data: ["cookies", "cache"]
+    csrf_parameter: "_logout_csrf"
+    csrf_token_id: "logout_token"
+    csrf_token_manager: "security.csrf.token_manager"
+    delete_cookies: ["refresh_token"]
+    enable_csrf: true
+    invalidate_session: true
+    path: "/api/logout"
+    target: "/login"
+```
+
+## Notes
+- Ensure that the `logout` configuration is placed under the `gesdinet_jwt_refresh_token` key in your configuration file.
+- If you enable CSRF protection (`enable_csrf: true`), make sure to include the CSRF token in your logout requests, typically via a form field or a query parameter matching the `csrf_parameter`.
+- The `clear_site_data` and `delete_cookies` options are particularly useful for ensuring a clean logout in single-page applications (SPAs) or when using HTTP-only cookies for refresh tokens.
+- Always test your logout configuration in a development environment to ensure it behaves as expected, especially when customizing CSRF or session settings.
+
+For additional details on configuring the JWTRefreshTokenBundle, refer to the [main documentation](https.github.com/markitosgv/JWTRefreshTokenBundle) or other sections of this repository.
