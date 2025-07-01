@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Document;
 
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
@@ -31,7 +32,7 @@ final class RefreshTokenRepositoryTest extends ODMTestCase
         $this->documentManager->getSchemaManager()->ensureIndexes();
 
         $this->generator = new RefreshTokenGenerator(
-            new RefreshTokenManager($this->documentManager, RefreshToken::class)
+            new RefreshTokenManager($this->documentManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE),
         );
     }
 

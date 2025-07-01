@@ -407,45 +407,6 @@ gesdinet_jwt_refresh_token:
 
 *NOTE* If using another object manager, it is recommended your object class extends from `Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken` which implements all required methods from `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface`.
 
-### Clearing Expired Refresh Tokens
-
-The `gesdinet:jwt:clear` command removes expired refresh tokens from the database. For large datasets (e.g., millions of records), the command now processes tokens in batches to prevent memory issues. You can configure the batch size by extending the `RefreshTokenManager` and overriding the `revokeAllInvalid` method:
-
-```php
-namespace App\Service;
-
-use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager as BaseRefreshTokenManager;
-
-class RefreshTokenManager extends BaseRefreshTokenManager
-{
-    public function revokeAllInvalid($andFlush = true, $batchSize = 500)
-    {
-        return parent::revokeAllInvalid($andFlush, $batchSize);
-    }
-}
-```
-
-Register the custom service in `config/services.yaml`:
-```yaml
-services:
-    gesdinet.jwtrefreshtoken.refresh_token_manager:
-        class: App\Service\RefreshTokenManager
-        arguments: ['@doctrine.orm.default_entity_manager', '%gesdinet.jwtrefreshtoken.refresh_token.class%']
-```
-
-### Disable automatic Doctrine mappings
-
-*NOTE*: This setting is deprecated and is no longer used
-
-On some occasions, you may not want to have default Doctrine mappings of object manager enabled as you use neither ORM nor ODM but i.e. using DoctrineBundle for DBAL.
-
-To disable dynamic Doctrine mapping add this line to your config:
-
-```yaml
-gesdinet_jwt_refresh_token:
-    doctrine_mappings: false
-```
-
 ### Generating Tokens
 
 When you authenticate through /api/login_check with user/password credentials, LexikJWTAuthenticationBundle now returns a JWT Token and a Refresh Token data.
@@ -474,7 +435,7 @@ This call returns a new valid JWT token renewing valid datetime of your refresh 
 
 ### Revoke all invalid tokens
 
-If you want to revoke all invalid (datetime expired) refresh tokens you can execute:
+If you want to revoke all invalid refresh tokens, where the expiration time has passed, you can run this command:
 
 ```bash
 php bin/console gesdinet:jwt:clear
@@ -484,6 +445,12 @@ The command optionally accepts a date argument which will delete all tokens olde
 
 ```bash
 php bin/console gesdinet:jwt:clear 2015-08-08
+```
+
+You can also specify the batch size used by the command when clearing tokens with the `--batch-size` option, which defaults to the `default_invalid_batch_size` config option when not provided.
+
+```bash
+php bin/console gesdinet:jwt:clear --batch-size=2500
 ```
 
 We recommend executing this command as a cronjob to remove invalid refresh tokens on an interval.

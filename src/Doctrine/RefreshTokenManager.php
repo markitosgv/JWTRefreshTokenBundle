@@ -31,11 +31,15 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
     /**
      * @param class-string<RefreshTokenInterface> $class
+     * @param positive-int                        $defaultBatchSize
      *
      * @throws LogicException if the object repository does not implement {@see RefreshTokenRepositoryInterface}
      */
-    public function __construct(private ObjectManager $objectManager, string $class)
-    {
+    public function __construct(
+        private ObjectManager $objectManager,
+        string $class,
+        private int $defaultBatchSize,
+    ) {
         $repository = $this->objectManager->getRepository($class);
 
         if (!$repository instanceof RefreshTokenRepositoryInterface) {
@@ -79,14 +83,15 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      * Revokes all invalid (expired) refresh tokens in batches.
      *
      * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
-     * @param ?int               $batchSize Number of tokens to process per batch, defaults to self::MAX_BATCH_SIZE if not provided
-     * @param ?int               $offset    The offset to start processing from, defaults to 0
+     * @param ?positive-int      $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
+     * @param ?int<0, max>       $offset    The offset to start processing from, defaults to 0
      * @param bool               $andFlush  Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      */
-    public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = self::MAX_BATCH_SIZE, ?int $offset = 0, bool $andFlush = true): array
+    public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array
     {
+        $batchSize ??= $this->defaultBatchSize;
         $count = 0;
 
         do {
@@ -111,9 +116,8 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Revokes all invalid (expired) refresh tokens.
      *
-     * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
-     * @param ?int               $batchSize Number of tokens to process per batch
-     * @param bool               $andFlush  Whether to flush the object manager after revoking
+     * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
+     * @param bool               $andFlush Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      */

@@ -15,6 +15,10 @@ The below guide will assist in upgrading from the 1.x versions to 2.0.
 - Made several classes final
 - Added parameter and return typehints
 
+## Added Features
+
+- Added the `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface::findInvalidBatch()` and `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface::revokeAllInvalidBatch()` interface methods to support batch operations, custom implementations will require these new methods
+
 ## Removed Features
 
 - Removed classes supporting authentication for Symfony 5.3 and earlier

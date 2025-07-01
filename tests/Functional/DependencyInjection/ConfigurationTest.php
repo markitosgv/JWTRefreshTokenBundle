@@ -46,6 +46,7 @@ final class ConfigurationTest extends TestCase
                     'http_only' => false,
                     'partitioned' => true,
                 ],
+                'default_invalid_batch_size' => 42,
             ],
         ]);
     }
@@ -55,6 +56,16 @@ final class ConfigurationTest extends TestCase
         $this->assertConfigurationIsInvalid([
             [
                 'refresh_token_class' => Configuration::class,
+            ],
+        ]);
+    }
+
+    public function test_configuration_is_invalid_when_batch_size_is_negative(): void
+    {
+        $this->assertConfigurationIsInvalid([
+            [
+                'refresh_token_class' => RefreshToken::class,
+                'default_invalid_batch_size' => -42,
             ],
         ]);
     }
