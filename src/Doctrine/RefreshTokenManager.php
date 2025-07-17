@@ -88,13 +88,18 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
             return $numDeleted;
         }
-        // Fallback for ODM or other managers: remove and flush, but cannot return affected rows
+        // Fallback for ODM or other managers: check if the entity is managed
+        if (!$this->objectManager->contains($refreshToken)) {
+            return 0; // Entity is not managed, so no deletion occurred
+        }
+
+        // Remove and flush the entity
         $this->objectManager->remove($refreshToken);
         if ($andFlush) {
             $this->objectManager->flush();
         }
 
-        // We assume 1 row affected if no exception was thrown
+        // Assume 1 row affected if no exception was thrown
         return 1;
     }
 
