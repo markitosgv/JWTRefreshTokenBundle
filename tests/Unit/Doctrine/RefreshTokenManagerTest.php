@@ -137,6 +137,11 @@ class RefreshTokenManagerTest extends TestCase
             ->method('getId')
             ->willReturn(123);
 
+        $this->repository
+            ->method('findOneBy')
+            ->with(['id' => $refreshToken->getId()])
+            ->willReturn($refreshToken);
+
         $this->objectManager
             ->expects($this->once())
             ->method('remove')
