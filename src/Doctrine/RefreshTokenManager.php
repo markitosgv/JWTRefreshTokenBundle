@@ -78,7 +78,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
         // Use DQL if this is an ORM EntityManager
-        if (is_a($this->objectManager, '\Doctrine\ORM\EntityManagerInterface')) {
+        if ($this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface) {
             $q = $this->objectManager->createQuery('DELETE FROM '.$this->class.' rt WHERE rt.id = :id');
             $q->setParameter('id', $refreshToken->getId());
             $numDeleted = $q->execute();
