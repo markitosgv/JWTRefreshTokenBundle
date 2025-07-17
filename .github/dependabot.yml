@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "composer"
+    directory: "/" # Location of composer.json
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: "all"
