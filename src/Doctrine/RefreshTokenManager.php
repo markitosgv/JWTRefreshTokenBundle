@@ -88,7 +88,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, RefreshTokenRepositoryInterface::class));
             }
 
-            if($repository->findOneBy(['id' => $refreshToken->getId()])) {
+            if ($repository->findOneBy(['id' => $refreshToken->getId()])) {
                 // If the refresh token is found, we can proceed with deletion
                 $this->objectManager->remove($refreshToken);
 
@@ -101,7 +101,6 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 return 0;
             }
         }
-        
 
         // Remove and flush the entity
         $this->objectManager->remove($refreshToken);
