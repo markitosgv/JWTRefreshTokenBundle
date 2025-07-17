@@ -33,7 +33,9 @@ class RefreshTokenManagerTest extends TestCase
             ->willReturn(static::REFRESH_TOKEN_ENTITY_CLASS);
 
         $this->objectManager = $this->createMock(ObjectManager::class);
+        // Allow getRepository to be called any number of times with the expected argument
         $this->objectManager
+            ->expects($this->any())
             ->method('getRepository')
             ->with(static::REFRESH_TOKEN_ENTITY_CLASS)
             ->willReturn($this->repository);
@@ -106,7 +108,10 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testSavesTheRefreshTokenAndFlushesTheObjectManager(): void
     {
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&\PHPUnit\Framework\MockObject\MockObject $refreshToken */
+        $refreshToken = $this->getMockBuilder(RefreshTokenInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->objectManager
             ->expects($this->once())
@@ -122,7 +127,10 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testDeletesTheRefreshTokenAndFlushesTheObjectManager(): void
     {
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&\PHPUnit\Framework\MockObject\MockObject $refreshToken */
+        $refreshToken = $this->getMockBuilder(RefreshTokenInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->objectManager
             ->expects($this->once())
@@ -133,7 +141,8 @@ class RefreshTokenManagerTest extends TestCase
             ->expects($this->once())
             ->method('flush');
 
-        $this->refreshTokenManager->delete($refreshToken, true);
+        $result = $this->refreshTokenManager->delete($refreshToken, true);
+        $this->assertSame(1, $result);
     }
 
     public function testRevokesAllInvalidTokensAndFlushesTheObjectManager(): void

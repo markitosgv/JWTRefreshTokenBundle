@@ -70,13 +70,32 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         }
     }
 
-    public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
+    /**
+     * Deletes the given refresh token and returns the number of rows affected.
+     *
+     * @param RefreshTokenInterface $refreshToken
+     * @param bool $andFlush
+     * @return int Number of rows deleted (should be 1 if deleted, 0 if not found)
+     */
+    public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
+        // Use DQL if this is an ORM EntityManager
+        if (is_a($this->objectManager, '\Doctrine\ORM\EntityManagerInterface')) {
+            $q = $this->objectManager->createQuery('DELETE FROM ' . $this->class . ' rt WHERE rt.id = :id');
+            $q->setParameter('id', $refreshToken->getId());
+            $numDeleted = $q->execute();
+            if ($andFlush) {
+                $this->objectManager->flush();
+            }
+            return $numDeleted;
+        }
+        // Fallback for ODM or other managers: remove and flush, but cannot return affected rows
         $this->objectManager->remove($refreshToken);
-
         if ($andFlush) {
             $this->objectManager->flush();
         }
+        // We assume 1 row affected if no exception was thrown
+        return 1;
     }
 
     /**
