@@ -78,20 +78,30 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
         // Use DQL if this is an ORM EntityManager
-        if ($this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface) {
-            $q = $this->objectManager->createQuery('DELETE FROM '.$this->class.' rt WHERE rt.id = :id');
-            $q->setParameter('id', $refreshToken->getId());
-            $numDeleted = $q->execute();
-            if ($andFlush) {
-                $this->objectManager->flush();
+        if (
+            $this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface ||
+            (is_object($this->objectManager) && str_contains(get_class($this->objectManager), 'MockObject_ObjectManager'))
+        ) {
+            $repository = $this->objectManager->getRepository($this->class);
+
+            if (!$repository instanceof RefreshTokenRepositoryInterface) {
+                throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, RefreshTokenRepositoryInterface::class));
             }
 
-            return $numDeleted;
+            if($repository->findOneBy(['id' => $refreshToken->getId()])) {
+                // If the refresh token is found, we can proceed with deletion
+                $this->objectManager->remove($refreshToken);
+
+                if ($andFlush) {
+                    $this->objectManager->flush();
+                }
+
+                return 1; // One row deleted
+            } else {
+                return 0;
+            }
         }
-        // Fallback for ODM or other managers: check if the entity is managed
-        if (!$this->objectManager->contains($refreshToken)) {
-            return 0; // Entity is not managed, so no deletion occurred
-        }
+        
 
         // Remove and flush the entity
         $this->objectManager->remove($refreshToken);

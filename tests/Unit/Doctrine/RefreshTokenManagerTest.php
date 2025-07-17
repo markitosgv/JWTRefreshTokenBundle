@@ -132,6 +132,11 @@ class RefreshTokenManagerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        // Simula que el refreshToken tiene un id
+        $refreshToken
+            ->method('getId')
+            ->willReturn(123);
+
         $this->objectManager
             ->expects($this->once())
             ->method('remove')
