@@ -1,4 +1,4 @@
-*JWTRefreshTokenBundle
+JWTRefreshTokenBundle
 =====================
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
