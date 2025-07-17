@@ -40,7 +40,12 @@ jobs:
           sudo apt-get install -y php-mongodb
 
       - name: Psalm Security Scan
-        uses: psalm/psalm-github-security-scan@f3e6fd9432bc3e44aec078572677ce9d2ef9c287
+        uses: psalm/psalm-github-security-scan:latest
+        with:
+          composer_require_dev: true
+          composer_ignore_platform_reqs: true
+          show_info: true
+          php_version: ${{ matrix.php }}
 
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v3
