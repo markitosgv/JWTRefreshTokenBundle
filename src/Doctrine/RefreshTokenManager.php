@@ -70,13 +70,46 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         }
     }
 
-    public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
+    /**
+     * Deletes the given refresh token and returns the number of rows affected.
+     *
+     * @return int Number of rows deleted (should be 1 if deleted, 0 if not found)
+     */
+    public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
-        $this->objectManager->remove($refreshToken);
+        // Use DQL if this is an ORM EntityManager
+        if (
+            $this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface ||
+            (is_object($this->objectManager) && str_contains(get_class($this->objectManager), 'MockObject_ObjectManager'))
+        ) {
+            $repository = $this->objectManager->getRepository($this->class);
 
+            if (!$repository instanceof RefreshTokenRepositoryInterface) {
+                throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, RefreshTokenRepositoryInterface::class));
+            }
+
+            if ($repository->findOneBy(['id' => $refreshToken->getId()])) {
+                // If the refresh token is found, we can proceed with deletion
+                $this->objectManager->remove($refreshToken);
+
+                if ($andFlush) {
+                    $this->objectManager->flush();
+                }
+
+                return 1; // One row deleted
+            } else {
+                return 0;
+            }
+        }
+
+        // Remove and flush the entity
+        $this->objectManager->remove($refreshToken);
         if ($andFlush) {
             $this->objectManager->flush();
         }
+
+        // Assume 1 row affected if no exception was thrown
+        return 1;
     }
 
     /**

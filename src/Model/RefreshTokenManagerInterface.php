@@ -29,7 +29,12 @@ interface RefreshTokenManagerInterface
 
     public function save(RefreshTokenInterface $refreshToken): void;
 
-    public function delete(RefreshTokenInterface $refreshToken): void;
+    /**
+     * Deletes the given refresh token and returns the number of rows affected.
+     *
+     * @return int Number of rows deleted (should be 1 if deleted, 0 if not found)
+     */
+    public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int;
 
     /**
      * Revokes all invalid (expired) refresh tokens.
