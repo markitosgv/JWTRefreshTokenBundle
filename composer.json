@@ -1,53 +1,52 @@
 {
-  "name" : "gesdinet/jwt-refresh-token-bundle",
-  "description" : "Implements a refresh token system over Json Web Tokens in Symfony",
-  "type" : "symfony-bundle",
-  "authors" : [{
-    "name" : "Marcos Gómez Vilches",
-    "email" : "marcos@gesdinet.com"
-  }],
-  "keywords" : [
-    "jwt refresh token bundle symfony json web"
-  ],
-  "license" : [
+  "name": "gesdinet/jwt-refresh-token-bundle",
+  "description": "Implements a refresh token system over Json Web Tokens in Symfony",
+  "license": [
     "MIT"
   ],
-  "require" : {
+  "type": "symfony-bundle",
+  "keywords": [
+    "jwt refresh token bundle symfony json web"
+  ],
+  "authors": [
+    {
+      "name": "Marcos Gómez Vilches",
+      "email": "marcos@gesdinet.com"
+    }
+  ],
+  "require": {
     "php": ">=8.2",
-    "doctrine/persistence": "^3.1|^4.0",
-    "lexik/jwt-authentication-bundle": "^2.15|^3.0",
-    "symfony/config": "^6.4|^7.2",
-    "symfony/console": "^6.4|^7.2",
-    "symfony/dependency-injection": "^6.4|^7.2",
-    "symfony/deprecation-contracts": "^2.1|^3.0",
-    "symfony/event-dispatcher": "^6.4|^7.2",
-    "symfony/http-foundation": "^6.4|^7.2",
-    "symfony/http-kernel": "^6.4|^7.2",
-    "symfony/property-access": "^6.4|^7.2",
-    "symfony/security-bundle": "^6.4|^7.2",
-    "symfony/security-core": "^6.4|^7.2",
-    "symfony/security-http": "^6.4|^7.2"
+    "doctrine/persistence": "^3.1 || ^4.0",
+    "lexik/jwt-authentication-bundle": "^2.15 || ^3.0",
+    "symfony/config": "^6.4 || ^7.2",
+    "symfony/console": "^6.4 || ^7.2",
+    "symfony/dependency-injection": "^6.4 || ^7.2",
+    "symfony/deprecation-contracts": "^2.1 || ^3.0",
+    "symfony/event-dispatcher": "^6.4 || ^7.2",
+    "symfony/http-foundation": "^6.4 || ^7.2",
+    "symfony/http-kernel": "^6.4 || ^7.2",
+    "symfony/property-access": "^6.4 || ^7.2",
+    "symfony/security-bundle": "^6.4 || ^7.2",
+    "symfony/security-core": "^6.4 || ^7.2",
+    "symfony/security-http": "^6.4 || ^7.2"
   },
   "require-dev": {
     "doctrine/mongodb-odm": "^2.7",
-    "doctrine/orm": "^2.20|^3.0",
-    "matthiasnoback/symfony-config-test": "^5.1|^6.0",
-    "matthiasnoback/symfony-dependency-injection-test": "^5.1|^6.0",
+    "doctrine/orm": "^2.20 || ^3.0",
+    "ergebnis/composer-normalize": "*",
+    "matthiasnoback/symfony-config-test": "^5.1 || ^6.0",
+    "matthiasnoback/symfony-dependency-injection-test": "^5.1 || ^6.0",
     "phpunit/phpunit": "^10.5 || ^12.2",
-    "rector/rector": "^2.1",
     "rector/jack": "^0.2.5",
-    "symfony/cache": "^6.4|^7.2"
+    "rector/rector": "^2.1",
+    "symfony/cache": "^6.4 || ^7.2"
   },
   "conflict": {
     "doctrine/mongodb-odm": "<2.7",
     "doctrine/orm": "<2.20"
   },
-  "config": {
-    "allow-plugins": {
-      "composer/package-versions-deprecated": true
-    },
-    "bin-dir": "bin"
-  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "autoload": {
     "psr-4": {
       "Gesdinet\\JWTRefreshTokenBundle\\": "src/"
@@ -58,11 +57,16 @@
       "Gesdinet\\JWTRefreshTokenBundle\\Tests\\": "tests/"
     }
   },
-  "extra" : {
-    "branch-alias" : {
-      "dev-master" : "2.x-dev"
-    }
+  "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true,
+      "ergebnis/composer-normalize": true
+    },
+    "bin-dir": "bin"
   },
-  "minimum-stability": "dev",
-  "prefer-stable": true
+  "extra": {
+    "branch-alias": {
+      "dev-master": "2.x-dev"
+    }
+  }
 }
