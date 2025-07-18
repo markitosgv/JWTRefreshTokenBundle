@@ -72,16 +72,18 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
-     * Wrapper around DQL deletion so that ObjectManager can be cast to EntityManagerInterface
+     * Wrapper around DQL deletion so that ObjectManager can be cast to EntityManagerInterface.
      *
      * @param \Doctrine\ORM\EntityManagerInterface|MockObject $entityManager
      * @param int $id
      * @return int Number of rows deleted
      */
-    private function deleteById(\Doctrine\ORM\EntityManagerInterface|MockObject $entityManager, int $id): int {
+    private function deleteById(\Doctrine\ORM\EntityManagerInterface|MockObject $entityManager, int $id): int
+    {
         $q = $entityManager->createQuery('DELETE FROM Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken rt WHERE rt.id = :id');
         $q->setParameter('id', $id);
         $numDeleted = $q->execute();
+
         return $numDeleted;
     }
 
@@ -107,6 +109,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             if ($andFlush) {
                 $this->objectManager->flush();
             }
+
             return $numDeleted;
         }
 

@@ -168,7 +168,7 @@ class RefreshTokenManagerTest extends TestCase
         $query = $this->getMockBuilder(Query::class)
             ->disableOriginalConstructor()
             ->getMock();
-        
+
         $query
             ->method('execute')
             ->willReturn(1);
