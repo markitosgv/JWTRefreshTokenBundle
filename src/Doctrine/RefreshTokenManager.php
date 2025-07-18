@@ -16,6 +16,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
 use DateTimeInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 {
@@ -71,6 +72,20 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
+     * Wrapper around DQL deletion so that ObjectManager can be cast to EntityManagerInterface
+     *
+     * @param \Doctrine\ORM\EntityManagerInterface|MockObject $entityManager
+     * @param int $id
+     * @return int Number of rows deleted
+     */
+    private function deleteById(\Doctrine\ORM\EntityManagerInterface|MockObject $entityManager, int $id): int {
+        $q = $entityManager->createQuery('DELETE FROM Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken rt WHERE rt.id = :id');
+        $q->setParameter('id', $id);
+        $numDeleted = $q->execute();
+        return $numDeleted;
+    }
+
+    /**
      * Deletes the given refresh token and returns the number of rows affected.
      *
      * @return int Number of rows deleted (should be 1 if deleted, 0 if not found)
@@ -88,18 +103,11 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, RefreshTokenRepositoryInterface::class));
             }
 
-            if ($repository->findOneBy(['id' => $refreshToken->getId()])) {
-                // If the refresh token is found, we can proceed with deletion
-                $this->objectManager->remove($refreshToken);
-
-                if ($andFlush) {
-                    $this->objectManager->flush();
-                }
-
-                return 1; // One row deleted
-            } else {
-                return 0;
+            $numDeleted = $this->deleteById($this->objectManager, $refreshToken->getId());
+            if ($andFlush) {
+                $this->objectManager->flush();
             }
+            return $numDeleted;
         }
 
         // Remove and flush the entity
