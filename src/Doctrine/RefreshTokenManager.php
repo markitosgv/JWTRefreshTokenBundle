@@ -74,8 +74,6 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Wrapper around DQL deletion so that ObjectManager can be cast to EntityManagerInterface.
      *
-     * @param \Doctrine\ORM\EntityManagerInterface|MockObject $entityManager
-     * @param int $id
      * @return int Number of rows deleted
      */
     private function deleteById(\Doctrine\ORM\EntityManagerInterface|MockObject $entityManager, int $id): int
