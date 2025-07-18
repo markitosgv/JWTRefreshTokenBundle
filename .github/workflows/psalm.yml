@@ -52,7 +52,7 @@ jobs:
         run: composer install
 
       - name: Psalm Security Scan
-        uses: docker://ghcr.io/vimeo/psalm:6.9.1
+        uses: docker://ghcr.io/psalm/psalm-github-actions:6.13.0
         with:
           composer_require_dev: true
           composer_ignore_platform_reqs: true
