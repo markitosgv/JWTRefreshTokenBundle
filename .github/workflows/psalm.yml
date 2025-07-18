@@ -46,10 +46,13 @@ jobs:
       - name: Install PHP MongoDB extension
         run: |
           sudo apt-get update
-          sudo apt-get install -y php-mongodb
+          sudo apt-get install -y php8.4-mongodb
 
       - name: Install Composer dependencies
         run: composer install
+
+      - name: Mark /github/workspace as safe
+        run: git config --global --add safe.directory /github/workspace
 
       - name: Psalm Security Scan
         uses: docker://ghcr.io/psalm/psalm-github-actions:6.13.0
@@ -59,6 +62,7 @@ jobs:
           security_analysis: true
           show_info: true
           php_version: ${{ matrix.php }}
+          report_file: results.sarif
 
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v3
