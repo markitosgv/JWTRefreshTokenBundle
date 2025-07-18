@@ -54,8 +54,9 @@ jobs:
       - name: Psalm Security Scan
         uses: docker://ghcr.io/psalm/psalm-security-scan:5.25.0
         with:
-          composer_require_dev: true
-          composer_ignore_platform_reqs: true
+          composer_require_dev: false
+          composer_ignore_platform_reqs: false
+          security_analysis: true
           show_info: true
           php_version: ${{ matrix.php }}
 
