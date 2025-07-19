@@ -78,7 +78,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      */
     private function deleteById(\Doctrine\ORM\EntityManagerInterface|MockObject $entityManager, int $id): int
     {
-        $q = $entityManager->createQuery('DELETE FROM Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken rt WHERE rt.id = :id');
+        $q = $entityManager->createQuery(sprintf('DELETE FROM %s rt WHERE rt.id = :id', $this->class));
         $q->setParameter('id', $id);
         $numDeleted = $q->execute();
 
