@@ -16,7 +16,6 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
 use DateTimeInterface;
-use PHPUnit\Framework\MockObject\MockObject;
 
 final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 {
@@ -76,7 +75,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @return int Number of rows deleted
      */
-    private function deleteById(\Doctrine\ORM\EntityManagerInterface|MockObject $entityManager, int $id): int
+    private function deleteById(\Doctrine\ORM\EntityManagerInterface $entityManager, int $id): int
     {
         $q = $entityManager->createQuery(sprintf('DELETE FROM %s rt WHERE rt.id = :id', $this->class));
         $q->setParameter('id', $id);
@@ -93,10 +92,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
         // Use DQL if this is an ORM EntityManager
-        if (
-            $this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface ||
-            (is_object($this->objectManager) && str_contains(get_class($this->objectManager), 'MockObject_ObjectManager'))
-        ) {
+        if ($this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface) {
             $repository = $this->objectManager->getRepository($this->class);
 
             if (!$repository instanceof RefreshTokenRepositoryInterface) {
