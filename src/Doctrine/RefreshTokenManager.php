@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
@@ -77,7 +78,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      */
     private function deleteById(\Doctrine\ORM\EntityManagerInterface $entityManager, int $id): int
     {
-        $q = $entityManager->createQuery(sprintf('DELETE FROM %s rt WHERE rt.id = :id', $this->class));
+        $q = $entityManager->createQuery(sprintf('DELETE FROM %s rt WHERE rt.id = :id', RefreshToken::class));
         $q->setParameter('id', $id);
         $numDeleted = $q->execute();
 
