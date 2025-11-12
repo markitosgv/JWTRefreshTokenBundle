@@ -31,16 +31,15 @@ final readonly class TableSchemaManager
     private array $columnConfig;
 
     /**
-     * @param Connection $connection DBAL connection
-     * @param string $tableName Name of the refresh tokens table
+     * @param Connection                                       $connection   DBAL connection
+     * @param string                                           $tableName    Name of the refresh tokens table
      * @param array<string, array{name: string, type: string}> $columnConfig Column configuration map
      */
     public function __construct(
         private Connection $connection,
-        private string     $tableName,
-        array              $columnConfig
-    )
-    {
+        private string $tableName,
+        array $columnConfig
+    ) {
         $this->columnConfig = !empty($columnConfig) ? $columnConfig : $this->getDefaultColumnConfig();
     }
 
@@ -65,6 +64,7 @@ final readonly class TableSchemaManager
      * Creates the refresh token table based on the column configuration.
      *
      * @param bool $dropIfExists Whether to drop the table if it already exists
+     *
      * @throws Exception
      * @throws TypesException
      */
@@ -138,6 +138,7 @@ final readonly class TableSchemaManager
     public function tableExists(): bool
     {
         $schemaManager = $this->connection->createSchemaManager();
+
         return $schemaManager->tablesExist([$this->tableName]);
     }
 

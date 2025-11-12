@@ -26,7 +26,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../config'));
         $loader->load('services.php');
 
         $container->registerForAutoconfiguration(ExtractorInterface::class)->addTag('gesdinet_jwt_refresh_token.request_extractor');
@@ -48,7 +48,6 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             $this->configureObjectManager($container, $mergedConfig, $loader);
             $loader->load('om_services.php');
         }
-
     }
 
     private function configureDBALManager(ContainerBuilder $container, array $config, PhpFileLoader $loader): void
@@ -57,7 +56,6 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.table_name', $config['dbal_table_name']);
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.auto_create_table', $config['dbal_auto_create_table']);
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.columns', $config['dbal_columns']);
-
     }
 
     private function configureObjectManager(ContainerBuilder $container, array $mergedConfig, PhpFileLoader $loader): void
@@ -69,6 +67,5 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine_mongodb.odm.document_manager');
         }
-
     }
 }

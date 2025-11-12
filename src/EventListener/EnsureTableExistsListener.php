@@ -50,7 +50,7 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
 
         // Lazy initialize ConfigCache
         $this->cache ??= new ConfigCache(
-            $this->cacheDir . '/gesdinet_jwt_refresh_token_table.php',
+            $this->cacheDir.'/gesdinet_jwt_refresh_token_table.php',
             $this->debug
         );
 

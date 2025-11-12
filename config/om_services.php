@@ -1,6 +1,5 @@
 <?php
 
-
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;

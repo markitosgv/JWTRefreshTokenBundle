@@ -50,7 +50,6 @@ return static function (ContainerConfigurator $container): void {
 
     $services->alias(RefreshTokenGeneratorInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_generator');
 
-
     $services->alias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
 
     $services->set('gesdinet_jwt_refresh_token.request.extractor.chain')
@@ -120,7 +119,4 @@ return static function (ContainerConfigurator $container): void {
             param('gesdinet_jwt_refresh_token.token_parameter_name'),
             param('gesdinet_jwt_refresh_token.cookie'),
         ]);
-
-
-
 };
