@@ -17,7 +17,7 @@ return static function (ContainerConfigurator $container): void {
         ->class(TableSchemaManager::class)
         ->public(false)
         ->args([
-            service(param('gesdinet_jwt_refresh_token.dbal.connection')),
+            service('gesdinet_jwt_refresh_token.dbal.connection'),
             param('gesdinet_jwt_refresh_token.dbal.table_name'),
             param('gesdinet_jwt_refresh_token.dbal.columns'),
         ]);
@@ -31,7 +31,7 @@ return static function (ContainerConfigurator $container): void {
         ->class(RefreshTokenManager::class)
         ->public(true)
         ->args([
-            service(param('gesdinet_jwt_refresh_token.dbal.connection')),
+            service('gesdinet_jwt_refresh_token.dbal.connection'),
             param('gesdinet_jwt_refresh_token.default_invalid_batch_size'),
             param('gesdinet_jwt_refresh_token.dbal.table_name'),
             param('gesdinet_jwt_refresh_token.refresh_token.class'),

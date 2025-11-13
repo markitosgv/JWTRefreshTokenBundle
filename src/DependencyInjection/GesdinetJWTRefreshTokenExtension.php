@@ -52,6 +52,8 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 
     private function configureDBALManager(ContainerBuilder $container, array $config, PhpFileLoader $loader): void
     {
+        $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
+
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.table_name', $config['dbal_table_name']);
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.auto_create_table', $config['dbal_auto_create_table']);
