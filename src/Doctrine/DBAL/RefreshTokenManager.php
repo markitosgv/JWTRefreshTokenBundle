@@ -33,20 +33,19 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     private array $columnConfig;
 
     /**
-     * @param positive-int $defaultBatchSize
-     * @param Connection $connection DBAL connection
-     * @param string $tableName Name of the refresh tokens table
-     * @param class-string<RefreshTokenInterface> $class Fully qualified class name for refresh token instances
-     * @param array<string, array{name: string, type: string}> $columnConfig Map of aliases to column configuration ['alias' => ['name' => 'column_name', 'type' => Types::STRING]]
+     * @param positive-int                                     $defaultBatchSize
+     * @param Connection                                       $connection       DBAL connection
+     * @param string                                           $tableName        Name of the refresh tokens table
+     * @param class-string<RefreshTokenInterface>              $class            Fully qualified class name for refresh token instances
+     * @param array<string, array{name: string, type: string}> $columnConfig     Map of aliases to column configuration ['alias' => ['name' => 'column_name', 'type' => Types::STRING]]
      */
     public function __construct(
         private Connection $connection,
-        private int        $defaultBatchSize,
-        private string     $tableName,
-        private string     $class,
-        array              $columnConfig = []
-    )
-    {
+        private int $defaultBatchSize,
+        private string $tableName,
+        private string $class,
+        array $columnConfig = []
+    ) {
         $this->columnConfig = $columnConfig ?: $this->getDefaultColumnConfig();
     }
 
@@ -173,7 +172,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function get(string $refreshToken): ?RefreshTokenInterface
     {
         $qb = $this->query()
-            ->where($this->getColumnName('refreshToken') . ' = :refreshToken')
+            ->where($this->getColumnName('refreshToken').' = :refreshToken')
             ->setParameter('refreshToken', $refreshToken)
             ->setMaxResults(1);
 
@@ -188,7 +187,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function getLastFromUsername(string $username): ?RefreshTokenInterface
     {
         $qb = $this->query()
-            ->where($this->getColumnName('username') . ' = :username')
+            ->where($this->getColumnName('username').' = :username')
             ->setParameter('username', $username)
             ->setMaxResults(1)
             ->orderBy($this->getColumnName('valid'), 'DESC');
@@ -226,7 +225,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 ->update($this->tableName)
                 ->set($this->getColumnName('username'), ':username')
                 ->set($this->getColumnName('valid'), ':valid')
-                ->where($this->getColumnName('refreshToken') . ' = :refresh_token')
+                ->where($this->getColumnName('refreshToken').' = :refresh_token')
                 ->setParameters([
                     'refresh_token' => $refreshToken->getRefreshToken(),
                     'username' => $refreshToken->getUsername(),
@@ -256,10 +255,10 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Revokes all invalid (expired) refresh tokens in batches.
      *
-     * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
-     * @param ?positive-int $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
-     * @param int $offset The offset to start processing from, defaults to 0
-     * @param bool $andFlush Whether to flush the object manager after revoking
+     * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
+     * @param ?positive-int      $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
+     * @param int                $offset    The offset to start processing from, defaults to 0
+     * @param bool               $andFlush  Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      *
@@ -295,14 +294,14 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             throw $e;
         }
 
-        return array_map(fn(array $data) => $this->hydrate($data), $allRevokedData);
+        return array_map(fn (array $data) => $this->hydrate($data), $allRevokedData);
     }
 
     /**
      * Revokes all invalid (expired) refresh tokens.
      *
      * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
-     * @param bool $andFlush Whether to flush the object manager after revoking
+     * @param bool               $andFlush Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      *
@@ -315,16 +314,15 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
         $this->connection->beginTransaction();
         try {
-
             $invalidData = $this->query()
-                ->where($this->getColumnName('valid') . ' < :datetime')
+                ->where($this->getColumnName('valid').' < :datetime')
                 ->setParameter('datetime', $datetime, 'datetime')
                 ->fetchAllAssociative();
 
             if ([] !== $invalidData) {
                 $this->connection->createQueryBuilder()
                     ->delete($this->tableName)
-                    ->where($this->getColumnName('valid') . ' < :datetime')
+                    ->where($this->getColumnName('valid').' < :datetime')
                     ->setParameter('datetime', $datetime, 'datetime')
                     ->executeStatement();
             }
@@ -339,7 +337,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             return [];
         }
 
-        return array_map(fn(array $data) => $this->hydrate($data), $invalidData);
+        return array_map(fn (array $data) => $this->hydrate($data), $invalidData);
     }
 
     /**
@@ -356,7 +354,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      * Generator that yields batches of invalid token data without hydration.
      *
      * @param positive-int $batchSize
-     * @param int<0, max> $offset
+     * @param int<0, max>  $offset
      *
      * @return Generator<array<string, mixed>>
      *
@@ -366,7 +364,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     {
         do {
             $qb = $this->query()
-                ->where($this->getColumnName('valid') . ' < :datetime')
+                ->where($this->getColumnName('valid').' < :datetime')
                 ->setParameter('datetime', $datetime, 'datetime')
                 ->setMaxResults($batchSize)
                 ->setFirstResult($offset);
