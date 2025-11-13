@@ -152,16 +152,17 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         $instance = new $class();
 
         $columnConfig = $this->columnConfig;
+        $conn = $this->connection;
 
         /**
          * @param AbstractRefreshToken $object
          * @param array<string, mixed> $data
          */
-        $hydrator = \Closure::bind(function ($object, array $data) use ($columnConfig): void {
+        $hydrator = \Closure::bind(function ($object, array $data) use ($columnConfig, $conn): void {
             $object->id = $data[$columnConfig['id']['name']] ?? $data['id'] ?? null;
             $object->refreshToken = $data[$columnConfig['refreshToken']['name']] ?? $data['refresh_token'] ?? null;
             $object->username = $data[$columnConfig['username']['name']] ?? $data['username'] ?? null;
-            $object->valid = $data[$columnConfig['valid']['name']] ?? $data['valid'] ?? null;
+            $object->valid = $conn->convertToPHPValue($data[$columnConfig['valid']['name']] ?? $data['valid'] ?? null, $columnConfig['valid']['type'] ?? 'datetime');
         }, null, $class);
 
         $hydrator($instance, $data);
