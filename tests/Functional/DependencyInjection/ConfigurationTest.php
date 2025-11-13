@@ -125,9 +125,7 @@ final class ConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [
-                [
-                    'refresh_token_class' => RefreshToken::class,
-                ],
+                [],
             ],
             ['dbal_columns' => []],
             'dbal_columns'
@@ -138,9 +136,7 @@ final class ConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [
-                [
-                    'refresh_token_class' => RefreshToken::class,
-                ],
+                [],
             ],
             ['dbal_table_name' => 'refresh_tokens'],
             'dbal_table_name'
@@ -151,9 +147,7 @@ final class ConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [
-                [
-                    'refresh_token_class' => RefreshToken::class,
-                ],
+                [],
             ],
             ['dbal_auto_create_table' => true],
             'dbal_auto_create_table'

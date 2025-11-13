@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\DependencyInjection;
 
 use Doctrine\DBAL\Connection;
+use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ValidateDBALConnectionCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenExtension;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
@@ -107,6 +108,9 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'refresh_token_class' => RefreshTokenEntity::class,
             'dbal_connection' => 'nonexistent_connection',
         ]);
+
+        $this->container->addCompilerPass(new ValidateDBALConnectionCompilerPass());
+        $this->compile();
     }
 
     public function test_container_is_loaded_with_valid_dbal_connection(): void
@@ -118,6 +122,9 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'refresh_token_class' => RefreshTokenEntity::class,
             'dbal_connection' => 'doctrine.dbal.default_connection',
         ]);
+
+        $this->container->addCompilerPass(new ValidateDBALConnectionCompilerPass());
+        $this->compile();
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.dbal.connection', 'doctrine.dbal.default_connection');
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.dbal.table_name', 'refresh_tokens');
@@ -139,5 +146,8 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'refresh_token_class' => RefreshTokenEntity::class,
             'dbal_connection' => 'invalid_connection',
         ]);
+
+        $this->container->addCompilerPass(new ValidateDBALConnectionCompilerPass());
+        $this->compile();
     }
 }
