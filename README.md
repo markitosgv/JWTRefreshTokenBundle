@@ -13,7 +13,7 @@ The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) i
 
 ## Prerequisites
 
-This bundle requires PHP 8.2 or later and Symfony 6.4, 7.2+, 8.0+.
+This bundle requires PHP 8.2 or later and Symfony 6.4, 7.2+ or 8.0+.
 
 For support with older Symfony versions, please use the 1.x release.
 
