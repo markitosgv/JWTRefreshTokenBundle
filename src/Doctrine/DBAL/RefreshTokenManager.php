@@ -11,19 +11,13 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL;
 
-use DateTime;
-use DateTimeInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Doctrine\DBAL\Schema\Schema;
-use Doctrine\DBAL\Types\Exception\TypesException;
-use Doctrine\DBAL\Types\Types;
 use Generator;
 use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
-use Throwable;
 
 final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 {
@@ -46,90 +40,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         private string $class,
         array $columnConfig = []
     ) {
-        $this->columnConfig = $columnConfig ?: $this->getDefaultColumnConfig();
-    }
-
-    /**
-     * Creates the refresh token table based on the column configuration.
-     *
-     * @param bool $dropIfExists Whether to drop the table if it already exists
-     *
-     * @throws Exception
-     * @throws TypesException
-     */
-    public function createTable(bool $dropIfExists = false): void
-    {
-        $schemaManager = $this->connection->createSchemaManager();
-        $schema = new Schema();
-
-        if ($dropIfExists && $schemaManager->tablesExist([$this->tableName])) {
-            $schemaManager->dropTable($this->tableName);
-        }
-
-        $table = $schema->createTable($this->tableName);
-
-        foreach ($this->columnConfig as $alias => $config) {
-            $columnName = $config['name'];
-            $columnType = $config['type'];
-
-            $column = $table->addColumn($columnName, $columnType);
-
-            match ($alias) {
-                'id' => $column->setAutoincrement(true)->setNotnull(true),
-                'refreshToken' => $column->setLength(255)->setNotnull(true),
-                'username' => $column->setLength(255)->setNotnull(true),
-                'valid' => $column->setNotnull(true),
-                default => $column
-            };
-        }
-
-        if (isset($this->columnConfig['id'])) {
-            $table->setPrimaryKey([$this->columnConfig['id']['name']]);
-        }
-
-        if (isset($this->columnConfig['refreshToken'])) {
-            $table->addUniqueIndex([$this->columnConfig['refreshToken']['name']], 'UNIQ_REFRESH_TOKEN');
-        }
-
-        if (isset($this->columnConfig['username'])) {
-            $table->addIndex([$this->columnConfig['username']['name']], 'IDX_USERNAME');
-        }
-
-        if (isset($this->columnConfig['valid'])) {
-            $table->addIndex([$this->columnConfig['valid']['name']], 'IDX_VALID');
-        }
-
-        $queries = $schema->toSql($this->connection->getDatabasePlatform());
-        foreach ($queries as $query) {
-            $this->connection->executeStatement($query);
-        }
-    }
-
-    /**
-     * Returns the default column configuration.
-     *
-     * @return array<string, array{name: string, type: string}>
-     */
-    private function getDefaultColumnConfig(): array
-    {
-        return [
-            'id' => [
-                'name' => 'id',
-                'type' => Types::INTEGER,
-            ],
-            'refreshToken' => [
-                'name' => 'refresh_token',
-                'type' => Types::STRING,
-            ],
-            'username' => [
-                'name' => 'username',
-                'type' => Types::STRING,
-            ],
-            'valid' => [
-                'name' => 'valid',
-                'type' => Types::DATETIME_MUTABLE,
-            ],
-        ];
+        $this->columnConfig = $columnConfig ?: TableSchemaManager::getDefaultColumnConfig();
     }
 
     /**
@@ -138,6 +49,22 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     private function getColumnName(string $alias): string
     {
         return $this->columnConfig[$alias]['name'] ?? $alias;
+    }
+
+    /**
+     * Get properly quoted column identifier by alias.
+     */
+    private function quoteColumnIdentifier(string $alias): string
+    {
+        return $this->connection->getDatabasePlatform()->quoteIdentifier($this->getColumnName($alias));
+    }
+
+    /**
+     * Get properly quoted table identifier.
+     */
+    private function quoteTableIdentifier(): string
+    {
+        return $this->connection->getDatabasePlatform()->quoteIdentifier($this->tableName);
     }
 
     /**
@@ -172,7 +99,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function get(string $refreshToken): ?RefreshTokenInterface
     {
         $qb = $this->query()
-            ->where($this->getColumnName('refreshToken').' = :refreshToken')
+            ->where($this->quoteColumnIdentifier('refreshToken').' = :refreshToken')
             ->setParameter('refreshToken', $refreshToken)
             ->setMaxResults(1);
 
@@ -187,10 +114,10 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function getLastFromUsername(string $username): ?RefreshTokenInterface
     {
         $qb = $this->query()
-            ->where($this->getColumnName('username').' = :username')
+            ->where($this->quoteColumnIdentifier('username').' = :username')
             ->setParameter('username', $username)
             ->setMaxResults(1)
-            ->orderBy($this->getColumnName('valid'), 'DESC');
+            ->orderBy($this->quoteColumnIdentifier('valid'), 'DESC');
 
         $data = $qb->fetchAssociative();
         if (false === $data) {
@@ -202,7 +129,12 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
     public function save(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
     {
-        $token = $this->get($refreshToken->getRefreshToken());
+        $refreshTokenString = $refreshToken->getRefreshToken();
+        if (null === $refreshTokenString) {
+            throw new \InvalidArgumentException('Cannot save a refresh token without a token string.');
+        }
+
+        $token = $this->get($refreshTokenString);
 
         if (!$token instanceof RefreshTokenInterface) {
             $this->connection->createQueryBuilder()
@@ -225,7 +157,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 ->update($this->tableName)
                 ->set($this->getColumnName('username'), ':username')
                 ->set($this->getColumnName('valid'), ':valid')
-                ->where($this->getColumnName('refreshToken').' = :refresh_token')
+                ->where($this->quoteColumnIdentifier('refreshToken').' = :refresh_token')
                 ->setParameters([
                     'refresh_token' => $refreshToken->getRefreshToken(),
                     'username' => $refreshToken->getUsername(),
@@ -246,28 +178,30 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      */
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
-        return $this->connection->delete(
+        $result = $this->connection->delete(
             $this->tableName,
             [$this->getColumnName('refreshToken') => $refreshToken->getRefreshToken()]
         );
+
+        return (int) $result;
     }
 
     /**
      * Revokes all invalid (expired) refresh tokens in batches.
      *
-     * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
-     * @param ?positive-int      $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
-     * @param int                $offset    The offset to start processing from, defaults to 0
-     * @param bool               $andFlush  Whether to flush the object manager after revoking
+     * @param ?\DateTimeInterface $datetime  The date and time to consider for invalidation
+     * @param ?positive-int       $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
+     * @param int<0, max>         $offset    The offset to start processing from, defaults to 0
+     * @param bool                $andFlush  Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      *
-     * @throws Exception|Throwable
+     * @throws Exception|\Throwable
      */
-    public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array
+    public function revokeAllInvalidBatch(?\DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array
     {
         $batchSize ??= $this->defaultBatchSize;
-        $datetime ??= new DateTime();
+        $datetime ??= new \DateTime();
         $allRevokedData = [];
 
         $this->connection->beginTransaction();
@@ -278,8 +212,8 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 $this->connection->executeStatement(
                     sprintf(
                         'DELETE FROM %s WHERE %s IN (%s)',
-                        $this->tableName,
-                        $this->getColumnName('id'),
+                        $this->quoteTableIdentifier(),
+                        $this->quoteColumnIdentifier('id'),
                         implode(',', array_fill(0, count($ids), '?'))
                     ),
                     $ids
@@ -289,7 +223,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             }
 
             $this->connection->commit();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->connection->rollBack();
             throw $e;
         }
@@ -300,35 +234,34 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Revokes all invalid (expired) refresh tokens.
      *
-     * @param ?DateTimeInterface $datetime The date and time to consider for invalidation
-     * @param bool               $andFlush Whether to flush the object manager after revoking
+     * @param ?\DateTimeInterface $datetime The date and time to consider for invalidation
+     * @param bool                $andFlush Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      *
-     * @throws Exception|Throwable
+     * @throws Exception|\Throwable
      */
-    public function revokeAllInvalid(?DateTimeInterface $datetime = null, bool $andFlush = true): array
+    public function revokeAllInvalid(?\DateTimeInterface $datetime = null, bool $andFlush = true): array
     {
-        $datetime ??= new DateTime();
-        $platform = $this->connection->getDatabasePlatform();
+        $datetime ??= new \DateTime();
 
         $this->connection->beginTransaction();
         try {
             $invalidData = $this->query()
-                ->where($this->getColumnName('valid').' < :datetime')
+                ->where($this->quoteColumnIdentifier('valid').' < :datetime')
                 ->setParameter('datetime', $datetime, 'datetime')
                 ->fetchAllAssociative();
 
             if ([] !== $invalidData) {
                 $this->connection->createQueryBuilder()
                     ->delete($this->tableName)
-                    ->where($this->getColumnName('valid').' < :datetime')
+                    ->where($this->quoteColumnIdentifier('valid').' < :datetime')
                     ->setParameter('datetime', $datetime, 'datetime')
                     ->executeStatement();
             }
 
             $this->connection->commit();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->connection->rollBack();
             throw $e;
         }
@@ -356,15 +289,15 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      * @param positive-int $batchSize
      * @param int<0, max>  $offset
      *
-     * @return Generator<array<string, mixed>>
+     * @return \Generator<int, array<int, array<string, mixed>>>
      *
      * @throws Exception
      */
-    private function generateInvalidTokenBatches(DateTimeInterface $datetime, int $batchSize, int $offset): Generator
+    private function generateInvalidTokenBatches(\DateTimeInterface $datetime, int $batchSize, int $offset): \Generator
     {
         do {
             $qb = $this->query()
-                ->where($this->getColumnName('valid').' < :datetime')
+                ->where($this->quoteColumnIdentifier('valid').' < :datetime')
                 ->setParameter('datetime', $datetime, 'datetime')
                 ->setMaxResults($batchSize)
                 ->setFirstResult($offset);
@@ -383,11 +316,11 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     {
         return $this->connection->createQueryBuilder()
             ->select(
-                $this->getColumnName('id'),
-                $this->getColumnName('refreshToken'),
-                $this->getColumnName('username'),
-                $this->getColumnName('valid')
+                $this->quoteColumnIdentifier('id'),
+                $this->quoteColumnIdentifier('refreshToken'),
+                $this->quoteColumnIdentifier('username'),
+                $this->quoteColumnIdentifier('valid')
             )
-            ->from($this->tableName);
+            ->from($this->quoteTableIdentifier());
     }
 }

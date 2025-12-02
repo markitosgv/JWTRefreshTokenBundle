@@ -2,10 +2,10 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Doctrine\DBAL;
 
-use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -14,17 +14,23 @@ class RefreshTokenManagerTest extends TestCase
 {
     private Connection $connection;
     private RefreshTokenManager $manager;
+    private TableSchemaManager $schemaManager;
 
     protected function setUp(): void
     {
         $this->connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
+        $this->schemaManager = new TableSchemaManager(
+            $this->connection,
+            'refresh_tokens',
+            []
+        );
         $this->manager = new RefreshTokenManager(
             $this->connection,
             RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
             'refresh_tokens',
             RefreshToken::class
         );
-        $this->manager->createTable(true);
+        $this->schemaManager->createTable(true);
     }
 
     protected function tearDown(): void
@@ -37,7 +43,7 @@ class RefreshTokenManagerTest extends TestCase
         $token = new RefreshToken();
         $token->setRefreshToken('test-token-123');
         $token->setUsername('testuser');
-        $token->setValid(new DateTime('+1 hour'));
+        $token->setValid(new \DateTime('+1 hour'));
 
         $this->manager->save($token);
         $retrieved = $this->manager->get('test-token-123');
@@ -52,7 +58,7 @@ class RefreshTokenManagerTest extends TestCase
         $token = new RefreshToken();
         $token->setRefreshToken('delete-me');
         $token->setUsername('user');
-        $token->setValid(new DateTime('+1 hour'));
+        $token->setValid(new \DateTime('+1 hour'));
 
         $this->manager->save($token);
         $this->manager->delete($token);
@@ -65,13 +71,13 @@ class RefreshTokenManagerTest extends TestCase
         $valid = new RefreshToken();
         $valid->setRefreshToken('valid-token');
         $valid->setUsername('user1');
-        $valid->setValid(new DateTime('+1 hour'));
+        $valid->setValid(new \DateTime('+1 hour'));
         $this->manager->save($valid);
 
         $expired = new RefreshToken();
         $expired->setRefreshToken('expired-token');
         $expired->setUsername('user2');
-        $expired->setValid(new DateTime('-1 hour'));
+        $expired->setValid(new \DateTime('-1 hour'));
         $this->manager->save($expired);
 
         $revoked = $this->manager->revokeAllInvalid();
