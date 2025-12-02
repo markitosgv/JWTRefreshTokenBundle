@@ -24,6 +24,9 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
  */
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
+    /**
+     * @param array<string, mixed> $mergedConfig
+     */
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../config'));
@@ -50,6 +53,9 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         }
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     private function configureDBALManager(ContainerBuilder $container, array $config, PhpFileLoader $loader): void
     {
         $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
@@ -60,6 +66,9 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.columns', $config['dbal_columns']);
     }
 
+    /**
+     * @param array<string, mixed> $mergedConfig
+     */
     private function configureObjectManager(ContainerBuilder $container, array $mergedConfig, PhpFileLoader $loader): void
     {
         if (null !== $mergedConfig['object_manager']) {

@@ -26,7 +26,7 @@ use Doctrine\DBAL\Types\Types;
 final readonly class TableSchemaManager
 {
     /**
-     * @var array[]
+     * @var array<string, array{name: string, type: string}>
      */
     private array $columnConfig;
 
