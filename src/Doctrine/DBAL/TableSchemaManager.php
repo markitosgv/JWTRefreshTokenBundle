@@ -40,7 +40,7 @@ final readonly class TableSchemaManager
         private string $tableName,
         array $columnConfig
     ) {
-        $this->columnConfig = !empty($columnConfig) ? $columnConfig : $this->getDefaultColumnConfig();
+        $this->columnConfig = !empty($columnConfig) ? $columnConfig : self::getDefaultColumnConfig();
     }
 
     /**

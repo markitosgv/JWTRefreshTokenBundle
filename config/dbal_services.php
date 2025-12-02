@@ -15,7 +15,7 @@ return static function (ContainerConfigurator $container): void {
     //
     $services->set('gesdinet_jwt_refresh_token.dbal.table_schema_manager')
         ->class(TableSchemaManager::class)
-        ->public(false)
+        ->public()
         ->args([
             service('gesdinet_jwt_refresh_token.dbal.connection'),
             param('gesdinet_jwt_refresh_token.dbal.table_name'),
@@ -29,7 +29,7 @@ return static function (ContainerConfigurator $container): void {
     //
     $services->set('gesdinet_jwt_refresh_token.refresh_token_manager')
         ->class(RefreshTokenManager::class)
-        ->public(true)
+        ->public()
         ->args([
             service('gesdinet_jwt_refresh_token.dbal.connection'),
             param('gesdinet_jwt_refresh_token.default_invalid_batch_size'),
@@ -45,7 +45,7 @@ return static function (ContainerConfigurator $container): void {
     //
     $services->set('gesdinet_jwt_refresh_token.ensure_table_exists_listener')
         ->class(EnsureTableExistsListener::class)
-        ->public(true)
+        ->public()
         ->args([
             service('gesdinet_jwt_refresh_token.dbal.table_schema_manager'),
             param('gesdinet_jwt_refresh_token.dbal.auto_create_table'),

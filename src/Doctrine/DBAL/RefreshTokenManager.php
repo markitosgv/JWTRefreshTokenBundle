@@ -294,7 +294,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             throw $e;
         }
 
-        return array_map(fn (array $data) => $this->hydrate($data), $allRevokedData);
+        return array_map($this->hydrate(...), $allRevokedData);
     }
 
     /**
@@ -337,7 +337,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             return [];
         }
 
-        return array_map(fn (array $data) => $this->hydrate($data), $invalidData);
+        return array_map($this->hydrate(...), $invalidData);
     }
 
     /**
