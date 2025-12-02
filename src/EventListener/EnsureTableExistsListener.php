@@ -64,16 +64,20 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
             $this->schemaManager->createTableIfNotExists();
 
             // Try to write cache file - improves performance on subsequent requests
-            // Silently fails on immutable deploys or read-only filesystems
+            // Fails silently on immutable deploys or read-only filesystems
             try {
                 $this->cache->write('<?php // Refresh tokens table created');
-            } catch (\Exception $cacheException) {
-                // Cache write failed (read-only FS, immutable deploy, etc.)
-                // This is fine - we just won't benefit from the cache optimization
+            } catch (\RuntimeException|\InvalidArgumentException $cacheException) {
+                // Cache write failed - likely read-only filesystem or immutable deploy
+                // This is acceptable - we just won't benefit from the cache optimization
             }
-        } catch (\Exception $e) {
-            // Silently fail - table might exist or user doesn't have permissions
-            // This is similar to how Symfony Messenger handles transport creation
+        } catch (\Throwable $e) {
+            // Table creation failed - could be:
+            // - Table already exists (race condition with another process)
+            // - Insufficient permissions
+            // - Connection issues
+            // Similar to how Symfony Messenger handles transport creation
+            // If the table truly doesn't exist, the next request will fail with a clear error
         }
     }
 }
