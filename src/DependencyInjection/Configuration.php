@@ -66,6 +66,7 @@ final class Configuration implements ConfigurationInterface
                     ->info('Automatically create the refresh tokens table if it does not exist (like Symfony Messenger)')
                 ->end()
                 ->arrayNode('dbal_columns')
+                    ->defaultValue([])
                     ->useAttributeAsKey('alias')
                     ->arrayPrototype()
                         ->children()
