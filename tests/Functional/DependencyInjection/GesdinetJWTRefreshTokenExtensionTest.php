@@ -98,11 +98,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
     public function test_throws_exception_when_dbal_connection_does_not_exist(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('The DBAL connection service "nonexistent_connection" does not exist');
-        $this->expectExceptionMessage('Please ensure you have');
-        $this->expectExceptionMessage('Installed doctrine/dbal and doctrine/doctrine-bundle');
-        $this->expectExceptionMessage('Configured Doctrine DBAL in your config/packages/doctrine.yaml');
-        $this->expectExceptionMessage('Used a valid connection name (e.g., "doctrine.dbal.default_connection")');
+        $this->expectExceptionMessageMatches('/The DBAL connection service "nonexistent_connection" does not exist.*Please ensure you have.*Installed doctrine\/dbal and doctrine\/doctrine-bundle.*Configured Doctrine DBAL in your config\/packages\/doctrine\.yaml.*Used a valid connection name \(e\.g\., "doctrine\.dbal\.default_connection"\)/s');
 
         $this->load([
             'refresh_token_class' => RefreshTokenEntity::class,
