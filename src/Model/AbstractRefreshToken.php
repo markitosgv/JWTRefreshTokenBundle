@@ -42,7 +42,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
 
         $model = new static();
         $model->setRefreshToken($refreshToken);
-        // @phpstan-ignore method.notFound, function.alreadyNarrowedType (Backward compatibility with Symfony <5.3)
+        // @phpstan-ignore method.notFound (Backward compatibility with Symfony <5.3)
         $model->setUsername(method_exists($user, 'getUserIdentifier') ? $user->getUserIdentifier() : $user->getUsername());
         $model->setValid($valid);
 
