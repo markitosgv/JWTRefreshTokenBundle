@@ -118,7 +118,7 @@ final class Configuration implements ConfigurationInterface
                 ->integerNode('default_invalid_batch_size')
                     ->defaultValue(RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE)
                     ->info('The default batch size when clearing invalid tokens')
-                    ->min(0)
+                    ->min(1)
                 ->end()
             ->end()
             ->validate()
