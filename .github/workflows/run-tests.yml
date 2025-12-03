@@ -14,6 +14,11 @@ jobs:
         composer-flags: ['--prefer-stable']
         can-fail: [false]
         extensions: ['curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip']
+        exclude:
+          - php: '8.2'
+            symfony: '8.0.*'
+          - php: '8.3'
+            symfony: '8.0.*'
         include:
           - php: '8.2'
             symfony: '6.4.*'
