@@ -30,7 +30,9 @@ final class EnsureTableExistsListenerTest extends TestCase
         );
         $this->logger = new TestLogger();
         $this->cacheDir = sys_get_temp_dir().'/jwt_test_'.uniqid();
-        @mkdir($this->cacheDir, 0777, true);
+        if (!is_dir($this->cacheDir)) {
+            mkdir($this->cacheDir, 0777, true);
+        }
     }
 
     protected function tearDown(): void
