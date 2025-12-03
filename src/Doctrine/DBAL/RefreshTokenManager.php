@@ -88,7 +88,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             $object->refreshToken = $data[$columnConfig['refreshToken']['name']] ?? $data['refresh_token'] ?? null;
             $object->username = $data[$columnConfig['username']['name']] ?? $data['username'] ?? null;
             $object->valid = $conn->convertToPHPValue($data[$columnConfig['valid']['name']] ?? $data['valid'] ?? null, $columnConfig['valid']['type'] ?? 'datetime');
-        }, null, $class);
+        }, null, AbstractRefreshToken::class);
 
         $hydrator($instance, $data);
 
