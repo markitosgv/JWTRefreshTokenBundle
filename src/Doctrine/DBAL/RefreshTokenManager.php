@@ -14,7 +14,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Generator;
 use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -27,18 +26,18 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     private array $columnConfig;
 
     /**
-     * @param positive-int                                     $defaultBatchSize
-     * @param Connection                                       $connection       DBAL connection
-     * @param string                                           $tableName        Name of the refresh tokens table
-     * @param class-string<RefreshTokenInterface>              $class            Fully qualified class name for refresh token instances
-     * @param array<string, array{name: string, type: string}> $columnConfig     Map of aliases to column configuration ['alias' => ['name' => 'column_name', 'type' => Types::STRING]]
+     * @param Connection $connection DBAL connection
+     * @param positive-int $defaultBatchSize
+     * @param string $tableName Name of the refresh tokens table
+     * @param class-string<RefreshTokenInterface> $class Fully qualified class name for refresh token instances
+     * @param array<string, array{name: string, type: string}> $columnConfig Map of aliases to column configuration ['alias' => ['name' => 'column_name', 'type' => Types::STRING]]
      */
     public function __construct(
         private Connection $connection,
-        private int $defaultBatchSize,
-        private string $tableName,
-        private string $class,
-        array $columnConfig = []
+        private int        $defaultBatchSize,
+        private string     $tableName,
+        private string     $class,
+        array              $columnConfig = []
     ) {
         $this->columnConfig = $columnConfig ?: TableSchemaManager::getDefaultColumnConfig();
     }
@@ -99,7 +98,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function get(string $refreshToken): ?RefreshTokenInterface
     {
         $qb = $this->query()
-            ->where($this->quoteColumnIdentifier('refreshToken').' = :refreshToken')
+            ->where($this->quoteColumnIdentifier('refreshToken') . ' = :refreshToken')
             ->setParameter('refreshToken', $refreshToken)
             ->setMaxResults(1);
 
@@ -114,7 +113,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function getLastFromUsername(string $username): ?RefreshTokenInterface
     {
         $qb = $this->query()
-            ->where($this->quoteColumnIdentifier('username').' = :username')
+            ->where($this->quoteColumnIdentifier('username') . ' = :username')
             ->setParameter('username', $username)
             ->setMaxResults(1)
             ->orderBy($this->quoteColumnIdentifier('valid'), 'DESC');
@@ -157,7 +156,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 ->update($this->tableName)
                 ->set($this->getColumnName('username'), ':username')
                 ->set($this->getColumnName('valid'), ':valid')
-                ->where($this->quoteColumnIdentifier('refreshToken').' = :refresh_token')
+                ->where($this->quoteColumnIdentifier('refreshToken') . ' = :refresh_token')
                 ->setParameters([
                     'refresh_token' => $refreshToken->getRefreshToken(),
                     'username' => $refreshToken->getUsername(),
@@ -183,16 +182,16 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             [$this->getColumnName('refreshToken') => $refreshToken->getRefreshToken()]
         );
 
-        return (int) $result;
+        return (int)$result;
     }
 
     /**
      * Revokes all invalid (expired) refresh tokens in batches.
      *
-     * @param ?\DateTimeInterface $datetime  The date and time to consider for invalidation
-     * @param ?positive-int       $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
-     * @param int<0, max>         $offset    The offset to start processing from, defaults to 0
-     * @param bool                $andFlush  Whether to flush the object manager after revoking
+     * @param ?\DateTimeInterface $datetime The date and time to consider for invalidation
+     * @param ?positive-int $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
+     * @param int<0, max> $offset The offset to start processing from, defaults to 0
+     * @param bool $andFlush Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      *
@@ -208,6 +207,10 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         try {
             foreach ($this->generateInvalidTokenBatches($datetime, $batchSize, $offset) as $batchData) {
                 $ids = array_column($batchData, $this->getColumnName('id'));
+
+                if ([] === $ids) {
+                    continue;
+                }
 
                 $this->connection->executeStatement(
                     sprintf(
@@ -235,7 +238,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      * Revokes all invalid (expired) refresh tokens.
      *
      * @param ?\DateTimeInterface $datetime The date and time to consider for invalidation
-     * @param bool                $andFlush Whether to flush the object manager after revoking
+     * @param bool $andFlush Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
      *
@@ -248,14 +251,14 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         $this->connection->beginTransaction();
         try {
             $invalidData = $this->query()
-                ->where($this->quoteColumnIdentifier('valid').' < :datetime')
+                ->where($this->quoteColumnIdentifier('valid') . ' < :datetime')
                 ->setParameter('datetime', $datetime, 'datetime')
                 ->fetchAllAssociative();
 
             if ([] !== $invalidData) {
                 $this->connection->createQueryBuilder()
                     ->delete($this->tableName)
-                    ->where($this->quoteColumnIdentifier('valid').' < :datetime')
+                    ->where($this->quoteColumnIdentifier('valid') . ' < :datetime')
                     ->setParameter('datetime', $datetime, 'datetime')
                     ->executeStatement();
             }
@@ -286,8 +289,11 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Generator that yields batches of invalid token data without hydration.
      *
+     * After each batch is deleted, records shift down, so we always fetch from the same offset.
+     * The initial offset parameter allows starting from a specific position if needed.
+     *
      * @param positive-int $batchSize
-     * @param int<0, max>  $offset
+     * @param int<0, max>  $offset Starting offset for the first batch
      *
      * @return \Generator<int, array<int, array<string, mixed>>>
      *
@@ -297,7 +303,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     {
         do {
             $qb = $this->query()
-                ->where($this->quoteColumnIdentifier('valid').' < :datetime')
+                ->where($this->quoteColumnIdentifier('valid') . ' < :datetime')
                 ->setParameter('datetime', $datetime, 'datetime')
                 ->setMaxResults($batchSize)
                 ->setFirstResult($offset);
@@ -308,7 +314,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
                 yield $results;
             }
 
-            $offset += $batchSize;
+            // Don't increment offset - after deletion, remaining records shift to fill the gap
         } while ([] !== $results);
     }
 
