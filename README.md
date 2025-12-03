@@ -1,13 +1,12 @@
 JWTRefreshTokenBundle
 =====================
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/markitosgv/JWTRefreshTokenBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/markitosgv/JWTRefreshTokenBundle/?branch=master)
 [![Run Tests](https://github.com/markitosgv/JWTRefreshTokenBundle/workflows/Run%20Tests/badge.svg?branch=master)](https://github.com/markitosgv/JWTRefreshTokenBundle/actions)
-[![Code Coverage](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/gesdinet/JWTRefreshTokenBundle/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/markitosgv/JWTRefreshTokenBundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/markitosgv/JWTRefreshTokenBundle/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
-[![StyleCI](https://styleci.io/repos/42582199/shield)](https://styleci.io/repos/42582199)
 
 The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle). Supports Doctrine ORM/ODM.
 
