@@ -5,3 +5,4 @@ composer.lock
 /phpunit.xml
 /coverage.xml
 /coverage/
+.php-cs-fixer.cache
