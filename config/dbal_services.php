@@ -51,6 +51,7 @@ return static function (ContainerConfigurator $container): void {
             param('gesdinet_jwt_refresh_token.dbal.auto_create_table'),
             param('kernel.cache_dir'),
             param('kernel.debug'),
+            service('logger')->nullOnInvalid(),
         ])
         ->tag('kernel.event_subscriber');
 };

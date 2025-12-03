@@ -12,6 +12,8 @@
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -26,13 +28,16 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final class EnsureTableExistsListener implements EventSubscriberInterface
 {
     private ?ConfigCache $cache = null;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
         private readonly TableSchemaManager $schemaManager,
         private readonly bool $autoCreateTable,
         private readonly string $cacheDir,
-        private readonly bool $debug = false
+        private readonly bool $debug = false,
+        ?LoggerInterface $logger = null
     ) {
+        $this->logger = $logger ?? new NullLogger();
     }
 
     public static function getSubscribedEvents(): array
@@ -73,11 +78,18 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
             }
         } catch (\Throwable $e) {
             // Table creation failed - could be:
-            // - Table already exists (race condition with another process)
             // - Insufficient permissions
             // - Connection issues
+            // - Schema introspection errors
             // Similar to how Symfony Messenger handles transport creation
             // If the table truly doesn't exist, the next request will fail with a clear error
+            $this->logger->error(
+                'Failed to auto-create refresh tokens table: {error}',
+                [
+                    'error' => $e->getMessage(),
+                    'exception' => $e,
+                ]
+            );
         }
     }
 }
