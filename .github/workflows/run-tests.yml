@@ -62,3 +62,14 @@ jobs:
         run: bin/phpunit
         env:
           DOCTRINE_MONGODB_SERVER: ${{ steps.setup-mongodb.outputs.cluster-uri }}
+
+  lint:
+    runs-on: 'ubuntu-22.04'
+    name: 'Markdown Linting'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run markdownlint
+        uses: articulate/actions-markdownlint@v1
