@@ -6,8 +6,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\EnsureTableExistsListener;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\TestLogger;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -203,65 +203,5 @@ final class EnsureTableExistsListenerTest extends TestCase
         $request = Request::create('/');
 
         return new RequestEvent($kernel, $request, $requestType);
-    }
-}
-
-/**
- * Simple test logger to capture log messages.
- */
-final class TestLogger implements LoggerInterface
-{
-    /**
-     * @var array<int, array{level: string, message: string, context: array<string, mixed>}>
-     */
-    public array $logs = [];
-
-    public function emergency(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::EMERGENCY, $message, $context);
-    }
-
-    public function alert(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::ALERT, $message, $context);
-    }
-
-    public function critical(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::CRITICAL, $message, $context);
-    }
-
-    public function error(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::ERROR, $message, $context);
-    }
-
-    public function warning(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::WARNING, $message, $context);
-    }
-
-    public function notice(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::NOTICE, $message, $context);
-    }
-
-    public function info(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::INFO, $message, $context);
-    }
-
-    public function debug(\Stringable|string $message, array $context = []): void
-    {
-        $this->log(LogLevel::DEBUG, $message, $context);
-    }
-
-    public function log($level, \Stringable|string $message, array $context = []): void
-    {
-        $this->logs[] = [
-            'level' => $level,
-            'message' => (string) $message,
-            'context' => $context,
-        ];
     }
 }
