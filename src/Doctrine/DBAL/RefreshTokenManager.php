@@ -95,6 +95,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         return $instance;
     }
 
+    #[\Override]
     public function get(string $refreshToken): ?RefreshTokenInterface
     {
         $qb = $this->query()
@@ -110,6 +111,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         return $this->hydrate($data);
     }
 
+    #[\Override]
     public function getLastFromUsername(string $username): ?RefreshTokenInterface
     {
         $qb = $this->query()
@@ -125,7 +127,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
         return $this->hydrate($data);
     }
-
+    #[\Override]
     public function save(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
     {
         $refreshTokenString = $refreshToken->getRefreshToken();
@@ -175,6 +177,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @throws Exception
      */
+    #[\Override]
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
         $result = $this->connection->delete(
@@ -197,6 +200,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @throws Exception|\Throwable
      */
+    #[\Override]
     public function revokeAllInvalidBatch(?\DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array
     {
         $batchSize ??= $this->defaultBatchSize;
@@ -244,6 +248,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @throws Exception|\Throwable
      */
+    #[\Override]
     public function revokeAllInvalid(?\DateTimeInterface $datetime = null, bool $andFlush = true): array
     {
         $datetime ??= new \DateTime();
@@ -281,6 +286,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @return class-string<RefreshTokenInterface>
      */
+    #[\Override]
     public function getClass(): string
     {
         return $this->class;
