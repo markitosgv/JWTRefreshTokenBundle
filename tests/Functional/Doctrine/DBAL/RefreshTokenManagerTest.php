@@ -133,7 +133,7 @@ class RefreshTokenManagerTest extends TestCase
     public function testRevokeAllInvalidBatchWithSingleBatch(): void
     {
         // Create 3 expired tokens and 2 valid tokens
-        for ($i = 1; $i <= 3; $i++) {
+        for ($i = 1; $i <= 3; ++$i) {
             $expired = new RefreshToken();
             $expired->setRefreshToken("expired-{$i}");
             $expired->setUsername("user{$i}");
@@ -141,7 +141,7 @@ class RefreshTokenManagerTest extends TestCase
             $this->manager->save($expired);
         }
 
-        for ($i = 1; $i <= 2; $i++) {
+        for ($i = 1; $i <= 2; ++$i) {
             $valid = new RefreshToken();
             $valid->setRefreshToken("valid-{$i}");
             $valid->setUsername("validuser{$i}");
@@ -167,7 +167,7 @@ class RefreshTokenManagerTest extends TestCase
     public function testRevokeAllInvalidBatchWithMultipleBatches(): void
     {
         // Create 10 expired tokens
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 10; ++$i) {
             $expired = new RefreshToken();
             $expired->setRefreshToken("expired-{$i}");
             $expired->setUsername("user{$i}");
@@ -176,7 +176,7 @@ class RefreshTokenManagerTest extends TestCase
         }
 
         // Create 3 valid tokens
-        for ($i = 1; $i <= 3; $i++) {
+        for ($i = 1; $i <= 3; ++$i) {
             $valid = new RefreshToken();
             $valid->setRefreshToken("valid-{$i}");
             $valid->setUsername("validuser{$i}");
@@ -190,12 +190,12 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertCount(10, $revoked, 'Should revoke all 10 expired tokens across multiple batches');
 
         // Verify all valid tokens remain
-        for ($i = 1; $i <= 3; $i++) {
+        for ($i = 1; $i <= 3; ++$i) {
             $this->assertNotNull($this->manager->get("valid-{$i}"));
         }
 
         // Verify all expired tokens are gone
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 10; ++$i) {
             $this->assertNull($this->manager->get("expired-{$i}"));
         }
 
@@ -207,7 +207,7 @@ class RefreshTokenManagerTest extends TestCase
     public function testRevokeAllInvalidBatchWithNoExpiredTokens(): void
     {
         // Create only valid tokens
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 5; ++$i) {
             $valid = new RefreshToken();
             $valid->setRefreshToken("valid-{$i}");
             $valid->setUsername("user{$i}");
@@ -260,7 +260,7 @@ class RefreshTokenManagerTest extends TestCase
     public function testRevokeAllInvalidBatchWithOffset(): void
     {
         // Create 10 expired tokens
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 10; ++$i) {
             $expired = new RefreshToken();
             $expired->setRefreshToken("expired-{$i}");
             $expired->setUsername("user{$i}");
@@ -275,12 +275,12 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertCount(5, $revoked, 'Should revoke 5 tokens starting from offset 5');
 
         // Verify first 5 tokens still exist
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 5; ++$i) {
             $this->assertNotNull($this->manager->get("expired-{$i}"), "Token expired-{$i} should still exist");
         }
 
         // Verify last 5 tokens are deleted
-        for ($i = 6; $i <= 10; $i++) {
+        for ($i = 6; $i <= 10; ++$i) {
             $this->assertNull($this->manager->get("expired-{$i}"), "Token expired-{$i} should be deleted");
         }
     }
@@ -288,7 +288,7 @@ class RefreshTokenManagerTest extends TestCase
     public function testRevokeAllInvalidBatchRethrowsExceptionsOnDatabaseError(): void
     {
         // Create some expired tokens
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 5; ++$i) {
             $expired = new RefreshToken();
             $expired->setRefreshToken("expired-{$i}");
             $expired->setUsername("user{$i}");

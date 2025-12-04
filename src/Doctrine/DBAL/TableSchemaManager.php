@@ -85,13 +85,13 @@ final readonly class TableSchemaManager
 
             $column = $table->addColumn($columnName, $columnType);
 
-            if ($alias === 'id') {
+            if ('id' === $alias) {
                 $column->setAutoincrement(true)->setNotnull(true);
-            } elseif ($alias === 'refreshToken') {
+            } elseif ('refreshToken' === $alias) {
                 $column->setLength(255)->setNotnull(true);
-            } elseif ($alias === 'username') {
+            } elseif ('username' === $alias) {
                 $column->setLength(255)->setNotnull(true);
-            } elseif ($alias === 'valid') {
+            } elseif ('valid' === $alias) {
                 $column->setNotnull(true);
             }
         }
