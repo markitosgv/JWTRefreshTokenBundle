@@ -21,6 +21,19 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 final class Configuration implements ConfigurationInterface
 {
+    /**
+     * Validates that a string is a valid SQL identifier.
+     *
+     * Valid SQL identifiers must start with a letter or underscore and contain
+     * only letters, numbers, and underscores. This prevents potential SQL injection
+     * risks and ensures compatibility across database platforms.
+     */
+    private static function isValidSqlIdentifier(string $identifier): bool
+    {
+        // Must start with letter or underscore, contain only alphanumeric and underscores
+        return 1 === preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $identifier);
+    }
+
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('gesdinet_jwt_refresh_token');
@@ -60,6 +73,10 @@ final class Configuration implements ConfigurationInterface
                 ->scalarNode('dbal_table_name')
                     ->defaultValue('refresh_tokens')
                     ->info('The table name for refresh tokens when using DBAL')
+                    ->validate()
+                        ->ifTrue(static fn ($v): bool => !self::isValidSqlIdentifier($v))
+                        ->thenInvalid('The "dbal_table_name" must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
+                    ->end()
                 ->end()
                 ->booleanNode('dbal_auto_create_table')
                     ->defaultTrue()
@@ -74,6 +91,10 @@ final class Configuration implements ConfigurationInterface
                                 ->isRequired()
                                 ->cannotBeEmpty()
                                 ->info('The actual column name in the database')
+                                ->validate()
+                                    ->ifTrue(static fn ($v): bool => !self::isValidSqlIdentifier($v))
+                                    ->thenInvalid('The column name must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
+                                ->end()
                             ->end()
                             ->scalarNode('type')
                                 ->isRequired()

@@ -164,4 +164,119 @@ final class ConfigurationTest extends TestCase
             ],
         ]);
     }
+
+    public function test_dbal_table_name_with_invalid_sql_identifier_is_rejected(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_table_name' => 'tokens; DROP TABLE users--',
+                ],
+            ],
+            'must be a valid SQL identifier'
+        );
+    }
+
+    public function test_dbal_table_name_starting_with_number_is_rejected(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_table_name' => '123_tokens',
+                ],
+            ],
+            'must be a valid SQL identifier'
+        );
+    }
+
+    public function test_dbal_table_name_with_special_characters_is_rejected(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_table_name' => 'tokens-with-dashes',
+                ],
+            ],
+            'must be a valid SQL identifier'
+        );
+    }
+
+    public function test_dbal_table_name_with_valid_underscores_and_numbers_is_accepted(): void
+    {
+        $this->assertConfigurationIsValid([
+            [
+                'refresh_token_class' => RefreshToken::class,
+                'dbal_connection' => 'doctrine.dbal.default_connection',
+                'dbal_table_name' => 'my_tokens_2024',
+            ],
+        ]);
+    }
+
+    public function test_dbal_column_name_with_invalid_sql_identifier_is_rejected(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_columns' => [
+                        'id' => ['name' => 'id; DROP TABLE--', 'type' => 'integer'],
+                    ],
+                ],
+            ],
+            'must be a valid SQL identifier'
+        );
+    }
+
+    public function test_dbal_column_name_starting_with_number_is_rejected(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_columns' => [
+                        'id' => ['name' => '1_id', 'type' => 'integer'],
+                    ],
+                ],
+            ],
+            'must be a valid SQL identifier'
+        );
+    }
+
+    public function test_dbal_column_name_with_special_characters_is_rejected(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_columns' => [
+                        'id' => ['name' => 'my-column', 'type' => 'integer'],
+                    ],
+                ],
+            ],
+            'must be a valid SQL identifier'
+        );
+    }
+
+    public function test_dbal_column_name_with_valid_underscores_and_numbers_is_accepted(): void
+    {
+        $this->assertConfigurationIsValid([
+            [
+                'refresh_token_class' => RefreshToken::class,
+                'dbal_connection' => 'doctrine.dbal.default_connection',
+                'dbal_columns' => [
+                    'id' => ['name' => 'my_column_2024', 'type' => 'integer'],
+                    'refreshToken' => ['name' => '_token', 'type' => 'string'],
+                ],
+            ],
+        ]);
+    }
 }
