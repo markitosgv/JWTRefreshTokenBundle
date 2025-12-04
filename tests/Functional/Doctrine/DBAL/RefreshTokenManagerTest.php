@@ -285,7 +285,7 @@ class RefreshTokenManagerTest extends TestCase
         }
     }
 
-    public function testRevokeAllInvalidBatchTransactionRollbackOnError(): void
+    public function testRevokeAllInvalidBatchRethrowsExceptionsOnDatabaseError(): void
     {
         // Create some expired tokens
         for ($i = 1; $i <= 5; $i++) {
@@ -299,30 +299,9 @@ class RefreshTokenManagerTest extends TestCase
         // Close the connection to simulate a database error during batch processing
         $this->connection->close();
 
-        try {
-            $this->manager->revokeAllInvalidBatch();
-            $this->fail('Should have thrown an exception due to closed connection');
-        } catch (\Throwable $e) {
-            // Exception is expected
-            $this->assertInstanceOf(\Throwable::class, $e);
-        }
-
-        // Reconnect to verify rollback (tokens should still exist)
-        $this->connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
-        $this->schemaManager = new TableSchemaManager($this->connection, 'refresh_tokens', []);
-        $this->manager = new RefreshTokenManager(
-            $this->connection,
-            RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
-            'refresh_tokens',
-            RefreshToken::class
-        );
-
-        // Recreate table since we're using in-memory SQLite
-        $this->schemaManager->createTable(true);
-
-        // Note: In-memory SQLite loses data on disconnect, so we can't verify rollback
-        // This test primarily verifies that exceptions are properly caught and rethrown
-        $this->assertTrue(true, 'Transaction rollback handling works correctly');
+        // Verify that exceptions are properly caught and rethrown
+        $this->expectException(\Throwable::class);
+        $this->manager->revokeAllInvalidBatch();
     }
 
     public function testRevokeAllInvalidBatchReturnsHydratedObjects(): void
