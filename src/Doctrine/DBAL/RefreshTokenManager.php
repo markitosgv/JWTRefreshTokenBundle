@@ -127,6 +127,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
         return $this->hydrate($data);
     }
+
     #[\Override]
     public function save(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
     {
