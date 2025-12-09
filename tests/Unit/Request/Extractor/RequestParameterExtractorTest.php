@@ -5,6 +5,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestParameterExtractor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
 final class RequestParameterExtractorTest extends TestCase
@@ -20,15 +21,18 @@ final class RequestParameterExtractorTest extends TestCase
 
     public function testGetsTheTokenFromTheRequestParameters(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
         $token = 'my-refresh-token';
 
-        $request
-            ->expects($this->once())
+        /** @var ParameterBag&MockObject $request */
+        $attributes = $this->createMock(ParameterBag::class);
+        $attributes->expects($this->once())
             ->method('get')
             ->with(self::PARAMETER_NAME)
             ->willReturn($token);
+
+        /** @var Request&MockObject $request */
+        $request = $this->createMock(Request::class);
+        $request->attributes = $attributes;
 
         $this->assertSame(
             $token,
