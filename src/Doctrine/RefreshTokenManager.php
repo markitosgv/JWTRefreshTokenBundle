@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
@@ -71,6 +72,20 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
+     * Wrapper around DQL deletion so that ObjectManager can be cast to EntityManagerInterface.
+     *
+     * @return int Number of rows deleted
+     */
+    private function deleteById(\Doctrine\ORM\EntityManagerInterface $entityManager, int $id): int
+    {
+        $q = $entityManager->createQuery(sprintf('DELETE FROM %s rt WHERE rt.id = :id', RefreshToken::class));
+        $q->setParameter('id', $id);
+        $numDeleted = $q->execute();
+
+        return $numDeleted;
+    }
+
+    /**
      * Deletes the given refresh token and returns the number of rows affected.
      *
      * @return int Number of rows deleted (should be 1 if deleted, 0 if not found)
@@ -78,28 +93,19 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
         // Use DQL if this is an ORM EntityManager
-        if (
-            $this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface ||
-            (is_object($this->objectManager) && str_contains(get_class($this->objectManager), 'MockObject_ObjectManager'))
-        ) {
+        if ($this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface) {
             $repository = $this->objectManager->getRepository($this->class);
 
             if (!$repository instanceof RefreshTokenRepositoryInterface) {
                 throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, RefreshTokenRepositoryInterface::class));
             }
 
-            if ($repository->findOneBy(['id' => $refreshToken->getId()])) {
-                // If the refresh token is found, we can proceed with deletion
-                $this->objectManager->remove($refreshToken);
-
-                if ($andFlush) {
-                    $this->objectManager->flush();
-                }
-
-                return 1; // One row deleted
-            } else {
-                return 0;
+            $numDeleted = $this->deleteById($this->objectManager, $refreshToken->getId());
+            if ($andFlush) {
+                $this->objectManager->flush();
             }
+
+            return $numDeleted;
         }
 
         // Remove and flush the entity

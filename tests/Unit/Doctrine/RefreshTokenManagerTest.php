@@ -2,6 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Doctrine;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
@@ -20,7 +22,11 @@ class RefreshTokenManagerTest extends TestCase
 
     private MockObject&ObjectManager $objectManager;
 
+    private MockObject&EntityManagerInterface $entityManager;
+
     private RefreshTokenManager $refreshTokenManager;
+
+    private RefreshTokenManager $refreshTokenManagerAlt;
 
     protected function setUp(): void
     {
@@ -48,6 +54,33 @@ class RefreshTokenManagerTest extends TestCase
 
         $this->refreshTokenManager = new RefreshTokenManager(
             $this->objectManager,
+            static::REFRESH_TOKEN_ENTITY_CLASS,
+            RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
+        );
+
+        // alt setup for EntityManagerInterface (subclass of ObjectManager), required in testDeletesTheRefreshTokenAndFlushesTheObjectManager()
+        $classMetadataAlt = $this->createMock(\Doctrine\ORM\Mapping\ClassMetadata::class);
+        $classMetadataAlt
+            ->expects($this->once())
+            ->method('getName')
+            ->willReturn(static::REFRESH_TOKEN_ENTITY_CLASS);
+
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        // Allow getRepository to be called any number of times with the expected argument
+        $this->entityManager
+            ->expects($this->any())
+            ->method('getRepository')
+            ->with(static::REFRESH_TOKEN_ENTITY_CLASS)
+            ->willReturn($this->repository);
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getClassMetadata')
+            ->with(static::REFRESH_TOKEN_ENTITY_CLASS)
+            ->willReturn($classMetadataAlt);
+
+        $this->refreshTokenManagerAlt = new RefreshTokenManager(
+            $this->entityManager,
             static::REFRESH_TOKEN_ENTITY_CLASS,
             RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
         );
@@ -132,26 +165,29 @@ class RefreshTokenManagerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $query = $this->getMockBuilder(Query::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $query
+            ->method('execute')
+            ->willReturn(1);
+
         // Simula que el refreshToken tiene un id
         $refreshToken
             ->method('getId')
             ->willReturn(123);
 
-        $this->repository
-            ->method('findOneBy')
-            ->with(['id' => $refreshToken->getId()])
-            ->willReturn($refreshToken);
-
-        $this->objectManager
+        $this->entityManager
             ->expects($this->once())
-            ->method('remove')
-            ->with($refreshToken);
+            ->method('createQuery')
+            ->willReturn($query);
 
-        $this->objectManager
+        $this->entityManager
             ->expects($this->once())
             ->method('flush');
 
-        $result = $this->refreshTokenManager->delete($refreshToken, true);
+        $result = $this->refreshTokenManagerAlt->delete($refreshToken, true);
         $this->assertSame(1, $result);
     }
 
