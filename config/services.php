@@ -22,74 +22,94 @@ use Lexik\Bundle\JWTAuthenticationBundle\Events;
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
-    $services->set('gesdinet_jwt_refresh_token.event_listener.attach_refresh_token')
+    $vendor = 'gesdinet_jwt_refresh_token';
+
+    $refreshTokenTtl = param($vendor.'.ttl');
+    $tokenParameterName = param($vendor.'.token_parameter_name');
+    $singleUse = param($vendor.'.single_use');
+    $cookie = param($vendor.'.cookie');
+    $returnExpiration = param($vendor.'.return_expiration');
+    $returnExpirationParameterName = param($vendor.'.return_expiration_parameter_name');
+    $defaultInvalidBatchSize = param($vendor.'.default_invalid_batch_size');
+    $refreshTokenClass = param($vendor.'.refresh_token.class');
+
+    $services->set($vendor.'.event_listener.attach_refresh_token')
         ->class(AttachRefreshTokenOnSuccessListener::class)
         ->args([
-            service('gesdinet_jwt_refresh_token.refresh_token_manager'),
-            param('gesdinet_jwt_refresh_token.ttl'),
+            service($vendor.'.refresh_token_manager'),
+            $refreshTokenTtl,
             service('request_stack'),
-            param('gesdinet_jwt_refresh_token.token_parameter_name'),
-            param('gesdinet_jwt_refresh_token.single_use'),
-            service('gesdinet_jwt_refresh_token.refresh_token_generator'),
-            service('gesdinet_jwt_refresh_token.request.extractor.chain'),
-            param('gesdinet_jwt_refresh_token.cookie'),
-            param('gesdinet_jwt_refresh_token.return_expiration'),
-            param('gesdinet_jwt_refresh_token.return_expiration_parameter_name'),
+            $tokenParameterName,
+            $singleUse,
+            service($vendor.'.refresh_token_generator'),
+            service($vendor.'.request.extractor.chain'),
+            $cookie,
+            $returnExpiration,
+            $returnExpirationParameterName,
         ])
         ->tag('kernel.event_listener', [
             'event' => Events::AUTHENTICATION_SUCCESS,
             'method' => 'attachRefreshToken',
         ]);
 
-    $services->set('gesdinet_jwt_refresh_token.refresh_token_generator')
+    $services->set($vendor.'.refresh_token_generator')
         ->class(RefreshTokenGenerator::class)
         ->public()
         ->args([
-            service('gesdinet_jwt_refresh_token.refresh_token_manager'),
+            service($vendor.'.refresh_token_manager'),
         ]);
 
-    $services->alias(RefreshTokenGeneratorInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_generator');
+    $services->alias(RefreshTokenGeneratorInterface::class, $vendor.'.refresh_token_generator');
 
-    $services->alias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
+    $services->set($vendor.'.refresh_token_manager')
+        ->class(RefreshTokenManager::class)
+        ->public()
+        ->args([
+            service($vendor.'.object_manager'),
+            $refreshTokenClass,
+            $defaultInvalidBatchSize,
+        ]);
 
-    $services->set('gesdinet_jwt_refresh_token.request.extractor.chain')
+    $services->alias(RefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
+
+    $services->set($vendor.'.request.extractor.chain')
         ->class(ChainExtractor::class)
         ->public();
 
-    $services->alias(ExtractorInterface::class, 'gesdinet_jwt_refresh_token.request.extractor.chain');
+    $services->alias(ExtractorInterface::class, $vendor.'.request.extractor.chain');
 
-    $services->set('gesdinet_jwt_refresh_token.request.extractor.request_body')
+    $services->set($vendor.'.request.extractor.request_body')
         ->class(RequestBodyExtractor::class)
-        ->tag('gesdinet_jwt_refresh_token.request_extractor');
+        ->tag($vendor.'.request_extractor');
 
-    $services->set('gesdinet_jwt_refresh_token.request.extractor.request_parameter')
+    $services->set($vendor.'.request.extractor.request_parameter')
         ->class(RequestParameterExtractor::class)
-        ->tag('gesdinet_jwt_refresh_token.request_extractor');
+        ->tag($vendor.'.request_extractor');
 
-    $services->set('gesdinet_jwt_refresh_token.request.extractor.request_cookie')
+    $services->set($vendor.'.request.extractor.request_cookie')
         ->class(RequestCookieExtractor::class)
-        ->tag('gesdinet_jwt_refresh_token.request_extractor');
+        ->tag($vendor.'.request_extractor');
 
-    $services->set('gesdinet_jwt_refresh_token.security.authentication.failure_handler')
+    $services->set($vendor.'.security.authentication.failure_handler')
         ->class(AuthenticationFailureHandler::class)
         ->args([
             service('event_dispatcher'),
         ]);
 
-    $services->set('gesdinet_jwt_refresh_token.security.authentication.success_handler')
+    $services->set($vendor.'.security.authentication.success_handler')
         ->class(AuthenticationSuccessHandler::class)
         ->args([
             service('lexik_jwt_authentication.handler.authentication_success'),
             service('event_dispatcher'),
         ]);
 
-    $services->set('gesdinet_jwt_refresh_token.security.refresh_token_authenticator')
+    $services->set($vendor.'.security.refresh_token_authenticator')
         ->abstract()
         ->class(RefreshTokenAuthenticator::class)
         ->args([
-            service('gesdinet_jwt_refresh_token.refresh_token_manager'),
+            service($vendor.'.refresh_token_manager'),
             service('event_dispatcher'),
-            service('gesdinet_jwt_refresh_token.request.extractor.chain'),
+            service($vendor.'.request.extractor.chain'),
             abstract_arg('user provider'),
             abstract_arg('authentication success handler'),
             abstract_arg('authentication failure handler'),
@@ -99,24 +119,24 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set(ClearInvalidRefreshTokensCommand::class)
         ->args([
-            service('gesdinet_jwt_refresh_token.refresh_token_manager'),
-            param('gesdinet_jwt_refresh_token.default_invalid_batch_size'),
+            service($vendor.'.refresh_token_manager'),
+            $defaultInvalidBatchSize,
         ])
         ->tag('console.command');
 
     $services->set(RevokeRefreshTokenCommand::class)
         ->args([
-            service('gesdinet_jwt_refresh_token.refresh_token_manager'),
+            service($vendor.'.refresh_token_manager'),
         ])
         ->tag('console.command');
 
-    $services->set('gesdinet_jwt_refresh_token.security.listener.logout')
+    $services->set($vendor.'.security.listener.logout')
         ->abstract()
         ->class(LogoutEventListener::class)
         ->args([
-            service('gesdinet_jwt_refresh_token.refresh_token_manager'),
-            service('gesdinet_jwt_refresh_token.request.extractor.chain'),
-            param('gesdinet_jwt_refresh_token.token_parameter_name'),
-            param('gesdinet_jwt_refresh_token.cookie'),
+            service($vendor.'.refresh_token_manager'),
+            service($vendor.'.request.extractor.chain'),
+            $tokenParameterName,
+            $cookie,
         ]);
 };
