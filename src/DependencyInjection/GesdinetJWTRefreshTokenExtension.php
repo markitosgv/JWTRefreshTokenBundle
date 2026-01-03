@@ -16,7 +16,6 @@ use Doctrine\ORM\EntityManager;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
@@ -25,6 +24,9 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
  */
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
+    /**
+     * @param array<string, mixed> $mergedConfig
+     */
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../config'));
@@ -42,21 +44,39 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.refresh_token.class', $mergedConfig['refresh_token_class']);
         $container->setParameter('gesdinet_jwt_refresh_token.default_invalid_batch_size', $mergedConfig['default_invalid_batch_size']);
 
-        /*
-         * Configuration preference:
-         * - Explicitly configured "object_manager" node
-         * - Feature detection (ORM then MongoDB ODM)
-         */
-        if (null !== $mergedConfig['object_manager']) {
-            $objectManager = $mergedConfig['object_manager'];
-        } elseif (ContainerBuilder::willBeAvailable('doctrine/orm', EntityManager::class, ['doctrine/doctrine-bundle'])) {
-            $objectManager = 'doctrine.orm.entity_manager';
-        } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
-            $objectManager = 'doctrine_mongodb.odm.document_manager';
+        if (null !== $mergedConfig['dbal_connection']) {
+            $this->configureDBALManager($container, $mergedConfig, $loader);
+            $loader->load('dbal_services.php');
         } else {
-            throw new RuntimeException('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
+            $this->configureObjectManager($container, $mergedConfig, $loader);
+            $loader->load('om_services.php');
         }
+    }
 
-        $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $objectManager);
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function configureDBALManager(ContainerBuilder $container, array $config, PhpFileLoader $loader): void
+    {
+        $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
+
+        $container->setParameter('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
+        $container->setParameter('gesdinet_jwt_refresh_token.dbal.table_name', $config['dbal_table_name']);
+        $container->setParameter('gesdinet_jwt_refresh_token.dbal.auto_create_table', $config['dbal_auto_create_table']);
+        $container->setParameter('gesdinet_jwt_refresh_token.dbal.columns', $config['dbal_columns']);
+    }
+
+    /**
+     * @param array<string, mixed> $mergedConfig
+     */
+    private function configureObjectManager(ContainerBuilder $container, array $mergedConfig, PhpFileLoader $loader): void
+    {
+        if (null !== $mergedConfig['object_manager']) {
+            $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $mergedConfig['object_manager']);
+        } elseif (ContainerBuilder::willBeAvailable('doctrine/orm', EntityManager::class, ['doctrine/doctrine-bundle'])) {
+            $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine.orm.entity_manager');
+        } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
+            $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine_mongodb.odm.document_manager');
+        }
     }
 }

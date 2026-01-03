@@ -21,6 +21,19 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 final class Configuration implements ConfigurationInterface
 {
+    /**
+     * Validates that a string is a valid SQL identifier.
+     *
+     * Valid SQL identifiers must start with a letter or underscore and contain
+     * only letters, numbers, and underscores. This prevents potential SQL injection
+     * risks and ensures compatibility across database platforms.
+     */
+    private static function isValidSqlIdentifier(string $identifier): bool
+    {
+        // Must start with letter or underscore, contain only alphanumeric and underscores
+        return 1 === preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $identifier);
+    }
+
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('gesdinet_jwt_refresh_token');
@@ -51,7 +64,46 @@ final class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('object_manager')
                     ->defaultNull()
-                    ->info('Set the object manager to use (default: doctrine.orm.entity_manager)')
+                    ->info('Set the object manager to use (default: doctrine.orm.entity_manager). Mutually exclusive with dbal_connection.')
+                ->end()
+                ->scalarNode('dbal_connection')
+                    ->defaultNull()
+                    ->info('Set the DBAL connection to use for direct database access. Mutually exclusive with object_manager.')
+                ->end()
+                ->scalarNode('dbal_table_name')
+                    ->defaultValue('refresh_tokens')
+                    ->info('The table name for refresh tokens when using DBAL')
+                    ->validate()
+                        ->ifTrue(static fn ($v): bool => !self::isValidSqlIdentifier($v))
+                        ->thenInvalid('The "dbal_table_name" must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
+                    ->end()
+                ->end()
+                ->booleanNode('dbal_auto_create_table')
+                    ->defaultTrue()
+                    ->info('Automatically create the refresh tokens table if it does not exist (like Symfony Messenger)')
+                ->end()
+                ->arrayNode('dbal_columns')
+                    ->defaultValue([])
+                    ->useAttributeAsKey('alias')
+                    ->arrayPrototype()
+                        ->children()
+                            ->scalarNode('name')
+                                ->isRequired()
+                                ->cannotBeEmpty()
+                                ->info('The actual column name in the database')
+                                ->validate()
+                                    ->ifTrue(static fn ($v): bool => !self::isValidSqlIdentifier($v))
+                                    ->thenInvalid('The column name must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
+                                ->end()
+                            ->end()
+                            ->scalarNode('type')
+                                ->isRequired()
+                                ->cannotBeEmpty()
+                                ->info('The DBAL type (integer, string, datetime, etc.)')
+                            ->end()
+                        ->end()
+                    ->end()
+                    ->info('Custom column mapping for DBAL persistence layer')
                 ->end()
                 ->scalarNode('single_use')
                     ->defaultFalse()
@@ -87,8 +139,12 @@ final class Configuration implements ConfigurationInterface
                 ->integerNode('default_invalid_batch_size')
                     ->defaultValue(RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE)
                     ->info('The default batch size when clearing invalid tokens')
-                    ->min(0)
+                    ->min(1)
                 ->end()
+            ->end()
+            ->validate()
+                ->ifTrue(static fn (array $v): bool => null !== $v['object_manager'] && null !== $v['dbal_connection'])
+                ->thenInvalid('The "object_manager" and "dbal_connection" options are mutually exclusive. Use one or the other.')
             ->end();
 
         return $treeBuilder;

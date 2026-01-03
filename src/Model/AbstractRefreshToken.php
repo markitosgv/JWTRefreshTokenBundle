@@ -11,10 +11,11 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
-use DateTimeInterface;
-use DateTime;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 abstract class AbstractRefreshToken implements RefreshTokenInterface
 {
     protected int|string|null $id = null;
@@ -23,14 +24,14 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
 
     protected ?string $username = null;
 
-    protected ?DateTimeInterface $valid = null;
+    protected ?\DateTimeInterface $valid = null;
 
     /**
      * Creates a new model instance based on the provided details.
      */
     public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): static
     {
-        $valid = new DateTime();
+        $valid = new \DateTime();
 
         // Explicitly check for a negative number based on a behavior change in PHP 8.2, see https://github.com/php/php-src/issues/9950
         if ($ttl > 0) {
@@ -41,6 +42,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
 
         $model = new static();
         $model->setRefreshToken($refreshToken);
+        // @phpstan-ignore method.notFound (Backward compatibility with Symfony <5.3)
         $model->setUsername(method_exists($user, 'getUserIdentifier') ? $user->getUserIdentifier() : $user->getUsername());
         $model->setValid($valid);
 
@@ -69,14 +71,14 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $this->refreshToken;
     }
 
-    public function setValid(DateTimeInterface $valid): static
+    public function setValid(\DateTimeInterface $valid): static
     {
         $this->valid = $valid;
 
         return $this;
     }
 
-    public function getValid(): ?DateTimeInterface
+    public function getValid(): ?\DateTimeInterface
     {
         return $this->valid;
     }
@@ -95,6 +97,6 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
 
     public function isValid(): bool
     {
-        return null !== $this->valid && $this->valid >= new DateTime();
+        return null !== $this->valid && $this->valid >= new \DateTime();
     }
 }
