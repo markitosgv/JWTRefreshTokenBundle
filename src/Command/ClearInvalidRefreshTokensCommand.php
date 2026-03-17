@@ -66,7 +66,7 @@ final class ClearInvalidRefreshTokensCommand extends Command
             $io->text(sprintf('Revoked %d invalid token(s) in batches of %d', count($revokedTokens), $batchSize));
             $io->listing(array_map(
                 static fn (RefreshTokenInterface $revokedToken): string => $revokedToken->getRefreshToken(),
-                $revokedTokens,
+                iterator_to_array($revokedTokens),
             ));
         }
 
