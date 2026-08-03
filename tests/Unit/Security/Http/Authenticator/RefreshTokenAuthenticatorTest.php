@@ -15,6 +15,8 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,6 +33,11 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * The collaborators are built once in setUp(), so a test only sets expectations on the ones it
+ * is about. The others stay mock objects without any.
+ */
+#[AllowMockObjectsWithoutExpectations]
 final class RefreshTokenAuthenticatorTest extends TestCase
 {
     private MockObject&RefreshTokenManagerInterface $refreshTokenManager;
@@ -71,8 +78,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
             'check_path' => 'api_refresh',
         ]);
 
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         $this->httpUtils->expects($this->once())
             ->method('checkRequestPath')
@@ -88,8 +95,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
             'check_path' => 'api_refresh',
         ]);
 
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         $this->httpUtils->expects($this->once())
             ->method('checkRequestPath')
@@ -101,8 +108,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testAuthenticatesTheRequestWhenTtlUpdateIsDisabled(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -119,8 +126,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testAuthenticatesTheRequestWhenTtlUpdateIsEnabled(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -149,8 +156,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testBringsForwardTheExpirationWhenTheConfiguredTtlIsNegative(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -174,8 +181,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotAuthenticateTheRequestWhenTheTokenIsNotValid(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -194,8 +201,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotAuthenticateTheRequestWhenTheTokenHasNoUser(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -218,8 +225,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotAuthenticateTheRequestWhenTheTokenIsNotFoundInStorage(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
         $token = 'my-refresh-token';
 
         $this->createExtractorGetRefreshTokenExpectation($request, $token);
@@ -232,8 +239,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testDoesNotAuthenticateTheRequestWhenTheTokenIsNotFoundInTheRequest(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
         $this->createExtractorGetRefreshTokenExpectation($request, null);
 
         $this->expectExceptionObject(new MissingTokenException());
@@ -265,14 +272,14 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testHandlesSuccessfulAuthentication(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
-        /** @var TokenInterface&MockObject $token */
-        $token = $this->createMock(TokenInterface::class);
+        /** @var TokenInterface&Stub $token */
+        $token = $this->createStub(TokenInterface::class);
 
-        /** @var Response&MockObject $response */
-        $response = $this->createMock(Response::class);
+        /** @var Response&Stub $response */
+        $response = $this->createStub(Response::class);
 
         $this->successHandler
             ->expects($this->once())
@@ -288,14 +295,14 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testHandlesAnAuthenticationFailure(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
-        /** @var AuthenticationException&MockObject $exception */
-        $exception = $this->createMock(AuthenticationException::class);
+        /** @var AuthenticationException&Stub $exception */
+        $exception = $this->createStub(AuthenticationException::class);
 
-        /** @var Response&MockObject $response */
-        $response = $this->createMock(Response::class);
+        /** @var Response&Stub $response */
+        $response = $this->createStub(Response::class);
 
         $this->failureHandler
             ->expects($this->once())
@@ -311,8 +318,8 @@ final class RefreshTokenAuthenticatorTest extends TestCase
 
     public function testStartsAnAuthenticationRequest(): void
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         /** @var AuthenticationException&MockObject $exception */
         $exception = $this->createMock(AuthenticationException::class);

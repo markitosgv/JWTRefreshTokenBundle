@@ -5,6 +5,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ChainExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -30,8 +31,8 @@ final class ChainExtractorTest extends TestCase
         /** @var ExtractorInterface&MockObject $thirdExtractor */
         $thirdExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         $token = 'my-refresh-token';
 
@@ -59,8 +60,8 @@ final class ChainExtractorTest extends TestCase
         /** @var ExtractorInterface&MockObject $thirdExtractor */
         $thirdExtractor = $this->createMock(ExtractorInterface::class);
 
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
 
         $this->createExtractorGetRefreshTokenExpectation($firstExtractor, null);
         $this->createExtractorGetRefreshTokenExpectation($secondExtractor, null);

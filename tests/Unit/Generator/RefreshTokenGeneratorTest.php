@@ -9,6 +9,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 final class RefreshTokenGeneratorTest extends TestCase
@@ -29,7 +30,7 @@ final class RefreshTokenGeneratorTest extends TestCase
         $this->manager
             ->expects($this->once())
             ->method('get')
-            ->with($this->isType('string'))
+            ->with($this->isString())
             ->willReturn(null);
 
         $this->manager
@@ -45,13 +46,13 @@ final class RefreshTokenGeneratorTest extends TestCase
 
     public function testGeneratesARefreshTokenWhenThereIsAnExistingTokenMatchingTheGeneratedToken(): void
     {
-        /** @var RefreshTokenInterface&MockObject $existingRefreshToken */
-        $existingRefreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $existingRefreshToken */
+        $existingRefreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $this->manager
             ->expects($this->exactly(2))
             ->method('get')
-            ->with($this->isType('string'))
+            ->with($this->isString())
             ->willReturn($existingRefreshToken, null);
 
         $this->manager

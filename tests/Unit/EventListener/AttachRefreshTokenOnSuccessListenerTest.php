@@ -11,12 +11,19 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * The collaborators are built once in setUp(), so a test only sets expectations on the ones it
+ * is about. The others stay mock objects without any.
+ */
+#[AllowMockObjectsWithoutExpectations]
 final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 {
     public const TTL = 2592000;
@@ -72,8 +79,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testTreatsAnEmptyExtractedTokenAsNoTokenAtAll(): void
     {
-        /** @var RefreshTokenInterface&MockObject $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
         $refreshToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
         $refreshToken->method('getValid')->willReturn(new DateTime('+1 day'));
 
@@ -95,8 +102,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
     {
         $expiration = new DateTime('+1 day');
 
-        /** @var RefreshTokenInterface&MockObject $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
         $refreshToken->method('getValid')->willReturn($expiration);
 
         $this->refreshTokenManager
@@ -113,8 +120,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testAttachesAZeroExpirationWhenTheTokenHasNoExpirationDate(): void
     {
-        /** @var RefreshTokenInterface&MockObject $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
         $refreshToken->method('getValid')->willReturn(null);
 
         $this->refreshTokenManager
@@ -133,8 +140,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
     {
         $expiration = new DateTime('+1 day');
 
-        /** @var RefreshTokenInterface&MockObject $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
         $refreshToken->method('getValid')->willReturn($expiration);
         $refreshToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
 
@@ -200,8 +207,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testAttachesTheTokenToTheResponseBodyOnRefresh(): void
     {
-        /** @var UserInterface&MockObject $user */
-        $user = $this->createMock(UserInterface::class);
+        /** @var UserInterface&Stub $user */
+        $user = $this->createStub(UserInterface::class);
 
         /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
@@ -241,8 +248,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     public function testAddsTheTokenToTheResponseCookiesOnRefresh(): void
     {
-        /** @var UserInterface&MockObject $user */
-        $user = $this->createMock(UserInterface::class);
+        /** @var UserInterface&Stub $user */
+        $user = $this->createStub(UserInterface::class);
 
         /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
@@ -303,8 +310,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
 
-        /** @var RefreshTokenInterface&MockObject $oldRefreshToken */
-        $oldRefreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $oldRefreshToken */
+        $oldRefreshToken = $this->createStub(RefreshTokenInterface::class);
 
         /** @var RefreshTokenInterface&MockObject $newRefreshToken */
         $newRefreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -376,8 +383,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         /** @var AuthenticationSuccessEvent&MockObject $event */
         $event = $this->createMock(AuthenticationSuccessEvent::class);
 
-        /** @var UserInterface&MockObject $user */
-        $user = $this->createMock(UserInterface::class);
+        /** @var UserInterface&Stub $user */
+        $user = $this->createStub(UserInterface::class);
 
         /** @var RefreshTokenInterface&MockObject $refreshToken */
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
@@ -423,7 +430,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $event
             ->expects($this->atLeastOnce())
             ->method('setData')
-            ->with($this->isType('array'));
+            ->with($this->isArray());
 
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }

@@ -13,9 +13,16 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use LogicException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * The collaborators are built once in setUp(), so a test only sets expectations on the ones it
+ * is about. The others stay mock objects without any.
+ */
+#[AllowMockObjectsWithoutExpectations]
 class RefreshTokenManagerTest extends TestCase
 {
     public const REFRESH_TOKEN_ENTITY_CLASS = RefreshToken::class;
@@ -60,7 +67,7 @@ class RefreshTokenManagerTest extends TestCase
     public function testRetrievesATokenFromStorage(): void
     {
         $token = 'token';
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $this->repository
             ->expects($this->once())
@@ -86,7 +93,7 @@ class RefreshTokenManagerTest extends TestCase
     public function testRetrievesTheLastTokenForAUserFromStorage(): void
     {
         $username = 'test';
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $this->repository
             ->expects($this->once())
@@ -161,7 +168,7 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testDoesNotDeleteARefreshTokenThatIsNotInStorage(): void
     {
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
         $refreshToken
             ->method('getId')
             ->willReturn(123);
@@ -185,7 +192,7 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testRevokesAllInvalidTokensAndFlushesTheObjectManager(): void
     {
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $this->repository
             ->expects($this->once())
@@ -207,7 +214,7 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testRevokesAllInvalidTokensInBatchesAndFlushesTheObjectManager(): void
     {
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
         $remainingTokens = [$refreshToken];
         $this->repository
             ->expects($this->exactly(2))
@@ -280,7 +287,7 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testPagesForwardWhenTheCallerTakesCareOfTheFlush(): void
     {
-        $token = $this->createMock(RefreshTokenInterface::class);
+        $token = $this->createStub(RefreshTokenInterface::class);
 
         // Nothing is deleted until the caller flushes, so the offset has to page forward.
         $offsets = [];
@@ -304,7 +311,7 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testRevokesAllInvalidTokensInBatchesWhenTheRepositoryReturnsAnIterator(): void
     {
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $remainingTokens = [$refreshToken];
         $this->repository
@@ -326,7 +333,7 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testRevokesAllInvalidTokensWhenTheRepositoryReturnsAnIterator(): void
     {
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $this->repository
             ->expects($this->once())
@@ -365,7 +372,7 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testRefusesAnObjectManagerWhoseRepositoryDoesNotImplementTheInterface(): void
     {
-        $objectManager = $this->createMock(ObjectManager::class);
+        $objectManager = $this->createStub(ObjectManager::class);
         $objectManager
             ->method('getRepository')
             ->willReturn($this->createMock(ObjectRepository::class));

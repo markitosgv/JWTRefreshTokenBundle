@@ -6,6 +6,7 @@ use Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -35,8 +36,8 @@ final class RevokeRefreshTokenCommandTest extends TestCase
     {
         $token = 'refresh-token';
 
-        /** @var MockObject&RefreshTokenInterface $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var Stub&RefreshTokenInterface $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
         $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);

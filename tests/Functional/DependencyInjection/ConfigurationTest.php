@@ -5,9 +5,15 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\DependencyInjection;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Configuration;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken;
 use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+/**
+ * The collaborators are built once in setUp(), so a test only sets expectations on the ones it
+ * is about. The others stay mock objects without any.
+ */
+#[AllowMockObjectsWithoutExpectations]
 final class ConfigurationTest extends TestCase
 {
     use ConfigurationTestCaseTrait;

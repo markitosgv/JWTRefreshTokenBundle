@@ -7,6 +7,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,8 +42,8 @@ final class LogoutEventListenerTest extends TestCase
             ->with($request, self::TOKEN_PARAMETER_NAME)
             ->willReturn($refreshTokenString);
 
-        /** @var RefreshTokenInterface&MockObject $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $this->refreshTokenManager
             ->expects($this->once())
@@ -87,8 +88,8 @@ final class LogoutEventListenerTest extends TestCase
             ->with($request, self::TOKEN_PARAMETER_NAME)
             ->willReturn($refreshTokenString);
 
-        /** @var RefreshTokenInterface&MockObject $refreshToken */
-        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
 
         $this->refreshTokenManager
             ->expects($this->once())

@@ -7,6 +7,8 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +16,11 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * The collaborators are built once in setUp(), so a test only sets expectations on the ones it
+ * is about. The others stay mock objects without any.
+ */
+#[AllowMockObjectsWithoutExpectations]
 final class AuthenticationSuccessHandlerTest extends TestCase
 {
     private MockObject&AuthenticationSuccessHandlerInterface $decoratedHandler;
@@ -39,7 +46,7 @@ final class AuthenticationSuccessHandlerTest extends TestCase
         $response = new Response();
         $firewallName = 'api';
 
-        $token = $this->createMock(PostRefreshTokenAuthenticationToken::class);
+        $token = $this->createStub(PostRefreshTokenAuthenticationToken::class);
         $token->method('getRefreshToken')
             ->willReturn($this->createMock(RefreshTokenInterface::class));
 
@@ -63,7 +70,7 @@ final class AuthenticationSuccessHandlerTest extends TestCase
     {
         $request = new Request();
         $response = new Response();
-        $token = $this->createMock(TokenInterface::class);
+        $token = $this->createStub(TokenInterface::class);
 
         $this->eventDispatcher->expects($this->never())
             ->method('dispatch');
@@ -78,7 +85,7 @@ final class AuthenticationSuccessHandlerTest extends TestCase
 
     public function test_passes_through_an_empty_response_from_the_decorated_handler(): void
     {
-        $token = $this->createMock(TokenInterface::class);
+        $token = $this->createStub(TokenInterface::class);
 
         $this->decoratedHandler->expects($this->once())
             ->method('onAuthenticationSuccess')

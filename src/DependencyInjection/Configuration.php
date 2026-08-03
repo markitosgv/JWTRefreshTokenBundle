@@ -47,11 +47,12 @@ final class Configuration implements ConfigurationInterface
                     ->info('Set the refresh token class to use')
                     ->validate()
                         ->ifTrue(static function (mixed $v): bool {
-                            if (!\is_string($v)) {
+                            // Checked before class_implements(), which raises a warning of its own
+                            // when the class cannot be loaded
+                            if (!\is_string($v) || !class_exists($v)) {
                                 return true;
                             }
 
-                            // false when the class cannot be loaded, which is invalid all the same
                             $interfaces = class_implements($v);
 
                             return false === $interfaces || !\in_array(RefreshTokenInterface::class, $interfaces, true);
