@@ -4,7 +4,8 @@
 [![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
-[![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg)](https://phpstan.org/)
+[![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen.svg)](https://github.com/markitosgv/JWTRefreshTokenBundle/actions/workflows/run-tests.yml)
+[![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-brightgreen.svg)](https://phpstan.org/)
 [![Rector](https://img.shields.io/badge/Rector-enabled-brightgreen.svg)](https://getrector.org/)
 
 The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle). Supports Doctrine ORM/ODM.
