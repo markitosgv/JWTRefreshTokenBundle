@@ -156,6 +156,30 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertSame(1, $result);
     }
 
+    public function testDoesNotDeleteARefreshTokenThatIsNotInStorage(): void
+    {
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken
+            ->method('getId')
+            ->willReturn(123);
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findOneBy')
+            ->with(['id' => 123])
+            ->willReturn(null);
+
+        $this->objectManager
+            ->expects($this->never())
+            ->method('remove');
+
+        $this->objectManager
+            ->expects($this->never())
+            ->method('flush');
+
+        $this->assertSame(0, $this->refreshTokenManager->delete($refreshToken, true));
+    }
+
     public function testRevokesAllInvalidTokensAndFlushesTheObjectManager(): void
     {
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
