@@ -40,7 +40,7 @@ class RefreshTokenManagerTest extends TestCase
         $classMetadata
             ->expects($this->once())
             ->method('getName')
-            ->willReturn(static::REFRESH_TOKEN_ENTITY_CLASS);
+            ->willReturn(self::REFRESH_TOKEN_ENTITY_CLASS);
 
         $this->objectManager = $this->createMock(ObjectManager::class);
         // getRepository() may be called any number of times, so the class it is asked for is
@@ -48,7 +48,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->objectManager
             ->method('getRepository')
             ->willReturnCallback(function (string $class): RefreshTokenRepository {
-                $this->assertSame(static::REFRESH_TOKEN_ENTITY_CLASS, $class);
+                $this->assertSame(self::REFRESH_TOKEN_ENTITY_CLASS, $class);
 
                 return $this->repository;
             });
@@ -56,12 +56,12 @@ class RefreshTokenManagerTest extends TestCase
         $this->objectManager
             ->expects($this->once())
             ->method('getClassMetadata')
-            ->with(static::REFRESH_TOKEN_ENTITY_CLASS)
+            ->with(self::REFRESH_TOKEN_ENTITY_CLASS)
             ->willReturn($classMetadata);
 
         $this->refreshTokenManager = new RefreshTokenManager(
             $this->objectManager,
-            static::REFRESH_TOKEN_ENTITY_CLASS,
+            self::REFRESH_TOKEN_ENTITY_CLASS,
             RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
         );
     }
@@ -388,6 +388,6 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testProvidesTheModelClass(): void
     {
-        $this->assertSame(static::REFRESH_TOKEN_ENTITY_CLASS, $this->refreshTokenManager->getClass());
+        $this->assertSame(self::REFRESH_TOKEN_ENTITY_CLASS, $this->refreshTokenManager->getClass());
     }
 }

@@ -166,7 +166,14 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 
         /** @var ChildDefinition $logoutListener */
         $logoutListener = $this->container->getDefinition('gesdinet_jwt_refresh_token.security.listener.logout.test');
-        $this->assertSame(['event' => LogoutEvent::class, 'method' => 'onLogout', 'dispatcher' => 'security.event_dispatcher.test'], $logoutListener->getTags()['kernel.event_listener'][0]);
+        $this->assertSame(
+            [
+                'kernel.event_listener' => [
+                    ['event' => LogoutEvent::class, 'method' => 'onLogout', 'dispatcher' => 'security.event_dispatcher.test'],
+                ],
+            ],
+            $logoutListener->getTags()
+        );
     }
 
     public function test_authenticator_service_is_created_with_custom_handlers(): void
