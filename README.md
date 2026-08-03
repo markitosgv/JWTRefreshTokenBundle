@@ -4,7 +4,7 @@
 [![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
-[![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen.svg)](https://github.com/markitosgv/JWTRefreshTokenBundle/actions/workflows/run-tests.yml)
+[![Coverage Status](https://coveralls.io/repos/github/markitosgv/JWTRefreshTokenBundle/badge.svg?branch=master)](https://coveralls.io/github/markitosgv/JWTRefreshTokenBundle?branch=master)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-brightgreen.svg)](https://phpstan.org/)
 [![Rector](https://img.shields.io/badge/Rector-enabled-brightgreen.svg)](https://getrector.org/)
 
