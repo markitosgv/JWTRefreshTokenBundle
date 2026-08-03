@@ -1,6 +1,31 @@
 # Changelog
 
-## Unreleased
+## 2.1.0
+
+### Fixed
+
+* `revokeAllInvalidBatch()` returned the last batch read, which is empty once the loop ends, so it always returned an empty array and `gesdinet:jwt:clear` reported that there was nothing to revoke after deleting tokens
+* `revokeAllInvalidBatch()` looped forever with the MongoDB ODM, as its condition tested the repository result with `empty()`, which is never true for the iterator the ODM returns
+* `revokeAllInvalidBatch()` skipped expired tokens: each batch is deleted before the next is read, so the remaining tokens shift down and the offset has to stay where it is
+* The document repository reads its results through `Query::getIterator()`, so they are the iterable the interface promises
+* `delete()` returns `0` when the token is not in storage, which the ODM reported as `1` regardless
+* The success listener no longer brings the request down when a token has no expiration date, and both of its checks for a usable token string now agree
+* The logout listener clears the cookie on the response it just built rather than reading it back from the event
+* A refresh token without a username is rejected with an `InvalidTokenException` instead of a `TypeError` while building the passport
+* `refresh_token_class` reports a configuration error when the class cannot be loaded, instead of a `TypeError` while building the container
+* `gesdinet:jwt:clear` rejects a `--batch-size` that is not a positive number, which read no tokens and reported success while leaving every expired token in place
+* Both request extractors check what they read before returning it, and `PostRefreshTokenAuthenticationToken` checks the serialized state it is given
+
+### Changed
+
+* `AuthenticationSuccessHandler::onAuthenticationSuccess()` is typed `?Response`, matching the handler it decorates. What is returned at runtime has not changed
+* `RefreshTokenRepositoryInterface` documents, through a `@method` tag, that `findOneBy()` takes an optional `$orderBy` argument
+* The `php` constraint is written as `^8.2`, the same minimum without claiming support for a future PHP 9
+* Dropped the compatibility shims for Symfony versions below 6.4, which is already the minimum
+
+See [UPGRADE-2.1.md](UPGRADE-2.1.md) for the details.
+
+## 2.0.0
 
 * [B/C Break] Removed the `Gesdinet\JWTRefreshTokenBundle\EventListener\LogoutEventListener` service definition; if needed, an abstract `gesdinet_jwt_refresh_token.security.listener.logout` definition replaces it and does not have a `kernel.event_listener` tag
 * [B/C Break] The `logout_firewall` config node default value is now null

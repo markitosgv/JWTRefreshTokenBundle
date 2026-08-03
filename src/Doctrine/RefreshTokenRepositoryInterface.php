@@ -7,28 +7,21 @@ use Doctrine\Persistence\ObjectRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 
 /**
+ * `Doctrine\Persistence\ObjectRepository` declares findOneBy() without an order, but both the ORM
+ * and the ODM repositories accept one, and it is needed to retrieve the last token of a user. It is
+ * described here rather than declared, so that an implementation is free to keep the inherited
+ * signature.
+ *
  * @template T of RefreshTokenInterface
  *
  * @extends ObjectRepository<T>
+ *
+ * @method T|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
  *
  * @psalm-mutable
  */
 interface RefreshTokenRepositoryInterface extends ObjectRepository
 {
-    /**
-     * `Doctrine\Persistence\ObjectRepository` does not take an order, but both the ORM and the ODM
-     * repositories do, and it is needed to retrieve the last token of a user.
-     *
-     * @param array<string, mixed>       $criteria
-     * @param array<string, string>|null $orderBy
-     *
-     * @return T|null
-     *
-     * @psalm-impure it queries the storage
-     */
-    #[\Override]
-    public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
-
     /**
      * @return iterable<T>
      *

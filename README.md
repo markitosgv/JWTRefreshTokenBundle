@@ -16,6 +16,9 @@ This bundle requires PHP 8.2 or later and Symfony 6.4, 7.2+ or 8.0+.
 For support with older Symfony versions, please use the 1.x release.
 **Protip:** Though the bundle doesn't force you to do so, it is highly recommended to use HTTPS.
 
+When upgrading, see [UPGRADE-2.1.md](UPGRADE-2.1.md) and [UPGRADE-2.0.md](UPGRADE-2.0.md) for what
+changed, and the [changelog](CHANGELOG.md) for the full list.
+
 ## Installation
 
 ### Step 1: Download the Bundle
