@@ -37,6 +37,8 @@
     "ergebnis/composer-normalize": "*",
     "matthiasnoback/symfony-config-test": "^5.1 || ^6.0",
     "matthiasnoback/symfony-dependency-injection-test": "^5.1 || ^6.0",
+    "phpstan/phpstan": "^2.2",
+    "phpstan/phpstan-doctrine": "^2.0",
     "phpunit/phpunit": "^10.5 || ^12.2",
     "rector/jack": "^1.0.0",
     "rector/rector": "^2.2",

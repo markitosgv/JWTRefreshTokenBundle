@@ -1,3 +1,6 @@
+includes:
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+
 parameters:
     level: 5
     paths:
@@ -5,3 +8,15 @@ parameters:
         - tests
     bootstrapFiles:
         - tests/bootstrap.php
+    ignoreErrors:
+        # phpstan-doctrine only models the ORM metadata, so it does not know that the ODM assigns
+        # the identifier of a document. The ORM fixtures are handled by the extension itself.
+        -
+            identifier: property.unusedType
+            path: tests/Functional/Fixtures/Document/User.php
+        # Configuration::enableNativeLazyObjects() was added in doctrine/orm 3.6, but composer.json
+        # still allows ^2.20, where the method does not exist. The check only looks redundant
+        # because the analysis runs against the newest version the lock file resolves to.
+        -
+            identifier: function.alreadyNarrowedType
+            path: tests/Functional/ORMTestCase.php
