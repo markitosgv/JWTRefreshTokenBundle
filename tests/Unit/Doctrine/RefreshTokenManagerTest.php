@@ -43,12 +43,15 @@ class RefreshTokenManagerTest extends TestCase
             ->willReturn(static::REFRESH_TOKEN_ENTITY_CLASS);
 
         $this->objectManager = $this->createMock(ObjectManager::class);
-        // Allow getRepository to be called any number of times with the expected argument
+        // getRepository() may be called any number of times, so the class it is asked for is
+        // checked on the call itself rather than with an expected count
         $this->objectManager
-            ->expects($this->any())
             ->method('getRepository')
-            ->with(static::REFRESH_TOKEN_ENTITY_CLASS)
-            ->willReturn($this->repository);
+            ->willReturnCallback(function (string $class): RefreshTokenRepository {
+                $this->assertSame(static::REFRESH_TOKEN_ENTITY_CLASS, $class);
+
+                return $this->repository;
+            });
 
         $this->objectManager
             ->expects($this->once())
@@ -148,6 +151,7 @@ class RefreshTokenManagerTest extends TestCase
             ->willReturn(123);
 
         $this->repository
+            ->expects($this->once())
             ->method('findOneBy')
             ->with(['id' => $refreshToken->getId()])
             ->willReturn($refreshToken);

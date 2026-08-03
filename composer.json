@@ -15,7 +15,7 @@
     }
   ],
   "require": {
-    "php": ">=8.2 || ^8.3 || ^8.4",
+    "php": "^8.2",
     "doctrine/persistence": "^3.1 || ^4.0",
     "lexik/jwt-authentication-bundle": "^2.15 || ^3.0",
     "symfony/config": "^6.4 || ^7.0 || ^7.2 || ^8.0",
@@ -39,7 +39,7 @@
     "matthiasnoback/symfony-dependency-injection-test": "^5.1 || ^6.0",
     "phpstan/phpstan": "^2.2",
     "phpstan/phpstan-doctrine": "^2.0",
-    "phpunit/phpunit": "^10.5 || ^12.2",
+    "phpunit/phpunit": "^10.5 || ^12.2 || ^13.0",
     "rector/jack": "^1.0.0",
     "rector/rector": "^2.2",
     "symfony/cache": "^6.4 || ^7.2 || ^8.0",
