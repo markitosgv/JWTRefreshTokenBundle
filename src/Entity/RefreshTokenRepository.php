@@ -62,13 +62,17 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
         return $tokens;
     }
 
+    #[\Override]
     public function deleteByUser(UserInterface $user): int
     {
-        return $this->createQueryBuilder('rt')
+        /** @var int $deleted */
+        $deleted = $this->createQueryBuilder('rt')
             ->delete()
             ->where('rt.username = :user_identifier')
             ->setParameter('user_identifier', $user->getUserIdentifier(), ParameterType::STRING)
             ->getQuery()
             ->execute();
+
+        return $deleted;
     }
 }

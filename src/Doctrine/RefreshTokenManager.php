@@ -176,6 +176,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         return is_array($tokens) ? array_values($tokens) : iterator_to_array($tokens, false);
     }
 
+    #[\Override]
     public function revokeAllForUser(UserInterface $user): void
     {
         if (!$this->repository instanceof DeleteRefreshTokenRepositoryInterface) {

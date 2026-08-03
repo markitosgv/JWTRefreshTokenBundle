@@ -5,12 +5,17 @@ namespace Gesdinet\JWTRefreshTokenBundle\Model;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Interface to be implemented by user managers. This adds an additional level
- * of abstraction between your application, and the actual repository.
+ * Revokes every refresh token issued to a user, for a password reset or an account being disabled.
  *
- * All changes to RefreshTokenInterface objects should happen through this interface.
+ * Kept apart from RefreshTokenManagerInterface so that an existing implementation of it keeps
+ * working without this method.
+ *
+ * @psalm-mutable
  */
 interface RevokeRefreshTokenManagerInterface
 {
+    /**
+     * @psalm-impure it writes to the storage
+     */
     public function revokeAllForUser(UserInterface $user): void;
 }

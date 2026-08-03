@@ -51,6 +51,7 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
         return $qb->getQuery()->getIterator();
     }
 
+    #[\Override]
     public function deleteByUser(UserInterface $user): int
     {
         /** @var DeleteResult */
