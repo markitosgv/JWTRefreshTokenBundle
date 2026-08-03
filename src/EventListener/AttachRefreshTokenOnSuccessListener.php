@@ -24,9 +24,14 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 final class AttachRefreshTokenOnSuccessListener
 {
+    /**
+     * @var array{enabled: bool, same_site: 'lax'|'none'|'strict', path: string, domain: string|null, http_only: bool, secure: bool, partitioned: bool, remove_token_from_body: bool}
+     */
     private array $cookieSettings;
 
     /**
+     * @param array{enabled?: bool, same_site?: 'lax'|'none'|'strict', path?: string, domain?: string|null, http_only?: bool, secure?: bool, partitioned?: bool, remove_token_from_body?: bool} $cookieSettings
+     *
      * @psalm-mutation-free
      */
     public function __construct(
@@ -120,7 +125,7 @@ final class AttachRefreshTokenOnSuccessListener
             );
 
             // Remove the refreshTokenString from the response body
-            if (isset($this->cookieSettings['remove_token_from_body']) && $this->cookieSettings['remove_token_from_body']) {
+            if ($this->cookieSettings['remove_token_from_body']) {
                 unset($data[$this->tokenParameterName]);
             }
         }

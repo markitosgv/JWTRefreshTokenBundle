@@ -44,7 +44,7 @@ class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
     }
 
     /**
-     * {@inheritdoc}
+     * @param array<array-key, mixed> $data the refresh token followed by the parent state, as produced by {@see self::__serialize()}
      */
     #[\Override]
     public function __unserialize(array $data): void

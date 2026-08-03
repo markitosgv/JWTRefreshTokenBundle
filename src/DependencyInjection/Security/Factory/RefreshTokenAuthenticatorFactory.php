@@ -106,6 +106,9 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         return $authenticatorId;
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     private function createAuthenticationSuccessHandler(ContainerBuilder $container, string $id, array $config): string
     {
         $successHandlerId = $this->getSuccessHandlerId($id);
@@ -123,6 +126,9 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         return $successHandlerId;
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     private function createAuthenticationFailureHandler(ContainerBuilder $container, string $id, array $config): string
     {
         $failureHandlerId = $this->getFailureHandlerId($id);

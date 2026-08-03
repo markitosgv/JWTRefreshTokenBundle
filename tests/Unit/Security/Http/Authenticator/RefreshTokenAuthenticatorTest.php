@@ -334,6 +334,9 @@ final class RefreshTokenAuthenticatorTest extends TestCase
             ->willReturn($username);
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
     private function appendOptionsOnRefreshTokenAuthenticator(array $options): void
     {
         $reflector = new ReflectionClass(RefreshTokenAuthenticator::class);

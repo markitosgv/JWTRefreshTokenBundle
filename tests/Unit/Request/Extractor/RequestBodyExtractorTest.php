@@ -43,6 +43,9 @@ final class RequestBodyExtractorTest extends TestCase
         $this->assertNull($this->requestBodyExtractor->getRefreshToken($request, self::PARAMETER_NAME));
     }
 
+    /**
+     * @param array<string, mixed>|null $jsonBodyData
+     */
     private function createMockRequest(?string $contentType, ?array $jsonBodyData = null): MockObject&Request
     {
         /** @var Request&MockObject $request */
