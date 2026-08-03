@@ -27,15 +27,11 @@ final readonly class RefreshTokenGenerator implements RefreshTokenGeneratorInter
     #[\Override]
     public function createForUserWithTtl(UserInterface $user, int $ttl): RefreshTokenInterface
     {
-        $exists = true;
-
-        while ($exists) {
+        // Keep generating until the value is not already taken. The loop body always runs once,
+        // which is what guarantees $token is set below.
+        do {
             $token = bin2hex(random_bytes(64));
-
-            $existingModel = $this->manager->get($token);
-
-            $exists = null !== $existingModel;
-        }
+        } while (null !== $this->manager->get($token));
 
         $modelClass = $this->manager->getClass();
 
