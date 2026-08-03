@@ -16,8 +16,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Generates a new RefreshTokenInterface instance while validating the underlying token value is unique.
+ *
+ * @psalm-mutable
  */
 interface RefreshTokenGeneratorInterface
 {
+    /**
+     * @psalm-impure the token value comes from a random source
+     */
     public function createForUserWithTtl(UserInterface $user, int $ttl): RefreshTokenInterface;
 }

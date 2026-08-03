@@ -24,6 +24,9 @@ final class LogoutEventListener
 {
     private array $cookieSettings;
 
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
         private readonly ExtractorInterface $refreshTokenExtractor,

@@ -17,6 +17,9 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class RefreshTokenNotFoundEvent extends Event
 {
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly AuthenticationException $exception,
         private ?Response $response = null
@@ -33,6 +36,9 @@ final class RefreshTokenNotFoundEvent extends Event
         return $this->response;
     }
 
+    /**
+     * @psalm-external-mutation-free
+     */
     public function setResponse(?Response $response = null): void
     {
         $this->response = $response;

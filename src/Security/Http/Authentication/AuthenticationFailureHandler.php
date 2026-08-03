@@ -21,6 +21,9 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final readonly class AuthenticationFailureHandler implements AuthenticationFailureHandlerInterface
 {
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(private EventDispatcherInterface $eventDispatcher)
     {
     }

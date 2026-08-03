@@ -18,21 +18,34 @@ use DateTimeInterface;
  * of abstraction between your application, and the actual repository.
  *
  * All changes to RefreshTokenInterface objects should happen through this interface.
+ *
+ * @psalm-mutable
  */
 interface RefreshTokenManagerInterface
 {
     public const DEFAULT_BATCH_SIZE = 1000;
 
+    /**
+     * @psalm-impure it queries the storage
+     */
     public function get(string $refreshToken): ?RefreshTokenInterface;
 
+    /**
+     * @psalm-impure it queries the storage
+     */
     public function getLastFromUsername(string $username): ?RefreshTokenInterface;
 
+    /**
+     * @psalm-impure it writes to the storage
+     */
     public function save(RefreshTokenInterface $refreshToken): void;
 
     /**
      * Deletes the given refresh token and returns the number of rows affected.
      *
      * @return int Number of rows deleted (should be 1 if deleted, 0 if not found)
+     *
+     * @psalm-impure it writes to the storage
      */
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int;
 
@@ -43,6 +56,8 @@ interface RefreshTokenManagerInterface
      * @param bool                   $andFlush whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
+     *
+     * @psalm-impure it writes to the storage
      */
     public function revokeAllInvalid(?DateTimeInterface $datetime = null, bool $andFlush = true): array;
 
@@ -57,6 +72,8 @@ interface RefreshTokenManagerInterface
      * @param bool                   $andFlush  whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[] an array of revoked refresh tokens
+     *
+     * @psalm-impure it writes to the storage
      */
     public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array;
 
@@ -64,6 +81,8 @@ interface RefreshTokenManagerInterface
      * Returns the fully qualified class name for a concrete RefreshTokenInterface class.
      *
      * @return class-string<RefreshTokenInterface>
+     *
+     * @psalm-mutation-free
      */
     public function getClass(): string;
 }

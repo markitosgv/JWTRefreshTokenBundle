@@ -26,6 +26,9 @@ final class AttachRefreshTokenOnSuccessListener
 {
     private array $cookieSettings;
 
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
         private readonly int $ttl,

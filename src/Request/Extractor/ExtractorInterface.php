@@ -13,7 +13,13 @@ namespace Gesdinet\JWTRefreshTokenBundle\Request\Extractor;
 
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @psalm-mutable
+ */
 interface ExtractorInterface
 {
+    /**
+     * @psalm-mutation-free
+     */
     public function getRefreshToken(Request $request, string $parameter): ?string;
 }

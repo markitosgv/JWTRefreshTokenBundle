@@ -15,6 +15,9 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class MissingTokenException extends AuthenticationException
 {
+    /**
+     * @psalm-pure
+     */
     #[\Override]
     public function getMessageKey(): string
     {

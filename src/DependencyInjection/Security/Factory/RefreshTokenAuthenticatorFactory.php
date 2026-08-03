@@ -23,12 +23,18 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInterface
 {
+    /**
+     * @psalm-pure
+     */
     #[\Override]
     public function getPriority(): int
     {
         return -50;
     }
 
+    /**
+     * @psalm-pure
+     */
     #[\Override]
     public function getKey(): string
     {
@@ -132,11 +138,17 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         return $failureHandlerId;
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     private function getSuccessHandlerId(string $id): string
     {
         return 'security.authentication.success_handler.'.$id.'.'.str_replace('-', '_', $this->getKey());
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     private function getFailureHandlerId(string $id): string
     {
         return 'security.authentication.failure_handler.'.$id.'.'.str_replace('-', '_', $this->getKey());

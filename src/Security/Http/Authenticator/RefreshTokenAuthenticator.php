@@ -41,6 +41,9 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
 {
     private array $options;
 
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
         private readonly EventDispatcherInterface $eventDispatcher,

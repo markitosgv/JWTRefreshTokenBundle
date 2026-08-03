@@ -53,6 +53,9 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $model;
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     public function __toString(): string
     {
         return !in_array($this->getRefreshToken(), [null, '', '0'], true) ? $this->getRefreshToken() : '';
@@ -64,6 +67,9 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $this->id;
     }
 
+    /**
+     * @psalm-external-mutation-free
+     */
     #[\Override]
     public function setRefreshToken(string $refreshToken): static
     {
@@ -78,6 +84,9 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $this->refreshToken;
     }
 
+    /**
+     * @psalm-external-mutation-free
+     */
     #[\Override]
     public function setValid(DateTimeInterface $valid): static
     {
@@ -92,6 +101,9 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $this->valid;
     }
 
+    /**
+     * @psalm-external-mutation-free
+     */
     #[\Override]
     public function setUsername(string $username): static
     {

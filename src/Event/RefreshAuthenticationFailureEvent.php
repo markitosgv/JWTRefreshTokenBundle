@@ -17,6 +17,9 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class RefreshAuthenticationFailureEvent extends Event
 {
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly AuthenticationException $exception,
         private Response $response
@@ -33,6 +36,9 @@ final class RefreshAuthenticationFailureEvent extends Event
         return $this->response;
     }
 
+    /**
+     * @psalm-external-mutation-free
+     */
     public function setResponse(Response $response): void
     {
         $this->response = $response;

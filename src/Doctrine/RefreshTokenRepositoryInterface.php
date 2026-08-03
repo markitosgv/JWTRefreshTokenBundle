@@ -10,6 +10,8 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
  * @template T of RefreshTokenInterface
  *
  * @extends ObjectRepository<T>
+ *
+ * @psalm-mutable
  */
 interface RefreshTokenRepositoryInterface extends ObjectRepository
 {
@@ -21,12 +23,16 @@ interface RefreshTokenRepositoryInterface extends ObjectRepository
      * @param array<string, string>|null $orderBy
      *
      * @return T|null
+     *
+     * @psalm-impure it queries the storage
      */
     #[\Override]
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
     /**
      * @return iterable<T>
+     *
+     * @psalm-impure it queries the storage
      */
     public function findInvalid(?DateTimeInterface $datetime = null): iterable;
 
@@ -35,6 +41,8 @@ interface RefreshTokenRepositoryInterface extends ObjectRepository
      * @param int<0, max>       $offset
      *
      * @return iterable<T>
+     *
+     * @psalm-impure it queries the storage
      */
     public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable;
 }

@@ -23,6 +23,9 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
 {
     private ?string $firewallName = null;
 
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler,
         private readonly EventDispatcherInterface $eventDispatcher
@@ -46,6 +49,9 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
         return $this->firewallName;
     }
 
+    /**
+     * @psalm-external-mutation-free
+     */
     public function setFirewallName(string $firewallName): void
     {
         $this->firewallName = $firewallName;

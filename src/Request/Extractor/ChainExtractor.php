@@ -20,11 +20,17 @@ final class ChainExtractor implements ExtractorInterface
      */
     private array $extractors = [];
 
+    /**
+     * @psalm-external-mutation-free
+     */
     public function addExtractor(ExtractorInterface $extractor): void
     {
         $this->extractors[] = $extractor;
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     #[\Override]
     public function getRefreshToken(Request $request, string $parameter): ?string
     {

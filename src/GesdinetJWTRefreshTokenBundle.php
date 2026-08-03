@@ -22,6 +22,9 @@ class GesdinetJWTRefreshTokenBundle extends Bundle
         $extension->addAuthenticatorFactory(new RefreshTokenAuthenticatorFactory());
     }
 
+    /**
+     * @psalm-pure
+     */
     #[\Override]
     public function getPath(): string
     {

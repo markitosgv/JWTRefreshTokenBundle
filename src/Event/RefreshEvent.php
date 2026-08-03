@@ -17,6 +17,9 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class RefreshEvent extends Event
 {
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly RefreshTokenInterface $refreshToken,
         private readonly TokenInterface $token,
