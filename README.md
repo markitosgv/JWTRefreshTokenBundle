@@ -10,6 +10,8 @@
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-brightgreen.svg)](https://phpstan.org/)
 [![Rector](https://img.shields.io/badge/Rector-enabled-brightgreen.svg)](https://getrector.org/)
 
+Packagist has no badge for the downloads of a single release, but it does chart them: see the [download statistics](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle/stats) for the breakdown per version.
+
 The purpose of this bundle is manage refresh tokens with JWT (Json Web Tokens) in an easy way. This bundles uses [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle). Supports Doctrine ORM/ODM.
 
 ## Prerequisites
