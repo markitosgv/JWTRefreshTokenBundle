@@ -5,12 +5,15 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Doctrine;
 use DateTimeInterface;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectRepository;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 
 class RefreshTokenManagerTest extends TestCase
@@ -358,6 +361,19 @@ class RefreshTokenManagerTest extends TestCase
             ->method('flush');
 
         $this->assertSame([], $this->refreshTokenManager->revokeAllInvalid(null, true));
+    }
+
+    public function testRefusesAnObjectManagerWhoseRepositoryDoesNotImplementTheInterface(): void
+    {
+        $objectManager = $this->createMock(ObjectManager::class);
+        $objectManager
+            ->method('getRepository')
+            ->willReturn($this->createMock(ObjectRepository::class));
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(sprintf('Repository mapped for "%s" should implement %s.', RefreshToken::class, RefreshTokenRepositoryInterface::class));
+
+        new RefreshTokenManager($objectManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
     }
 
     public function testProvidesTheModelClass(): void

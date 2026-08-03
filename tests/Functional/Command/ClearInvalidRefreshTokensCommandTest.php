@@ -69,6 +69,23 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $this->assertStringContainsString('* refresh-token', $output, 'The output should list all invalidated tokens');
     }
 
+    public function test_reports_when_there_was_nothing_to_revoke(): void
+    {
+        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
+        $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
+        $refreshTokenManager->expects($this->once())
+            ->method('revokeAllInvalidBatch')
+            ->willReturn([]);
+
+        $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertStringContainsString('There were no invalid tokens to revoke.', $commandTester->getDisplay());
+    }
+
     public function test_rejects_a_batch_size_that_is_not_positive(): void
     {
         /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */

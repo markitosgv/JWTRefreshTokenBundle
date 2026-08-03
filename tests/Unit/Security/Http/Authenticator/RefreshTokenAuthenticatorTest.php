@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Security\Http\Authenticator;
 
+use DateTime;
 use DateTimeInterface;
 use ReflectionClass;
 use Gesdinet\JWTRefreshTokenBundle\Http\RefreshAuthenticationFailureResponse;
@@ -142,6 +143,31 @@ final class RefreshTokenAuthenticatorTest extends TestCase
             ->expects($this->atLeastOnce())
             ->method('save')
             ->with($this->equalTo($refreshToken));
+
+        $this->assertInstanceOf(Passport::class, $this->refreshTokenAuthenticator->authenticate($request));
+    }
+
+    public function testBringsForwardTheExpirationWhenTheConfiguredTtlIsNegative(): void
+    {
+        /** @var Request&MockObject $request */
+        $request = $this->createMock(Request::class);
+
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+
+        $this->appendOptionsOnRefreshTokenAuthenticator(['ttl_update' => true, 'ttl' => -600]);
+
+        $token = 'my-refresh-token';
+
+        $this->createExtractorGetRefreshTokenExpectation($request, $token);
+        $this->createRefreshTokenManagerGetExpectation($token, $refreshToken);
+        $this->createRefreshTokenIsValidExpectation($refreshToken, true);
+        $this->createRefreshTokenGetUsernameExpectation($refreshToken, 'test@example.com');
+
+        $refreshToken
+            ->expects($this->once())
+            ->method('setValid')
+            ->with($this->callback(static fn (DateTimeInterface $valid): bool => $valid < new DateTime()));
 
         $this->assertInstanceOf(Passport::class, $this->refreshTokenAuthenticator->authenticate($request));
     }

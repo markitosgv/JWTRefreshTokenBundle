@@ -71,6 +71,15 @@ final class ConfigurationTest extends TestCase
         ]);
     }
 
+    public function test_configuration_is_invalid_when_refresh_token_class_is_not_a_string(): void
+    {
+        $this->assertConfigurationIsInvalid([
+            [
+                'refresh_token_class' => 123,
+            ],
+        ]);
+    }
+
     public function test_configuration_is_invalid_when_batch_size_is_negative(): void
     {
         $this->assertConfigurationIsInvalid([

@@ -70,6 +70,27 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }
 
+    public function testTreatsAnEmptyExtractedTokenAsNoTokenAtAll(): void
+    {
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+        $refreshToken->method('getValid')->willReturn(new DateTime('+1 day'));
+
+        // An empty value must not be reused, a new token is generated instead
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->willReturn($refreshToken);
+
+        $event = $this->createEventExpectingData(
+            [self::TOKEN_PARAMETER_NAME => 'thenewlyissuedrefreshtoken'],
+            ''
+        );
+
+        $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
+    }
+
     public function testAttachesTheExpirationOfTheReusedToken(): void
     {
         $expiration = new DateTime('+1 day');
