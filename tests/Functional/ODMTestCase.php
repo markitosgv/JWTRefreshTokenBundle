@@ -14,7 +14,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 abstract class ODMTestCase extends TestCase
 {
-    protected DocumentManager $documentManager;
+    protected ?DocumentManager $documentManager = null;
 
     protected function setUp(): void
     {
@@ -56,7 +56,7 @@ abstract class ODMTestCase extends TestCase
      */
     protected function tearDown(): void
     {
-        if (!$this->documentManager) {
+        if (null === $this->documentManager) {
             return;
         }
 
