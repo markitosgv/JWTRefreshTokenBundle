@@ -19,6 +19,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * Subclasses must keep the constructor signature of this class, it is instantiated with `new static()`.
  *
  * @phpstan-consistent-constructor
+ *
  * @psalm-consistent-constructor
  */
 abstract class AbstractRefreshToken implements RefreshTokenInterface
