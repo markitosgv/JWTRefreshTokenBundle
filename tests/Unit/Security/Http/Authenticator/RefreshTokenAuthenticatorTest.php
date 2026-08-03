@@ -159,13 +159,32 @@ final class RefreshTokenAuthenticatorTest extends TestCase
         $this->createRefreshTokenManagerGetExpectation($token, $refreshToken);
         $this->createRefreshTokenIsValidExpectation($refreshToken, false);
 
-        $refreshToken
-            ->expects($this->once())
-            ->method('getRefreshToken')
-            ->willReturn($token);
-
         $this->expectExceptionObject(
             new InvalidTokenException('Refresh token "my-refresh-token" is invalid.')
+        );
+
+        $this->refreshTokenAuthenticator->authenticate($request);
+    }
+
+    public function testDoesNotAuthenticateTheRequestWhenTheTokenHasNoUser(): void
+    {
+        /** @var Request&MockObject $request */
+        $request = $this->createMock(Request::class);
+
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $token = 'my-refresh-token';
+
+        $this->createExtractorGetRefreshTokenExpectation($request, $token);
+        $this->createRefreshTokenManagerGetExpectation($token, $refreshToken);
+        $this->createRefreshTokenIsValidExpectation($refreshToken, true);
+
+        $refreshToken
+            ->method('getUsername')
+            ->willReturn(null);
+
+        $this->expectExceptionObject(
+            new InvalidTokenException('Refresh token "my-refresh-token" is not attached to a user.')
         );
 
         $this->refreshTokenAuthenticator->authenticate($request);

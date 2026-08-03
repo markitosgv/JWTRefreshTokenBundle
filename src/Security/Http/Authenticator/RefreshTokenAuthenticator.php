@@ -84,7 +84,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         }
 
         if (!$refreshToken->isValid()) {
-            throw new InvalidTokenException(sprintf('Refresh token "%s" is invalid.', $refreshToken->getRefreshToken()));
+            throw new InvalidTokenException(sprintf('Refresh token "%s" is invalid.', $token));
         }
 
         if ($this->options['ttl_update']) {
@@ -102,7 +102,13 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
             $this->refreshTokenManager->save($refreshToken);
         }
 
-        $passport = new SelfValidatingPassport(new UserBadge($refreshToken->getUsername(), $this->userProvider->loadUserByIdentifier(...)));
+        $username = $refreshToken->getUsername();
+
+        if (null === $username) {
+            throw new InvalidTokenException(sprintf('Refresh token "%s" is not attached to a user.', $token));
+        }
+
+        $passport = new SelfValidatingPassport(new UserBadge($username, $this->userProvider->loadUserByIdentifier(...)));
         $passport->setAttribute('refreshToken', $refreshToken);
 
         return $passport;
@@ -141,13 +147,16 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
     #[\Override]
     public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
+        $response = new RefreshAuthenticationFailureResponse($authException instanceof AuthenticationException ? $authException->getMessageKey() : 'Authentication error');
+
         $event = new RefreshTokenNotFoundEvent(
             new MissingTokenException('JWT Refresh Token not found', 0, $authException),
-            new RefreshAuthenticationFailureResponse($authException instanceof AuthenticationException ? $authException->getMessageKey() : 'Authentication error')
+            $response
         );
 
         $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token_not_found');
 
-        return $event->getResponse();
+        // A listener is free to replace the response, but it may also clear it
+        return $event->getResponse() ?? $response;
     }
 }
