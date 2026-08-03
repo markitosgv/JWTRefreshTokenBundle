@@ -65,9 +65,9 @@ interface RefreshTokenManagerInterface
      * Revokes all invalid refresh tokens in batches.
      *
      * @param DateTimeInterface|null $datetime  the date and time to consider for invalidation
-     * @param int|null               $batchSize The number of tokens to process in each batch.
-     *                                          Defaults to self::MAX_BATCH_SIZE if not provided.
-     * @param int                    $offset    The offset to start processing from.
+     * @param positive-int|null      $batchSize The number of tokens to process in each batch.
+     *                                          Defaults to self::DEFAULT_BATCH_SIZE if not provided.
+     * @param int<0, max>            $offset    The offset to start processing from.
      *                                          Defaults to 0 if not provided.
      * @param bool                   $andFlush  whether to flush the object manager after revoking
      *
