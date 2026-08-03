@@ -68,30 +68,27 @@ final class LogoutEventListener
         $refreshToken = $this->refreshTokenManager->get($tokenString);
 
         if (null === $refreshToken) {
-            $event->setResponse(
-                new JsonResponse(
-                    [
-                        'code' => 200,
-                        'message' => 'The supplied refresh_token is already invalid.',
-                    ],
-                    Response::HTTP_OK
-                )
+            $response = new JsonResponse(
+                [
+                    'code' => 200,
+                    'message' => 'The supplied refresh_token is already invalid.',
+                ],
+                Response::HTTP_OK
             );
         } else {
             $this->refreshTokenManager->delete($refreshToken);
-            $event->setResponse(
-                new JsonResponse(
-                    [
-                        'code' => 200,
-                        'message' => 'The supplied refresh_token has been invalidated.',
-                    ],
-                    Response::HTTP_OK
-                )
+            $response = new JsonResponse(
+                [
+                    'code' => 200,
+                    'message' => 'The supplied refresh_token has been invalidated.',
+                ],
+                Response::HTTP_OK
             );
         }
 
+        $event->setResponse($response);
+
         if ($this->cookieSettings['enabled']) {
-            $response = $event->getResponse();
             $response->headers->clearCookie(
                 $this->tokenParameterName,
                 $this->cookieSettings['path'],
