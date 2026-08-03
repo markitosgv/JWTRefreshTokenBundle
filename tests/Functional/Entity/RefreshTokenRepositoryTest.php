@@ -72,6 +72,46 @@ final class RefreshTokenRepositoryTest extends ORMTestCase
         $this->assertCount(3, $repo->findInvalid());
     }
 
+    public function test_retrieves_only_the_requested_batch_of_invalid_tokens(): void
+    {
+        $this->persistExpiredTokens(5);
+
+        /** @var RefreshTokenRepository $repo */
+        $repo = $this->entityManager->getRepository(RefreshToken::class);
+
+        $this->assertCount(2, $repo->findInvalidBatch(null, 2));
+    }
+
+    public function test_retrieves_the_invalid_tokens_left_after_the_offset(): void
+    {
+        $this->persistExpiredTokens(5);
+
+        /** @var RefreshTokenRepository $repo */
+        $repo = $this->entityManager->getRepository(RefreshToken::class);
+
+        $this->assertCount(1, $repo->findInvalidBatch(null, 2, 4));
+    }
+
+    /**
+     * Every batch is deleted before the next one is read, so the remaining tokens shift down. This
+     * is what catches an implementation paging the offset forward and skipping half of them.
+     */
+    public function test_revokes_every_invalid_token_across_batches(): void
+    {
+        $this->persistExpiredTokens(5);
+
+        $manager = new RefreshTokenManager($this->entityManager, RefreshToken::class, 2);
+
+        $revokedTokens = $manager->revokeAllInvalidBatch(null, 2);
+
+        $this->assertCount(5, $revokedTokens, 'Every expired token should be revoked and returned');
+
+        /** @var RefreshTokenRepository $repo */
+        $repo = $this->entityManager->getRepository(RefreshToken::class);
+
+        $this->assertCount(0, $repo->findInvalid(), 'No expired token should be left in storage');
+    }
+
     public function test_retrieves_all_tokens_older_than_the_specified_time(): void
     {
         for ($i = 1; $i <= 5; ++$i) {
@@ -91,5 +131,18 @@ final class RefreshTokenRepositoryTest extends ORMTestCase
         $time->modify('+1200 seconds');
 
         $this->assertCount(5, $repo->findInvalid($time));
+    }
+
+    private function persistExpiredTokens(int $count): void
+    {
+        for ($i = 1; $i <= $count; ++$i) {
+            $user = new User(sprintf('user-%d@localhost', $i));
+            $token = $this->generator->createForUserWithTtl($user, -600);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->persist($token);
+        }
+
+        $this->entityManager->flush();
     }
 }

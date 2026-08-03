@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\EventListener;
 
+use DateTime;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -50,6 +51,128 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             $this->extractor,
             [],
             self::RETURN_EXPIRATION,
+            self::RETURN_EXPIRATION_PARAMETER_NAME
+        );
+    }
+
+    public function testDoesNothingWithoutACurrentRequest(): void
+    {
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+
+        $this->requestStack
+            ->expects($this->once())
+            ->method('getCurrentRequest')
+            ->willReturn(null);
+
+        $event->expects($this->never())->method('setData');
+
+        $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
+    }
+
+    public function testAttachesTheExpirationOfTheReusedToken(): void
+    {
+        $expiration = new DateTime('+1 day');
+
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken->method('getValid')->willReturn($expiration);
+
+        $this->refreshTokenManager
+            ->method('get')
+            ->willReturn($refreshToken);
+
+        $event = $this->createEventExpectingData([
+            self::TOKEN_PARAMETER_NAME => 'thepreviouslyissuedrefreshtoken',
+            self::RETURN_EXPIRATION_PARAMETER_NAME => $expiration->getTimestamp(),
+        ]);
+
+        $this->createListenerReturningExpiration()->attachRefreshToken($event);
+    }
+
+    public function testAttachesAZeroExpirationWhenTheTokenHasNoExpirationDate(): void
+    {
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken->method('getValid')->willReturn(null);
+
+        $this->refreshTokenManager
+            ->method('get')
+            ->willReturn($refreshToken);
+
+        $event = $this->createEventExpectingData([
+            self::TOKEN_PARAMETER_NAME => 'thepreviouslyissuedrefreshtoken',
+            self::RETURN_EXPIRATION_PARAMETER_NAME => 0,
+        ]);
+
+        $this->createListenerReturningExpiration()->attachRefreshToken($event);
+    }
+
+    public function testAttachesTheExpirationOfAFreshlyGeneratedToken(): void
+    {
+        $expiration = new DateTime('+1 day');
+
+        /** @var RefreshTokenInterface&MockObject $refreshToken */
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $refreshToken->method('getValid')->willReturn($expiration);
+        $refreshToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->willReturn($refreshToken);
+
+        $event = $this->createEventExpectingData([
+            self::TOKEN_PARAMETER_NAME => 'thenewlyissuedrefreshtoken',
+            self::RETURN_EXPIRATION_PARAMETER_NAME => $expiration->getTimestamp(),
+        ], null);
+
+        $this->createListenerReturningExpiration()->attachRefreshToken($event);
+    }
+
+    /**
+     * @param array<string, mixed> $expectedData
+     */
+    private function createEventExpectingData(array $expectedData, ?string $extractedToken = 'thepreviouslyissuedrefreshtoken'): AuthenticationSuccessEvent&MockObject
+    {
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+
+        $event->method('getUser')->willReturn($this->createMock(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+
+        $request = Request::create('/', 'POST');
+
+        $this->requestStack
+            ->expects($this->once())
+            ->method('getCurrentRequest')
+            ->willReturn($request);
+
+        $this->extractor
+            ->expects($this->once())
+            ->method('getRefreshToken')
+            ->willReturn($extractedToken);
+
+        $event
+            ->expects($this->once())
+            ->method('setData')
+            ->with($this->equalTo($expectedData));
+
+        return $event;
+    }
+
+    private function createListenerReturningExpiration(): AttachRefreshTokenOnSuccessListener
+    {
+        return new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            true,
             self::RETURN_EXPIRATION_PARAMETER_NAME
         );
     }
