@@ -12,6 +12,9 @@ class User implements UserInterface
     #[ODM\Id]
     private ?string $id = null;
 
+    /**
+     * @param non-empty-string $email
+     */
     public function __construct(
         #[ODM\Field]
         private string $email,
@@ -49,6 +52,9 @@ class User implements UserInterface
         return $this->getUserIdentifier();
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function getUserIdentifier(): string
     {
         return $this->email;

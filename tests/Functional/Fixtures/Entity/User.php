@@ -14,6 +14,9 @@ class User implements UserInterface
     #[ORM\GeneratedValue]
     private ?int $id = null;
 
+    /**
+     * @param non-empty-string $email
+     */
     public function __construct(
         #[ORM\Column]
         private string $email,
@@ -51,6 +54,9 @@ class User implements UserInterface
         return $this->getUserIdentifier();
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function getUserIdentifier(): string
     {
         return $this->email;
