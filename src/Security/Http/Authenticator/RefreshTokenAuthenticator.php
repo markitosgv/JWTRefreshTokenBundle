@@ -97,9 +97,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
             $this->refreshTokenManager->save($refreshToken);
         }
 
-        $method = method_exists($this->userProvider, 'loadUserByIdentifier') ? 'loadUserByIdentifier' : 'loadUserByUsername';
-
-        $passport = new SelfValidatingPassport(new UserBadge($refreshToken->getUsername(), [$this->userProvider, $method]));
+        $passport = new SelfValidatingPassport(new UserBadge($refreshToken->getUsername(), $this->userProvider->loadUserByIdentifier(...)));
         $passport->setAttribute('refreshToken', $refreshToken);
 
         return $passport;
@@ -127,7 +125,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         return $this->successHandler->onAuthenticationSuccess($request, $token);
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
         return $this->failureHandler->onAuthenticationFailure($request, $exception);
     }

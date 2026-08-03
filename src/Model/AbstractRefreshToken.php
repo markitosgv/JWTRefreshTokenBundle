@@ -15,6 +15,11 @@ use DateTimeInterface;
 use DateTime;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * Subclasses must keep the constructor signature of this class, it is instantiated with `new static()`.
+ *
+ * @phpstan-consistent-constructor
+ */
 abstract class AbstractRefreshToken implements RefreshTokenInterface
 {
     protected int|string|null $id = null;
@@ -41,7 +46,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
 
         $model = new static();
         $model->setRefreshToken($refreshToken);
-        $model->setUsername(method_exists($user, 'getUserIdentifier') ? $user->getUserIdentifier() : $user->getUsername());
+        $model->setUsername($user->getUserIdentifier());
         $model->setValid($valid);
 
         return $model;
