@@ -43,9 +43,6 @@ jobs:
       - name: Update Composer dependencies
         run: composer update
 
-      - name: Install Composer dependencies
-        run: composer install
-
       - name: Mark /github/workspace as safe
         run: git config --global --add safe.directory /github/workspace
 
