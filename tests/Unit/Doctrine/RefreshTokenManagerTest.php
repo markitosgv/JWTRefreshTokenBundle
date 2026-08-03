@@ -181,18 +181,16 @@ class RefreshTokenManagerTest extends TestCase
     public function testRevokesAllInvalidTokensInBatchesAndFlushesTheObjectManager(): void
     {
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
+        $remainingTokens = [$refreshToken];
         $this->repository
             ->expects($this->exactly(2))
             ->method('findInvalidBatch')
-            ->willReturnCallback(function ($arg1, $arg2, $arg3) use ($refreshToken) {
-                if (null === $arg1 && 1000 === $arg2 && 0 === $arg3) {
-                    return [$refreshToken];
-                }
-                if (null === $arg1 && 1000 === $arg2 && 1000 === $arg3) {
-                    return [];
-                }
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use (&$remainingTokens) {
+                $this->assertNull($arg1);
+                $this->assertSame(1000, $arg2);
+                $this->assertSame(0, $arg3);
 
-                return null;
+                return array_splice($remainingTokens, 0, 1000);
             });
 
         $this->objectManager
@@ -208,34 +206,85 @@ class RefreshTokenManagerTest extends TestCase
 
     public function testReturnsAllTheTokensRevokedInBatches(): void
     {
-        $firstBatch = [$this->createMock(RefreshTokenInterface::class), $this->createMock(RefreshTokenInterface::class)];
-        $secondBatch = [$this->createMock(RefreshTokenInterface::class)];
+        $allTokens = [
+            $this->createMock(RefreshTokenInterface::class),
+            $this->createMock(RefreshTokenInterface::class),
+            $this->createMock(RefreshTokenInterface::class),
+        ];
+        $remainingTokens = $allTokens;
 
         $this->repository
             ->expects($this->exactly(3))
             ->method('findInvalidBatch')
-            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use ($firstBatch, $secondBatch): array {
-                return match ($offset) {
-                    0 => $firstBatch,
-                    2 => $secondBatch,
-                    default => [],
-                };
+            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use (&$remainingTokens): array {
+                return array_splice($remainingTokens, 0, 2);
             });
 
         $revokedTokens = $this->refreshTokenManager->revokeAllInvalidBatch(null, 2, 0, true);
 
-        $this->assertSame([...$firstBatch, ...$secondBatch], $revokedTokens, 'All the revoked tokens should be returned, not only the ones of the last batch');
+        $this->assertSame($allTokens, $revokedTokens, 'All the revoked tokens should be returned, not only the ones of the last batch');
+    }
+
+    public function testDoesNotSkipTokensWhenTheBatchesAreFlushed(): void
+    {
+        $tokens = [
+            $this->createMock(RefreshTokenInterface::class),
+            $this->createMock(RefreshTokenInterface::class),
+            $this->createMock(RefreshTokenInterface::class),
+        ];
+
+        // The storage is emptied batch by batch, so the offset must always point at the first
+        // token still left. Anything else would skip the tokens that shifted down.
+        $offsets = [];
+        $this->repository
+            ->expects($this->exactly(3))
+            ->method('findInvalidBatch')
+            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use (&$tokens, &$offsets): array {
+                $offsets[] = $offset;
+
+                return array_splice($tokens, 0, 2);
+            });
+
+        $revokedTokens = $this->refreshTokenManager->revokeAllInvalidBatch(null, 2, 0, true);
+
+        $this->assertSame([0, 0, 0], $offsets, 'The offset should not move forward while the batches are being deleted');
+        $this->assertCount(3, $revokedTokens, 'Every invalid token should be revoked');
+    }
+
+    public function testPagesForwardWhenTheCallerTakesCareOfTheFlush(): void
+    {
+        $token = $this->createMock(RefreshTokenInterface::class);
+
+        // Nothing is deleted until the caller flushes, so the offset has to page forward.
+        $offsets = [];
+        $this->repository
+            ->expects($this->exactly(3))
+            ->method('findInvalidBatch')
+            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use ($token, &$offsets): array {
+                $offsets[] = $offset;
+
+                return $offset < 4 ? [$token, $token] : [];
+            });
+
+        $this->objectManager
+            ->expects($this->never())
+            ->method('flush');
+
+        $this->refreshTokenManager->revokeAllInvalidBatch(null, 2, 0, false);
+
+        $this->assertSame([0, 2, 4], $offsets, 'The offset should page forward when nothing is deleted');
     }
 
     public function testRevokesAllInvalidTokensInBatchesWhenTheRepositoryReturnsAnIterator(): void
     {
         $refreshToken = $this->createMock(RefreshTokenInterface::class);
 
+        $remainingTokens = [$refreshToken];
         $this->repository
             ->expects($this->exactly(2))
             ->method('findInvalidBatch')
-            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use ($refreshToken): CachingIteratorDouble {
-                return new CachingIteratorDouble(0 === $offset ? [$refreshToken] : []);
+            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use (&$remainingTokens): CachingIteratorDouble {
+                return new CachingIteratorDouble(array_splice($remainingTokens, 0, 1000));
             });
 
         $this->objectManager

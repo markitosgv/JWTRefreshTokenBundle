@@ -115,6 +115,11 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     /**
      * Revokes all invalid (expired) refresh tokens in batches.
      *
+     * When the tokens are flushed, every batch is deleted from the storage before the next one is
+     * read, so the remaining tokens shift down and the offset must stay where it is. Advancing it
+     * would skip one batch for every batch deleted. The offset is only paged forward when the
+     * caller takes care of the flush, since nothing has been deleted yet in that case.
+     *
      * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
      * @param ?positive-int      $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
      * @param ?int<0, max>       $offset    The offset to start processing from, defaults to 0
@@ -138,9 +143,9 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
             if ($andFlush && [] !== $invalidTokens) {
                 $this->objectManager->flush();
                 $this->objectManager->clear();
+            } else {
+                $offset += $batchSize;
             }
-
-            $offset += $batchSize;
         } while ([] !== $invalidTokens);
 
         return $revokedTokens;
