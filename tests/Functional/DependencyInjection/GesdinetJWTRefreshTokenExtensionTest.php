@@ -7,6 +7,7 @@ use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
 final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCase
 {
@@ -15,6 +16,20 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         return [
             new GesdinetJWTRefreshTokenExtension(),
         ];
+    }
+
+    /**
+     * When the node is left out, the bundle looks for an installed mapping. Neither doctrine-bundle
+     * nor mongodb-odm-bundle are installed here, which is the situation the message describes.
+     */
+    public function test_object_manager_must_be_configured_when_no_mapping_is_detected(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
+
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+        ]);
     }
 
     public function test_container_is_loaded_with_default_configuration(): void
