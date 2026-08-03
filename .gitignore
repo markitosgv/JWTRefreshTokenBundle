@@ -3,6 +3,8 @@
 composer.lock
 .phpunit.result.cache
 /phpunit.xml
+/psalm.xml
+/results.sarif
 /coverage.xml
 /coverage/
 .php-cs-fixer.cache

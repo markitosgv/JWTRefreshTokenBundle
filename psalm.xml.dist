@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="8"
+    resolveFromConfigFile="true"
+    findUnusedCode="false"
+    findUnusedBaselineEntry="false"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <!--
+        Starting point, deliberately lax. Lower errorLevel towards 1 as the code is cleaned up.
+        findUnusedCode is off because this is a library: its public API is used by the applications
+        that install it, not from within the bundle.
+    -->
+    <projectFiles>
+        <directory name="src" />
+        <ignoreFiles>
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <!--
+            Annotations Psalm 7 asks for that the code has not adopted yet. Enable them one by one
+            when adding the corresponding attributes and docblocks.
+        -->
+        <MissingOverrideAttribute errorLevel="suppress" />
+        <MissingPureAnnotation errorLevel="suppress" />
+        <MissingAbstractPureAnnotation errorLevel="suppress" />
+        <MissingInterfaceImmutableAnnotation errorLevel="suppress" />
+    </issueHandlers>
+</psalm>
