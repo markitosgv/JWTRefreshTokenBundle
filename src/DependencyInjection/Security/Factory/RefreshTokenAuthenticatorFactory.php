@@ -11,7 +11,9 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory;
 
+use InvalidArgumentException;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\AuthenticatorFactoryInterface;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -33,6 +35,10 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
 
     public function addConfiguration(NodeDefinition $builder): void
     {
+        if (!$builder instanceof ArrayNodeDefinition) {
+            throw new InvalidArgumentException(sprintf('The "%s" authenticator can only be configured on an array node, "%s" given.', $this->getKey(), get_debug_type($builder)));
+        }
+
         // no-op TTL and param configuration until bundle is further updated to support per-authenticator configuration
         $builder
             ->children()

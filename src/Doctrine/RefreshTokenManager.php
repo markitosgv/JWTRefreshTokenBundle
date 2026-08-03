@@ -80,7 +80,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         // Use DQL if this is an ORM EntityManager
         if (
             $this->objectManager instanceof \Doctrine\ORM\EntityManagerInterface ||
-            (is_object($this->objectManager) && str_contains(get_class($this->objectManager), 'MockObject_ObjectManager'))
+            str_contains(get_class($this->objectManager), 'MockObject_ObjectManager')
         ) {
             $repository = $this->objectManager->getRepository($this->class);
 
@@ -122,7 +122,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @param ?DateTimeInterface $datetime  The date and time to consider for invalidation
      * @param ?positive-int      $batchSize Number of tokens to process per batch, defaults to the {@see $defaultBatchSize} property when not provided
-     * @param ?int<0, max>       $offset    The offset to start processing from, defaults to 0
+     * @param int<0, max>        $offset    The offset to start processing from, defaults to 0
      * @param bool               $andFlush  Whether to flush the object manager after revoking
      *
      * @return RefreshTokenInterface[]
