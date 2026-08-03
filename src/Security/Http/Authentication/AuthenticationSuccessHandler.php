@@ -32,8 +32,12 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
     ) {
     }
 
+    /**
+     * The response is whatever the decorated handler returns, and
+     * {@see AuthenticationSuccessHandlerInterface} allows that to be null.
+     */
     #[\Override]
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
     {
         if ($token instanceof PostRefreshTokenAuthenticationToken) {
             $event = new RefreshEvent($token->getRefreshToken(), $token, $this->firewallName);

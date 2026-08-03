@@ -60,6 +60,14 @@ final class ClearInvalidRefreshTokensCommand extends Command
         $datetime = new DateTime($input->getArgument('datetime'));
         $batchSize = (int) $input->getOption('batch-size');
 
+        // A batch of zero or less reads nothing, so the command would report that there was
+        // nothing to revoke while leaving every expired token in place
+        if ($batchSize < 1) {
+            $io->error('The batch size must be a positive integer.');
+
+            return Command::INVALID;
+        }
+
         $revokedTokens = $this->refreshTokenManager->revokeAllInvalidBatch($datetime, $batchSize);
 
         if (0 === count($revokedTokens)) {
@@ -67,7 +75,7 @@ final class ClearInvalidRefreshTokensCommand extends Command
         } else {
             $io->text(sprintf('Revoked %d invalid token(s) in batches of %d', count($revokedTokens), $batchSize));
             $io->listing(array_map(
-                static fn (RefreshTokenInterface $revokedToken): string => $revokedToken->getRefreshToken(),
+                static fn (RefreshTokenInterface $revokedToken): string => $revokedToken->getRefreshToken() ?? '',
                 $revokedTokens,
             ));
         }

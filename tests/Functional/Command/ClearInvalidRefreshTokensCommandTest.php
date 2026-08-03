@@ -8,6 +8,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
 final class ClearInvalidRefreshTokensCommandTest extends TestCase
@@ -66,6 +67,22 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
 
         $this->assertStringContainsString('Revoked 1 invalid token(s)', $output, 'The output should include a summary of the number of invalidated tokens');
         $this->assertStringContainsString('* refresh-token', $output, 'The output should list all invalidated tokens');
+    }
+
+    public function test_rejects_a_batch_size_that_is_not_positive(): void
+    {
+        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
+        $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
+        $refreshTokenManager->expects($this->never())
+            ->method('revokeAllInvalidBatch');
+
+        $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(['--batch-size' => 0]);
+
+        $this->assertSame(Command::INVALID, $commandTester->getStatusCode(), 'A batch size of zero would revoke nothing while reporting success');
+        $this->assertStringContainsString('The batch size must be a positive integer.', $commandTester->getDisplay());
     }
 
     public function test_clears_tokens_with_custom_batch_size(): void
