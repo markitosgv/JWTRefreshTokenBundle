@@ -3,9 +3,13 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\DependencyInjection\Security\Factory;
 
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory\RefreshTokenAuthenticatorFactory;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
@@ -19,6 +23,121 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
     {
         $this->factory = new RefreshTokenAuthenticatorFactory();
         $this->container = new ContainerBuilder();
+    }
+
+    public function test_is_registered_under_the_refresh_jwt_key_after_the_other_authenticators(): void
+    {
+        $this->assertSame('refresh-jwt', $this->factory->getKey());
+        $this->assertSame(-50, $this->factory->getPriority());
+    }
+
+    public function test_firewall_configuration_defaults(): void
+    {
+        $this->assertSame(
+            [
+                'check_path' => '/login_check',
+                'invalidate_token_on_logout' => true,
+            ],
+            $this->processConfiguration([])
+        );
+    }
+
+    public function test_firewall_configuration_accepts_the_supported_values(): void
+    {
+        $config = $this->processConfiguration([
+            'check_path' => '/api/token/refresh',
+            'provider' => 'app.user_provider',
+            'success_handler' => 'app.security.authentication.success_handler',
+            'failure_handler' => 'app.security.authentication.failure_handler',
+            'invalidate_token_on_logout' => false,
+        ]);
+
+        $this->assertSame('/api/token/refresh', $config['check_path']);
+        $this->assertSame('app.user_provider', $config['provider']);
+        $this->assertSame('app.security.authentication.success_handler', $config['success_handler']);
+        $this->assertSame('app.security.authentication.failure_handler', $config['failure_handler']);
+        $this->assertFalse($config['invalidate_token_on_logout']);
+    }
+
+    public function test_configuration_is_rejected_on_a_node_that_cannot_hold_children(): void
+    {
+        $node = (new TreeBuilder('refresh-jwt', 'scalar'))->getRootNode();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The "refresh-jwt" authenticator can only be configured on an array node');
+
+        $this->factory->addConfiguration($node);
+    }
+
+    public function test_authenticator_service_takes_its_options_from_the_bundle_parameters(): void
+    {
+        $authenticatorId = $this->factory->createAuthenticator(
+            $this->container,
+            'test',
+            $this->processConfiguration([]),
+            'app.user_provider'
+        );
+
+        $this->assertSame('security.authenticator.refresh_jwt.test', $authenticatorId);
+
+        /** @var ChildDefinition $authenticator */
+        $authenticator = $this->container->getDefinition($authenticatorId);
+
+        $this->assertSame('gesdinet_jwt_refresh_token.security.refresh_token_authenticator', $authenticator->getParent());
+        $this->assertEquals(new Reference('app.user_provider'), $authenticator->getArgument(3));
+
+        // Per authenticator options are not supported yet, so everything but the path is taken
+        // from the bundle parameters
+        $this->assertEquals(
+            [
+                'check_path' => '/login_check',
+                'ttl' => new Parameter('gesdinet_jwt_refresh_token.ttl'),
+                'ttl_update' => new Parameter('gesdinet_jwt_refresh_token.ttl_update'),
+                'token_parameter_name' => new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
+            ],
+            $authenticator->getArgument(6)
+        );
+    }
+
+    public function test_success_handler_is_bound_to_the_firewall(): void
+    {
+        $this->factory->createAuthenticator(
+            $this->container,
+            'test',
+            $this->processConfiguration([]),
+            'app.user_provider'
+        );
+
+        $successHandler = $this->container->getDefinition('security.authentication.success_handler.test.refresh_jwt');
+
+        $this->assertSame([['setFirewallName', ['test']]], $successHandler->getMethodCalls());
+    }
+
+    public function test_logout_listener_is_not_registered_when_the_token_is_kept_on_logout(): void
+    {
+        $this->factory->createAuthenticator(
+            $this->container,
+            'test',
+            $this->processConfiguration(['invalidate_token_on_logout' => false]),
+            'app.user_provider'
+        );
+
+        $this->assertTrue($this->container->hasDefinition('security.authenticator.refresh_jwt.test'));
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.security.listener.logout.test'));
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     *
+     * @return array<string, mixed>
+     */
+    private function processConfiguration(array $config): array
+    {
+        $treeBuilder = new TreeBuilder('refresh-jwt');
+
+        $this->factory->addConfiguration($treeBuilder->getRootNode());
+
+        return (new Processor())->process($treeBuilder->buildTree(), [$config]);
     }
 
     public function test_authenticator_service_is_created_with_default_configuration(): void
