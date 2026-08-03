@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     /**
-     * @param array<array-key, mixed> $mergedConfig
+     * @param array{ttl: int, ttl_update: bool, single_use: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, object_manager: string|null} $mergedConfig
      */
     #[\Override]
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void

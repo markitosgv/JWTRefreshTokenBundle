@@ -57,8 +57,18 @@ final class ClearInvalidRefreshTokensCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $datetime = new DateTime($input->getArgument('datetime'));
-        $batchSize = (int) $input->getOption('batch-size');
+        $datetimeArgument = $input->getArgument('datetime');
+        $batchSizeOption = $input->getOption('batch-size');
+
+        // Both come off the command line, where an argument may also arrive as an array
+        if (!is_string($datetimeArgument) || !is_numeric($batchSizeOption)) {
+            $io->error('The datetime and the batch size must each be a single value.');
+
+            return Command::INVALID;
+        }
+
+        $datetime = new DateTime($datetimeArgument);
+        $batchSize = (int) $batchSizeOption;
 
         // A batch of zero or less reads nothing, so the command would report that there was
         // nothing to revoke while leaving every expired token in place

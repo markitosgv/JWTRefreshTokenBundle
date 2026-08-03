@@ -6,6 +6,7 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 final class PostRefreshTokenAuthenticationTokenTest extends TestCase
 {
@@ -36,5 +37,15 @@ final class PostRefreshTokenAuthenticationTokenTest extends TestCase
         $this->assertSame('user@localhost', $restored->getUserIdentifier());
         $this->assertSame(['ROLE_USER'], $restored->getRoleNames());
         $this->assertSame('api', $restored->getFirewallName());
+    }
+
+    public function test_refuses_serialized_state_that_does_not_hold_a_refresh_token(): void
+    {
+        $token = new PostRefreshTokenAuthenticationToken(UserCreator::create(), 'api', ['ROLE_USER'], new RefreshToken());
+
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('serialized state');
+
+        $token->__unserialize(['not-a-refresh-token', []]);
     }
 }

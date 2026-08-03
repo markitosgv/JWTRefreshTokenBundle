@@ -102,6 +102,22 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $this->assertStringContainsString('The batch size must be a positive integer.', $commandTester->getDisplay());
     }
 
+    public function test_rejects_a_batch_size_that_is_not_a_number(): void
+    {
+        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
+        $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
+        $refreshTokenManager->expects($this->never())
+            ->method('revokeAllInvalidBatch');
+
+        $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(['--batch-size' => 'every-single-one']);
+
+        $this->assertSame(Command::INVALID, $commandTester->getStatusCode());
+        $this->assertStringContainsString('must each be a single value', $commandTester->getDisplay());
+    }
+
     public function test_clears_tokens_with_custom_batch_size(): void
     {
         $batchSize = 5;

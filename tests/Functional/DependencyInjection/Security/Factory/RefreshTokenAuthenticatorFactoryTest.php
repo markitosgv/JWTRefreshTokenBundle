@@ -44,19 +44,15 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 
     public function test_firewall_configuration_accepts_the_supported_values(): void
     {
-        $config = $this->processConfiguration([
+        $config = [
             'check_path' => '/api/token/refresh',
             'provider' => 'app.user_provider',
             'success_handler' => 'app.security.authentication.success_handler',
             'failure_handler' => 'app.security.authentication.failure_handler',
             'invalidate_token_on_logout' => false,
-        ]);
+        ];
 
-        $this->assertSame('/api/token/refresh', $config['check_path']);
-        $this->assertSame('app.user_provider', $config['provider']);
-        $this->assertSame('app.security.authentication.success_handler', $config['success_handler']);
-        $this->assertSame('app.security.authentication.failure_handler', $config['failure_handler']);
-        $this->assertFalse($config['invalidate_token_on_logout']);
+        $this->assertSame($config, $this->processConfiguration($config), 'Every supported value is kept, and nothing else is added');
     }
 
     public function test_configuration_is_rejected_on_a_node_that_cannot_hold_children(): void
@@ -129,7 +125,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
     /**
      * @param array<string, mixed> $config
      *
-     * @return array<string, mixed>
+     * @return array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool}
      */
     private function processConfiguration(array $config): array
     {
@@ -137,7 +133,10 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 
         $this->factory->addConfiguration($treeBuilder->getRootNode());
 
-        return (new Processor())->process($treeBuilder->buildTree(), [$config]);
+        /** @var array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool} $processed */
+        $processed = (new Processor())->process($treeBuilder->buildTree(), [$config]);
+
+        return $processed;
     }
 
     public function test_authenticator_service_is_created_with_default_configuration(): void

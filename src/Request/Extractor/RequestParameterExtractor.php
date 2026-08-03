@@ -18,6 +18,8 @@ final class RequestParameterExtractor implements ExtractorInterface
     #[\Override]
     public function getRefreshToken(Request $request, string $parameter): ?string
     {
-        return $request->attributes->get($parameter) ?? $request->query->get($parameter) ?? $request->request->get($parameter);
+        $token = $request->attributes->get($parameter) ?? $request->query->get($parameter) ?? $request->request->get($parameter);
+
+        return is_string($token) ? $token : null;
     }
 }

@@ -79,6 +79,9 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         ;
     }
 
+    /**
+     * @param array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool} $config
+     */
     #[\Override]
     public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId): string
     {
@@ -107,7 +110,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
     }
 
     /**
-     * @param array<string, mixed> $config
+     * @param array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool} $config
      */
     private function createAuthenticationSuccessHandler(ContainerBuilder $container, string $id, array $config): string
     {
@@ -127,7 +130,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
     }
 
     /**
-     * @param array<string, mixed> $config
+     * @param array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool} $config
      */
     private function createAuthenticationFailureHandler(ContainerBuilder $container, string $id, array $config): string
     {

@@ -20,11 +20,14 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
     #[\Override]
     public function findInvalid(?DateTimeInterface $datetime = null): iterable
     {
-        return $this->createQueryBuilder('u')
+        /** @var list<RefreshToken> $tokens */
+        $tokens = $this->createQueryBuilder('u')
             ->where('u.valid < :datetime')
             ->setParameter(':datetime', $datetime ?? new DateTime())
             ->getQuery()
             ->getResult();
+
+        return $tokens;
     }
 
     /**
@@ -44,12 +47,15 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
     #[\Override]
     public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
     {
-        return $this->createQueryBuilder('u')
+        /** @var list<RefreshToken> $tokens */
+        $tokens = $this->createQueryBuilder('u')
             ->where('u.valid < :datetime')
             ->setParameter(':datetime', $datetime ?? new DateTime())
             ->setFirstResult($offset)
             ->setMaxResults($batchSize)
             ->getQuery()
             ->getResult();
+
+        return $tokens;
     }
 }

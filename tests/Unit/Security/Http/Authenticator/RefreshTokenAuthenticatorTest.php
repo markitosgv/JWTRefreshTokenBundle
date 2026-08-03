@@ -375,13 +375,10 @@ final class RefreshTokenAuthenticatorTest extends TestCase
         $reflector = new ReflectionClass(RefreshTokenAuthenticator::class);
         $property = $reflector->getProperty('options');
 
-        $property->setValue(
-            $this->refreshTokenAuthenticator,
-            array_merge(
-                $property->getValue($this->refreshTokenAuthenticator),
-                $options
-            )
-        );
+        /** @var array<string, mixed> $current */
+        $current = $property->getValue($this->refreshTokenAuthenticator);
+
+        $property->setValue($this->refreshTokenAuthenticator, array_merge($current, $options));
     }
 
     private function createUserPassport(string $userIdentifier, UserInterface $user): SelfValidatingPassport

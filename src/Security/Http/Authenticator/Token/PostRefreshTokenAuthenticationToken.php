@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use UnexpectedValueException;
 use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 
 class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
@@ -49,7 +50,15 @@ class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
     #[\Override]
     public function __unserialize(array $data): void
     {
-        [$this->refreshToken, $parentData] = $data;
+        [$refreshToken, $parentData] = $data;
+
+        // The state comes back from the session, so it is not trusted to have the right shape
+        if (!$refreshToken instanceof RefreshTokenInterface || !is_array($parentData)) {
+            throw new UnexpectedValueException(sprintf('The serialized state of "%s" is not usable.', static::class));
+        }
+
+        $this->refreshToken = $refreshToken;
+
         parent::__unserialize($parentData);
     }
 }
