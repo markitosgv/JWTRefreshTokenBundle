@@ -30,7 +30,7 @@ final class RefreshTokenGeneratorTest extends TestCase
         $this->manager
             ->expects($this->once())
             ->method('get')
-            ->with($this->isString())
+            ->with($this->callback('is_string'))
             ->willReturn(null);
 
         $this->manager
@@ -52,7 +52,7 @@ final class RefreshTokenGeneratorTest extends TestCase
         $this->manager
             ->expects($this->exactly(2))
             ->method('get')
-            ->with($this->isString())
+            ->with($this->callback('is_string'))
             ->willReturn($existingRefreshToken, null);
 
         $this->manager

@@ -430,7 +430,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $event
             ->expects($this->atLeastOnce())
             ->method('setData')
-            ->with($this->isArray());
+            ->with($this->callback('is_array'));
 
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }
