@@ -63,7 +63,7 @@ interface RefreshTokenInterface extends Stringable
     public function getUsername(): ?string;
 
     /**
-     * @psalm-mutation-free
+     * @psalm-impure it compares against the current time
      */
     public function isValid(): bool;
 }

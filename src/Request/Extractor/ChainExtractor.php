@@ -28,9 +28,6 @@ final class ChainExtractor implements ExtractorInterface
         $this->extractors[] = $extractor;
     }
 
-    /**
-     * @psalm-mutation-free
-     */
     #[\Override]
     public function getRefreshToken(Request $request, string $parameter): ?string
     {

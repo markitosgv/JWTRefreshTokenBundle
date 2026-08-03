@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 interface ExtractorInterface
 {
     /**
-     * @psalm-mutation-free
+     * @psalm-impure it reads the incoming request
      */
     public function getRefreshToken(Request $request, string $parameter): ?string;
 }
