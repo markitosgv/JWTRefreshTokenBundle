@@ -130,6 +130,13 @@ class RefreshTokenManager implements RefreshTokenManagerInterface
     {
         $invalidTokens = $this->repository->findInvalid($datetime);
 
+        // The ORM repository returns an array, but the ODM one returns a
+        // Doctrine\ODM\MongoDB\Iterator\CachingIterator, which is not an array. Normalize it so
+        // callers always get the RefreshTokenInterface[] documented by the interface.
+        if (!is_array($invalidTokens)) {
+            $invalidTokens = iterator_to_array($invalidTokens, false);
+        }
+
         foreach ($invalidTokens as $invalidToken) {
             $this->objectManager->remove($invalidToken);
         }

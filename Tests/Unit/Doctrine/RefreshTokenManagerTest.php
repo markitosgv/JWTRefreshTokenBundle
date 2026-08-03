@@ -174,6 +174,34 @@ class RefreshTokenManagerTest extends TestCase
         $this->refreshTokenManager->revokeAllInvalid(null, true);
     }
 
+    /**
+     * The ODM repositories return a CachingIterator instead of an array.
+     */
+    public function testRevokesAllInvalidTokensWhenTheRepositoryReturnsAnIterator()
+    {
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findInvalid')
+            ->with(null)
+            ->willReturn(new CachingIteratorDouble([$refreshToken]));
+
+        $this->objectManager
+            ->expects($this->once())
+            ->method('remove')
+            ->with($refreshToken);
+
+        $this->objectManager
+            ->expects($this->once())
+            ->method('flush');
+
+        $invalidTokens = $this->refreshTokenManager->revokeAllInvalid(null, true);
+
+        $this->assertIsArray($invalidTokens, 'The revoked tokens should always be returned as an array');
+        $this->assertSame([$refreshToken], $invalidTokens);
+    }
+
     public function testProvidesTheModelClass()
     {
         $this->assertSame(static::REFRESH_TOKEN_ENTITY_CLASS, $this->refreshTokenManager->getClass());

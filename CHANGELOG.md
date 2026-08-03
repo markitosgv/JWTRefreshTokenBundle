@@ -7,6 +7,10 @@
 - Deprecated not configuring the request path to check in the `refresh_jwt` authenticator
 - Added feature to add the expiration timestamp on the response
 
+## 1.5.1
+
+- Fixed `gesdinet:jwt:clear` crashing with `array_map(): Argument #2 ($array) must be of type array, Doctrine\ODM\MongoDB\Iterator\CachingIterator given` when using the MongoDB ODM. `Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager::revokeAllInvalid()` now always returns the `RefreshTokenInterface[]` documented by `RefreshTokenManagerInterface`, whatever the repository returns.
+
 ## 1.0.0
 
 - Dropped support for MongoDB ODM 1.x
