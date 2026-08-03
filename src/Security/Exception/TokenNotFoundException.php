@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class TokenNotFoundException extends AuthenticationException
 {
+    #[\Override]
     public function getMessageKey(): string
     {
         return 'JWT Refresh Token Not Found';

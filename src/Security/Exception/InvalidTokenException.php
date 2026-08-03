@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class InvalidTokenException extends AuthenticationException
 {
+    #[\Override]
     public function getMessageKey(): string
     {
         return 'Invalid JWT Refresh Token';

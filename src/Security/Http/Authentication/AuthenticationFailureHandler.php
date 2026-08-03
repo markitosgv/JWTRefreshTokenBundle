@@ -25,6 +25,7 @@ final readonly class AuthenticationFailureHandler implements AuthenticationFailu
     {
     }
 
+    #[\Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
         $event = new RefreshAuthenticationFailureEvent(

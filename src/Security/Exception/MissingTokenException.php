@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class MissingTokenException extends AuthenticationException
 {
+    #[\Override]
     public function getMessageKey(): string
     {
         return 'Missing JWT Refresh Token';

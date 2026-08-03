@@ -21,6 +21,7 @@ final readonly class RefreshTokenGenerator implements RefreshTokenGeneratorInter
     {
     }
 
+    #[\Override]
     public function createForUserWithTtl(UserInterface $user, int $ttl): RefreshTokenInterface
     {
         $exists = true;

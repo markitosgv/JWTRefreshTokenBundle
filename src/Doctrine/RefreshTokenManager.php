@@ -51,16 +51,19 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         $this->class = $this->objectManager->getClassMetadata($class)->getName();
     }
 
+    #[\Override]
     public function get(string $refreshToken): ?RefreshTokenInterface
     {
         return $this->repository->findOneBy(['refreshToken' => $refreshToken]);
     }
 
+    #[\Override]
     public function getLastFromUsername(string $username): ?RefreshTokenInterface
     {
         return $this->repository->findOneBy(['username' => $username], ['valid' => 'DESC']);
     }
 
+    #[\Override]
     public function save(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
     {
         $this->objectManager->persist($refreshToken);
@@ -75,6 +78,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @return int Number of rows deleted (should be 1 if deleted, 0 if not found)
      */
+    #[\Override]
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
         if (null === $this->repository->findOneBy(['id' => $refreshToken->getId()])) {
@@ -105,6 +109,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @return RefreshTokenInterface[]
      */
+    #[\Override]
     public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array
     {
         $batchSize ??= $this->defaultBatchSize;
@@ -137,6 +142,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @return RefreshTokenInterface[]
      */
+    #[\Override]
     public function revokeAllInvalid(?DateTimeInterface $datetime = null, bool $andFlush = true): array
     {
         $invalidTokens = self::toArray($this->repository->findInvalid($datetime));
@@ -173,6 +179,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      *
      * @return class-string<RefreshTokenInterface>
      */
+    #[\Override]
     public function getClass(): string
     {
         return $this->class;

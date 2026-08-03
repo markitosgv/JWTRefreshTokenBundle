@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class RequestCookieExtractor implements ExtractorInterface
 {
+    #[\Override]
     public function getRefreshToken(Request $request, string $parameter): ?string
     {
         return $request->cookies->get($parameter);

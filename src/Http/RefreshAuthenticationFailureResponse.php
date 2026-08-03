@@ -21,6 +21,7 @@ class RefreshAuthenticationFailureResponse extends JsonResponse
         parent::__construct(null, $statusCode);
     }
 
+    #[\Override]
     public function setData(mixed $data = []): static
     {
         return parent::setData((array) $data + ['code' => $this->statusCode, 'message' => $this->getMessage()]);

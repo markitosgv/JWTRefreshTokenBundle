@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class RequestBodyExtractor implements ExtractorInterface
 {
+    #[\Override]
     public function getRefreshToken(Request $request, string $parameter): ?string
     {
         $contentType = $request->getContentTypeFormat();

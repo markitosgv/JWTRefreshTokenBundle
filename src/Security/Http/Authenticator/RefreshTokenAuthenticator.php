@@ -59,11 +59,13 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         ], $options);
     }
 
+    #[\Override]
     public function supports(Request $request): bool
     {
         return $this->httpUtils->checkRequestPath($request, $this->options['check_path']);
     }
 
+    #[\Override]
     public function authenticate(Request $request): Passport
     {
         $token = $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
@@ -103,6 +105,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         return $passport;
     }
 
+    #[\Override]
     public function createToken(Passport $passport, string $firewallName): TokenInterface
     {
         /** @var RefreshTokenInterface|null $refreshToken */
@@ -120,16 +123,19 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         );
     }
 
+    #[\Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         return $this->successHandler->onAuthenticationSuccess($request, $token);
     }
 
+    #[\Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
         return $this->failureHandler->onAuthenticationFailure($request, $exception);
     }
 
+    #[\Override]
     public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         $event = new RefreshTokenNotFoundEvent(

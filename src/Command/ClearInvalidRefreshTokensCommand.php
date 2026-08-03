@@ -35,6 +35,7 @@ final class ClearInvalidRefreshTokensCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this->addArgument('datetime', InputArgument::OPTIONAL, 'An optional date, all tokens before this date will be removed; the value should be able to be parsed by DateTime.', 'now');
@@ -51,6 +52,7 @@ final class ClearInvalidRefreshTokensCommand extends Command
         $this->setDescription('Clear invalid refresh tokens.');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

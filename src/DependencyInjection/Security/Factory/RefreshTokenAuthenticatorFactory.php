@@ -23,16 +23,19 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInterface
 {
+    #[\Override]
     public function getPriority(): int
     {
         return -50;
     }
 
+    #[\Override]
     public function getKey(): string
     {
         return 'refresh-jwt';
     }
 
+    #[\Override]
     public function addConfiguration(NodeDefinition $builder): void
     {
         if (!$builder instanceof ArrayNodeDefinition) {
@@ -70,6 +73,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         ;
     }
 
+    #[\Override]
     public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId): string
     {
         $authenticatorId = 'security.authenticator.refresh_jwt.'.$firewallName;

@@ -17,6 +17,7 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
     /**
      * @return iterable<RefreshToken>
      */
+    #[\Override]
     public function findInvalid(?DateTimeInterface $datetime = null): iterable
     {
         return $this->createQueryBuilder()
@@ -29,6 +30,7 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
     /**
      * @return iterable<RefreshToken>
      */
+    #[\Override]
     public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
     {
         $qb = $this->createQueryBuilder()

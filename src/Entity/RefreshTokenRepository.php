@@ -17,6 +17,7 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
     /**
      * @return iterable<RefreshToken>
      */
+    #[\Override]
     public function findInvalid(?DateTimeInterface $datetime = null): iterable
     {
         return $this->createQueryBuilder('u')
@@ -40,6 +41,7 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
      *
      * @return iterable<RefreshToken>
      */
+    #[\Override]
     public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
     {
         return $this->createQueryBuilder('u')

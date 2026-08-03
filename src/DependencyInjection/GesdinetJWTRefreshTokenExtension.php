@@ -25,6 +25,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
  */
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
+    #[\Override]
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__.'/../../config'));

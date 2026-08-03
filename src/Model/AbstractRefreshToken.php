@@ -33,6 +33,7 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
     /**
      * Creates a new model instance based on the provided details.
      */
+    #[\Override]
     public static function createForUserWithTtl(string $refreshToken, UserInterface $user, int $ttl): static
     {
         $valid = new DateTime();
@@ -57,11 +58,13 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return !in_array($this->getRefreshToken(), [null, '', '0'], true) ? $this->getRefreshToken() : '';
     }
 
+    #[\Override]
     public function getId(): int|string|null
     {
         return $this->id;
     }
 
+    #[\Override]
     public function setRefreshToken(string $refreshToken): static
     {
         $this->refreshToken = $refreshToken;
@@ -69,11 +72,13 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $this;
     }
 
+    #[\Override]
     public function getRefreshToken(): ?string
     {
         return $this->refreshToken;
     }
 
+    #[\Override]
     public function setValid(DateTimeInterface $valid): static
     {
         $this->valid = $valid;
@@ -81,11 +86,13 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $this;
     }
 
+    #[\Override]
     public function getValid(): ?DateTimeInterface
     {
         return $this->valid;
     }
 
+    #[\Override]
     public function setUsername(string $username): static
     {
         $this->username = $username;
@@ -93,11 +100,13 @@ abstract class AbstractRefreshToken implements RefreshTokenInterface
         return $this;
     }
 
+    #[\Override]
     public function getUsername(): ?string
     {
         return $this->username;
     }
 
+    #[\Override]
     public function isValid(): bool
     {
         return null !== $this->valid && $this->valid >= new DateTime();

@@ -29,6 +29,7 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
     ) {
     }
 
+    #[\Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
     {
         if ($token instanceof PostRefreshTokenAuthenticationToken) {

@@ -22,6 +22,7 @@ interface RefreshTokenRepositoryInterface extends ObjectRepository
      *
      * @return T|null
      */
+    #[\Override]
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
     /**

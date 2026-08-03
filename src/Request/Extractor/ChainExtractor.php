@@ -25,6 +25,7 @@ final class ChainExtractor implements ExtractorInterface
         $this->extractors[] = $extractor;
     }
 
+    #[\Override]
     public function getRefreshToken(Request $request, string $parameter): ?string
     {
         foreach ($this->extractors as $extractor) {

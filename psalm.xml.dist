@@ -25,7 +25,6 @@
             Annotations Psalm 7 asks for that the code has not adopted yet. Enable them one by one
             when adding the corresponding attributes and docblocks.
         -->
-        <MissingOverrideAttribute errorLevel="suppress" />
         <MissingPureAnnotation errorLevel="suppress" />
         <MissingAbstractPureAnnotation errorLevel="suppress" />
         <MissingInterfaceImmutableAnnotation errorLevel="suppress" />

@@ -37,6 +37,7 @@ class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function __serialize(): array
     {
         return [$this->refreshToken, parent::__serialize()];
@@ -45,6 +46,7 @@ class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function __unserialize(array $data): void
     {
         [$this->refreshToken, $parentData] = $data;

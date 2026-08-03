@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class GesdinetJWTRefreshTokenBundle extends Bundle
 {
+    #[\Override]
     public function build(ContainerBuilder $container): void
     {
         parent::build($container);
@@ -21,6 +22,7 @@ class GesdinetJWTRefreshTokenBundle extends Bundle
         $extension->addAuthenticatorFactory(new RefreshTokenAuthenticatorFactory());
     }
 
+    #[\Override]
     public function getPath(): string
     {
         return \dirname(__DIR__);

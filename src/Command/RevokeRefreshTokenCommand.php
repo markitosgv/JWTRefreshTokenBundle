@@ -27,11 +27,13 @@ final class RevokeRefreshTokenCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this->addArgument('refresh_token', InputArgument::REQUIRED, 'The refresh token to revoke');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
