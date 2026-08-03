@@ -3,6 +3,8 @@
 [![Run Tests](https://github.com/markitosgv/JWTRefreshTokenBundle/actions/workflows/run-tests.yml/badge.svg?branch=master)](https://github.com/markitosgv/JWTRefreshTokenBundle/actions/workflows/run-tests.yml)
 [![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
+[![Monthly Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/d/monthly)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle/stats)
+[![Daily Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/d/daily)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle/stats)
 [![License](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/license)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![Coverage Status](https://coveralls.io/repos/github/markitosgv/JWTRefreshTokenBundle/badge.svg?branch=master)](https://coveralls.io/github/markitosgv/JWTRefreshTokenBundle?branch=master)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%2010-brightgreen.svg)](https://phpstan.org/)
