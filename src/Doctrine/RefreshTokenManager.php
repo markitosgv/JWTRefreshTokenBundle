@@ -125,25 +125,25 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function revokeAllInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0, bool $andFlush = true): array
     {
         $batchSize ??= $this->defaultBatchSize;
-        $count = 0;
+        $revokedTokens = [];
 
         do {
-            $invalidTokens = $this->repository->findInvalidBatch($datetime, $batchSize, $offset);
+            $invalidTokens = self::toArray($this->repository->findInvalidBatch($datetime, $batchSize, $offset));
 
             foreach ($invalidTokens as $invalidToken) {
                 $this->objectManager->remove($invalidToken);
-                ++$count;
+                $revokedTokens[] = $invalidToken;
             }
 
-            if ($andFlush && !empty($invalidToken)) {
+            if ($andFlush && [] !== $invalidTokens) {
                 $this->objectManager->flush();
                 $this->objectManager->clear();
             }
 
             $offset += $batchSize;
-        } while (!empty($invalidTokens));
+        } while ([] !== $invalidTokens);
 
-        return $invalidTokens ?? [];
+        return $revokedTokens;
     }
 
     /**
@@ -156,18 +156,33 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      */
     public function revokeAllInvalid(?DateTimeInterface $datetime = null, bool $andFlush = true): array
     {
-        $invalidTokens = $this->repository->findInvalid($datetime);
+        $invalidTokens = self::toArray($this->repository->findInvalid($datetime));
 
         foreach ($invalidTokens as $invalidToken) {
             $this->objectManager->remove($invalidToken);
         }
 
-        if ($andFlush && !empty($invalidToken)) {
+        if ($andFlush && [] !== $invalidTokens) {
             $this->objectManager->flush();
             $this->objectManager->clear();
         }
 
-        return $invalidTokens ?? [];
+        return $invalidTokens;
+    }
+
+    /**
+     * Normalizes the repository result to a list.
+     *
+     * The repositories are typed to return an `iterable`; the ORM gives back an array, but the ODM
+     * gives back a {@see \Doctrine\ODM\MongoDB\Iterator\CachingIterator}, which is not an array.
+     *
+     * @param iterable<RefreshTokenInterface> $tokens
+     *
+     * @return list<RefreshTokenInterface>
+     */
+    private static function toArray(iterable $tokens): array
+    {
+        return is_array($tokens) ? array_values($tokens) : iterator_to_array($tokens, false);
     }
 
     /**

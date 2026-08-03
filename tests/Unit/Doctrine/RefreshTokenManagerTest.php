@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Doctrine;
 
+use DateTimeInterface;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
@@ -203,6 +204,87 @@ class RefreshTokenManagerTest extends TestCase
             ->method('flush');
 
         $this->refreshTokenManager->revokeAllInvalidBatch(null, 1000, 0, true);
+    }
+
+    public function testReturnsAllTheTokensRevokedInBatches(): void
+    {
+        $firstBatch = [$this->createMock(RefreshTokenInterface::class), $this->createMock(RefreshTokenInterface::class)];
+        $secondBatch = [$this->createMock(RefreshTokenInterface::class)];
+
+        $this->repository
+            ->expects($this->exactly(3))
+            ->method('findInvalidBatch')
+            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use ($firstBatch, $secondBatch): array {
+                return match ($offset) {
+                    0 => $firstBatch,
+                    2 => $secondBatch,
+                    default => [],
+                };
+            });
+
+        $revokedTokens = $this->refreshTokenManager->revokeAllInvalidBatch(null, 2, 0, true);
+
+        $this->assertSame([...$firstBatch, ...$secondBatch], $revokedTokens, 'All the revoked tokens should be returned, not only the ones of the last batch');
+    }
+
+    public function testRevokesAllInvalidTokensInBatchesWhenTheRepositoryReturnsAnIterator(): void
+    {
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+
+        $this->repository
+            ->expects($this->exactly(2))
+            ->method('findInvalidBatch')
+            ->willReturnCallback(static function (?DateTimeInterface $datetime, ?int $batchSize, int $offset) use ($refreshToken): CachingIteratorDouble {
+                return new CachingIteratorDouble(0 === $offset ? [$refreshToken] : []);
+            });
+
+        $this->objectManager
+            ->expects($this->once())
+            ->method('remove')
+            ->with($refreshToken);
+
+        $revokedTokens = $this->refreshTokenManager->revokeAllInvalidBatch(null, 1000, 0, true);
+
+        $this->assertSame([$refreshToken], $revokedTokens);
+    }
+
+    public function testRevokesAllInvalidTokensWhenTheRepositoryReturnsAnIterator(): void
+    {
+        $refreshToken = $this->createMock(RefreshTokenInterface::class);
+
+        $this->repository
+            ->expects($this->once())
+            ->method('findInvalid')
+            ->with(null)
+            ->willReturn(new CachingIteratorDouble([$refreshToken]));
+
+        $this->objectManager
+            ->expects($this->once())
+            ->method('remove')
+            ->with($refreshToken);
+
+        $this->objectManager
+            ->expects($this->once())
+            ->method('flush');
+
+        $revokedTokens = $this->refreshTokenManager->revokeAllInvalid(null, true);
+
+        $this->assertSame([$refreshToken], $revokedTokens);
+    }
+
+    public function testDoesNotFlushWhenThereAreNoInvalidTokensToRevoke(): void
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('findInvalid')
+            ->with(null)
+            ->willReturn(new CachingIteratorDouble());
+
+        $this->objectManager
+            ->expects($this->never())
+            ->method('flush');
+
+        $this->assertSame([], $this->refreshTokenManager->revokeAllInvalid(null, true));
     }
 
     public function testProvidesTheModelClass(): void
