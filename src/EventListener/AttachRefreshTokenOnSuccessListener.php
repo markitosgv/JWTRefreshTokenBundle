@@ -64,11 +64,16 @@ final class AttachRefreshTokenOnSuccessListener
         $user = $event->getUser();
         $data = $event->getData();
 
-        // Extract refreshToken from the request
+        // Extract refreshToken from the request, treating an empty value as no value at all so the
+        // checks below only have to care about null
         $refreshTokenString = $this->extractor->getRefreshToken($request, $this->tokenParameterName);
 
+        if ('' === $refreshTokenString || '0' === $refreshTokenString) {
+            $refreshTokenString = null;
+        }
+
         // Remove the current refreshToken if it is single-use
-        if ($refreshTokenString && true === $this->singleUse) {
+        if (null !== $refreshTokenString && true === $this->singleUse) {
             $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
             $refreshTokenString = null;
 
@@ -78,12 +83,12 @@ final class AttachRefreshTokenOnSuccessListener
         }
 
         // Set or create the refreshTokenString
-        if (null !== $refreshTokenString && '' !== $refreshTokenString && '0' !== $refreshTokenString) {
+        if (null !== $refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
 
             if ($this->returnExpiration) {
                 $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
-                $data[$this->returnExpirationParameterName] = ($refreshToken instanceof RefreshTokenInterface) ? $refreshToken->getValid()->getTimestamp() : 0;
+                $data[$this->returnExpirationParameterName] = $refreshToken?->getValid()?->getTimestamp() ?? 0;
             }
         } else {
             $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, $this->ttl);
@@ -93,7 +98,7 @@ final class AttachRefreshTokenOnSuccessListener
             $data[$this->tokenParameterName] = $refreshTokenString;
 
             if ($this->returnExpiration) {
-                $data[$this->returnExpirationParameterName] = $refreshToken->getValid()->getTimestamp();
+                $data[$this->returnExpirationParameterName] = $refreshToken->getValid()?->getTimestamp() ?? 0;
             }
         }
 
