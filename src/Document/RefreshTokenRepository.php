@@ -24,7 +24,7 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
             ->field('valid')
             ->lt($datetime ?? new DateTime())
             ->getQuery()
-            ->execute();
+            ->getIterator();
     }
 
     /**
@@ -45,6 +45,6 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
             $qb->skip($offset);
         }
 
-        return $qb->getQuery()->execute();
+        return $qb->getQuery()->getIterator();
     }
 }
