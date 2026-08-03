@@ -60,6 +60,17 @@ final class ConfigurationTest extends TestCase
         ]);
     }
 
+    public function test_configuration_is_invalid_when_refresh_token_class_does_not_exist(): void
+    {
+        // class_implements() returns false for a class that cannot be loaded, which used to reach
+        // in_array() and raise a TypeError instead of reporting the configuration as invalid
+        $this->assertConfigurationIsInvalid([
+            [
+                'refresh_token_class' => 'Gesdinet\JWTRefreshTokenBundle\ThisClassDoesNotExist',
+            ],
+        ]);
+    }
+
     public function test_configuration_is_invalid_when_batch_size_is_negative(): void
     {
         $this->assertConfigurationIsInvalid([

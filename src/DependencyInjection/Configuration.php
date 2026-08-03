@@ -46,7 +46,16 @@ final class Configuration implements ConfigurationInterface
                     ->cannotBeEmpty()
                     ->info('Set the refresh token class to use')
                     ->validate()
-                        ->ifTrue(static fn ($v): bool => null === $v || !\in_array(RefreshTokenInterface::class, class_implements($v), true))
+                        ->ifTrue(static function (mixed $v): bool {
+                            if (!\is_string($v)) {
+                                return true;
+                            }
+
+                            // false when the class cannot be loaded, which is invalid all the same
+                            $interfaces = class_implements($v);
+
+                            return false === $interfaces || !\in_array(RefreshTokenInterface::class, $interfaces, true);
+                        })
                         ->thenInvalid(sprintf('The "refresh_token_class" class must implement "%s".', RefreshTokenInterface::class))
                     ->end()
                 ->end()
