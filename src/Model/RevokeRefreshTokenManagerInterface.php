@@ -15,7 +15,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 interface RevokeRefreshTokenManagerInterface
 {
     /**
+     * Revokes every refresh token issued to the given user.
+     *
+     * @return int the number of revoked refresh tokens
+     *
      * @psalm-impure it writes to the storage
      */
-    public function revokeAllForUser(UserInterface $user): void;
+    public function revokeAllForUser(UserInterface $user): int;
 }

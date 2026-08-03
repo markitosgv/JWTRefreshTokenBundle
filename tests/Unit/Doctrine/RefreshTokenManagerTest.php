@@ -395,9 +395,10 @@ class RefreshTokenManagerTest extends TestCase
         $this->repository
             ->expects($this->once())
             ->method('deleteByUser')
-            ->with($user);
+            ->with($user)
+            ->willReturn(3);
 
-        $this->refreshTokenManager->revokeAllForUser($user);
+        $this->assertSame(3, $this->refreshTokenManager->revokeAllForUser($user), 'The number of revoked tokens should reach the caller');
     }
 
     public function testRefusesToRevokeForAUserWhenTheRepositoryCannotDelete(): void

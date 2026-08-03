@@ -177,13 +177,13 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     #[\Override]
-    public function revokeAllForUser(UserInterface $user): void
+    public function revokeAllForUser(UserInterface $user): int
     {
         if (!$this->repository instanceof DeleteRefreshTokenRepositoryInterface) {
             throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, DeleteRefreshTokenRepositoryInterface::class));
         }
 
-        $this->repository->deleteByUser($user);
+        return $this->repository->deleteByUser($user);
     }
 
     /**
