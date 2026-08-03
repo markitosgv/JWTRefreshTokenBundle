@@ -63,6 +63,46 @@ jobs:
         env:
           DOCTRINE_MONGODB_SERVER: ${{ steps.setup-mongodb.outputs.cluster-uri }}
 
+  coverage:
+    runs-on: 'ubuntu-22.04'
+    name: 'Coverage'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          extensions: 'curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip'
+          coverage: pcov
+
+      # The document repository is only exercised with a server available, so the report would
+      # understate the coverage without it
+      - name: Setup MongoDB
+        id: setup-mongodb
+        uses: mongodb-labs/drivers-evergreen-tools@master
+        with:
+          version: '6.0'
+          topology: server
+
+      - name: Install dependencies
+        run: composer update --prefer-stable --prefer-dist
+
+      - name: Run PHPUnit with coverage
+        run: bin/phpunit --coverage-clover coverage.xml
+        env:
+          DOCTRINE_MONGODB_SERVER: ${{ steps.setup-mongodb.outputs.cluster-uri }}
+
+      - name: Report coverage
+        uses: coverallsapp/github-action@v2.3.8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: coverage.xml
+          format: clover
+
   lint:
     runs-on: 'ubuntu-22.04'
     name: 'Markdown Linting'
