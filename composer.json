@@ -49,6 +49,7 @@
     "doctrine/mongodb-odm": "<2.7",
     "doctrine/orm": "<2.20"
   },
+  "minimum-stability": "dev",
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
