@@ -4,15 +4,18 @@ namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
 use DateTimeInterface;
 use DateTime;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityRepository;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends EntityRepository<RefreshToken>
  *
  * @implements RefreshTokenRepositoryInterface<RefreshToken>
  */
-class RefreshTokenRepository extends EntityRepository implements RefreshTokenRepositoryInterface
+class RefreshTokenRepository extends EntityRepository implements RefreshTokenRepositoryInterface, DeleteRefreshTokenRepositoryInterface
 {
     /**
      * @return iterable<RefreshToken>
@@ -57,5 +60,19 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
             ->getResult();
 
         return $tokens;
+    }
+
+    #[\Override]
+    public function deleteByUser(UserInterface $user): int
+    {
+        /** @var int $deleted */
+        $deleted = $this->createQueryBuilder('rt')
+            ->delete()
+            ->where('rt.username = :user_identifier')
+            ->setParameter('user_identifier', $user->getUserIdentifier(), ParameterType::STRING)
+            ->getQuery()
+            ->execute();
+
+        return $deleted;
     }
 }

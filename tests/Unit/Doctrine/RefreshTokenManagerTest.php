@@ -6,12 +6,14 @@ use DateTimeInterface;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
 use LogicException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -384,6 +386,37 @@ class RefreshTokenManagerTest extends TestCase
         $this->expectExceptionMessage(sprintf('Repository mapped for "%s" should implement %s.', RefreshToken::class, RefreshTokenRepositoryInterface::class));
 
         new RefreshTokenManager($objectManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+    }
+
+    public function testRevokesEveryTokenIssuedToAUser(): void
+    {
+        $user = UserCreator::create('user@localhost');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('deleteByUser')
+            ->with($user)
+            ->willReturn(3);
+
+        $this->assertSame(3, $this->refreshTokenManager->revokeAllForUser($user), 'The number of revoked tokens should reach the caller');
+    }
+
+    public function testRefusesToRevokeForAUserWhenTheRepositoryCannotDelete(): void
+    {
+        $metadata = $this->createStub(ClassMetadata::class);
+        $metadata->method('getName')->willReturn(self::REFRESH_TOKEN_ENTITY_CLASS);
+
+        // A repository predating DeleteRefreshTokenRepositoryInterface still satisfies the rest
+        $objectManager = $this->createStub(ObjectManager::class);
+        $objectManager->method('getRepository')->willReturn($this->createStub(RefreshTokenRepositoryInterface::class));
+        $objectManager->method('getClassMetadata')->willReturn($metadata);
+
+        $manager = new RefreshTokenManager($objectManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(sprintf('Repository mapped for "%s" should implement %s.', RefreshToken::class, DeleteRefreshTokenRepositoryInterface::class));
+
+        $manager->revokeAllForUser(UserCreator::create());
     }
 
     public function testProvidesTheModelClass(): void

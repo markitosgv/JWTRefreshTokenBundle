@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+* `RevokeRefreshTokenManagerInterface::revokeAllForUser()` revokes every refresh token issued to a user, for a password reset or an account being disabled, and returns how many were revoked. It is deleted by the database, so no token is hydrated and no life-cycle event is raised
+* `DeleteRefreshTokenRepositoryInterface::deleteByUser()` backs it. Both are separate interfaces, so an existing manager or repository keeps working without them
+
 ## 2.1.0
 
 ### Fixed

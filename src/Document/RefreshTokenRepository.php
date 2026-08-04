@@ -5,14 +5,17 @@ namespace Gesdinet\JWTRefreshTokenBundle\Document;
 use DateTimeInterface;
 use DateTime;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
+use MongoDB\DeleteResult;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends DocumentRepository<RefreshToken>
  *
  * @implements RefreshTokenRepositoryInterface<RefreshToken>
  */
-class RefreshTokenRepository extends DocumentRepository implements RefreshTokenRepositoryInterface
+class RefreshTokenRepository extends DocumentRepository implements RefreshTokenRepositoryInterface, DeleteRefreshTokenRepositoryInterface
 {
     /**
      * @return iterable<RefreshToken>
@@ -46,5 +49,19 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
         }
 
         return $qb->getQuery()->getIterator();
+    }
+
+    #[\Override]
+    public function deleteByUser(UserInterface $user): int
+    {
+        /** @var DeleteResult */
+        $result = $this->createQueryBuilder()
+            ->field('username')
+            ->equals($user->getUserIdentifier())
+            ->remove()
+            ->getQuery()
+            ->execute();
+
+        return $result->isAcknowledged() ? $result->getDeletedCount() : 0;
     }
 }

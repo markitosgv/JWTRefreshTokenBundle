@@ -96,4 +96,29 @@ final class RefreshTokenRepositoryTest extends ODMTestCase
 
         $this->assertCount(5, $repo->findInvalid($time));
     }
+
+    public function test_deletes_all_tokens_for_user(): void
+    {
+        $users = [];
+
+        for ($i = 0; $i < 2; ++$i) {
+            $users[$i] = new User("user-{$i}@localhost");
+            $this->documentManager->persist($users[$i]);
+        }
+
+        for ($i = 0; $i < 3; ++$i) {
+            $token = $this->generator->createForUserWithTtl($users[$i % 2], 600);
+
+            $this->documentManager->persist($token);
+        }
+
+        $this->documentManager->flush();
+
+        /** @var RefreshTokenRepository */
+        $repo = $this->documentManager->getRepository(RefreshToken::class);
+
+        $this->assertSame(2, $repo->deleteByUser($users[0]));
+        $this->assertEmpty($repo->findBy(['username' => $users[0]->getUserIdentifier()]));
+        $this->assertCount(1, $repo->findBy(['username' => $users[1]->getUserIdentifier()]));
+    }
 }

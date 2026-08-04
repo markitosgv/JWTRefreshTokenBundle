@@ -16,8 +16,10 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
 use DateTimeInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var class-string<RefreshTokenInterface>
@@ -172,6 +174,16 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     private static function toArray(iterable $tokens): array
     {
         return is_array($tokens) ? array_values($tokens) : iterator_to_array($tokens, false);
+    }
+
+    #[\Override]
+    public function revokeAllForUser(UserInterface $user): int
+    {
+        if (!$this->repository instanceof DeleteRefreshTokenRepositoryInterface) {
+            throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, DeleteRefreshTokenRepositoryInterface::class));
+        }
+
+        return $this->repository->deleteByUser($user);
     }
 
     /**
