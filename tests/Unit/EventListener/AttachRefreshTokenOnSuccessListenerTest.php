@@ -303,6 +303,66 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         ))->attachRefreshToken($event);
     }
 
+    /**
+     * The token goes in an HttpOnly cookie the frontend cannot read, and the body keeps the
+     * expiration so it still knows how long the refresh session lasts.
+     */
+    public function testKeepsTheExpirationInTheBodyWhenTheTokenMovesToACookie(): void
+    {
+        $expiration = new DateTime('+1 month');
+
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
+        $refreshToken->method('getValid')->willReturn($expiration);
+
+        $this->refreshTokenManager->method('get')->willReturn($refreshToken);
+
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($this->createStub(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+
+        $response = new Response();
+        $event->method('getResponse')->willReturn($response);
+
+        $request = Request::create('/', 'POST');
+
+        $this->requestStack
+            ->expects($this->once())
+            ->method('getCurrentRequest')
+            ->willReturn($request);
+
+        $this->extractor
+            ->expects($this->once())
+            ->method('getRefreshToken')
+            ->willReturn('thepreviouslyissuedrefreshtoken');
+
+        $event
+            ->expects($this->once())
+            ->method('setData')
+            ->with($this->equalTo([self::RETURN_EXPIRATION_PARAMETER_NAME => $expiration->getTimestamp()]));
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            ['enabled' => true, 'http_only' => true, 'remove_token_from_body' => true],
+            true,
+            self::RETURN_EXPIRATION_PARAMETER_NAME
+        ))->attachRefreshToken($event);
+
+        $cookies = $response->headers->getCookies();
+
+        $this->assertCount(1, $cookies);
+        $this->assertSame(self::TOKEN_PARAMETER_NAME, $cookies[0]->getName());
+        $this->assertSame('thepreviouslyissuedrefreshtoken', $cookies[0]->getValue());
+        $this->assertTrue($cookies[0]->isHttpOnly(), 'The token itself stays out of reach of the frontend');
+    }
+
     public function testAttachTokenOnRefreshWithSingleUseToken(): void
     {
         $this->setSingleUseOnEventListener(true);

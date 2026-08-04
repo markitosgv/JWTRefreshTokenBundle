@@ -210,6 +210,29 @@ gesdinet_jwt_refresh_token:
     return_expiration_parameter_name: refresh_token_expiration
 ```
 
+This works alongside the cookie below. With the token moved into an `HttpOnly` cookie and taken out
+of the body, the expiration stays in the body, so a frontend that cannot read the token still knows
+how long the refresh session lasts:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    return_expiration: true
+    cookie:
+        enabled: true
+        http_only: true
+        remove_token_from_body: true
+```
+
+The response then carries the expiration and no token, while the token travels in a cookie the
+browser sends on its own:
+
+```json
+{
+    "token": "...",
+    "refresh_token_expiration": 1793923200
+}
+```
+
 ### Set The User Provider
 
 You can define a user provider to use for the authenticator its configuration.
