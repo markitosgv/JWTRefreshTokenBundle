@@ -22,6 +22,7 @@ final class BlockPreviousJWTListenerTest extends TestCase
     private BlockedTokenManagerInterface&MockObject $blockedTokens;
     private TokenExtractorInterface&MockObject $extractor;
     private JWTTokenManagerInterface&MockObject $jwtManager;
+
     protected function setUp(): void
     {
         $this->blockedTokens = $this->createMock(BlockedTokenManagerInterface::class);

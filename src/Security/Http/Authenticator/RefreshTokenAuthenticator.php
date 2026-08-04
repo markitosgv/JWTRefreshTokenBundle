@@ -46,7 +46,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
     private array $options;
 
     /**
-     * @param UserProviderInterface<UserInterface>                                                    $userProvider
+     * @param UserProviderInterface<UserInterface>                                                   $userProvider
      * @param array{check_path: string, ttl?: int, ttl_update?: bool, token_parameter_name?: string} $options
      *
      * @psalm-mutation-free
