@@ -62,15 +62,17 @@ final class Configuration implements ConfigurationInterface
             ->children()
                 ->integerNode('ttl')
                     ->defaultValue(2592000)
-                    // min() rather than a validate() closure: it is skipped while the placeholder
-                    // of an environment variable is being checked, and a closure is not, so a
-                    // closure rejects every `%env(int:...)%` on the sample value of 0
-                    ->min(1)
+                    // Deliberately unvalidated. A number checked here, by min() or by a closure, is
+                    // also checked against the sample value an environment variable stands in as,
+                    // which for an integer is 0. min() is skipped for that in symfony/config
+                    // 6.4.37, 7.4.9 and 8.0.9, and never in 7.0 to 7.3, which are end of life and
+                    // still supported here. Rejecting a ttl of 0 is not worth refusing to boot an
+                    // application that reads it from the environment
                     ->info('How long a refresh token lasts, in seconds, for all authenticators. There is no value meaning never: a token is valid until this many seconds after it was issued, so a long lived one is a large number, 315360000 being ten years.')
                 ->end()
                 ->integerNode('max_tokens_per_user')
                     ->defaultNull()
-                    ->min(1)
+                    // Unvalidated for the same reason as ttl above
                     ->info('How many refresh tokens a user may hold at once. Each login stores one, so this is a limit on signed-in devices: signing in beyond it revokes the session that has gone longest without being refreshed. Unlimited when not set.')
                 ->end()
                 ->booleanNode('ttl_update')

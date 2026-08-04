@@ -220,31 +220,6 @@ final class ConfigurationTest extends TestCase
         );
     }
 
-    /**
-     * @return iterable<string, array{int}>
-     */
-    public static function uselessTtlProvider(): iterable
-    {
-        // What somebody reaching for an unlimited token tries first, since that is the convention
-        // elsewhere. Here it means the token has expired by the time it is handed over
-        yield 'zero' => [0];
-        yield 'negative' => [-1];
-    }
-
-    #[DataProvider('uselessTtlProvider')]
-    public function test_a_ttl_that_issues_expired_tokens_is_rejected(int $ttl): void
-    {
-        $this->assertConfigurationIsInvalid(
-            [
-                [
-                    'refresh_token_class' => RefreshToken::class,
-                    'ttl' => $ttl,
-                ],
-            ],
-            'too small'
-        );
-    }
-
     public function test_a_ttl_can_be_as_long_as_the_application_wants(): void
     {
         $this->assertConfigurationIsValid([
@@ -254,19 +229,6 @@ final class ConfigurationTest extends TestCase
                 'ttl' => 315360000,
             ],
         ]);
-    }
-
-    public function test_a_token_limit_below_one_is_rejected(): void
-    {
-        $this->assertConfigurationIsInvalid(
-            [
-                [
-                    'refresh_token_class' => RefreshToken::class,
-                    'max_tokens_per_user' => 0,
-                ],
-            ],
-            'too small'
-        );
     }
 
     public function test_there_is_no_token_limit_unless_one_is_asked_for(): void

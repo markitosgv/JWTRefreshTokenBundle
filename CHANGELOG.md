@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.2
+
+### Fixed
+
+* `ttl` and `max_tokens_per_user` can be read from an environment variable on every supported Symfony, which 2.2.1 did not manage. Switching to `min()` was only half the answer: `NumericNode` skips it while a placeholder is being handled, but that skip is not in symfony/config before 6.4.37, 7.4.9 and 8.0.9, and is in no release of 7.0 to 7.3, which are end of life and still supported here. Neither node is validated at all now — refusing to boot an application that reads its ttl from the environment is worse than accepting a `0` written by hand
+
 ## 2.2.1
 
 ### Fixed
