@@ -138,6 +138,14 @@ final class LogoutEventListenerTest extends TestCase
 
         $this->assertSame('{"code":200,"message":"The supplied refresh_token has been invalidated."}', $response->getContent());
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $cookies = $response->headers->getCookies();
+
+        $this->assertCount(1, $cookies);
+        // The cookie is named after the token parameter, so clearing it is clearing the one that
+        // was set, and both follow the configured name rather than a name of their own
+        $this->assertSame(self::TOKEN_PARAMETER_NAME, $cookies[0]->getName());
+        $this->assertLessThan(time(), $cookies[0]->getExpiresTime(), 'A cleared cookie has already expired');
     }
 
     public function testInvalidatesTokenAndDoesNotClearCookieFromResponseWhenCookieSupportIsDisabled(): void
@@ -184,6 +192,8 @@ final class LogoutEventListenerTest extends TestCase
 
         $this->assertSame('{"code":200,"message":"The supplied refresh_token has been invalidated."}', $response->getContent());
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $this->assertCount(0, $response->headers->getCookies(), 'Nothing set the cookie, so nothing should clear it');
     }
 
     public function testCreatesASuccessResponseWhenTheRefreshTokenIsAlreadyInvalid(): void

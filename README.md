@@ -192,12 +192,19 @@ gesdinet_jwt_refresh_token:
 
 ### Refresh Token Parameter Name
 
-You can define the parameter name for the refresh token when it is read from the request, the default value is `refresh_token`. You can change this value adding this line to your config:
+The refresh token is called `refresh_token` by default. One setting changes it:
 
 ```yaml
 gesdinet_jwt_refresh_token:
     token_parameter_name: refreshToken
 ```
+
+It is the name everywhere the token appears, not only where it is read: the JSON body and the query
+string it is read from, the cookie it is read from and set in, the key it is returned under in the
+response body, and the cookie cleared on logout. There is no separate setting for the cookie name.
+
+So changing it changes both ends at once. A client reading `refresh_token` out of the response, or
+sending it back under that name, has to be updated with it.
 
 ### Return Expiration Timestamp
 
@@ -305,6 +312,9 @@ always behaved.
 
 By default, the refresh token is returned in the body of a JSON response. You can use the following configuration to set it in a HttpOnly cookie instead. The refresh token is automatically extracted from the cookie during refresh.
 To allow users to logout when using cookies, you need to [configure the `LogoutEvent` to trigger on a specific route](#invalidate-refresh-token-on-logout), and call that route during logout.
+
+The cookie is named after [`token_parameter_name`](#refresh-token-parameter-name), so it is
+`refresh_token` unless you change that.
 
 ```yaml
 gesdinet_jwt_refresh_token:
