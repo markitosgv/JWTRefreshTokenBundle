@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 2.2.0
+
+Released 2026-08-04. See [UPGRADE-2.2.md](UPGRADE-2.2.md) for what to check before upgrading.
 
 ### Changed
 
@@ -26,7 +28,7 @@
 * `RevokeRefreshTokenManagerInterface` and `ListRefreshTokenManagerInterface` are aliased to the manager for every backend, the DBAL one included. Revoking by user was only offered to the ORM and the ODM
 * `hash_tokens`, which stores `sha256$` and the hash of a refresh token rather than the token, so a copy of the database cannot be used to refresh. Off by default. Turning it on signs nobody out: tokens already stored are taken as they are and rewritten hashed the first time they are used, until `accept_stored_in_the_clear` is turned off. Note that `getRefreshToken()` then returns the stored hash, since that is what is stored
 * `max_tokens_per_user`, a limit on how many refresh tokens a user may hold at once, which is a limit on signed-in devices since each login stores one. Signing in beyond it revokes the session that has gone longest without being refreshed, expired tokens first. Unlimited when not set
-* `RevokeRefreshTokenManagerInterface::revokeAllButNewestForUser()` and `DeleteRefreshTokenRepositoryInterface::deleteAllButNewestForUser()` back it. The DBAL manager implements `RevokeRefreshTokenManagerInterface` as well now, so revoking by user is no longer only for the ORM and the ODM
+* `RevokeRefreshTokenManagerInterface::revokeAllButNewestForUser()` and `DeleteRefreshTokenRepositoryInterface::deleteAllButNewestForUser()` back it
 * `api_platform.enabled`, which documents the refresh token in the OpenAPI specification API Platform generates: the `refresh_token` Lexik's login schema was missing, and the refresh endpoint nobody documented, one path per firewall the authenticator is on. It follows the bundle's own configuration, so the cookie replacing the body is documented as such rather than promising a field that never arrives. Off by default, since an application documenting it by hand would end up with it twice
 * `refresh_token_manager`, naming a service of your own, which replaces the manager the bundle would build and wires none of its storage, so the tokens can live in a PDO repository or anywhere else and Doctrine need not be installed at all. `RefreshTokenManagerInterface` is now held to the same test suite from outside the bundle, so it stays implementable
 
