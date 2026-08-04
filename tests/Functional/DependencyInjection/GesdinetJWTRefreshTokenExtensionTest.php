@@ -82,6 +82,51 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         );
     }
 
+    public function test_the_openapi_factory_is_not_registered_unless_it_is_asked_for(): void
+    {
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
+
+        $this->assertFalse(
+            $this->container->hasDefinition('gesdinet_jwt_refresh_token.api_platform.openapi.factory'),
+            'An application documenting the endpoint by hand would otherwise end up with it twice'
+        );
+    }
+
+    /**
+     * Lexik decorates the same factory at priority 0, so this one has to be handed the
+     * specification it has already contributed the login endpoint to.
+     */
+    public function test_the_openapi_factory_decorates_api_platform_after_lexik(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'api_platform' => ['enabled' => true],
+        ]);
+
+        $definition = $this->container->getDefinition('gesdinet_jwt_refresh_token.api_platform.openapi.factory');
+
+        $decoration = $definition->getDecoratedService();
+
+        $this->assertNotNull($decoration);
+        $this->assertSame('api_platform.openapi.factory', $decoration[0]);
+        $this->assertLessThan(0, $decoration[2], 'A lower priority than Lexik is what puts this one after it');
+    }
+
+    /**
+     * The paths come from the firewall, which may not have the authenticator on it at all.
+     */
+    public function test_the_openapi_factory_is_given_an_empty_path_list_rather_than_a_missing_one(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'api_platform' => ['enabled' => true],
+        ]);
+
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.check_paths', []);
+    }
+
     public function test_container_is_loaded_with_default_configuration(): void
     {
         $this->load([

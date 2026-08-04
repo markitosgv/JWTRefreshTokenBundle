@@ -462,6 +462,34 @@ alter the schema. A failure stops the request with an explanation rather than be
 forgotten, since a connection that cannot create the table would otherwise fail later on something
 unrelated.
 
+### Document the refresh token in API Platform
+
+LexikJWTAuthenticationBundle documents the login endpoint for API Platform, but its response schema
+only carries the JWT: the refresh token beside it is added by this bundle, and that factory has no
+hook to extend. The refresh endpoint is not documented by anyone, since it is a firewall
+authenticator rather than a resource, so there is no controller for API Platform to find.
+
+Turning this on completes both:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    api_platform:
+        enabled: true
+```
+
+It reads the configuration the bundle already holds, so the specification follows it rather than
+having to be kept in step by hand. That includes the case worth spelling out: with the cookie
+enabled and `remove_token_from_body` left on, there is no `refresh_token` property in the response
+at all, and documenting one would promise a field that never arrives. The refresh endpoint is then
+documented as taking no body, since the browser carries the cookie.
+
+The refresh paths come from the firewalls, so every firewall the authenticator is enabled on gets
+its endpoint documented.
+
+It is off by default. An application already decorating `api_platform.openapi.factory` by hand
+would otherwise document the same endpoint twice, so turning this on is the moment to remove that
+decorator.
+
 ### Store the tokens somewhere else entirely
 
 Name a service of your own and the bundle wires nothing of its own storage, so it does not need

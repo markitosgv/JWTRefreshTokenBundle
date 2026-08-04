@@ -87,6 +87,8 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
     {
         $authenticatorId = 'security.authenticator.refresh_jwt.'.$firewallName;
 
+        $this->recordCheckPath($container, $config['check_path']);
+
         // When per-authenticator configuration is supported, this array should be updated to check the $config values before falling back to the bundle parameters
         $options = [
             'check_path' => $config['check_path'],
@@ -107,6 +109,29 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         }
 
         return $authenticatorId;
+    }
+
+    /**
+     * Keeps the refresh paths where something outside the firewall can reach them.
+     *
+     * The path is only ever named here, on the firewall, so documenting the endpoint means
+     * collecting it as each authenticator is created. A firewall may be configured more than once,
+     * hence the check for one already recorded.
+     */
+    private function recordCheckPath(ContainerBuilder $container, string $checkPath): void
+    {
+        /** @var string[] $checkPaths */
+        $checkPaths = $container->hasParameter('gesdinet_jwt_refresh_token.check_paths')
+            ? (array) $container->getParameter('gesdinet_jwt_refresh_token.check_paths')
+            : [];
+
+        if (in_array($checkPath, $checkPaths, true)) {
+            return;
+        }
+
+        $checkPaths[] = $checkPath;
+
+        $container->setParameter('gesdinet_jwt_refresh_token.check_paths', $checkPaths);
     }
 
     /**

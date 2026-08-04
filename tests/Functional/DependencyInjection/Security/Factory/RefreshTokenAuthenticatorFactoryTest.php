@@ -65,6 +65,29 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->factory->addConfiguration($node);
     }
 
+    /**
+     * The path is only ever named on the firewall, so documenting the endpoint means collecting it
+     * as each authenticator is created.
+     */
+    public function test_the_check_path_is_recorded_for_whatever_needs_it_outside_the_firewall(): void
+    {
+        $this->factory->createAuthenticator($this->container, 'api', $this->processConfiguration(['check_path' => '/api/token/refresh']), 'app.user_provider');
+        $this->factory->createAuthenticator($this->container, 'admin', $this->processConfiguration(['check_path' => '/admin/token/refresh']), 'app.user_provider');
+
+        $this->assertSame(
+            ['/api/token/refresh', '/admin/token/refresh'],
+            $this->container->getParameter('gesdinet_jwt_refresh_token.check_paths')
+        );
+    }
+
+    public function test_a_path_shared_by_two_firewalls_is_recorded_once(): void
+    {
+        $this->factory->createAuthenticator($this->container, 'api', $this->processConfiguration(['check_path' => '/api/token/refresh']), 'app.user_provider');
+        $this->factory->createAuthenticator($this->container, 'other', $this->processConfiguration(['check_path' => '/api/token/refresh']), 'app.user_provider');
+
+        $this->assertSame(['/api/token/refresh'], $this->container->getParameter('gesdinet_jwt_refresh_token.check_paths'));
+    }
+
     public function test_authenticator_service_takes_its_options_from_the_bundle_parameters(): void
     {
         $authenticatorId = $this->factory->createAuthenticator(
