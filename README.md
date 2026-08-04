@@ -386,7 +386,7 @@ security:
                 max_attempts: 5
 ```
 
-Note that this limits failed attempts. Where repeated *successful* logins are the concern, rate
+Note that this limits failed attempts. Where repeated _successful_ logins are the concern, rate
 limit the route itself with `symfony/rate-limiter`.
 
 ### Single Use Tokens
