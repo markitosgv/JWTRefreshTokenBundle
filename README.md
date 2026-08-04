@@ -316,6 +316,17 @@ To allow users to logout when using cookies, you need to [configure the `LogoutE
 The cookie is named after [`token_parameter_name`](#refresh-token-parameter-name), so it is
 `refresh_token` unless you change that.
 
+`same_site` takes `none`, `lax` or `strict`, matched without regard to case, or an empty value to
+leave the attribute off the cookie entirely. Every one of these settings can be read from an
+environment variable:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    cookie:
+        enabled: true
+        same_site: '%env(COOKIE_SAME_SITE)%'
+```
+
 ```yaml
 gesdinet_jwt_refresh_token:
     cookie:

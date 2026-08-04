@@ -182,6 +182,44 @@ final class ConfigurationTest extends TestCase
         ]);
     }
 
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function sameSiteProvider(): iterable
+    {
+        yield 'none' => ['none'];
+        yield 'lax' => ['lax'];
+        yield 'strict' => ['strict'];
+        // Cookie lowercases it, and an environment variable is as likely to be written this way
+        yield 'in capitals' => ['STRICT'];
+        // Which Cookie takes as leaving the attribute off altogether
+        yield 'empty' => [''];
+    }
+
+    #[DataProvider('sameSiteProvider')]
+    public function test_same_site_accepts_what_the_cookie_accepts(string $sameSite): void
+    {
+        $this->assertConfigurationIsValid([
+            [
+                'refresh_token_class' => RefreshToken::class,
+                'cookie' => ['enabled' => true, 'same_site' => $sameSite],
+            ],
+        ]);
+    }
+
+    public function test_same_site_rejects_a_value_the_cookie_would_throw_on(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'cookie' => ['enabled' => true, 'same_site' => 'sometimes'],
+                ],
+            ],
+            'must be one of "none", "lax" or "strict"'
+        );
+    }
+
     public function test_dbal_columns_configuration_defaults_to_empty_array(): void
     {
         $this->assertProcessedConfigurationEquals(
