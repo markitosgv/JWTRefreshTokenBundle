@@ -169,13 +169,16 @@ final class ConfigurationTest extends TestCase
         );
     }
 
-    public function test_dbal_auto_create_table_defaults_to_true(): void
+    /**
+     * It runs DDL while serving traffic, so it stays off unless it is asked for.
+     */
+    public function test_dbal_auto_create_table_defaults_to_false(): void
     {
         $this->assertProcessedConfigurationEquals(
             [
                 [],
             ],
-            ['dbal_auto_create_table' => true],
+            ['dbal_auto_create_table' => false],
             'dbal_auto_create_table'
         );
     }

@@ -88,7 +88,7 @@ final class EnsureTableExistsListenerTest extends TestCase
         $this->assertEmpty($this->logger->logs, 'No errors should be logged when table already exists');
     }
 
-    public function testLogsErrorOnDatabaseFailure(): void
+    public function testReportsAndRethrowsOnDatabaseFailure(): void
     {
         // Use an invalid table name with special characters that will cause an error
         $badSchemaManager = new TableSchemaManager(
@@ -106,12 +106,18 @@ final class EnsureTableExistsListenerTest extends TestCase
         );
 
         $event = $this->createRequestEvent();
-        $listener->onKernelRequest($event);
 
-        // Should have logged an error
+        try {
+            $listener->onKernelRequest($event);
+            $this->fail('The failure has to reach the caller instead of surfacing later as a missing table');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('could not be created', $e->getMessage());
+            $this->assertStringContainsString('dbal_auto_create_table', $e->getMessage(), 'The message should say how to avoid it');
+        }
+
         $this->assertCount(1, $this->logger->logs, 'Expected one error to be logged');
         $this->assertSame(LogLevel::ERROR, $this->logger->logs[0]['level']);
-        $this->assertStringContainsString('Failed to auto-create refresh tokens table', $this->logger->logs[0]['message']);
+        $this->assertStringContainsString('Failed to create the refresh tokens table', $this->logger->logs[0]['message']);
         $this->assertArrayHasKey('exception', $this->logger->logs[0]['context']);
         $this->assertArrayHasKey('error', $this->logger->logs[0]['context']);
     }
@@ -199,7 +205,7 @@ final class EnsureTableExistsListenerTest extends TestCase
 
     private function createRequestEvent(int $requestType = HttpKernelInterface::MAIN_REQUEST): RequestEvent
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('/');
 
         return new RequestEvent($kernel, $request, $requestType);

@@ -14,6 +14,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use RuntimeException;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -30,6 +31,9 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
     private ?ConfigCache $cache = null;
     private readonly LoggerInterface $logger;
 
+    /**
+     * @psalm-mutation-free
+     */
     public function __construct(
         private readonly TableSchemaManager $schemaManager,
         private readonly bool $autoCreateTable,
@@ -40,6 +44,10 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
         $this->logger = $logger ?? new NullLogger();
     }
 
+    /**
+     * @psalm-pure
+     */
+    #[\Override]
     public static function getSubscribedEvents(): array
     {
         return [
@@ -72,24 +80,23 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
             // Fails silently on immutable deploys or read-only filesystems
             try {
                 $this->cache->write('<?php // Refresh tokens table created');
-            } catch (\RuntimeException|\InvalidArgumentException $cacheException) {
+            } catch (\RuntimeException $cacheException) {
                 // Cache write failed - likely read-only filesystem or immutable deploy
                 // This is acceptable - we just won't benefit from the cache optimization
             }
         } catch (\Throwable $e) {
-            // Table creation failed - could be:
-            // - Insufficient permissions
-            // - Connection issues
-            // - Schema introspection errors
-            // Similar to how Symfony Messenger handles transport creation
-            // If the table truly doesn't exist, the next request will fail with a clear error
+            // Reported and rethrown: the causes are configuration problems, such as a connection
+            // that cannot alter the schema, and swallowing them turns the first refresh into an
+            // unrelated error about a missing table
             $this->logger->error(
-                'Failed to auto-create refresh tokens table: {error}',
+                'Failed to create the refresh tokens table: {error}',
                 [
                     'error' => $e->getMessage(),
                     'exception' => $e,
                 ]
             );
+
+            throw new RuntimeException(sprintf('The refresh tokens table could not be created: %s. Create it with a migration and turn "dbal_auto_create_table" off.', $e->getMessage()), 0, $e);
         }
     }
 }

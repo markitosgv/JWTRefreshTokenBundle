@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;
  */
 final class ValidateDBALConnectionCompilerPass implements CompilerPassInterface
 {
+    #[\Override]
     public function process(ContainerBuilder $container): void
     {
         if (!$container->hasParameter('gesdinet_jwt_refresh_token.dbal.connection')) {

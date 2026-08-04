@@ -215,7 +215,6 @@ class TableSchemaManagerTest extends TestCase
     {
         $config = TableSchemaManager::getDefaultColumnConfig();
 
-        $this->assertIsArray($config);
         $this->assertArrayHasKey('id', $config);
         $this->assertArrayHasKey('refreshToken', $config);
         $this->assertArrayHasKey('username', $config);
@@ -347,6 +346,7 @@ class TableSchemaManagerTest extends TestCase
             ['user2']
         );
 
+        $this->assertIsArray($result);
         $this->assertSame($largeText, $result['refresh_token'], 'TEXT type should support large strings');
     }
 

@@ -34,6 +34,8 @@ final readonly class TableSchemaManager
      * @param Connection                                       $connection   DBAL connection
      * @param string                                           $tableName    Name of the refresh tokens table
      * @param array<string, array{name: string, type: string}> $columnConfig Column configuration map
+     *
+     * @psalm-mutation-free
      */
     public function __construct(
         private Connection $connection,
@@ -148,6 +150,8 @@ final readonly class TableSchemaManager
      * Returns the default column configuration for refresh tokens.
      *
      * @return array<string, array{name: string, type: string}>
+     *
+     * @psalm-pure
      */
     public static function getDefaultColumnConfig(): array
     {

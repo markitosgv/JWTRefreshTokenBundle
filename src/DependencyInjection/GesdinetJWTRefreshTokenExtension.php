@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManager;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
@@ -55,11 +56,17 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     }
 
     /**
-     * @param array<string, mixed> $config
+     * @param array{dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $config
      */
     private function configureDBALManager(ContainerBuilder $container, array $config, PhpFileLoader $loader): void
     {
-        $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
+        $connection = $config['dbal_connection'];
+
+        if (null === $connection) {
+            throw new RuntimeException('The "dbal_connection" node must name a connection service.');
+        }
+
+        $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $connection);
 
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.table_name', $config['dbal_table_name']);
@@ -68,7 +75,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     }
 
     /**
-     * @param array<string, mixed> $mergedConfig
+     * @param array{object_manager: string|null} $mergedConfig
      */
     private function configureObjectManager(ContainerBuilder $container, array $mergedConfig, PhpFileLoader $loader): void
     {
@@ -78,6 +85,8 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine.orm.entity_manager');
         } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine_mongodb.odm.document_manager');
+        } else {
+            throw new RuntimeException('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
         }
     }
 }

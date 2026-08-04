@@ -27,11 +27,29 @@ final class Configuration implements ConfigurationInterface
      * Valid SQL identifiers must start with a letter or underscore and contain
      * only letters, numbers, and underscores. This prevents potential SQL injection
      * risks and ensures compatibility across database platforms.
+     *
+     * Written without a regular expression so that it holds no global state, which is what lets
+     * both analysers treat it as pure.
+     *
+     * @psalm-pure
      */
     private static function isValidSqlIdentifier(string $identifier): bool
     {
-        // Must start with letter or underscore, contain only alphanumeric and underscores
-        return 1 === preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $identifier);
+        if ('' === $identifier) {
+            return false;
+        }
+
+        if ('_' !== $identifier[0] && !ctype_alpha($identifier[0])) {
+            return false;
+        }
+
+        for ($i = 1, $length = strlen($identifier); $i < $length; ++$i) {
+            if ('_' !== $identifier[$i] && !ctype_alnum($identifier[$i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     #[\Override]
@@ -85,13 +103,13 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue('refresh_tokens')
                     ->info('The table name for refresh tokens when using DBAL')
                     ->validate()
-                        ->ifTrue(static fn ($v): bool => !self::isValidSqlIdentifier($v))
+                        ->ifTrue(static fn (mixed $v): bool => !is_string($v) || !self::isValidSqlIdentifier($v))
                         ->thenInvalid('The "dbal_table_name" must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
                     ->end()
                 ->end()
                 ->booleanNode('dbal_auto_create_table')
-                    ->defaultTrue()
-                    ->info('Automatically create the refresh tokens table if it does not exist (like Symfony Messenger)')
+                    ->defaultFalse()
+                    ->info('Create the refresh tokens table on the first request when it does not exist. Off by default: it runs DDL while serving traffic, so the connection needs rights to alter the schema. Prefer a migration.')
                 ->end()
                 ->arrayNode('dbal_columns')
                     ->defaultValue([])
@@ -103,7 +121,7 @@ final class Configuration implements ConfigurationInterface
                                 ->cannotBeEmpty()
                                 ->info('The actual column name in the database')
                                 ->validate()
-                                    ->ifTrue(static fn ($v): bool => !self::isValidSqlIdentifier($v))
+                                    ->ifTrue(static fn (mixed $v): bool => !is_string($v) || !self::isValidSqlIdentifier($v))
                                     ->thenInvalid('The column name must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
                                 ->end()
                             ->end()
@@ -154,7 +172,7 @@ final class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
             ->validate()
-                ->ifTrue(static fn (array $v): bool => null !== $v['object_manager'] && null !== $v['dbal_connection'])
+                ->ifTrue(static fn (array $v): bool => null !== ($v['object_manager'] ?? null) && null !== ($v['dbal_connection'] ?? null))
                 ->thenInvalid('The "object_manager" and "dbal_connection" options are mutually exclusive. Use one or the other.')
             ->end();
 

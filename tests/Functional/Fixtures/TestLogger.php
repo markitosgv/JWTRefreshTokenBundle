@@ -17,7 +17,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function emergency($message, array $context = []): void
@@ -27,7 +27,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function alert($message, array $context = []): void
@@ -37,7 +37,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function critical($message, array $context = []): void
@@ -47,7 +47,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function error($message, array $context = []): void
@@ -57,7 +57,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function warning($message, array $context = []): void
@@ -67,7 +67,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function notice($message, array $context = []): void
@@ -77,7 +77,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function info($message, array $context = []): void
@@ -87,7 +87,7 @@ final class TestLogger implements LoggerInterface
 
     /**
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function debug($message, array $context = []): void
@@ -98,13 +98,13 @@ final class TestLogger implements LoggerInterface
     /**
      * @param string|int $level
      * @param string|\Stringable $message
-     * @param mixed[] $context
+     * @param array<string, mixed> $context
      * @return void
      */
     public function log($level, $message, array $context = []): void
     {
         $this->logs[] = [
-            'level' => $level,
+            'level' => (string) $level,
             'message' => (string)$message,
             'context' => $context,
         ];

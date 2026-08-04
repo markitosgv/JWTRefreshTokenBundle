@@ -138,7 +138,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
 
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.dbal.connection', 'doctrine.dbal.default_connection');
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.dbal.table_name', 'refresh_tokens');
-        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.dbal.auto_create_table', true);
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.dbal.auto_create_table', false);
         $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.refresh_token_manager');
         $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.dbal.table_schema_manager');
     }

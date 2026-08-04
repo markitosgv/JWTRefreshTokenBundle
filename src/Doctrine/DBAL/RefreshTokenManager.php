@@ -31,6 +31,8 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      * @param string                                           $tableName        Name of the refresh tokens table
      * @param class-string<RefreshTokenInterface>              $class            Fully qualified class name for refresh token instances
      * @param array<string, array{name: string, type: string}> $columnConfig     Map of aliases to column configuration ['alias' => ['name' => 'column_name', 'type' => Types::STRING]]
+     *
+     * @psalm-mutation-free
      */
     public function __construct(
         private Connection $connection,
@@ -44,6 +46,8 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
     /**
      * Get column name by alias.
+     *
+     * @psalm-mutation-free
      */
     private function getColumnName(string $alias): string
     {
@@ -67,7 +71,10 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     }
 
     /**
-     * Hydrates a RefreshToken from raw database data using Closure::bind.
+     * Builds a token out of one row.
+     *
+     * Everything the model exposes a setter for goes through it; only the identifier does not have
+     * one, as the mappings fill it in and there is no mapping here.
      *
      * @param array<string, mixed> $data Raw data from database
      */
@@ -76,23 +83,48 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         $class = $this->class;
         $instance = new $class();
 
-        $columnConfig = $this->columnConfig;
-        $conn = $this->connection;
+        $refreshToken = $data[$this->getColumnName('refreshToken')] ?? $data['refresh_token'] ?? null;
+        $username = $data[$this->getColumnName('username')] ?? $data['username'] ?? null;
+        $valid = $this->connection->convertToPHPValue(
+            $data[$this->getColumnName('valid')] ?? $data['valid'] ?? null,
+            $this->columnConfig['valid']['type'] ?? 'datetime'
+        );
 
-        /**
-         * @param AbstractRefreshToken $object
-         * @param array<string, mixed> $data
-         */
-        $hydrator = \Closure::bind(function ($object, array $data) use ($columnConfig, $conn): void {
-            $object->id = $data[$columnConfig['id']['name']] ?? $data['id'] ?? null;
-            $object->refreshToken = $data[$columnConfig['refreshToken']['name']] ?? $data['refresh_token'] ?? null;
-            $object->username = $data[$columnConfig['username']['name']] ?? $data['username'] ?? null;
-            $object->valid = $conn->convertToPHPValue($data[$columnConfig['valid']['name']] ?? $data['valid'] ?? null, $columnConfig['valid']['type'] ?? 'datetime');
-        }, null, AbstractRefreshToken::class);
+        if (is_string($refreshToken)) {
+            $instance->setRefreshToken($refreshToken);
+        }
 
-        $hydrator($instance, $data);
+        if (is_string($username)) {
+            $instance->setUsername($username);
+        }
+
+        if ($valid instanceof \DateTimeInterface) {
+            $instance->setValid($valid);
+        }
+
+        $this->assignIdentifier($instance, $data[$this->getColumnName('id')] ?? $data['id'] ?? null);
 
         return $instance;
+    }
+
+    /**
+     * Assigns the identifier the database gave the row.
+     *
+     * An implementation is free not to have the property, in which case there is nothing to fill.
+     */
+    private function assignIdentifier(RefreshTokenInterface $token, mixed $id): void
+    {
+        if (null === $id) {
+            return;
+        }
+
+        $reflection = new \ReflectionObject($token);
+
+        if (!$reflection->hasProperty('id')) {
+            return;
+        }
+
+        $reflection->getProperty('id')->setValue($token, $id);
     }
 
     #[\Override]
@@ -132,43 +164,41 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function save(RefreshTokenInterface $refreshToken, bool $andFlush = true): void
     {
         $refreshTokenString = $refreshToken->getRefreshToken();
+
         if (null === $refreshTokenString) {
             throw new \InvalidArgumentException('Cannot save a refresh token without a token string.');
         }
 
-        $token = $this->get($refreshTokenString);
+        $parameters = [
+            'refresh_token' => $refreshTokenString,
+            'username' => $refreshToken->getUsername(),
+            'valid' => $refreshToken->getValid(),
+        ];
+        $types = ['valid' => 'datetime'];
 
-        if (!$token instanceof RefreshTokenInterface) {
-            $this->connection->createQueryBuilder()
-                ->insert($this->tableName)
-                ->values([
-                    $this->getColumnName('refreshToken') => ':refresh_token',
-                    $this->getColumnName('username') => ':username',
-                    $this->getColumnName('valid') => ':valid',
-                ])
-                ->setParameters([
-                    'refresh_token' => $refreshToken->getRefreshToken(),
-                    'username' => $refreshToken->getUsername(),
-                    'valid' => $refreshToken->getValid(),
-                ], [
-                    'valid' => 'datetime',
-                ])
-                ->executeStatement();
-        } else {
-            $this->connection->createQueryBuilder()
-                ->update($this->tableName)
-                ->set($this->getColumnName('username'), ':username')
-                ->set($this->getColumnName('valid'), ':valid')
-                ->where($this->quoteColumnIdentifier('refreshToken').' = :refresh_token')
-                ->setParameters([
-                    'refresh_token' => $refreshToken->getRefreshToken(),
-                    'username' => $refreshToken->getUsername(),
-                    'valid' => $refreshToken->getValid(),
-                ], [
-                    'valid' => 'datetime',
-                ])
-                ->executeStatement();
+        // Updating first tells us whether the row is there, so the read the other way round needs
+        // does not happen. The token string is the natural key, so at most one row matches.
+        $updated = $this->connection->createQueryBuilder()
+            ->update($this->quoteTableIdentifier())
+            ->set($this->quoteColumnIdentifier('username'), ':username')
+            ->set($this->quoteColumnIdentifier('valid'), ':valid')
+            ->where($this->quoteColumnIdentifier('refreshToken').' = :refresh_token')
+            ->setParameters($parameters, $types)
+            ->executeStatement();
+
+        if ($updated > 0) {
+            return;
         }
+
+        $this->connection->createQueryBuilder()
+            ->insert($this->quoteTableIdentifier())
+            ->values([
+                $this->quoteColumnIdentifier('refreshToken') => ':refresh_token',
+                $this->quoteColumnIdentifier('username') => ':username',
+                $this->quoteColumnIdentifier('valid') => ':valid',
+            ])
+            ->setParameters($parameters, $types)
+            ->executeStatement();
     }
 
     /**
@@ -182,8 +212,8 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
         $result = $this->connection->delete(
-            $this->tableName,
-            [$this->getColumnName('refreshToken') => $refreshToken->getRefreshToken()]
+            $this->quoteTableIdentifier(),
+            [$this->quoteColumnIdentifier('refreshToken') => $refreshToken->getRefreshToken()]
         );
 
         return (int) $result;
@@ -263,7 +293,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
 
             if ([] !== $invalidData) {
                 $this->connection->createQueryBuilder()
-                    ->delete($this->tableName)
+                    ->delete($this->quoteTableIdentifier())
                     ->where($this->quoteColumnIdentifier('valid').' < :datetime')
                     ->setParameter('datetime', $datetime, 'datetime')
                     ->executeStatement();

@@ -38,6 +38,43 @@ class RefreshTokenManagerTest extends TestCase
         $this->connection->close();
     }
 
+    public function testKeepsTheIdentifierTheDatabaseAssigned(): void
+    {
+        $token = new RefreshToken();
+        $token->setRefreshToken('token-with-an-id');
+        $token->setUsername('testuser');
+        $token->setValid(new \DateTime('+1 day'));
+
+        $this->manager->save($token);
+
+        $stored = $this->manager->get('token-with-an-id');
+
+        $this->assertNotNull($stored);
+        $this->assertNotNull($stored->getId(), 'The row identifier should reach the model');
+    }
+
+    public function testUpdatesInPlaceInsteadOfInsertingTwice(): void
+    {
+        $token = new RefreshToken();
+        $token->setRefreshToken('token-saved-twice');
+        $token->setUsername('first');
+        $token->setValid(new \DateTime('+1 day'));
+
+        $this->manager->save($token);
+
+        $token->setUsername('second');
+        $this->manager->save($token);
+
+        /** @var int|string $count */
+        $count = $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM refresh_tokens WHERE refresh_token = ?',
+            ['token-saved-twice']
+        );
+
+        $this->assertSame(1, (int) $count, 'Saving the same token again should update the row, not add one');
+        $this->assertSame('second', $this->manager->get('token-saved-twice')?->getUsername());
+    }
+
     public function testSaveAndRetrieveToken(): void
     {
         $token = new RefreshToken();
@@ -81,7 +118,7 @@ class RefreshTokenManagerTest extends TestCase
         $retrieved = $this->manager->get('update-token');
         $this->assertNotNull($retrieved);
         $this->assertSame('original-user', $retrieved->getUsername());
-        $this->assertEquals($originalValid->getTimestamp(), $retrieved->getValid()->getTimestamp());
+        $this->assertEquals($originalValid->getTimestamp(), $retrieved->getValid()?->getTimestamp());
 
         // Modify the token
         $token->setUsername('updated-user');
@@ -95,7 +132,7 @@ class RefreshTokenManagerTest extends TestCase
         $updated = $this->manager->get('update-token');
         $this->assertNotNull($updated);
         $this->assertSame('updated-user', $updated->getUsername());
-        $this->assertEquals($newValid->getTimestamp(), $updated->getValid()->getTimestamp());
+        $this->assertEquals($newValid->getTimestamp(), $updated->getValid()?->getTimestamp());
 
         // Verify we still have only one row (UPDATE, not INSERT)
         $allTokens = $this->connection->createQueryBuilder()
