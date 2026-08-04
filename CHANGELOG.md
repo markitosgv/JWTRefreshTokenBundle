@@ -4,6 +4,7 @@
 
 ### Changed
 
+* An expired JWT can be exchanged with `jwt` and `refresh_jwt` on the same firewall. Symfony orders authenticators by the priority their factories declare rather than by the order written on the firewall, and this one sat below the JWT authenticator, which rejected the expired token before the refresh authenticator was reached. Reordering them in `security.yaml` never had any effect. It now sits above it, and since it only takes over requests matching its `check_path`, nothing else changes
 * The refresh token is read from a JSON body whatever the request declares its content type to be. A client that sets no header, which is what `fetch()` does when given none, or a proxy that strips it, was answered as though no token had been supplied
 * `delete()` reports what the storage actually deleted rather than one row after reading the token back. Two callers racing for the same token were both told they had deleted it, which is the answer a single use token needs to tell them apart
 * Logging out invalidates the refresh token of the user logging out and not one belonging to somebody else, which is answered as a token that no longer exists. A request with no authenticated user still invalidates the token it carries

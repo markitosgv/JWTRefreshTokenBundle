@@ -196,6 +196,12 @@ security:
 # ...
 ```
 
+`jwt` and `refresh_jwt` sit on the same firewall, and the refresh authenticator is reached first
+whatever order they appear in here: Symfony orders authenticators by a priority the bundles declare,
+not by the file. That ordering is what lets an expired JWT be exchanged at all — reached second, the
+JWT authenticator would reject the request before the refresh one saw it. It only takes over
+requests matching its `check_path`, so everything else still authenticates with the JWT as usual.
+
 ### Step 5: Update your database schema
 
 You will need to add the table for the refresh tokens to your application's database.

@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\DependencyInjection\Security\Factory;
 
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory\RefreshTokenAuthenticatorFactory;
+use Lexik\Bundle\JWTAuthenticationBundle\DependencyInjection\Security\Factory\JWTAuthenticatorFactory;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -25,10 +26,24 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->container = new ContainerBuilder();
     }
 
-    public function test_is_registered_under_the_refresh_jwt_key_after_the_other_authenticators(): void
+    public function test_is_registered_under_the_refresh_jwt_key(): void
     {
         $this->assertSame('refresh-jwt', $this->factory->getKey());
-        $this->assertSame(-50, $this->factory->getPriority());
+    }
+
+    /**
+     * Symfony orders authenticators by factory priority, not by the order they are written on the
+     * firewall, so this is what decides whether an expired JWT can be exchanged at all: reached
+     * second, the JWT authenticator rejects the request before the refresh one sees it.
+     *
+     * Compared against Lexik's own factory rather than a number, so that this fails if they move.
+     */
+    public function test_is_tried_before_the_jwt_authenticator(): void
+    {
+        $this->assertGreaterThan(
+            (new JWTAuthenticatorFactory())->getPriority(),
+            $this->factory->getPriority()
+        );
     }
 
     public function test_firewall_configuration_defaults(): void

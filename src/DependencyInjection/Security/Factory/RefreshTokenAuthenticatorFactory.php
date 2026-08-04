@@ -24,12 +24,22 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInterface
 {
     /**
+     * Above the JWT authenticator, which sits at -50.
+     *
+     * Symfony orders authenticators by this rather than by the order they appear on the firewall,
+     * so with both on one firewall the JWT authenticator used to be reached first and rejected an
+     * expired token before this one could exchange it — which is the whole point of the refresh
+     * endpoint. Reordering them in security.yaml has no effect, as the priority is what decides.
+     *
+     * Being tried first costs nothing elsewhere: supports() answers on the configured path alone,
+     * so on every other request this authenticator declines and the next one runs as before.
+     *
      * @psalm-pure
      */
     #[\Override]
     public function getPriority(): int
     {
-        return -50;
+        return -5;
     }
 
     /**
