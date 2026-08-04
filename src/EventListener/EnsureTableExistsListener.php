@@ -80,7 +80,7 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
             // Fails silently on immutable deploys or read-only filesystems
             try {
                 $this->cache->write('<?php // Refresh tokens table created');
-            } catch (\RuntimeException $cacheException) {
+            } catch (RuntimeException $cacheException) {
                 // Cache write failed - likely read-only filesystem or immutable deploy
                 // This is acceptable - we just won't benefit from the cache optimization
             }
