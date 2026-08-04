@@ -10,6 +10,7 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -79,6 +80,42 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'gesdinet_jwt_refresh_token.event_listener.attach_refresh_token',
             0,
             new Reference('gesdinet_jwt_refresh_token.refresh_token_manager')
+        );
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function listenerOptionProvider(): iterable
+    {
+        yield 'ttl' => [1, 'ttl'];
+        yield 'token_parameter_name' => [3, 'token_parameter_name'];
+        // The one this is really here for: single_use was configurable for a long time while the
+        // value never reached the listener, so it did nothing and the configuration looked ignored
+        yield 'single_use' => [4, 'single_use'];
+        yield 'cookie' => [7, 'cookie'];
+        yield 'return_expiration' => [8, 'return_expiration'];
+        yield 'return_expiration_parameter_name' => [9, 'return_expiration_parameter_name'];
+        yield 'single_use_ttl_update' => [10, 'single_use_ttl_update'];
+        yield 'max_tokens_per_user' => [11, 'max_tokens_per_user'];
+    }
+
+    /**
+     * A configured option that never reaches the listener is worse than one that does not exist:
+     * it is set, it is accepted, and nothing happens.
+     */
+    #[DataProvider('listenerOptionProvider')]
+    public function test_every_configured_option_reaches_the_listener(int $argument, string $option): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+        ]);
+
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(
+            'gesdinet_jwt_refresh_token.event_listener.attach_refresh_token',
+            $argument,
+            sprintf('%%gesdinet_jwt_refresh_token.%s%%', $option)
         );
     }
 
