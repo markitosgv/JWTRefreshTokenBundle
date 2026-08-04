@@ -4,7 +4,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Command\RevokeRefreshTokenCommand;
-use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\LogoutEventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
