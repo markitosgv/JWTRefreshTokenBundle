@@ -453,5 +453,4 @@ class RefreshTokenManagerTest extends TestCase
 
         $this->manager->revokeAllInvalid();
     }
-
 }
