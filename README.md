@@ -937,6 +937,46 @@ When there is a failure authenticating the refresh token, the `gesdinet.refresh_
 
 When there is a failure authenticating the refresh token, the `gesdinet.refresh_token_not_found` event is dispatched with a `Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenNotFoundEvent` object.
 
+### Adding your own data to the response
+
+The refresh token is put into the response by a listener on Lexik's
+`lexik_jwt_authentication.on_authentication_success`, and anything else can go in beside it the same
+way:
+
+```php
+namespace App\EventListener;
+
+use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+#[AsEventListener('lexik_jwt_authentication.on_authentication_success')]
+final class AttachUserToTheResponse
+{
+    public function __invoke(AuthenticationSuccessEvent $event): void
+    {
+        $user = $event->getUser();
+
+        if (!$user instanceof UserInterface) {
+            return;
+        }
+
+        $data = $event->getData();
+        $data['user'] = ['nickname' => $user->getNickname()];
+
+        $event->setData($data);
+    }
+}
+```
+
+That event is dispatched on **both** signing in and refreshing, which is usually what you want: a
+client that gets the user with its token on login gets it again with the refreshed one, rather than
+having to remember it. It is by design rather than a quirk of any one configuration.
+
+Where something should happen only on a refresh, listen to
+[`gesdinet.refresh_token`](#token-refreshed) instead — it is dispatched only then, and carries the
+refresh token itself.
+
 ## Token Extractor
 
 The bundle provides a `Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface` to define classes which can read the refresh token from the request.
