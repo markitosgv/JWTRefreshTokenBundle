@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     /**
-     * @param array{ttl: int, ttl_update: bool, single_use: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
+     * @param array{ttl: int, ttl_update: bool, single_use: bool, single_use_ttl_update: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
      */
     #[\Override]
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
@@ -39,6 +39,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.ttl', $mergedConfig['ttl']);
         $container->setParameter('gesdinet_jwt_refresh_token.ttl_update', $mergedConfig['ttl_update']);
         $container->setParameter('gesdinet_jwt_refresh_token.single_use', $mergedConfig['single_use']);
+        $container->setParameter('gesdinet_jwt_refresh_token.single_use_ttl_update', $mergedConfig['single_use_ttl_update']);
         $container->setParameter('gesdinet_jwt_refresh_token.token_parameter_name', $mergedConfig['token_parameter_name']);
         $container->setParameter('gesdinet_jwt_refresh_token.cookie', $mergedConfig['cookie'] ?? []);
         $container->setParameter('gesdinet_jwt_refresh_token.return_expiration', $mergedConfig['return_expiration']);

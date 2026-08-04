@@ -98,6 +98,98 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
     }
 
+    /**
+     * Rotation on its own lets a user refresh for as long as they keep at it, since each token
+     * arrives with a full ttl. Turning the update off ends the chain when the first token would
+     * have expired.
+     */
+    public function testIssuesTheReplacementForWhatWasLeftOfTheSingleUseToken(): void
+    {
+        $expiresIn = 3600;
+
+        /** @var RefreshTokenInterface&Stub $oldToken */
+        $oldToken = $this->createStub(RefreshTokenInterface::class);
+        $oldToken->method('getValid')->willReturn(new DateTime(sprintf('+%d seconds', $expiresIn)));
+
+        $this->refreshTokenManager->method('get')->willReturn($oldToken);
+
+        /** @var RefreshTokenInterface&Stub $newToken */
+        $newToken = $this->createStub(RefreshTokenInterface::class);
+        $newToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->with($this->anything(), $this->callback(
+                // Not the full ttl the listener is configured with, but what the old one had left
+                static fn (int $ttl): bool => $ttl > $expiresIn - 10 && $ttl <= $expiresIn
+            ))
+            ->willReturn($newToken);
+
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($this->createStub(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            false
+        ))->attachRefreshToken($event);
+    }
+
+    public function testIssuesAFullTtlWithTheSingleUseUpdateLeftOn(): void
+    {
+        /** @var RefreshTokenInterface&Stub $oldToken */
+        $oldToken = $this->createStub(RefreshTokenInterface::class);
+        $oldToken->method('getValid')->willReturn(new DateTime('+60 seconds'));
+
+        $this->refreshTokenManager->method('get')->willReturn($oldToken);
+
+        /** @var RefreshTokenInterface&Stub $newToken */
+        $newToken = $this->createStub(RefreshTokenInterface::class);
+        $newToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->with($this->anything(), self::TTL)
+            ->willReturn($newToken);
+
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($this->createStub(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true
+        ))->attachRefreshToken($event);
+    }
+
     public function testAttachesTheExpirationOfTheReusedToken(): void
     {
         $expiration = new DateTime('+1 day');

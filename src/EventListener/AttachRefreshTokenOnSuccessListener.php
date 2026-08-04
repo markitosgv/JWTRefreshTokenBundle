@@ -44,7 +44,8 @@ final class AttachRefreshTokenOnSuccessListener
         private readonly ExtractorInterface $extractor,
         array $cookieSettings,
         private readonly bool $returnExpiration = false,
-        private readonly string $returnExpirationParameterName = 'refresh_token_expiration'
+        private readonly string $returnExpirationParameterName = 'refresh_token_expiration',
+        private readonly bool $singleUseTtlUpdate = true
     ) {
         $this->cookieSettings = array_merge([
             'enabled' => false,
@@ -56,6 +57,21 @@ final class AttachRefreshTokenOnSuccessListener
             'remove_token_from_body' => true,
             'partitioned' => false,
         ], $cookieSettings);
+    }
+
+    /**
+     * Seconds left before the token expires, never below zero: a replacement issued for no time at
+     * all is the session having run out, not one lasting forever.
+     */
+    private function remainingTtl(RefreshTokenInterface $refreshToken): int
+    {
+        $valid = $refreshToken->getValid();
+
+        if (null === $valid) {
+            return 0;
+        }
+
+        return max(0, $valid->getTimestamp() - time());
     }
 
     public function attachRefreshToken(AuthenticationSuccessEvent $event): void
@@ -77,12 +93,17 @@ final class AttachRefreshTokenOnSuccessListener
             $refreshTokenString = null;
         }
 
+        // How long the token being replaced had left, read before it goes
+        $remainingTtl = null;
+
         // Remove the current refreshToken if it is single-use
         if (null !== $refreshTokenString && true === $this->singleUse) {
             $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
             $refreshTokenString = null;
 
             if ($refreshToken instanceof RefreshTokenInterface) {
+                $remainingTtl = $this->remainingTtl($refreshToken);
+
                 $this->refreshTokenManager->delete($refreshToken);
             }
         }
@@ -96,7 +117,13 @@ final class AttachRefreshTokenOnSuccessListener
                 $data[$this->returnExpirationParameterName] = $refreshToken?->getValid()?->getTimestamp() ?? 0;
             }
         } else {
-            $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, $this->ttl);
+            // Starting the ttl over on every rotation means refreshing can be chained for as long
+            // as the user keeps at it, so the replacement can be made to end when the token it
+            // replaces would have
+            $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl(
+                $user,
+                $this->singleUseTtlUpdate || null === $remainingTtl ? $this->ttl : $remainingTtl
+            );
 
             $this->refreshTokenManager->save($refreshToken);
             $refreshTokenString = $refreshToken->getRefreshToken();

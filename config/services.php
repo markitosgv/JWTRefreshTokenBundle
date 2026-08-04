@@ -27,6 +27,7 @@ return static function (ContainerConfigurator $container): void {
     $refreshTokenTtl = param($vendor.'.ttl');
     $tokenParameterName = param($vendor.'.token_parameter_name');
     $singleUse = param($vendor.'.single_use');
+    $singleUseTtlUpdate = param($vendor.'.single_use_ttl_update');
     $cookie = param($vendor.'.cookie');
     $returnExpiration = param($vendor.'.return_expiration');
     $returnExpirationParameterName = param($vendor.'.return_expiration_parameter_name');
@@ -46,6 +47,7 @@ return static function (ContainerConfigurator $container): void {
             $cookie,
             $returnExpiration,
             $returnExpirationParameterName,
+            $singleUseTtlUpdate,
         ])
         ->tag('kernel.event_listener', [
             'event' => Events::AUTHENTICATION_SUCCESS,

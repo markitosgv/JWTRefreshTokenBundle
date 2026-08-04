@@ -285,6 +285,22 @@ gesdinet_jwt_refresh_token:
     single_use: true
 ```
 
+#### Ending the chain of single use tokens
+
+Each token issued in place of a single use one starts its ttl over, so a user refreshing before the
+current token expires never has to sign in again. Turn the update off to have the replacement expire
+when the token it replaces would have:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    single_use: true
+    single_use_ttl_update: false
+```
+
+Refreshing then keeps rotating the token, and the whole chain ends a `ttl` after the first one was
+issued, at which point the user signs in again. It is left on by default, which is how the bundle has
+always behaved.
+
 ### Set the refresh token in a cookie
 
 By default, the refresh token is returned in the body of a JSON response. You can use the following configuration to set it in a HttpOnly cookie instead. The refresh token is automatically extracted from the cookie during refresh.
