@@ -241,7 +241,7 @@ final class ConfigurationTest extends TestCase
                     'ttl' => $ttl,
                 ],
             ],
-            'must be a positive number of seconds'
+            'too small'
         );
     }
 
@@ -265,7 +265,7 @@ final class ConfigurationTest extends TestCase
                     'max_tokens_per_user' => 0,
                 ],
             ],
-            'must be at least 1'
+            'too small'
         );
     }
 

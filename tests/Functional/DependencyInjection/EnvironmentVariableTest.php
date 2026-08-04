@@ -53,6 +53,46 @@ final class EnvironmentVariableTest extends TestCase
     }
 
     /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function numericSettingProvider(): iterable
+    {
+        yield 'ttl' => ['ttl', '86400'];
+        yield 'max_tokens_per_user' => ['max_tokens_per_user', '5'];
+    }
+
+    /**
+     * A number checked with a validate() closure rejects every environment variable put in front of
+     * it: the container is compiled again with a sample value of the type in place, and for an int
+     * that sample is 0. `min()` is skipped while a placeholder is being handled, a closure is not.
+     */
+    #[DataProvider('numericSettingProvider')]
+    public function test_a_numeric_setting_can_be_read_from_the_environment(string $setting, string $value): void
+    {
+        $container = new ContainerBuilder(new EnvPlaceholderParameterBag());
+        $container->registerExtension(new GesdinetJWTRefreshTokenExtension());
+        $container->loadFromExtension('gesdinet_jwt_refresh_token', [
+            'refresh_token_class' => RefreshToken::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            $setting => '%env(int:A_NUMERIC_SETTING)%',
+        ]);
+
+        foreach (['doctrine.orm.entity_manager', 'request_stack', 'event_dispatcher', 'security.http_utils', 'lexik_jwt_authentication.handler.authentication_success'] as $id) {
+            $container->register($id, \stdClass::class)->setPublic(true);
+        }
+
+        $_ENV['A_NUMERIC_SETTING'] = $value;
+
+        try {
+            $container->compile(true);
+        } finally {
+            unset($_ENV['A_NUMERIC_SETTING']);
+        }
+
+        $this->assertSame((int) $value, $container->getParameter('gesdinet_jwt_refresh_token.'.$setting));
+    }
+
+    /**
      * @param array<string, mixed> $cookie
      */
     private function containerWith(array $cookie): ContainerBuilder
