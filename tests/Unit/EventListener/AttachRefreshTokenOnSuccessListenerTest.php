@@ -149,6 +149,51 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         ))->attachRefreshToken($event);
     }
 
+    /**
+     * The cookie used to be given a ttl from now regardless of the token in it, which the browser
+     * would then keep sending after the token behind it had expired.
+     */
+    public function testTheCookieExpiresWhenTheTokenInsideItDoes(): void
+    {
+        $expiresAt = new DateTime('+90 seconds');
+
+        /** @var RefreshTokenInterface&Stub $newToken */
+        $newToken = $this->createStub(RefreshTokenInterface::class);
+        $newToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+        $newToken->method('getValid')->willReturn($expiresAt);
+
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($newToken);
+
+        $response = new Response();
+
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($this->createStub(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+        $event->method('getResponse')->willReturn($response);
+
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn(null);
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            ['enabled' => true],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME
+        ))->attachRefreshToken($event);
+
+        $cookies = $response->headers->getCookies();
+
+        $this->assertCount(1, $cookies);
+        $this->assertSame($expiresAt->getTimestamp(), $cookies[0]->getExpiresTime());
+    }
+
     public function testIssuesAFullTtlWithTheSingleUseUpdateLeftOn(): void
     {
         /** @var RefreshTokenInterface&Stub $oldToken */

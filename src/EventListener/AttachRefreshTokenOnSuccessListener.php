@@ -109,12 +109,19 @@ final class AttachRefreshTokenOnSuccessListener
         }
 
         // Set or create the refreshTokenString
+        $issuedToken = null;
+
         if (null !== $refreshTokenString) {
             $data[$this->tokenParameterName] = $refreshTokenString;
 
+            // Only read back when the expiry is going to be used, either in the body or on the
+            // cookie
+            if ($this->returnExpiration || $this->cookieSettings['enabled']) {
+                $issuedToken = $this->refreshTokenManager->get($refreshTokenString);
+            }
+
             if ($this->returnExpiration) {
-                $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
-                $data[$this->returnExpirationParameterName] = $refreshToken?->getValid()?->getTimestamp() ?? 0;
+                $data[$this->returnExpirationParameterName] = $issuedToken?->getValid()?->getTimestamp() ?? 0;
             }
         } else {
             // Starting the ttl over on every rotation means refreshing can be chained for as long
@@ -126,6 +133,7 @@ final class AttachRefreshTokenOnSuccessListener
             );
 
             $this->refreshTokenManager->save($refreshToken);
+            $issuedToken = $refreshToken;
             $refreshTokenString = $refreshToken->getRefreshToken();
             $data[$this->tokenParameterName] = $refreshTokenString;
 
@@ -140,7 +148,9 @@ final class AttachRefreshTokenOnSuccessListener
                 new Cookie(
                     $this->tokenParameterName,
                     $refreshTokenString,
-                    time() + $this->ttl,
+                    // The cookie goes when the token does, which is not a ttl from now once the
+                    // replacement inherits the expiry of the one it replaced
+                    $issuedToken?->getValid()?->getTimestamp() ?? time() + $this->ttl,
                     $this->cookieSettings['path'],
                     $this->cookieSettings['domain'],
                     $this->cookieSettings['secure'],
