@@ -7,6 +7,7 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ValidateDBALConn
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenExtension;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
+use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
@@ -208,17 +209,20 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
     /**
      * The DBAL manager does not revoke by user, so nothing should offer it under that interface.
      */
-    public function test_the_dbal_manager_is_not_offered_as_revoking_by_user(): void
+    /**
+     * The DBAL manager did not revoke by user when it was written, so the alias was left out for it.
+     * It does now, and leaving it out would mean the option resting on it could not be used there.
+     */
+    public function test_the_dbal_manager_is_offered_through_the_same_interfaces(): void
     {
         $this->load([
             'refresh_token_class' => RefreshTokenEntity::class,
             'dbal_connection' => 'doctrine.dbal.default_connection',
         ]);
 
-        $this->assertFalse(
-            $this->container->hasAlias(RevokeRefreshTokenManagerInterface::class),
-            'Injecting it would hand over a manager without the method'
-        );
+        $this->assertContainerBuilderHasAlias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
+        $this->assertContainerBuilderHasAlias(RevokeRefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
+        $this->assertContainerBuilderHasAlias(ListRefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
     }
 
     public function test_container_is_loaded_with_custom_configuration(): void

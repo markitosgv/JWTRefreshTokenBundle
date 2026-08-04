@@ -421,6 +421,41 @@ security:
 Note that this limits failed attempts. Where repeated _successful_ logins are the concern, rate
 limit the route itself with `symfony/rate-limiter`.
 
+#### Showing a user their sessions
+
+`Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface` reads them back, aliased to
+the manager so it can be injected by type:
+
+```php
+public function __construct(
+    private readonly ListRefreshTokenManagerInterface $refreshTokens,
+    private readonly RefreshTokenManagerInterface $manager,
+) {
+}
+
+public function sessions(UserInterface $user): array
+{
+    return array_filter(
+        $this->refreshTokens->findAllForUser($user),
+        static fn (RefreshTokenInterface $token): bool => $token->isValid()
+    );
+}
+```
+
+They come back with the one expiring last first, which is the order
+`max_tokens_per_user` keeps from, so the top of the list is the session that survives longest.
+Tokens that have already expired are included — they are still rows in the table — and `isValid()`
+is what tells them apart, as above.
+
+Revoking one of them is `delete()` on the manager, and revoking all of them is
+[`revokeAllForUser()`](#revoke-every-token-of-a-user).
+
+Adding what the session was, a device name or the like, means [a token class of your
+own](#use-another-class-for-refresh-tokens) with the column on it, and a decorator around
+`gesdinet_jwt_refresh_token.refresh_token_generator` that fills it in. Bear in mind that anything
+the client tells you about itself is worth exactly what the client is worth: it is useful for a
+person recognising a session of their own and revoking it, and it is not a security control.
+
 ### Single Use Tokens
 
 You can configure the refresh token so it can only be consumed _once_. If set to `true` and the refresh token is consumed, a new refresh token will be provided.

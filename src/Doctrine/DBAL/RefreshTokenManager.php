@@ -15,12 +15,13 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var array<string, array{name: string, type: string}>
@@ -237,6 +238,18 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         );
 
         return (int) $result;
+    }
+
+    #[\Override]
+    public function findAllForUser(UserInterface $user): array
+    {
+        $rows = $this->query()
+            ->where($this->quoteColumnIdentifier('username').' = :username')
+            ->setParameter('username', $user->getUserIdentifier())
+            ->orderBy($this->quoteColumnIdentifier('valid'), 'DESC')
+            ->fetchAllAssociative();
+
+        return array_values(array_map($this->hydrate(...), $rows));
     }
 
     #[\Override]

@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use LogicException;
@@ -19,7 +20,7 @@ use DateTimeInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var class-string<RefreshTokenInterface>
@@ -194,6 +195,17 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         }
 
         return $this->repository->deleteByUser($user);
+    }
+
+    #[\Override]
+    public function findAllForUser(UserInterface $user): array
+    {
+        // findBy() takes an order and is on ObjectRepository already, so no repository of a
+        // particular kind is needed for this
+        return $this->repository->findBy(
+            ['username' => $user->getUserIdentifier()],
+            ['valid' => 'DESC']
+        );
     }
 
     #[\Override]

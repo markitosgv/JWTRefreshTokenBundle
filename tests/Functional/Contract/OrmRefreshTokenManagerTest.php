@@ -4,6 +4,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\RefreshToken;
@@ -15,6 +16,7 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 final class OrmRefreshTokenManagerTest extends ORMTestCase
 {
     use RefreshTokenManagerContract;
+    use ListRefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
 
     protected function setUp(): void
@@ -40,6 +42,15 @@ final class OrmRefreshTokenManagerTest extends ORMTestCase
         $manager = $this->manager();
 
         \assert($manager instanceof RevokeRefreshTokenManagerInterface);
+
+        return $manager;
+    }
+
+    protected function listingManager(): ListRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ListRefreshTokenManagerInterface);
 
         return $manager;
     }

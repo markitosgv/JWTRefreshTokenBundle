@@ -7,6 +7,7 @@ use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 final class DbalRefreshTokenManagerTest extends TestCase
 {
     use RefreshTokenManagerContract;
+    use ListRefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
 
     private Connection $connection;
@@ -45,6 +47,15 @@ final class DbalRefreshTokenManagerTest extends TestCase
         $manager = $this->manager();
 
         \assert($manager instanceof RevokeRefreshTokenManagerInterface);
+
+        return $manager;
+    }
+
+    protected function listingManager(): ListRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ListRefreshTokenManagerInterface);
 
         return $manager;
     }
