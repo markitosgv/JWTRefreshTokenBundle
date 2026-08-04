@@ -101,6 +101,42 @@ class RefreshToken extends BaseRefreshToken
 }
 ```
 
+##### If your application sets `auto_mapping: false`
+
+The class above inherits its mapping — the identifier, the columns, the table name — from the base
+class, whose mapping ships with the bundle. Doctrine registers it for you only while
+`doctrine.orm.auto_mapping` is `true`, which it is by default. With it turned off, the base class is
+never mapped and the class above inherits nothing, which Doctrine reports as:
+
+```
+No identifier/primary key specified for Entity "App\Entity\RefreshToken"
+sub class of "Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken".
+Every Entity must have an identifier/primary key.
+```
+
+Name the mapping alongside your own and it is registered again:
+
+```yaml
+# config/packages/doctrine.yaml
+doctrine:
+    orm:
+        auto_mapping: false
+        mappings:
+            App:
+                # ... your own mapping
+            GesdinetJWTRefreshToken:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/vendor/gesdinet/jwt-refresh-token-bundle/config/doctrine'
+                prefix: 'Gesdinet\JWTRefreshTokenBundle\Entity'
+```
+
+The base class is a mapped superclass, so this adds no table of its own.
+
+The other way out is to leave the bundle's mapping alone and
+[map the entity yourself](#mapping-the-entity-yourself), which is also what you want if you need to
+choose the identifier strategy.
+
 ### Step 4
 
 #### Define the refresh token route
