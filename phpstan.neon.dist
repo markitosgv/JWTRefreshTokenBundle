@@ -14,6 +14,15 @@ parameters:
         -
             identifier: property.unusedType
             path: tests/Functional/Fixtures/Document/User.php
+        # quoteSingleIdentifier() and addPrimaryKeyConstraint() replace methods deprecated in
+        # doctrine/dbal 4 and do not exist in 3, which doctrine/orm 2.20 still brings in. They only
+        # look redundant because the analysis runs against the newest version the lock resolves to.
+        -
+            identifier: function.alreadyNarrowedType
+            path: src/Doctrine/DBAL/RefreshTokenManager.php
+        -
+            identifier: function.alreadyNarrowedType
+            path: src/Doctrine/DBAL/TableSchemaManager.php
         # Configuration::enableNativeLazyObjects() was added in doctrine/orm 3.6, but composer.json
         # still allows ^2.20, where the method does not exist. The check only looks redundant
         # because the analysis runs against the newest version the lock file resolves to.

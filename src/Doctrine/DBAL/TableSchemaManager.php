@@ -13,7 +13,10 @@ namespace Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Schema\Name\UnqualifiedName;
+use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Exception\TypesException;
 use Doctrine\DBAL\Types\Types;
 
@@ -98,8 +101,8 @@ final readonly class TableSchemaManager
             }
         }
 
-        if (isset($this->columnConfig['id'])) {
-            $table->setPrimaryKey([$this->columnConfig['id']['name']]);
+        if (isset($this->columnConfig['id']) && '' !== $this->columnConfig['id']['name']) {
+            $this->addPrimaryKey($table, $this->columnConfig['id']['name']);
         }
 
         if (isset($this->columnConfig['refreshToken'])) {
@@ -173,5 +176,24 @@ final readonly class TableSchemaManager
                 'type' => Types::DATETIME_MUTABLE,
             ],
         ];
+    }
+
+    /**
+     * Marks the column as the primary key.
+     *
+     * addPrimaryKeyConstraint() replaces setPrimaryKey() in DBAL 4, which is deprecated there. The
+     * constraint value objects only exist in DBAL 4, so the old call stays for DBAL 3.
+     *
+     * @param non-empty-string $columnName
+     */
+    private function addPrimaryKey(Table $table, string $columnName): void
+    {
+        if (method_exists($table, 'addPrimaryKeyConstraint')) {
+            $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [UnqualifiedName::unquoted($columnName)], false));
+
+            return;
+        }
+
+        $table->setPrimaryKey([$columnName]);
     }
 }

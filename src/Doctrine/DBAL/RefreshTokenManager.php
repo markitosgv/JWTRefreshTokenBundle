@@ -58,7 +58,7 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      */
     private function quoteColumnIdentifier(string $alias): string
     {
-        return $this->connection->getDatabasePlatform()->quoteIdentifier($this->getColumnName($alias));
+        return $this->quote($this->getColumnName($alias));
     }
 
     /**
@@ -66,7 +66,25 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
      */
     private function quoteTableIdentifier(): string
     {
-        return $this->connection->getDatabasePlatform()->quoteIdentifier($this->tableName);
+        return $this->quote($this->tableName);
+    }
+
+    /**
+     * Quotes one identifier.
+     *
+     * quoteSingleIdentifier() replaces quoteIdentifier() in DBAL 4, which is deprecated there and
+     * goes away in 5. The names are validated as single identifiers when the bundle is configured,
+     * so there is no qualified name to split, and the old method stays for DBAL 3.
+     */
+    private function quote(string $identifier): string
+    {
+        $platform = $this->connection->getDatabasePlatform();
+
+        if (method_exists($platform, 'quoteSingleIdentifier')) {
+            return $platform->quoteSingleIdentifier($identifier);
+        }
+
+        return $platform->quoteIdentifier($identifier);
     }
 
     /**
