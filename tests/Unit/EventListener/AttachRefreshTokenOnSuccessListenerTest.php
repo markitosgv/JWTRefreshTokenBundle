@@ -8,6 +8,7 @@ use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
@@ -19,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -149,6 +151,98 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             self::RETURN_EXPIRATION_PARAMETER_NAME,
             false
         ))->attachRefreshToken($event);
+    }
+
+    /**
+     * The authenticator has already loaded the token to authenticate with it, and Symfony puts the
+     * security token in storage before the success handler runs, so looking it up again is a second
+     * query for the same row.
+     */
+    public function testUsesTheTokenTheAuthenticatorAlreadyLoaded(): void
+    {
+        $refreshTokenString = 'thepreviouslyissuedrefreshtoken';
+
+        /** @var RefreshTokenInterface&Stub $alreadyLoaded */
+        $alreadyLoaded = $this->createStub(RefreshTokenInterface::class);
+        $alreadyLoaded->method('getRefreshToken')->willReturn($refreshTokenString);
+        $alreadyLoaded->method('getValid')->willReturn(new DateTime('+600 seconds'));
+
+        $this->refreshTokenManager->expects($this->never())->method('get');
+
+        $this->extractor->method('getRefreshToken')->willReturn($refreshTokenString);
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        $response = new Response();
+
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($this->createStub(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+        $event->method('getResponse')->willReturn($response);
+
+        $this->listenerReading($alreadyLoaded, true)->attachRefreshToken($event);
+
+        $this->assertSame($alreadyLoaded->getValid()?->getTimestamp(), $response->headers->getCookies()[0]->getExpiresTime());
+    }
+
+    /**
+     * A token left in storage by something other than this request is not the one to act on, so the
+     * value decides rather than the type. Hashed storage never matches, which just means the lookup
+     * happens as it did before.
+     */
+    public function testLooksTheTokenUpWhenTheOneInStorageIsNotTheOneAskedFor(): void
+    {
+        $refreshTokenString = 'thepreviouslyissuedrefreshtoken';
+
+        /** @var RefreshTokenInterface&Stub $somebodyElses */
+        $somebodyElses = $this->createStub(RefreshTokenInterface::class);
+        $somebodyElses->method('getRefreshToken')->willReturn('a-token-from-another-request');
+
+        /** @var RefreshTokenInterface&Stub $theRightOne */
+        $theRightOne = $this->createStub(RefreshTokenInterface::class);
+        $theRightOne->method('getValid')->willReturn(new DateTime('+600 seconds'));
+
+        $this->refreshTokenManager
+            ->expects($this->once())
+            ->method('get')
+            ->with($refreshTokenString)
+            ->willReturn($theRightOne);
+
+        $this->extractor->method('getRefreshToken')->willReturn($refreshTokenString);
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($this->createStub(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+        $event->method('getResponse')->willReturn(new Response());
+
+        $this->listenerReading($somebodyElses, true)->attachRefreshToken($event);
+    }
+
+    private function listenerReading(RefreshTokenInterface $inStorage, bool $cookie): AttachRefreshTokenOnSuccessListener
+    {
+        $securityToken = $this->createStub(PostRefreshTokenAuthenticationToken::class);
+        $securityToken->method('getRefreshToken')->willReturn($inStorage);
+
+        $tokenStorage = $this->createStub(TokenStorageInterface::class);
+        $tokenStorage->method('getToken')->willReturn($securityToken);
+
+        return new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            ['enabled' => $cookie],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true,
+            null,
+            $tokenStorage
+        );
     }
 
     public function testRevokesTheOldestSessionsOnceTheUserIsOverTheLimit(): void

@@ -51,6 +51,7 @@ return static function (ContainerConfigurator $container): void {
             $returnExpirationParameterName,
             $singleUseTtlUpdate,
             $maxTokensPerUser,
+            service('security.token_storage')->nullOnInvalid(),
         ])
         ->tag('kernel.event_listener', [
             'event' => Events::AUTHENTICATION_SUCCESS,

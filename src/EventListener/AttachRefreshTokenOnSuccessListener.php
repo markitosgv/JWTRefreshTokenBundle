@@ -16,10 +16,12 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use LogicException;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -51,6 +53,7 @@ final class AttachRefreshTokenOnSuccessListener
         private readonly string $returnExpirationParameterName = 'refresh_token_expiration',
         private readonly bool $singleUseTtlUpdate = true,
         private readonly ?int $maxTokensPerUser = null,
+        private readonly ?TokenStorageInterface $tokenStorage = null,
     ) {
         $this->cookieSettings = array_merge([
             'enabled' => false,
@@ -89,6 +92,31 @@ final class AttachRefreshTokenOnSuccessListener
         $this->refreshTokenManager->revokeAllButNewestForUser($user, $this->maxTokensPerUser);
     }
 
+    /**
+     * The token the authenticator has just read from this very request, when there is one.
+     *
+     * A refresh goes through the authenticator, which loads the token to authenticate with it, and
+     * then through here, which loaded it again: two queries for one request. Symfony puts the
+     * authenticated security token in storage before calling the success handler, so it is already
+     * to hand.
+     *
+     * The value is compared rather than trusted on type alone, so a token left in storage by
+     * anything other than this request is never the one acted on. That comparison cannot match when
+     * the stored value is a hash, which simply means the query happens as it used to.
+     */
+    private function refreshTokenFor(string $refreshTokenString): ?RefreshTokenInterface
+    {
+        $token = $this->tokenStorage?->getToken();
+
+        if ($token instanceof PostRefreshTokenAuthenticationToken
+            && $token->getRefreshToken()->getRefreshToken() === $refreshTokenString
+        ) {
+            return $token->getRefreshToken();
+        }
+
+        return $this->refreshTokenManager->get($refreshTokenString);
+    }
+
     private function remainingTtl(RefreshTokenInterface $refreshToken): int
     {
         $valid = $refreshToken->getValid();
@@ -124,7 +152,7 @@ final class AttachRefreshTokenOnSuccessListener
 
         // Remove the current refreshToken if it is single-use
         if (null !== $refreshTokenString && true === $this->singleUse) {
-            $refreshToken = $this->refreshTokenManager->get($refreshTokenString);
+            $refreshToken = $this->refreshTokenFor($refreshTokenString);
             $refreshTokenString = null;
 
             if ($refreshToken instanceof RefreshTokenInterface) {
@@ -143,7 +171,7 @@ final class AttachRefreshTokenOnSuccessListener
             // Only read back when the expiry is going to be used, either in the body or on the
             // cookie
             if ($this->returnExpiration || $this->cookieSettings['enabled']) {
-                $issuedToken = $this->refreshTokenManager->get($refreshTokenString);
+                $issuedToken = $this->refreshTokenFor($refreshTokenString);
             }
 
             if ($this->returnExpiration) {
