@@ -108,7 +108,7 @@ class, whose mapping ships with the bundle. Doctrine registers it for you only w
 `doctrine.orm.auto_mapping` is `true`, which it is by default. With it turned off, the base class is
 never mapped and the class above inherits nothing, which Doctrine reports as:
 
-```
+```text
 No identifier/primary key specified for Entity "App\Entity\RefreshToken"
 sub class of "Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken".
 Every Entity must have an identifier/primary key.
