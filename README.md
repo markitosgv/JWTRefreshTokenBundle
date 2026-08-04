@@ -362,6 +362,33 @@ security:
             refresh_jwt: ~
 ```
 
+### How many tokens a user ends up with
+
+Every successful login issues a refresh token and stores it, so a user signing in from a phone, a
+laptop and a browser tab has three, and signing in again from any of them adds a fourth. This is
+deliberate: they are separate sessions, and each has to be able to expire, be refreshed, or be
+revoked without disturbing the others. There is no reuse of an existing token, which would tie those
+sessions together and, with `single_use` on, log one device out whenever another refreshed.
+
+So the table grows with logins, and it is meant to be emptied on a schedule rather than kept small
+by the bundle. [`gesdinet:jwt:clear`](#revoke-all-invalid-tokens) removes the expired ones and is
+worth running as a cron job.
+
+What that does not cover is somebody hammering the login endpoint to insert rows on purpose. That is
+not something to solve here — a row is exactly what a successful login is supposed to leave behind —
+it belongs on the endpoint, where Symfony already has the tool:
+
+```yaml
+security:
+    firewalls:
+        login:
+            login_throttling:
+                max_attempts: 5
+```
+
+Note that this limits failed attempts. Where repeated *successful* logins are the concern, rate
+limit the route itself with `symfony/rate-limiter`.
+
 ### Single Use Tokens
 
 You can configure the refresh token so it can only be consumed _once_. If set to `true` and the refresh token is consumed, a new refresh token will be provided.
