@@ -38,6 +38,35 @@ class RefreshTokenManagerTest extends TestCase
         $this->connection->close();
     }
 
+    public function testReturnsTheTokenOfAUserThatExpiresLast(): void
+    {
+        foreach ([1, 30, 7] as $days) {
+            $token = new RefreshToken();
+            $token->setRefreshToken(sprintf('token-valid-%d-days', $days));
+            $token->setUsername('someone');
+            $token->setValid(new \DateTime(sprintf('+%d days', $days)));
+
+            $this->manager->save($token);
+        }
+
+        $other = new RefreshToken();
+        $other->setRefreshToken('token-of-another-user');
+        $other->setUsername('somebody-else');
+        $other->setValid(new \DateTime('+90 days'));
+        $this->manager->save($other);
+
+        $last = $this->manager->getLastFromUsername('someone');
+
+        $this->assertNotNull($last);
+        $this->assertSame('token-valid-30-days', $last->getRefreshToken(), 'The one expiring last should win, whatever order they were stored in');
+        $this->assertSame('someone', $last->getUsername());
+    }
+
+    public function testReturnsNoTokenForAUserWithoutOne(): void
+    {
+        $this->assertNull($this->manager->getLastFromUsername('nobody'));
+    }
+
     public function testKeepsTheIdentifierTheDatabaseAssigned(): void
     {
         $token = new RefreshToken();

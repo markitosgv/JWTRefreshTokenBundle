@@ -33,6 +33,7 @@
   "require-dev": {
     "doctrine/mongodb-odm": "^2.7",
     "mongodb/mongodb": "^2.1",
+    "doctrine/dbal": "^3.7 || ^4.0",
     "doctrine/orm": "^2.20 || ^3.0",
     "ergebnis/composer-normalize": "*",
     "matthiasnoback/symfony-config-test": "^5.1 || ^6.0",
@@ -44,6 +45,9 @@
     "rector/rector": "^2.2",
     "symfony/cache": "^6.4 || ^7.2 || ^8.0",
     "vimeo/psalm": "^7.0@beta"
+  },
+  "suggest": {
+    "doctrine/dbal": "To store the refresh tokens through a plain connection, without the ORM or the ODM"
   },
   "conflict": {
     "doctrine/mongodb-odm": "<2.7",
