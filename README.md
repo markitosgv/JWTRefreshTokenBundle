@@ -152,6 +152,7 @@ security:
 ### Step 5: Update your database schema
 
 You will need to add the table for the refresh tokens to your application's database.
+
 With migrations:
 
 ```bash
@@ -162,11 +163,32 @@ php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
 ```
 
+**Read the generated migration before running it.** It is not generated from this bundle. Doctrine
+compares your mapping against the whole database, so the migration covers every table it finds, not
+only this one. In a project where Doctrine does not map everything — tables kept by hand, by another
+tool, or shared with another application — the migration drops every table it does not know about.
+
+Telling Doctrine which tables are its own leaves the rest alone:
+
+```yaml
+# config/packages/doctrine.yaml
+doctrine:
+    dbal:
+        # Only tables matching this are compared. The form to exclude what Doctrine does not manage:
+        schema_filter: '~^(?!legacy_)~'
+        # Or, where this bundle's table is the only mapped one, name it and nothing else:
+        # schema_filter: '~^refresh_tokens$~'
+```
+
 Without migrations (**NOT RECOMMENDED**):
 
 ```bash
+php bin/console doctrine:schema:update --dump-sql
 php bin/console doctrine:schema:update --force
 ```
+
+This makes the same comparison, without writing a file to read first, so with no `schema_filter` in
+place it drops those tables there and then. `--dump-sql` prints what it would run.
 
 ## Usage
 
