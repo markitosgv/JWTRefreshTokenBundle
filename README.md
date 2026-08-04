@@ -1,6 +1,8 @@
 # JWTRefreshTokenBundle
 
 [![Run Tests](https://github.com/markitosgv/JWTRefreshTokenBundle/actions/workflows/run-tests.yml/badge.svg?branch=master)](https://github.com/markitosgv/JWTRefreshTokenBundle/actions/workflows/run-tests.yml)
+[![PHP](https://img.shields.io/badge/PHP-8.2%20%7C%208.3%20%7C%208.4-777BB4?logo=php&logoColor=white)](https://php.net)
+[![Symfony](https://img.shields.io/badge/Symfony-6.4%20%7C%207.2%20%7C%207.3%20%7C%207.4%20%7C%208.0-000000?logo=symfony&logoColor=white)](https://symfony.com)
 [![Latest Stable Version](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/v/stable)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![Total Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/downloads)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle)
 [![Monthly Downloads](https://poser.pugx.org/gesdinet/jwt-refresh-token-bundle/d/monthly)](https://packagist.org/packages/gesdinet/jwt-refresh-token-bundle/stats)
