@@ -67,7 +67,7 @@ final class RefreshTokenAuthenticatorTest extends TestCase
             $this->createMock(UserProviderInterface::class),
             $this->successHandler,
             $this->failureHandler,
-            [],
+            ['check_path' => '/api/token/refresh'],
             $this->httpUtils
         );
     }
