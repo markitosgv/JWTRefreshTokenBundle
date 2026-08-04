@@ -19,7 +19,7 @@
     "doctrine/persistence": "^3.1 || ^4.0",
     "lexik/jwt-authentication-bundle": "^2.15 || ^3.0",
     "symfony/config": "^6.4 || ^7.0 || ^7.2 || ^8.0",
-    "symfony/console": "^6.4 || ^7.2 || ^8.0",
+    "symfony/console": "^6.4 || ^7.0 || ^7.2 || ^8.0",
     "symfony/dependency-injection": "^6.4 || ^7.0 || ^7.2 || ^8.0",
     "symfony/deprecation-contracts": "^2.1 || ^3.0 || ^4.0",
     "symfony/event-dispatcher": "^6.4 || ^7.0 || ^7.2 || ^8.0",
@@ -28,7 +28,7 @@
     "symfony/property-access": "^6.4 || ^7.0 || ^7.2 || ^8.0",
     "symfony/security-bundle": "^6.4 || ^7.0 || ^7.2 || ^8.0",
     "symfony/security-core": "^6.4 || ^7.0 || ^7.2 || ^8.0",
-    "symfony/security-http": "^6.4 || ^7.2 || ^8.0"
+    "symfony/security-http": "^6.4 || ^7.0 || ^7.2 || ^8.0"
   },
   "require-dev": {
     "api-platform/openapi": "^4.0",
@@ -44,7 +44,7 @@
     "phpunit/phpunit": "^10.5 || ^12.2 || ^13.0",
     "rector/jack": "^1.0.0",
     "rector/rector": "^2.2",
-    "symfony/cache": "^6.4 || ^7.2 || ^8.0",
+    "symfony/cache": "^6.4 || ^7.0 || ^7.2 || ^8.0",
     "vimeo/psalm": "^7.0@beta"
   },
   "suggest": {
