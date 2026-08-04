@@ -4,6 +4,7 @@
 
 ### Changed
 
+* The refresh token is read from a JSON body whatever the request declares its content type to be. A client that sets no header, which is what `fetch()` does when given none, or a proxy that strips it, was answered as though no token had been supplied
 * `delete()` reports what the storage actually deleted rather than one row after reading the token back. Two callers racing for the same token were both told they had deleted it, which is the answer a single use token needs to tell them apart
 * Logging out invalidates the refresh token of the user logging out and not one belonging to somebody else, which is answered as a token that no longer exists. A request with no authenticated user still invalidates the token it carries
 * `gesdinet:jwt:clear` reports how many tokens it revoked and lists them only with `-v`. A run clearing a backlog revokes thousands, and listing them all buried the count

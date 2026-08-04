@@ -623,6 +623,11 @@ services:
             - { name: gesdinet_jwt_refresh_token.request_extractor }
 ```
 
+The body extractor reads a JSON body whatever the request declares its content type to be, so a
+client that sets no `Content-Type`, which is what `fetch()` does when it is given no headers, is
+still understood. A body that is not JSON, or that does not hold the parameter, is passed over for
+the next extractor rather than failing.
+
 ### Prioritizing Extractors
 
 The `gesdinet_jwt_refresh_token.request_extractor` container tag supports prioritizing extractors, you can use this to set the preferred order for your extractors by adding a `priority` attribute. The higher the number, the sooner the extractor will be run.

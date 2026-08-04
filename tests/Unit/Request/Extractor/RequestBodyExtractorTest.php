@@ -3,7 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestBodyExtractor;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -18,51 +18,68 @@ final class RequestBodyExtractorTest extends TestCase
         $this->requestBodyExtractor = new RequestBodyExtractor();
     }
 
-    public function testGetsTheTokenFromTheRequestBody(): void
+    /**
+     * @return iterable<string, array{string|null}>
+     */
+    public static function contentTypeProvider(): iterable
+    {
+        yield 'json' => ['application/json'];
+        yield 'json with a charset' => ['application/json; charset=utf-8'];
+        yield 'json-ld, as API Platform sends' => ['application/ld+json'];
+        // What fetch() sends when it is given no headers, and what a proxy stripping the header
+        // leaves behind: the body is still the JSON the client meant to send
+        yield 'text, as fetch() sends without headers' => ['text/plain;charset=UTF-8'];
+        yield 'none at all' => [null];
+    }
+
+    #[DataProvider('contentTypeProvider')]
+    public function testGetsTheTokenFromTheRequestBodyWhateverTheRequestCallsIt(?string $contentType): void
     {
         $token = 'my-refresh-token';
-        $request = $this->createMockRequest('json', [self::PARAMETER_NAME => $token]);
 
-        $this->assertSame(
-            $token,
-            $this->requestBodyExtractor->getRefreshToken($request, self::PARAMETER_NAME)
-        );
+        $this->assertSame($token, $this->requestBodyExtractor->getRefreshToken(
+            $this->createRequest((string) json_encode([self::PARAMETER_NAME => $token]), $contentType),
+            self::PARAMETER_NAME
+        ));
     }
 
     public function testReturnsNullIfTheParameterDoesNotExistInTheRequestBody(): void
     {
-        $request = $this->createMockRequest('json', []);
-
-        $this->assertNull($this->requestBodyExtractor->getRefreshToken($request, self::PARAMETER_NAME));
-    }
-
-    public function testReturnsNullIfTheRequestIsNotAJsonType(): void
-    {
-        $request = $this->createMockRequest(null);
+        $request = $this->createRequest((string) json_encode(['something_else' => 'a-value']));
 
         $this->assertNull($this->requestBodyExtractor->getRefreshToken($request, self::PARAMETER_NAME));
     }
 
     /**
-     * @param array<string, mixed>|null $jsonBodyData
+     * @return iterable<string, array{string}>
      */
-    private function createMockRequest(?string $contentType, ?array $jsonBodyData = null): MockObject&Request
+    public static function unusableBodyProvider(): iterable
     {
-        /** @var Request&MockObject $request */
-        $request = $this->createMock(Request::class);
+        yield 'empty' => [''];
+        yield 'not json at all' => ['not json'];
+        yield 'json that is not an object' => ['["a-value"]'];
+        yield 'json holding only a string' => ['"a-value"'];
+        yield 'the parameter holding an object' => ['{"refresh_token": {"nested": true}}'];
+    }
 
-        $request
-            ->expects($this->atLeastOnce())
-            ->method('getContentTypeFormat')
-            ->willReturn($contentType);
+    #[DataProvider('unusableBodyProvider')]
+    public function testReturnsNullWithoutFailingOnABodyItCannotUse(string $body): void
+    {
+        $request = $this->createRequest($body);
 
-        if (null !== $jsonBodyData) {
-            $request
-                ->expects($this->once())
-                ->method('getContent')
-                ->willReturn(json_encode($jsonBodyData));
-        }
+        $this->assertNull($this->requestBodyExtractor->getRefreshToken($request, self::PARAMETER_NAME));
+    }
 
-        return $request;
+    private function createRequest(string $body, ?string $contentType = 'application/json'): Request
+    {
+        return Request::create(
+            '/token/refresh',
+            'POST',
+            [],
+            [],
+            [],
+            null === $contentType ? [] : ['CONTENT_TYPE' => $contentType],
+            $body
+        );
     }
 }

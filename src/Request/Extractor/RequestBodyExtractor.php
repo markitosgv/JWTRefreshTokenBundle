@@ -18,14 +18,16 @@ final class RequestBodyExtractor implements ExtractorInterface
     #[\Override]
     public function getRefreshToken(Request $request, string $parameter): ?string
     {
-        $contentType = $request->getContentTypeFormat();
+        $content = $request->getContent();
 
-        if (null === $contentType || !str_contains($contentType, 'json')) {
+        if ('' === $content) {
             return null;
         }
 
-        $content = $request->getContent();
-        $params = '' !== $content ? json_decode($content, true) : [];
+        // A JSON body is read whatever the request says it is. A client that does not set the
+        // header, which is what fetch() does when none are given, still sent the token, and the
+        // reply is otherwise that no token was supplied at all
+        $params = json_decode($content, true);
 
         // The body is whatever the client sent: it may decode to a scalar, or hold anything at all
         // under the parameter
