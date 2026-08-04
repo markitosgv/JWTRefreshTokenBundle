@@ -607,6 +607,75 @@ gesdinet_jwt_refresh_token:
 
 _NOTE_ If using another object manager, it is recommended your object class extends from `Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken` which implements all required methods from `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface`.
 
+#### Mapping the entity yourself
+
+`Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken` is a mapped superclass, so a class extending
+it inherits the mapping, including the identifier and its `AUTO` generation strategy. That is the
+usual thing to want, but it cannot be overridden from the subclass: Doctrine refuses an identifier
+declared twice, with `Duplicate definition of column 'id'`. `#[ORM\AttributeOverride]` does not
+reach it either, since it overrides a column definition and the generation strategy is not part of
+one.
+
+This matters on PostgreSQL, where Doctrine deprecates relying on `AUTO` and asks for the strategy to
+be chosen explicitly.
+
+Extend `Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken` instead. It carries no mapping
+at all, so the whole of it is yours to declare:
+
+```php
+<?php
+namespace App\Entity;
+
+use DateTimeInterface;
+use Doctrine\ORM\Mapping as ORM;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository;
+use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken;
+
+#[ORM\Entity(repositoryClass: RefreshTokenRepository::class)]
+#[ORM\Table(name: 'refresh_tokens')]
+class RefreshToken extends AbstractRefreshToken
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer')]
+    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    protected int|string|null $id = null;
+
+    #[ORM\Column(name: 'refresh_token', type: 'string', length: 128, unique: true)]
+    protected ?string $refreshToken = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    protected ?string $username = null;
+
+    #[ORM\Column(type: 'datetime')]
+    protected ?DateTimeInterface $valid = null;
+}
+```
+
+Point `refresh_token_class` at it as above. The properties are redeclared so the attributes have
+something to sit on; they are the same properties, not new ones.
+
+The repository class is worth keeping: the bundle's manager uses `findInvalidBatch()` from it to
+revoke expired tokens in batches.
+
+An XML mapping does the same, and is the way to keep the entity itself free of mapping:
+
+```xml
+<entity name="App\Entity\RefreshToken"
+        repository-class="Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository"
+        table="refresh_tokens">
+    <id name="id" type="integer">
+        <generator strategy="SEQUENCE"/>
+        <sequence-generator sequence-name="refresh_tokens_id_seq" allocation-size="100" initial-value="1"/>
+    </id>
+    <field name="refreshToken" type="string" column="refresh_token" length="128" unique="true"/>
+    <field name="username" type="string" length="255" column="username"/>
+    <field name="valid" type="datetime"/>
+</entity>
+```
+
+Taking the mapping over means keeping it: a field added to the model in a later release has to be
+added here too, and the release notes will say so.
+
 ### Generating Tokens
 
 When you authenticate through /api/login_check with user/password credentials, LexikJWTAuthenticationBundle now returns a JWT Token and a Refresh Token data.
