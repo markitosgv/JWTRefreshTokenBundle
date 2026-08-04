@@ -343,6 +343,65 @@ gesdinet_jwt_refresh_token:
     object_manager: my.specific.entity_manager.id
 ```
 
+### Store the tokens through DBAL, without an object manager
+
+The bundle can persist the refresh tokens straight through a Doctrine DBAL connection, without the
+ORM or the ODM. The tokens are read and written with plain queries, so nothing is hydrated into a
+unit of work and no life-cycle event is raised for them.
+
+```yaml
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Entity\RefreshToken
+    dbal_connection: doctrine.dbal.default_connection
+    dbal_table_name: refresh_tokens
+```
+
+`dbal_connection` and `object_manager` are mutually exclusive: the bundle uses one backend or the
+other.
+
+The table and column names are validated as SQL identifiers, so they may only hold letters, digits
+and underscores, and may not start with a digit.
+
+#### Custom column names
+
+Point the bundle at an existing table by naming its columns:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    dbal_connection: doctrine.dbal.default_connection
+    dbal_table_name: user_refresh_tokens
+    dbal_columns:
+        id:
+            name: token_id
+            type: integer
+        refreshToken:
+            name: token
+            type: string
+        username:
+            name: user_identifier
+            type: string
+        valid:
+            name: expires_at
+            type: datetime
+```
+
+#### Creating the table
+
+Create the table with a migration, like any other table.
+
+For cases where that is not practical, the bundle can create it on the first request instead:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    dbal_auto_create_table: true
+```
+
+It is off by default, and worth understanding before turning it on. It runs DDL while the
+application is serving traffic, which means the connection the application runs on needs rights to
+alter the schema. A failure stops the request with an explanation rather than being logged and
+forgotten, since a connection that cannot create the table would otherwise fail later on something
+unrelated.
+
 ### Use another class for refresh tokens
 
 You can define your own refresh token class for your project by creating a class extending from the classes provided by this bundle. This also allows you to customize the refresh token, i.e. to add extra data to the token.

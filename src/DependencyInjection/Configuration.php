@@ -21,6 +21,37 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 final class Configuration implements ConfigurationInterface
 {
+    /**
+     * Validates that a string is a valid SQL identifier.
+     *
+     * Valid SQL identifiers must start with a letter or underscore and contain
+     * only letters, numbers, and underscores. This prevents potential SQL injection
+     * risks and ensures compatibility across database platforms.
+     *
+     * Written without a regular expression so that it holds no global state, which is what lets
+     * both analysers treat it as pure.
+     *
+     * @psalm-pure
+     */
+    private static function isValidSqlIdentifier(string $identifier): bool
+    {
+        if ('' === $identifier) {
+            return false;
+        }
+
+        if ('_' !== $identifier[0] && !ctype_alpha($identifier[0])) {
+            return false;
+        }
+
+        for ($i = 1, $length = strlen($identifier); $i < $length; ++$i) {
+            if ('_' !== $identifier[$i] && !ctype_alnum($identifier[$i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     #[\Override]
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -62,7 +93,46 @@ final class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('object_manager')
                     ->defaultNull()
-                    ->info('Set the object manager to use (default: doctrine.orm.entity_manager)')
+                    ->info('Set the object manager to use (default: doctrine.orm.entity_manager). Mutually exclusive with dbal_connection.')
+                ->end()
+                ->scalarNode('dbal_connection')
+                    ->defaultNull()
+                    ->info('Set the DBAL connection to use for direct database access. Mutually exclusive with object_manager.')
+                ->end()
+                ->scalarNode('dbal_table_name')
+                    ->defaultValue('refresh_tokens')
+                    ->info('The table name for refresh tokens when using DBAL')
+                    ->validate()
+                        ->ifTrue(static fn (mixed $v): bool => !is_string($v) || !self::isValidSqlIdentifier($v))
+                        ->thenInvalid('The "dbal_table_name" must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
+                    ->end()
+                ->end()
+                ->booleanNode('dbal_auto_create_table')
+                    ->defaultFalse()
+                    ->info('Create the refresh tokens table on the first request when it does not exist. Off by default: it runs DDL while serving traffic, so the connection needs rights to alter the schema. Prefer a migration.')
+                ->end()
+                ->arrayNode('dbal_columns')
+                    ->defaultValue([])
+                    ->useAttributeAsKey('alias')
+                    ->arrayPrototype()
+                        ->children()
+                            ->scalarNode('name')
+                                ->isRequired()
+                                ->cannotBeEmpty()
+                                ->info('The actual column name in the database')
+                                ->validate()
+                                    ->ifTrue(static fn (mixed $v): bool => !is_string($v) || !self::isValidSqlIdentifier($v))
+                                    ->thenInvalid('The column name must be a valid SQL identifier (alphanumeric and underscores only, starting with letter or underscore). Got: %s')
+                                ->end()
+                            ->end()
+                            ->scalarNode('type')
+                                ->isRequired()
+                                ->cannotBeEmpty()
+                                ->info('The DBAL type (integer, string, datetime, etc.)')
+                            ->end()
+                        ->end()
+                    ->end()
+                    ->info('Custom column mapping for DBAL persistence layer')
                 ->end()
                 ->scalarNode('single_use')
                     ->defaultFalse()
@@ -98,8 +168,12 @@ final class Configuration implements ConfigurationInterface
                 ->integerNode('default_invalid_batch_size')
                     ->defaultValue(RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE)
                     ->info('The default batch size when clearing invalid tokens')
-                    ->min(0)
+                    ->min(1)
                 ->end()
+            ->end()
+            ->validate()
+                ->ifTrue(static fn (array $v): bool => null !== ($v['object_manager'] ?? null) && null !== ($v['dbal_connection'] ?? null))
+                ->thenInvalid('The "object_manager" and "dbal_connection" options are mutually exclusive. Use one or the other.')
             ->end();
 
         return $treeBuilder;

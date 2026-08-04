@@ -4,6 +4,7 @@
 
 ### Added
 
+* A DBAL backend, configured with `dbal_connection`, storing the tokens through a plain connection rather than the ORM or the ODM. The table and its columns are named with `dbal_table_name` and `dbal_columns`, and `dbal_auto_create_table` creates the table on the first request when a migration is not practical
 * `RevokeRefreshTokenManagerInterface::revokeAllForUser()` revokes every refresh token issued to a user, for a password reset or an account being disabled, and returns how many were revoked. It is deleted by the database, so no token is hydrated and no life-cycle event is raised
 * `DeleteRefreshTokenRepositoryInterface::deleteByUser()` backs it. Both are separate interfaces, so an existing manager or repository keeps working without them
 
