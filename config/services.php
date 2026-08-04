@@ -32,7 +32,6 @@ return static function (ContainerConfigurator $container): void {
     $returnExpiration = param($vendor.'.return_expiration');
     $returnExpirationParameterName = param($vendor.'.return_expiration_parameter_name');
     $defaultInvalidBatchSize = param($vendor.'.default_invalid_batch_size');
-    $refreshTokenClass = param($vendor.'.refresh_token.class');
 
     $services->set($vendor.'.event_listener.attach_refresh_token')
         ->class(AttachRefreshTokenOnSuccessListener::class)
@@ -63,15 +62,7 @@ return static function (ContainerConfigurator $container): void {
 
     $services->alias(RefreshTokenGeneratorInterface::class, $vendor.'.refresh_token_generator');
 
-    $services->set($vendor.'.refresh_token_manager')
-        ->class(RefreshTokenManager::class)
-        ->public()
-        ->args([
-            service($vendor.'.object_manager'),
-            $refreshTokenClass,
-            $defaultInvalidBatchSize,
-        ]);
-
+    // The manager itself comes from the backend in use, so only the alias is shared
     $services->alias(RefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
 
     $services->set($vendor.'.request.extractor.chain')

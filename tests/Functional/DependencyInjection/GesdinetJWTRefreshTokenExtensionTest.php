@@ -11,6 +11,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
+use Symfony\Component\DependencyInjection\Reference;
 
 final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCase
 {
@@ -33,6 +34,52 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->load([
             'refresh_token_class' => RefreshTokenEntity::class,
         ]);
+    }
+
+    /**
+     * Storage the bundle knows nothing about, a PDO repository for instance, only has to be named:
+     * no object manager is looked for, so none of Doctrine has to be installed at all.
+     */
+    public function test_a_manager_of_its_own_replaces_everything_doctrine(): void
+    {
+        $this->container->register('app.pdo_refresh_token_manager', RefreshTokenManagerInterface::class);
+
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'refresh_token_manager' => 'app.pdo_refresh_token_manager',
+        ]);
+
+        $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.refresh_token_manager', 'app.pdo_refresh_token_manager');
+        $this->assertContainerBuilderHasAlias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
+
+        $this->assertFalse(
+            $this->container->has('gesdinet_jwt_refresh_token.object_manager'),
+            'No object manager should be looked for when the manager is supplied'
+        );
+        $this->assertFalse(
+            $this->container->has('gesdinet_jwt_refresh_token.dbal.connection'),
+            'No connection should be looked for either'
+        );
+    }
+
+    /**
+     * The listeners and commands are wired to the service id, so aliasing it has to be enough for
+     * them to reach a manager the bundle did not build.
+     */
+    public function test_the_supplied_manager_is_what_the_rest_of_the_bundle_is_given(): void
+    {
+        $this->container->register('app.pdo_refresh_token_manager', RefreshTokenManagerInterface::class);
+
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'refresh_token_manager' => 'app.pdo_refresh_token_manager',
+        ]);
+
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(
+            'gesdinet_jwt_refresh_token.event_listener.attach_refresh_token',
+            0,
+            new Reference('gesdinet_jwt_refresh_token.refresh_token_manager')
+        );
     }
 
     public function test_container_is_loaded_with_default_configuration(): void

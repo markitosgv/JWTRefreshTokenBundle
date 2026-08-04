@@ -452,6 +452,41 @@ alter the schema. A failure stops the request with an explanation rather than be
 forgotten, since a connection that cannot create the table would otherwise fail later on something
 unrelated.
 
+### Store the tokens somewhere else entirely
+
+Name a service of your own and the bundle wires nothing of its own storage, so it does not need
+Doctrine installed at all. This is the answer when the tokens live in a PDO repository, a cache, an
+API, or a table the application already owns and manages itself.
+
+```yaml
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Security\RefreshToken
+    refresh_token_manager: App\Security\PdoRefreshTokenManager
+```
+
+The service implements `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface`, which
+is the whole of what the bundle asks of storage: read a token by its string, read the last one
+issued to a user, save one, delete one and report whether a row went, and revoke the expired ones.
+The token class itself implements `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface` and
+is tied to nothing, so `Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken` can be used as it is.
+
+`refresh_token_manager` replaces the manager the bundle would build, so `object_manager` and
+`dbal_connection` have nothing left to configure and cannot be combined with it.
+
+Two details worth honouring, because the bundle relies on them and its own managers are tested
+against them:
+
+* `delete()` returns the number of rows actually removed, `0` when the token was not there. Two
+  requests racing to spend the same single use token both read it back first, and this is what
+  tells the one that lost that it deleted nothing.
+* `revokeAllInvalidBatch()` removes each batch before reading the next, so the remaining tokens
+  shift down and the offset stays where it is. Paging it forward skips a batch for every batch
+  removed.
+
+`tests/Services/InMemoryRefreshTokenManager.php` is a complete implementation, around a hundred
+lines storing the tokens in an array, and it is run against the same test suite as the three
+shipped managers.
+
 ### Revoke every token of a user
 
 Refresh tokens are stored against the user identifier, the value `getUserIdentifier()` returns, and

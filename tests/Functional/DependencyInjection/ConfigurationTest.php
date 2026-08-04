@@ -6,6 +6,7 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Configuration;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken;
 use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -145,6 +146,40 @@ final class ConfigurationTest extends TestCase
             ],
             'mutually exclusive'
         );
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function backendProvider(): iterable
+    {
+        yield 'an object manager' => ['object_manager', 'doctrine.orm.entity_manager'];
+        yield 'a DBAL connection' => ['dbal_connection', 'doctrine.dbal.default_connection'];
+    }
+
+    #[DataProvider('backendProvider')]
+    public function test_configuration_is_invalid_when_a_manager_of_its_own_is_given_a_backend_too(string $node, string $service): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'refresh_token_manager' => 'app.pdo_refresh_token_manager',
+                    $node => $service,
+                ],
+            ],
+            'nothing left to configure'
+        );
+    }
+
+    public function test_a_manager_of_its_own_is_valid_on_its_own(): void
+    {
+        $this->assertConfigurationIsValid([
+            [
+                'refresh_token_class' => RefreshToken::class,
+                'refresh_token_manager' => 'app.pdo_refresh_token_manager',
+            ],
+        ]);
     }
 
     public function test_dbal_columns_configuration_defaults_to_empty_array(): void

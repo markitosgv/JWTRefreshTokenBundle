@@ -95,6 +95,10 @@ final class Configuration implements ConfigurationInterface
                         ->thenInvalid(sprintf('The "refresh_token_class" class must implement "%s".', RefreshTokenInterface::class))
                     ->end()
                 ->end()
+                ->scalarNode('refresh_token_manager')
+                    ->defaultNull()
+                    ->info('Set your own service implementing RefreshTokenManagerInterface, storing the tokens however you like. Nothing Doctrine is wired when this is set, so the bundle works without it. Mutually exclusive with object_manager and dbal_connection.')
+                ->end()
                 ->scalarNode('object_manager')
                     ->defaultNull()
                     ->info('Set the object manager to use (default: doctrine.orm.entity_manager). Mutually exclusive with dbal_connection.')
@@ -178,6 +182,11 @@ final class Configuration implements ConfigurationInterface
             ->validate()
                 ->ifTrue(static fn (array $v): bool => null !== ($v['object_manager'] ?? null) && null !== ($v['dbal_connection'] ?? null))
                 ->thenInvalid('The "object_manager" and "dbal_connection" options are mutually exclusive. Use one or the other.')
+            ->end()
+            ->validate()
+                ->ifTrue(static fn (array $v): bool => null !== ($v['refresh_token_manager'] ?? null)
+                    && (null !== ($v['object_manager'] ?? null) || null !== ($v['dbal_connection'] ?? null)))
+                ->thenInvalid('The "refresh_token_manager" option replaces the manager the bundle would build, so "object_manager" and "dbal_connection" have nothing left to configure. Drop them, or drop "refresh_token_manager".')
             ->end();
 
         return $treeBuilder;

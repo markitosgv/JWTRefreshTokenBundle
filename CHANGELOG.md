@@ -9,6 +9,7 @@
 * Logging out invalidates the refresh token of the user logging out and not one belonging to somebody else, which is answered as a token that no longer exists. A request with no authenticated user still invalidates the token it carries
 * `gesdinet:jwt:clear` reports how many tokens it revoked and lists them only with `-v`. A run clearing a backlog revokes thousands, and listing them all buried the count
 * The refresh token cookie expires when the token inside it does rather than a `ttl` from when it was set. The two only ever agreed because the token was issued with a full `ttl`, which `single_use_ttl_update` no longer guarantees
+* The manager service is defined once by the backend in use. `config/services.php` also defined it, naming a class it never imported and an object manager the DBAL backend does not have, which went unnoticed only because both backends overwrote it
 
 ### Added
 
@@ -16,6 +17,7 @@
 * A DBAL backend, configured with `dbal_connection`, storing the tokens through a plain connection rather than the ORM or the ODM. The table and its columns are named with `dbal_table_name` and `dbal_columns`, and `dbal_auto_create_table` creates the table on the first request when a migration is not practical
 * `RevokeRefreshTokenManagerInterface`, aliased to the manager so it can be injected by type, whose `revokeAllForUser()` revokes every refresh token issued to a user, for a password reset or an account being disabled, and returns how many were revoked. It is deleted by the database, so no token is hydrated and no life-cycle event is raised
 * `DeleteRefreshTokenRepositoryInterface::deleteByUser()` backs it. Both are separate interfaces, so an existing manager or repository keeps working without them
+* `refresh_token_manager`, naming a service of your own, which replaces the manager the bundle would build and wires none of its storage, so the tokens can live in a PDO repository or anywhere else and Doctrine need not be installed at all. `RefreshTokenManagerInterface` is now held to the same test suite from outside the bundle, so it stays implementable
 
 ## 2.1.0
 

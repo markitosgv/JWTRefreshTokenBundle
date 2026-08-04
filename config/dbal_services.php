@@ -5,7 +5,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\EnsureTableExistsListener;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -38,7 +37,6 @@ return static function (ContainerConfigurator $container): void {
             param('gesdinet_jwt_refresh_token.dbal.columns'),
         ]);
 
-    $services->alias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
 
     //
     // EnsureTableExistsListener
