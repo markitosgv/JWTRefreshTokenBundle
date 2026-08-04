@@ -127,7 +127,7 @@ final class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('object_manager')
                     ->defaultNull()
-                    ->info('Set the object manager to use (default: doctrine.orm.entity_manager). Mutually exclusive with dbal_connection.')
+                    ->info('The object manager service to store the tokens through, as a service id rather than the name an entity manager is configured under: an entity manager named "foo" is the service "doctrine.orm.foo_entity_manager". Defaults to doctrine.orm.entity_manager. Mutually exclusive with dbal_connection.')
                 ->end()
                 ->scalarNode('dbal_connection')
                     ->defaultNull()

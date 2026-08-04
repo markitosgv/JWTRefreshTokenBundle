@@ -141,6 +141,32 @@ doctrine:
 
 The base class is a mapped superclass, so this adds no table of its own.
 
+The same applies with more than one entity manager, for a different reason: Doctrine allows
+`auto_mapping` on only one of them, so the bundle's mapping lands there and nowhere else. Naming the
+manager in `object_manager` points the bundle at it, and the mapping has to be declared under that
+manager as well, or `doctrine:schema:update --em=...` finds nothing to create:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    # A service id, not the name: an entity manager named "custom" is
+    # "doctrine.orm.custom_entity_manager"
+    object_manager: doctrine.orm.custom_entity_manager
+
+doctrine:
+    orm:
+        entity_managers:
+            custom:
+                connection: custom_connection
+                mappings:
+                    GesdinetJWTRefreshToken:
+                        type: xml
+                        is_bundle: false
+                        dir: '%kernel.project_dir%/vendor/gesdinet/jwt-refresh-token-bundle/config/doctrine'
+                        prefix: 'Gesdinet\JWTRefreshTokenBundle\Entity'
+```
+
+Your own token class needs mapping under that manager too, since it is the one that gets a table.
+
 The other way out is to leave the bundle's mapping alone and
 [map the entity yourself](#mapping-the-entity-yourself), which is also what you want if you need to
 choose the identifier strategy.
