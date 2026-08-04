@@ -425,6 +425,44 @@ alter the schema. A failure stops the request with an explanation rather than be
 forgotten, since a connection that cannot create the table would otherwise fail later on something
 unrelated.
 
+### Revoke every token of a user
+
+Refresh tokens are stored against the user identifier, the value `getUserIdentifier()` returns, and
+that is what the bundle looks the user up with when a token is refreshed.
+
+So when the identifier itself changes, for instance an application where it is the email address and
+the user edits it, the tokens issued before still hold the old value and no longer resolve to
+anybody. The same applies to any change that should end the existing sessions, such as a password
+reset or an account being disabled.
+
+Revoke them as part of that change:
+
+```php
+use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
+
+public function __construct(
+    private RevokeRefreshTokenManagerInterface $refreshTokenManager,
+) {
+}
+
+public function changeEmail(User $user, string $email): void
+{
+    // Before the change, while the user still carries the identifier the tokens were issued for
+    $this->refreshTokenManager->revokeAllForUser($user);
+
+    $user->setEmail($email);
+}
+```
+
+It returns how many were revoked, and deletes them in the database, so no token is loaded into
+memory and no life-cycle event is raised for them.
+
+The alternative is an identifier that never changes, a numeric id or a UUID, with the email looked up
+separately when signing in. That keeps the tokens valid across an email change, and is a decision
+about the application rather than about this bundle.
+
+Revoking by user is available with the Doctrine ORM and MongoDB ODM backends.
+
 ### Use another class for refresh tokens
 
 You can define your own refresh token class for your project by creating a class extending from the classes provided by this bundle. This also allows you to customize the refresh token, i.e. to add extra data to the token.

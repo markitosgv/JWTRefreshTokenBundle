@@ -8,6 +8,7 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenEx
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
@@ -62,6 +63,33 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.refresh_token.class', RefreshTokenEntity::class);
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.default_invalid_batch_size', RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
         $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine.orm.entity_manager');
+    }
+
+    public function test_the_manager_is_injectable_through_both_of_its_interfaces(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+        ]);
+
+        $this->assertContainerBuilderHasAlias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
+        $this->assertContainerBuilderHasAlias(RevokeRefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
+    }
+
+    /**
+     * The DBAL manager does not revoke by user, so nothing should offer it under that interface.
+     */
+    public function test_the_dbal_manager_is_not_offered_as_revoking_by_user(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'dbal_connection' => 'doctrine.dbal.default_connection',
+        ]);
+
+        $this->assertFalse(
+            $this->container->hasAlias(RevokeRefreshTokenManagerInterface::class),
+            'Injecting it would hand over a manager without the method'
+        );
     }
 
     public function test_container_is_loaded_with_custom_configuration(): void
