@@ -64,7 +64,8 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue(2592000)
                     // min() rather than a validate() closure: it is skipped while the placeholder
                     // of an environment variable is being checked, and a closure is not, so a
-                    // closure rejects every `%env(int:...)%` on the sample value of 0
+                    // closure rejects every `%env(int:...)%` on the sample value of 0. That skip
+                    // arrived in symfony/config 8.0.9, which composer.json requires for it
                     ->min(1)
                     ->info('How long a refresh token lasts, in seconds, for all authenticators. There is no value meaning never: a token is valid until this many seconds after it was issued, so a long lived one is a large number, 315360000 being ten years.')
                 ->end()
