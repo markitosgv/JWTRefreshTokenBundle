@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.1
+
+### Fixed
+
+* `ttl` and `max_tokens_per_user` can be read from an environment variable again. Both were checked with a `validate()` closure, which rejects every `%env(int:...)%` put in front of them: the container is compiled a second time with a sample value of the declared type in place, and for an integer that sample is `0`. `min()` is skipped while a placeholder is being handled and a closure is not, so the built-in constraint is used instead. Reported as #431 against 2.2.0, where the `ttl` check was introduced; 2.1.0 has no such check and is unaffected
+
 ## 2.2.0
 
 Released 2026-08-04. See [UPGRADE-2.2.md](UPGRADE-2.2.md) for what to check before upgrading.
