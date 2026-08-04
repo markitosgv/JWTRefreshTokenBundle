@@ -3,14 +3,12 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Doctrine;
 
 use Doctrine\ORM\Tools\SchemaTool;
-use Doctrine\Persistence\Mapping\ClassMetadata;
-use Doctrine\Persistence\Mapping\ClassMetadataFactory;
-use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
-use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository as BundleRefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\BareRefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\ObjectManagerWithRepository;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\User;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\ORMTestCase;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
@@ -78,127 +76,14 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
 
     private function manager(): RefreshTokenManager
     {
-        $bare = new class($this->entityManager->getRepository(RefreshToken::class)) implements RefreshTokenRepositoryInterface {
-            public function __construct(private readonly object $inner)
-            {
-            }
+        $repository = $this->entityManager->getRepository(RefreshToken::class);
 
-            public function findInvalid(?\DateTimeInterface $datetime = null): iterable
-            {
-                return $this->inner->findInvalid($datetime);
-            }
+        \assert($repository instanceof BundleRefreshTokenRepository);
 
-            public function findInvalidBatch(?\DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
-            {
-                return $this->inner->findInvalidBatch($datetime, $batchSize, $offset);
-            }
-
-            public function find($id): ?RefreshTokenInterface
-            {
-                return $this->inner->find($id);
-            }
-
-            public function findAll(): array
-            {
-                return $this->inner->findAll();
-            }
-
-            public function findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array
-            {
-                return $this->inner->findBy($criteria, $orderBy, $limit, $offset);
-            }
-
-            public function findOneBy(array $criteria, ?array $orderBy = null): ?RefreshTokenInterface
-            {
-                return $this->inner->findOneBy($criteria, $orderBy);
-            }
-
-            public function getClassName(): string
-            {
-                return RefreshToken::class;
-            }
-        };
-
-        // The manager takes its repository from the object manager, so that is where the bare one
-        // goes rather than being forced onto a readonly property
-        $objectManager = new class($this->entityManager, $bare) implements ObjectManager {
-            public function __construct(
-                private readonly ObjectManager $inner,
-                private readonly RefreshTokenRepositoryInterface $repository,
-            ) {
-            }
-
-            public function getRepository($className): RefreshTokenRepositoryInterface
-            {
-                return $this->repository;
-            }
-
-            public function __call(string $name, array $arguments): mixed
-            {
-                return $this->inner->{$name}(...$arguments);
-            }
-
-            public function find(string $className, $id): ?object
-            {
-                return $this->inner->find($className, $id);
-            }
-
-            public function persist(object $object): void
-            {
-                $this->inner->persist($object);
-            }
-
-            public function remove(object $object): void
-            {
-                $this->inner->remove($object);
-            }
-
-            public function clear(): void
-            {
-                $this->inner->clear();
-            }
-
-            public function detach(object $object): void
-            {
-                $this->inner->detach($object);
-            }
-
-            public function refresh(object $object): void
-            {
-                $this->inner->refresh($object);
-            }
-
-            public function flush(): void
-            {
-                $this->inner->flush();
-            }
-
-            public function getClassMetadata(string $className): ClassMetadata
-            {
-                return $this->inner->getClassMetadata($className);
-            }
-
-            public function getMetadataFactory(): ClassMetadataFactory
-            {
-                return $this->inner->getMetadataFactory();
-            }
-
-            public function initializeObject(object $obj): void
-            {
-                $this->inner->initializeObject($obj);
-            }
-
-            public function isUninitializedObject(mixed $value): bool
-            {
-                return $this->inner->isUninitializedObject($value);
-            }
-
-            public function contains(object $object): bool
-            {
-                return $this->inner->contains($object);
-            }
-        };
-
-        return new RefreshTokenManager($objectManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+        return new RefreshTokenManager(
+            new ObjectManagerWithRepository($this->entityManager, new BareRefreshTokenRepository($repository)),
+            RefreshToken::class,
+            RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE
+        );
     }
 }
