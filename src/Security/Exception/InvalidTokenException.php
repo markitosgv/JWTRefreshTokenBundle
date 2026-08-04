@@ -13,7 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Security\Exception;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
-class InvalidTokenException extends AuthenticationException
+final class InvalidTokenException extends AuthenticationException
 {
     /**
      * @psalm-pure

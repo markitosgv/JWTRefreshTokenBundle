@@ -4,6 +4,6 @@ namespace Gesdinet\JWTRefreshTokenBundle\Exception;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
-class UnknownRefreshTokenException extends AuthenticationException
+final class UnknownRefreshTokenException extends AuthenticationException
 {
 }

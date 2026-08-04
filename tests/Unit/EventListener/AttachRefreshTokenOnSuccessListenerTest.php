@@ -222,8 +222,13 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 
     private function listenerReading(RefreshTokenInterface $inStorage, bool $cookie): AttachRefreshTokenOnSuccessListener
     {
-        $securityToken = $this->createStub(PostRefreshTokenAuthenticationToken::class);
-        $securityToken->method('getRefreshToken')->willReturn($inStorage);
+        // A real one rather than a stub: the class is final, and it is a value object anyway
+        $securityToken = new PostRefreshTokenAuthenticationToken(
+            $this->createStub(UserInterface::class),
+            'api',
+            [],
+            $inStorage
+        );
 
         $tokenStorage = $this->createStub(TokenStorageInterface::class);
         $tokenStorage->method('getToken')->willReturn($securityToken);

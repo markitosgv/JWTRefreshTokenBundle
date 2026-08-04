@@ -7,6 +7,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\DependencyInjection\Security\Factory\JW
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,6 +25,23 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
     {
         $this->factory = new RefreshTokenAuthenticatorFactory();
         $this->container = new ContainerBuilder();
+    }
+
+    /**
+     * It used to default to /login_check, Lexik's login path, which is never the right one for
+     * refreshing: left alone the authenticator took no requests and the router reported the refresh
+     * route as having no controller. Requiring it turns that into a configuration error.
+     */
+    public function test_the_check_path_has_to_be_given(): void
+    {
+        $treeBuilder = new TreeBuilder('refresh-jwt');
+
+        $this->factory->addConfiguration($treeBuilder->getRootNode());
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('check_path');
+
+        (new Processor())->process($treeBuilder->buildTree(), [[]]);
     }
 
     public function test_is_registered_under_the_refresh_jwt_key(): void
@@ -50,7 +68,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
     {
         $this->assertSame(
             [
-                'check_path' => '/login_check',
+                'check_path' => '/api/token/refresh',
                 'invalidate_token_on_logout' => true,
             ],
             $this->processConfiguration([])
@@ -124,7 +142,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         // from the bundle parameters
         $this->assertEquals(
             [
-                'check_path' => '/login_check',
+                'check_path' => '/api/token/refresh',
                 'ttl' => new Parameter('gesdinet_jwt_refresh_token.ttl'),
                 'ttl_update' => new Parameter('gesdinet_jwt_refresh_token.ttl_update'),
                 'token_parameter_name' => new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
@@ -172,7 +190,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->factory->addConfiguration($treeBuilder->getRootNode());
 
         /** @var array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool} $processed */
-        $processed = (new Processor())->process($treeBuilder->buildTree(), [$config]);
+        $processed = (new Processor())->process($treeBuilder->buildTree(), [$config + ['check_path' => '/api/token/refresh']]);
 
         return $processed;
     }
@@ -183,7 +201,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             $this->container,
             'test',
             [
-                'check_path' => '/login_check',
+                'check_path' => '/api/token/refresh',
                 'invalidate_token_on_logout' => true,
             ],
             'app.user_provider'
@@ -220,7 +238,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             $this->container,
             'test',
             [
-                'check_path' => '/login_check',
+                'check_path' => '/api/token/refresh',
                 'success_handler' => 'app.security.authentication.success_handler',
                 'failure_handler' => 'app.security.authentication.failure_handler',
                 'invalidate_token_on_logout' => true,

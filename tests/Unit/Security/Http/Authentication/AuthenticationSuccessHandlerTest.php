@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -45,9 +46,13 @@ final class AuthenticationSuccessHandlerTest extends TestCase
         $response = new Response();
         $firewallName = 'api';
 
-        $token = $this->createStub(PostRefreshTokenAuthenticationToken::class);
-        $token->method('getRefreshToken')
-            ->willReturn($this->createMock(RefreshTokenInterface::class));
+        // A real one rather than a stub: the class is final, and it is a value object anyway
+        $token = new PostRefreshTokenAuthenticationToken(
+            $this->createStub(UserInterface::class),
+            $firewallName,
+            [],
+            $this->createStub(RefreshTokenInterface::class)
+        );
 
         $this->eventDispatcher->expects($this->once())
             ->method('dispatch')

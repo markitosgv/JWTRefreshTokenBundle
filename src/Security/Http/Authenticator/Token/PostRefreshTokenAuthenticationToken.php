@@ -16,7 +16,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use UnexpectedValueException;
 use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 
-class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
+final class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
 {
     /**
      * @param string[] $roles An array of roles

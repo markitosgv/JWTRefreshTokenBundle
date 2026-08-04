@@ -13,7 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Security\Exception;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
-class TokenNotFoundException extends AuthenticationException
+final class TokenNotFoundException extends AuthenticationException
 {
     /**
      * @psalm-pure

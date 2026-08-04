@@ -47,7 +47,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
 
     /**
      * @param UserProviderInterface<UserInterface>                                                    $userProvider
-     * @param array{check_path?: string, ttl?: int, ttl_update?: bool, token_parameter_name?: string} $options
+     * @param array{check_path: string, ttl?: int, ttl_update?: bool, token_parameter_name?: string} $options
      *
      * @psalm-mutation-free
      */
@@ -62,7 +62,6 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         private readonly HttpUtils $httpUtils
     ) {
         $this->options = array_merge([
-            'check_path' => '/login_check',
             'ttl' => 2592000,
             'ttl_update' => false,
             'token_parameter_name' => 'refresh_token',

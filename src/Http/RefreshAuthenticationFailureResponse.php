@@ -14,7 +14,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Http;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-class RefreshAuthenticationFailureResponse extends JsonResponse
+final class RefreshAuthenticationFailureResponse extends JsonResponse
 {
     public function __construct(private string $message = 'Bad credentials', int $statusCode = Response::HTTP_UNAUTHORIZED)
     {

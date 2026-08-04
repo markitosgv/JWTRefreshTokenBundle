@@ -10,7 +10,7 @@ use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class GesdinetJWTRefreshTokenBundle extends Bundle
+final class GesdinetJWTRefreshTokenBundle extends Bundle
 {
     #[\Override]
     public function build(ContainerBuilder $container): void
