@@ -95,6 +95,21 @@ trait RefreshTokenManagerContract
         $this->assertSame(0, $manager->delete($token), 'Nothing was deleted, so nothing should be reported');
     }
 
+    /**
+     * What two callers racing for the same token need to tell them apart: the one that lost is told
+     * nothing was deleted, rather than both being told they deleted it because both had read it
+     * back first. Deleting behind the manager stands in for the other caller getting there first.
+     */
+    public function test_reports_nothing_deleted_when_the_token_went_first(): void
+    {
+        $manager = $this->manager();
+
+        $token = $this->storeToken($manager, 'a-token-deleted-twice', 'someone', 600);
+
+        $this->assertSame(1, $manager->delete($token), 'The caller that got there first deleted it');
+        $this->assertSame(0, $manager->delete($token), 'The one that came second deleted nothing');
+    }
+
     public function test_revokes_the_expired_tokens_and_leaves_the_rest(): void
     {
         $manager = $this->manager();

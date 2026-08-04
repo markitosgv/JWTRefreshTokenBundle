@@ -83,6 +83,16 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
     #[\Override]
     public function delete(RefreshTokenInterface $refreshToken, bool $andFlush = true): int
     {
+        // Asking the storage what it deleted is the only answer that holds when two callers race
+        // for the same token: reading it back first tells both of them they won
+        if ($this->repository instanceof DeleteRefreshTokenRepositoryInterface) {
+            $deleted = $this->repository->deleteToken($refreshToken);
+
+            $this->objectManager->detach($refreshToken);
+
+            return $deleted;
+        }
+
         if (null === $this->repository->findOneBy(['id' => $refreshToken->getId()])) {
             return 0;
         }

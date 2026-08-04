@@ -7,6 +7,7 @@ use DateTime;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use MongoDB\DeleteResult;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -58,6 +59,20 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
         $result = $this->createQueryBuilder()
             ->field('username')
             ->equals($user->getUserIdentifier())
+            ->remove()
+            ->getQuery()
+            ->execute();
+
+        return $result->isAcknowledged() ? $result->getDeletedCount() : 0;
+    }
+
+    #[\Override]
+    public function deleteToken(RefreshTokenInterface $refreshToken): int
+    {
+        /** @var DeleteResult $result */
+        $result = $this->createQueryBuilder()
+            ->field('id')
+            ->equals($refreshToken->getId())
             ->remove()
             ->getQuery()
             ->execute();

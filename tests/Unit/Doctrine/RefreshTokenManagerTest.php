@@ -140,57 +140,36 @@ class RefreshTokenManagerTest extends TestCase
         $this->refreshTokenManager->save($refreshToken, true);
     }
 
-    public function testDeletesTheRefreshTokenAndFlushesTheObjectManager(): void
-    {
-        /** @var RefreshTokenInterface&\PHPUnit\Framework\MockObject\MockObject $refreshToken */
-        $refreshToken = $this->getMockBuilder(RefreshTokenInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        // Simula que el refreshToken tiene un id
-        $refreshToken
-            ->method('getId')
-            ->willReturn(123);
-
-        $this->repository
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->with(['id' => $refreshToken->getId()])
-            ->willReturn($refreshToken);
-
-        $this->objectManager
-            ->expects($this->once())
-            ->method('remove')
-            ->with($refreshToken);
-
-        $this->objectManager
-            ->expects($this->once())
-            ->method('flush');
-
-        $result = $this->refreshTokenManager->delete($refreshToken, true);
-        $this->assertSame(1, $result);
-    }
-
-    public function testDoesNotDeleteARefreshTokenThatIsNotInStorage(): void
+    public function testReportsWhatTheStorageDeleted(): void
     {
         $refreshToken = $this->createStub(RefreshTokenInterface::class);
-        $refreshToken
-            ->method('getId')
-            ->willReturn(123);
 
         $this->repository
             ->expects($this->once())
-            ->method('findOneBy')
-            ->with(['id' => 123])
-            ->willReturn(null);
+            ->method('deleteToken')
+            ->with($refreshToken)
+            ->willReturn(1);
+
+        $this->assertSame(1, $this->refreshTokenManager->delete($refreshToken, true));
+    }
+
+    /**
+     * Two callers racing for the same token both read it back, so a count taken before the delete
+     * tells both of them they won. Only what the storage deleted tells them apart.
+     */
+    public function testReportsNothingDeletedWhenTheTokenWasAlreadyGone(): void
+    {
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
+
+        $this->repository
+            ->expects($this->once())
+            ->method('deleteToken')
+            ->with($refreshToken)
+            ->willReturn(0);
 
         $this->objectManager
             ->expects($this->never())
             ->method('remove');
-
-        $this->objectManager
-            ->expects($this->never())
-            ->method('flush');
 
         $this->assertSame(0, $this->refreshTokenManager->delete($refreshToken, true));
     }

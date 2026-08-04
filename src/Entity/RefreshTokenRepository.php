@@ -8,6 +8,7 @@ use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityRepository;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -70,6 +71,20 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
             ->delete()
             ->where('rt.username = :user_identifier')
             ->setParameter('user_identifier', $user->getUserIdentifier(), ParameterType::STRING)
+            ->getQuery()
+            ->execute();
+
+        return $deleted;
+    }
+
+    #[\Override]
+    public function deleteToken(RefreshTokenInterface $refreshToken): int
+    {
+        /** @var int $deleted */
+        $deleted = $this->createQueryBuilder('rt')
+            ->delete()
+            ->where('rt.id = :id')
+            ->setParameter('id', $refreshToken->getId())
             ->getQuery()
             ->execute();
 
