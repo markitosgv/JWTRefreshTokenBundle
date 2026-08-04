@@ -7,6 +7,8 @@ use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\TokenWithoutAnIdentifier;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -388,4 +390,68 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertSame('testuser', $revoked[0]->getUsername());
         $this->assertInstanceOf(\DateTimeInterface::class, $revoked[0]->getValid());
     }
+
+    public function testRefusesToSaveATokenWithoutItsValue(): void
+    {
+        $token = new RefreshToken();
+        $token->setUsername('someone');
+        $token->setValid(new \DateTime('+600 seconds'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('without a token string');
+
+        $this->manager->save($token);
+    }
+
+    /**
+     * The interface asks for no identifier, and the backend fills an `id` property only when the
+     * model has one. This is the model that does not.
+     */
+    public function testStoresATokenModelWithoutAnIdentifier(): void
+    {
+        $manager = new RefreshTokenManager(
+            $this->connection,
+            RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
+            'refresh_tokens',
+            TokenWithoutAnIdentifier::class,
+            []
+        );
+
+        $manager->save(TokenWithoutAnIdentifier::createForUserWithTtl('a-token-without-an-id', UserCreator::create('someone'), 600));
+
+        $stored = $manager->get('a-token-without-an-id');
+
+        $this->assertNotNull($stored);
+        $this->assertNull($stored->getId());
+    }
+
+    /**
+     * The batch revocation runs in a transaction, so a statement failing part way through has to
+     * leave the table as it was rather than half cleared.
+     */
+    public function testRollsTheBatchBackWhenAStatementFails(): void
+    {
+        $this->manager->save(RefreshToken::createForUserWithTtl('expired', UserCreator::create('someone'), -600));
+
+        $this->connection->executeStatement('DROP TABLE refresh_tokens');
+
+        $this->expectException(\Throwable::class);
+
+        $this->manager->revokeAllInvalidBatch(null, 2);
+    }
+
+    /**
+     * The same for the unbatched revocation, which runs its own transaction.
+     */
+    public function testRollsTheWholeRevocationBackWhenAStatementFails(): void
+    {
+        $this->manager->save(RefreshToken::createForUserWithTtl('expired', UserCreator::create('someone'), -600));
+
+        $this->connection->executeStatement('DROP TABLE refresh_tokens');
+
+        $this->expectException(\Throwable::class);
+
+        $this->manager->revokeAllInvalid();
+    }
+
 }

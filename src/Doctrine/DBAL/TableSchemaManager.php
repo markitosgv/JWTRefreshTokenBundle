@@ -181,19 +181,10 @@ final readonly class TableSchemaManager
     /**
      * Marks the column as the primary key.
      *
-     * addPrimaryKeyConstraint() replaces setPrimaryKey() in DBAL 4, which is deprecated there. The
-     * constraint value objects only exist in DBAL 4, so the old call stays for DBAL 3.
-     *
      * @param non-empty-string $columnName
      */
     private function addPrimaryKey(Table $table, string $columnName): void
     {
-        if (method_exists($table, 'addPrimaryKeyConstraint')) {
-            $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [UnqualifiedName::unquoted($columnName)], false));
-
-            return;
-        }
-
-        $table->setPrimaryKey([$columnName]);
+        $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [UnqualifiedName::unquoted($columnName)], false));
     }
 }

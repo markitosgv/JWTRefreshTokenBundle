@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\EnsureTableExistsListener;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\TestLogger;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
@@ -209,5 +210,14 @@ final class EnsureTableExistsListenerTest extends TestCase
         $request = Request::create('/');
 
         return new RequestEvent($kernel, $request, $requestType);
+    }
+
+    public function test_listens_early_in_the_request(): void
+    {
+        $events = EnsureTableExistsListener::getSubscribedEvents();
+
+        $this->assertArrayHasKey(KernelEvents::REQUEST, $events);
+        // Ahead of anything that might reach for the table
+        $this->assertSame(['onKernelRequest', 512], $events[KernelEvents::REQUEST]);
     }
 }

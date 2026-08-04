@@ -34,7 +34,7 @@
     "api-platform/openapi": "^4.0",
     "doctrine/mongodb-odm": "^2.7",
     "mongodb/mongodb": "^2.1",
-    "doctrine/dbal": "^3.7 || ^4.0",
+    "doctrine/dbal": "^4.0",
     "doctrine/orm": "^2.20 || ^3.0",
     "ergebnis/composer-normalize": "*",
     "matthiasnoback/symfony-config-test": "^5.1 || ^6.0",

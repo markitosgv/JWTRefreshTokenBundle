@@ -76,19 +76,12 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
     /**
      * Quotes one identifier.
      *
-     * quoteSingleIdentifier() replaces quoteIdentifier() in DBAL 4, which is deprecated there and
-     * goes away in 5. The names are validated as single identifiers when the bundle is configured,
-     * so there is no qualified name to split, and the old method stays for DBAL 3.
+     * The names are validated as single identifiers when the bundle is configured, so there is no
+     * qualified name to split.
      */
     private function quote(string $identifier): string
     {
-        $platform = $this->connection->getDatabasePlatform();
-
-        if (method_exists($platform, 'quoteSingleIdentifier')) {
-            return $platform->quoteSingleIdentifier($identifier);
-        }
-
-        return $platform->quoteIdentifier($identifier);
+        return $this->connection->getDatabasePlatform()->quoteSingleIdentifier($identifier);
     }
 
     /**
@@ -311,10 +304,6 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
         try {
             foreach ($this->generateInvalidTokenBatches($datetime, $batchSize, $offset) as $batchData) {
                 $ids = array_column($batchData, $this->getColumnName('id'));
-
-                if ([] === $ids) {
-                    continue;
-                }
 
                 $this->connection->executeStatement(
                     sprintf(

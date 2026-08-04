@@ -292,6 +292,28 @@ final class ConfigurationTest extends TestCase
         );
     }
 
+    /**
+     * Batches are revoked by identifier, and a map without one used to leave the clear command
+     * reading the same batch forever.
+     */
+    public function test_dbal_columns_have_to_name_the_id_column(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_columns' => [
+                        'refreshToken' => ['name' => 'refresh_token', 'type' => 'string'],
+                        'username' => ['name' => 'username', 'type' => 'string'],
+                        'valid' => ['name' => 'valid', 'type' => 'datetime'],
+                    ],
+                ],
+            ],
+            'has to name the "id" column'
+        );
+    }
+
     public function test_dbal_columns_configuration_defaults_to_empty_array(): void
     {
         $this->assertProcessedConfigurationEquals(

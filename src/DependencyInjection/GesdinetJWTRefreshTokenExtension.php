@@ -87,17 +87,11 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     }
 
     /**
-     * @param array{dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $config
+     * @param array{dbal_connection: string, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $config
      */
     private function configureDBALManager(ContainerBuilder $container, array $config, PhpFileLoader $loader): void
     {
-        $connection = $config['dbal_connection'];
-
-        if (null === $connection) {
-            throw new RuntimeException('The "dbal_connection" node must name a connection service.');
-        }
-
-        $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $connection);
+        $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
 
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
         $container->setParameter('gesdinet_jwt_refresh_token.dbal.table_name', $config['dbal_table_name']);

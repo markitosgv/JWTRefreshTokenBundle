@@ -169,6 +169,12 @@ final class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                     ->info('Custom column mapping for DBAL persistence layer')
+                    ->validate()
+                        // Batches are revoked by identifier, and a map without one leaves
+                        // gesdinet:jwt:clear reading the same batch forever
+                        ->ifTrue(static fn (array $v): bool => [] !== $v && !isset($v['id']))
+                        ->thenInvalid('The "dbal_columns" map has to name the "id" column. Expired tokens are revoked in batches by identifier, and a table without one cannot be cleared.')
+                    ->end()
                 ->end()
                 ->scalarNode('single_use')
                     ->defaultFalse()
