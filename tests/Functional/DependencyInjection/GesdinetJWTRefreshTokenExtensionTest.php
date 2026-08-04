@@ -120,6 +120,32 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         );
     }
 
+    public function test_tokens_are_not_hashed_unless_it_is_asked_for(): void
+    {
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
+
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.hashed_refresh_token_manager'));
+    }
+
+    /**
+     * It decorates rather than replaces, so it wraps whichever backend is in use and every alias
+     * still resolves to it.
+     */
+    public function test_hashing_wraps_the_manager_of_whichever_backend_is_in_use(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'hash_tokens' => ['enabled' => true],
+        ]);
+
+        $decoration = $this->container->getDefinition('gesdinet_jwt_refresh_token.hashed_refresh_token_manager')->getDecoratedService();
+
+        $this->assertNotNull($decoration);
+        $this->assertSame('gesdinet_jwt_refresh_token.refresh_token_manager', $decoration[0]);
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.hash_tokens.accept_stored_in_the_clear', true);
+    }
+
     public function test_the_openapi_factory_is_not_registered_unless_it_is_asked_for(): void
     {
         $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);

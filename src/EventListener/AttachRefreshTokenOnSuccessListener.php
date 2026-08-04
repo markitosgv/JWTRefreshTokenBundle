@@ -158,10 +158,14 @@ final class AttachRefreshTokenOnSuccessListener
                 $this->singleUseTtlUpdate || null === $remainingTtl ? $this->ttl : $remainingTtl
             );
 
+            // Read before storing: a manager that hashes the token keeps the hash on the model,
+            // since what is stored is all it may ever hand back. This is the only moment the value
+            // the client is given exists
+            $refreshTokenString = $refreshToken->getRefreshToken();
+
             $this->refreshTokenManager->save($refreshToken);
             $this->enforceTheTokenLimit($user);
             $issuedToken = $refreshToken;
-            $refreshTokenString = $refreshToken->getRefreshToken();
             $data[$this->tokenParameterName] = $refreshTokenString;
 
             if ($this->returnExpiration) {

@@ -192,6 +192,8 @@ final readonly class OpenApiFactory implements OpenApiFactoryInterface
      * cookie and the expiration is not asked for.
      *
      * @return array<string, array<string, mixed>>
+     *
+     * @psalm-mutation-free
      */
     private function responseProperties(): array
     {

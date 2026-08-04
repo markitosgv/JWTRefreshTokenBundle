@@ -470,6 +470,44 @@ own](#use-another-class-for-refresh-tokens) with the column on it, and a decorat
 the client tells you about itself is worth exactly what the client is worth: it is useful for a
 person recognising a session of their own and revoking it, and it is not a security control.
 
+### Storing hashes instead of tokens
+
+A refresh token gets its holder back into an account without a password. Stored as it is, a copy of
+the table is a copy of everybody's credentials — which is why the passwords next to it are hashed.
+
+```yaml
+gesdinet_jwt_refresh_token:
+    hash_tokens:
+        enabled: true
+```
+
+The client still receives the token; what the database holds is `sha256$` followed by its hash, and
+a refresh hashes what arrives to find the row. A leaked table cannot be used, because the values in
+it are not the ones the endpoint accepts.
+
+SHA-256 rather than bcrypt or argon2 on purpose. Slow hashing exists to make guessing expensive, and
+a token of 64 random bytes is not guessable. It also has to be deterministic: a refresh request
+carries the token and nothing else, so the row has to be findable from it, which rules out a
+per-row salt.
+
+**Turning it on does not sign anyone out.** Tokens already in the table are looked up as they are and
+rewritten hashed the first time they are used. Once they have all expired — a `ttl` after you turned
+this on — close that door:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    hash_tokens:
+        enabled: true
+        accept_stored_in_the_clear: false
+```
+
+Until you do, a token read from a backup taken before the change would still work.
+
+One consequence worth knowing: `getRefreshToken()` on a token read back from storage returns the
+hash, since the hash is what is stored. The value the client is given exists only at the moment it
+is issued. Anything of yours that expects to read the token back out of the database has to be
+looked at before turning this on.
+
 ### Single Use Tokens
 
 You can configure the refresh token so it can only be consumed _once_. If set to `true` and the refresh token is consumed, a new refresh token will be provided.
