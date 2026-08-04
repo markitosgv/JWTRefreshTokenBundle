@@ -898,6 +898,62 @@ curl -X POST -d refresh_token="xxxx4b54b0076d2fcc5a51a6e60c0fb83b0bc90b47e2c886a
 
 This call returns a new valid JWT token renewing valid datetime of your refresh token.
 
+### Issuing a token from your own code
+
+Creating a JWT [programmatically](https://github.com/lexik/LexikJWTAuthenticationBundle/blob/3.x/Resources/doc/7-manual-token-creation.rst)
+does not produce a refresh token, because the refresh token is attached by a listener on the
+authentication success event rather than by the JWT manager.
+
+**In a controller**, dispatching that event yourself is what applies the whole configuration — the
+ttl, `single_use`, the cookie and all of its settings, `return_expiration`, and
+`remove_token_from_body`:
+
+```php
+use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
+use Lexik\Bundle\JWTAuthenticationBundle\Events;
+
+$data = ['token' => $this->jwtManager->create($user)];
+$response = new JsonResponse($data);
+
+$event = new AuthenticationSuccessEvent($data, $user, $response);
+$this->eventDispatcher->dispatch($event, Events::AUTHENTICATION_SUCCESS);
+
+// The listener adds the refresh token to the data and the cookie to the response
+$response->setData($event->getData());
+
+return $response;
+```
+
+**Outside a request** — a console command, a message handler — that listener does nothing, on
+purpose: it reads the incoming request to see whether a token is being replaced, and there is no
+response to put a cookie on. Create the token directly:
+
+```php
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+public function __construct(
+    private readonly RefreshTokenGeneratorInterface $generator,
+    private readonly RefreshTokenManagerInterface $manager,
+    #[Autowire('%gesdinet_jwt_refresh_token.ttl%')]
+    private readonly int $ttl,
+) {
+}
+
+public function issueFor(UserInterface $user): string
+{
+    $refreshToken = $this->generator->createForUserWithTtl($user, $this->ttl);
+
+    $this->manager->save($refreshToken);
+
+    return (string) $refreshToken->getRefreshToken();
+}
+```
+
+Injecting the configured `ttl` rather than a constant of your own keeps tokens made this way in step
+with the ones the bundle issues.
+
 ## Useful Commands
 
 ### Revoke all invalid tokens
