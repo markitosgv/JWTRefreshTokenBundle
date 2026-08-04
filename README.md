@@ -114,6 +114,11 @@ api_refresh_token:
 # ...
 ```
 
+The route has no controller on purpose. It exists so that the path is routable, and the firewall
+authenticator configured below answers it before any controller would be reached. Giving it
+`controller: gesdinet.jwtrefreshtoken::refresh`, as versions before 2.0 did, loads a class that no
+longer exists.
+
 #### Configure the authenticator
 
 To enable the authenticator, you should add it to your API firewall(s) alongside the `json_login` and `jwt` authenticators.

@@ -21,7 +21,25 @@ The below guide will assist in upgrading from the 1.x versions to 2.0.
 
 ## Removed Features
 
-* Removed classes supporting authentication for Symfony 5.3 and earlier
+* Removed classes supporting authentication for Symfony 5.3 and earlier, which were built on `Symfony\Component\Security\Guard`, itself gone since Symfony 6.0. Refreshing is handled by the `refresh_jwt` authenticator on the firewall, so the route it answers keeps its path and loses its controller:
+
+  ```yaml
+  # config/routes.yaml
+  api_refresh_token:
+      path: /api/token/refresh
+  -   controller: gesdinet.jwtrefreshtoken::refresh
+  ```
+
+  ```yaml
+  # config/packages/security.yaml
+  security:
+      firewalls:
+          api:
+              refresh_jwt:
+                  check_path: /api/token/refresh
+  ```
+
+  Leaving the controller in place loads the removed class and fails with `Attempted to load class "AbstractGuardAuthenticator"`. Removing it without configuring the authenticator leaves the path routable but unanswered, which reports the route as wrongly configured.
 * Removed the `AbstractRefreshToken` classes from the `Gesdinet\JWTRefreshTokenBundle\Document` and `Gesdinet\JWTRefreshTokenBundle\Entity` namespaces, use the `RefreshToken` class from the same namespace instead
 * Removed `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface::create()` and its implementations, a `Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface` implementation should be used instead
 * Removed `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManager`, implement `Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface` directly instead
