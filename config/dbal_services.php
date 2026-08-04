@@ -37,7 +37,6 @@ return static function (ContainerConfigurator $container): void {
             param('gesdinet_jwt_refresh_token.dbal.columns'),
         ]);
 
-
     //
     // EnsureTableExistsListener
     //
