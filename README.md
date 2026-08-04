@@ -320,6 +320,12 @@ api_token_invalidate:
     path: /api/token/invalidate
 ```
 
+A logout only invalidates the token of whoever is logging out. When the request carries an
+authenticated user and the refresh token belongs to somebody else, it is left alone and answered as
+one that no longer exists, so the endpoint cannot be asked whether another user's token is still
+live. A request with no authenticated user, which is what logging out with an expired access token
+looks like, invalidates the token it carries.
+
 If you want to configure the `LogoutEvent` to trigger on a different firewall, the name of the firewall has to be configured:
 
 ```yaml

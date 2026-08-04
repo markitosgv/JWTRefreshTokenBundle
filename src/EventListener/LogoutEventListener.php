@@ -11,10 +11,12 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 /**
@@ -50,6 +52,21 @@ final class LogoutEventListener
         ], $cookieSettings);
     }
 
+    /**
+     * A logout invalidates the token of whoever is logging out, and no one else's.
+     *
+     * A token belonging to somebody else is answered exactly as one that does not exist, so that
+     * the endpoint cannot be asked whether another user's token is still live.
+     *
+     * There is nobody to compare against when the request carries no authenticated user, which is
+     * the ordinary case of logging out once the access token has expired, and the refresh token is
+     * taken at its word then.
+     */
+    private function belongsToTheUserLoggingOut(RefreshTokenInterface $refreshToken, ?TokenInterface $token): bool
+    {
+        return null === $token || $refreshToken->getUsername() === $token->getUserIdentifier();
+    }
+
     public function onLogout(LogoutEvent $event): void
     {
         $request = $event->getRequest();
@@ -72,7 +89,7 @@ final class LogoutEventListener
 
         $refreshToken = $this->refreshTokenManager->get($tokenString);
 
-        if (null === $refreshToken) {
+        if (null === $refreshToken || !$this->belongsToTheUserLoggingOut($refreshToken, $event->getToken())) {
             $response = new JsonResponse(
                 [
                     'code' => 200,

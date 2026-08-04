@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class LogoutEventListenerTest extends TestCase
@@ -26,6 +27,71 @@ final class LogoutEventListenerTest extends TestCase
     {
         $this->refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
         $this->extractor = $this->createMock(ExtractorInterface::class);
+    }
+
+    public function testInvalidatesTheTokenOfTheUserLoggingOut(): void
+    {
+        $request = Request::create('/', 'POST');
+
+        $authenticated = $this->createStub(TokenInterface::class);
+        $authenticated->method('getUserIdentifier')->willReturn('someone');
+
+        $event = new LogoutEvent($request, $authenticated);
+
+        $this->extractor
+            ->expects($this->once())
+            ->method('getRefreshToken')
+            ->willReturn('a-token-of-their-own');
+
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
+        $refreshToken->method('getUsername')->willReturn('someone');
+
+        $this->refreshTokenManager->method('get')->willReturn($refreshToken);
+
+        $this->refreshTokenManager
+            ->expects($this->once())
+            ->method('delete')
+            ->with($this->equalTo($refreshToken));
+
+        (new LogoutEventListener($this->refreshTokenManager, $this->extractor, self::TOKEN_PARAMETER_NAME, []))
+            ->onLogout($event);
+
+        $this->assertStringContainsString('has been invalidated', (string) $event->getResponse()?->getContent());
+    }
+
+    /**
+     * Answered as a token that does not exist, so the endpoint cannot be asked whether somebody
+     * else's token is still live.
+     */
+    public function testRefusesToInvalidateTheTokenOfAnotherUser(): void
+    {
+        $request = Request::create('/', 'POST');
+
+        $authenticated = $this->createStub(TokenInterface::class);
+        $authenticated->method('getUserIdentifier')->willReturn('someone');
+
+        $event = new LogoutEvent($request, $authenticated);
+
+        $this->extractor
+            ->expects($this->once())
+            ->method('getRefreshToken')
+            ->willReturn('a-token-of-somebody-else');
+
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
+        $refreshToken->method('getUsername')->willReturn('somebody-else');
+
+        $this->refreshTokenManager->method('get')->willReturn($refreshToken);
+
+        $this->refreshTokenManager
+            ->expects($this->never())
+            ->method('delete');
+
+        (new LogoutEventListener($this->refreshTokenManager, $this->extractor, self::TOKEN_PARAMETER_NAME, []))
+            ->onLogout($event);
+
+        $this->assertStringContainsString('already invalid', (string) $event->getResponse()?->getContent(), 'The answer should not say the token exists');
     }
 
     public function testInvalidatesTokenAndClearsCookieFromResponse(): void
