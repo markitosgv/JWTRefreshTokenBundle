@@ -128,9 +128,15 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
      */
     private function assignIdentifier(RefreshTokenInterface $token, mixed $id): void
     {
+        // @codeCoverageIgnoreStart
+        // Reached only by a row with no identifier in it, and dbal_columns is now required to name
+        // the id column precisely because a table without one cannot have its expired tokens
+        // revoked. The guard stays because hydrate() reads the value with a null coalesce and a
+        // hand-written query could still hand one over.
         if (null === $id) {
             return;
         }
+        // @codeCoverageIgnoreEnd
 
         $reflection = new \ReflectionObject($token);
 

@@ -60,9 +60,15 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         }
 
         if ($mergedConfig['api_platform']['enabled']) {
+            // @codeCoverageIgnoreStart
+            // api-platform/openapi is a development dependency of this bundle, so the interface is
+            // always there while the tests run and this branch cannot be reached from them. Taking
+            // it out of the test environment to exercise one throw would cost the OpenApiFactory
+            // tests, which are worth more.
             if (!interface_exists(OpenApiFactoryInterface::class)) {
                 throw new RuntimeException('API Platform cannot be detected. Try running "composer require api-platform/core".');
             }
+            // @codeCoverageIgnoreEnd
 
             // The paths come from the firewall, so the parameter has to exist even when the
             // authenticator is not configured on one
@@ -106,10 +112,17 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     {
         if (null !== $mergedConfig['object_manager']) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $mergedConfig['object_manager']);
+        // @codeCoverageIgnoreStart
+        // willBeAvailable() asks whether a package is a runtime dependency of something installed,
+        // and names doctrine-bundle and mongodb-odm-bundle as the packages that would make it so.
+        // Neither is a dependency here — the tests build entity and document managers directly —
+        // so both of these are false whatever is installed. Adding those bundles to require-dev
+        // would pull a Symfony application's worth of packages to reach two setAlias() calls.
         } elseif (ContainerBuilder::willBeAvailable('doctrine/orm', EntityManager::class, ['doctrine/doctrine-bundle'])) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine.orm.entity_manager');
         } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine_mongodb.odm.document_manager');
+        // @codeCoverageIgnoreEnd
         } else {
             throw new RuntimeException('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
         }

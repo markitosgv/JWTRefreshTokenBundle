@@ -82,9 +82,15 @@ final readonly class OpenApiFactory implements OpenApiFactoryInterface
     private function completeTheLoginResponse(OpenApi $openApi): void
     {
         foreach ($openApi->getPaths()->getPaths() as $path => $pathItem) {
+            // @codeCoverageIgnoreStart
+            // Paths::getPaths() is annotated as a plain array, which is why static analysis wants
+            // this checked, but Paths::addPath() is typed and is the only way in — so nothing that
+            // fails it can be put there through the API. Kept for the analysers, unreachable for
+            // the tests.
             if (!is_string($path) || !$pathItem instanceof PathItem) {
                 continue;
             }
+            // @codeCoverageIgnoreEnd
 
             $operation = $pathItem->getPost();
 
