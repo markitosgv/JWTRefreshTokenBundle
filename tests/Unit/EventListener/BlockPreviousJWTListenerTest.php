@@ -14,7 +14,6 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 #[AllowMockObjectsWithoutExpectations]
@@ -23,15 +22,11 @@ final class BlockPreviousJWTListenerTest extends TestCase
     private BlockedTokenManagerInterface&MockObject $blockedTokens;
     private TokenExtractorInterface&MockObject $extractor;
     private JWTTokenManagerInterface&MockObject $jwtManager;
-    private RequestStack $requestStack;
-
     protected function setUp(): void
     {
         $this->blockedTokens = $this->createMock(BlockedTokenManagerInterface::class);
         $this->extractor = $this->createMock(TokenExtractorInterface::class);
         $this->jwtManager = $this->createMock(JWTTokenManagerInterface::class);
-        $this->requestStack = new RequestStack();
-        $this->requestStack->push(Request::create('/api/token/refresh', 'POST'));
     }
 
     public function test_blocks_the_jwt_the_refresh_replaced(): void
@@ -86,27 +81,12 @@ final class BlockPreviousJWTListenerTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    public function test_does_nothing_outside_a_request(): void
-    {
-        $this->blockedTokens->expects($this->never())->method('add');
-
-        $listener = new BlockPreviousJWTListener(
-            $this->blockedTokens,
-            $this->extractor,
-            $this->jwtManager,
-            new RequestStack()
-        );
-
-        $listener($this->event());
-    }
-
     private function listener(): BlockPreviousJWTListener
     {
         return new BlockPreviousJWTListener(
             $this->blockedTokens,
             $this->extractor,
-            $this->jwtManager,
-            $this->requestStack
+            $this->jwtManager
         );
     }
 
@@ -115,7 +95,8 @@ final class BlockPreviousJWTListenerTest extends TestCase
         return new RefreshEvent(
             $this->createStub(RefreshTokenInterface::class),
             $this->createStub(TokenInterface::class),
-            'api'
+            'api',
+            Request::create('/api/token/refresh', 'POST')
         );
     }
 }

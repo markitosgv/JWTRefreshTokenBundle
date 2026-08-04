@@ -40,7 +40,7 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): ?Response
     {
         if ($token instanceof PostRefreshTokenAuthenticationToken) {
-            $event = new RefreshEvent($token->getRefreshToken(), $token, $this->firewallName);
+            $event = new RefreshEvent($token->getRefreshToken(), $token, $this->firewallName, $request);
 
             $this->eventDispatcher->dispatch($event, 'gesdinet.refresh_token');
         }

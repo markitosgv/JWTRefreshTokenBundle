@@ -15,7 +15,6 @@ return static function (ContainerConfigurator $container): void {
             service('lexik_jwt_authentication.blocked_token_manager'),
             service('lexik_jwt_authentication.extractor.chain_extractor'),
             service('lexik_jwt_authentication.jwt_manager'),
-            service('request_stack'),
         ])
         ->tag('kernel.event_listener', ['event' => 'gesdinet.refresh_token']);
 };

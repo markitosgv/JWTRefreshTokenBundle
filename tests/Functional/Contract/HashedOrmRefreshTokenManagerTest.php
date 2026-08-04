@@ -159,6 +159,31 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
         $this->assertNull($manager->get('a-token-of-my-own'));
     }
 
+    public function test_passes_the_rest_of_the_interface_through(): void
+    {
+        $manager = $this->manager();
+
+        $manager->save(RefreshToken::createForUserWithTtl('expired', UserCreator::create('someone'), -600));
+
+        $this->assertSame(RefreshToken::class, $manager->getClass());
+        $this->assertCount(1, $manager->revokeAllInvalidBatch(null, 10));
+    }
+
+    /**
+     * Hashing wraps whichever manager is underneath, and one implementing only the base interface
+     * cannot be made to revoke by user. Saying which interface is missing beats calling a method
+     * that is not there.
+     */
+    public function test_says_so_when_the_manager_underneath_cannot_revoke_by_user(): void
+    {
+        $bare = new HashedRefreshTokenManager($this->createStub(RefreshTokenManagerInterface::class));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('does not implement');
+
+        $bare->revokeAllForUser(UserCreator::create('someone'));
+    }
+
     private function storeInTheClear(string $token): void
     {
         $unhashed = new RefreshTokenManager($this->entityManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);

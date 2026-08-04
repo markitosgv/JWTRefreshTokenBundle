@@ -120,6 +120,28 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         );
     }
 
+    public function test_blocking_the_previous_jwt_is_not_wired_unless_it_is_asked_for(): void
+    {
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
+
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.event_listener.block_previous_jwt'));
+    }
+
+    public function test_blocking_the_previous_jwt_listens_for_a_refresh(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'block_previous_jwt' => true,
+        ]);
+
+        $this->assertContainerBuilderHasServiceDefinitionWithTag(
+            'gesdinet_jwt_refresh_token.event_listener.block_previous_jwt',
+            'kernel.event_listener',
+            ['event' => 'gesdinet.refresh_token']
+        );
+    }
+
     public function test_tokens_are_not_hashed_unless_it_is_asked_for(): void
     {
         $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);

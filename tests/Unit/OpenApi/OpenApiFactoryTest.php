@@ -168,6 +168,40 @@ final class OpenApiFactoryTest extends TestCase
     }
 
     /**
+     * Lexik could document the login differently, or another bundle could put a path in that does
+     * not look like a response schema at all. Anything that is not the shape being completed is
+     * left as it is rather than reached into.
+     */
+    public function testLeavesALoginEndpointItCannotCompleteAlone(): void
+    {
+        $paths = $this->emptySpecification()->getPaths();
+        $paths->addPath(self::LOGIN_PATH, (new PathItem())->withPost(
+            (new Operation())->withOperationId('login_check_post')->withResponses([
+                // No content, so nothing to add the refresh token to
+                Response::HTTP_OK => ['description' => 'User token created'],
+            ])
+        ));
+
+        $openApi = $this->factory(decorated: new OpenApi(new Info('Test', '1.0'), [], $paths))();
+
+        $this->assertSame([], $this->okSchema($openApi, self::LOGIN_PATH));
+    }
+
+    public function testLeavesALoginResponseThatIsNotAnArrayAlone(): void
+    {
+        $paths = $this->emptySpecification()->getPaths();
+        $paths->addPath(self::LOGIN_PATH, (new PathItem())->withPost(
+            (new Operation())->withOperationId('login_check_post')->withResponses([
+                Response::HTTP_OK => 'not a response description at all',
+            ])
+        ));
+
+        $openApi = $this->factory(decorated: new OpenApi(new Info('Test', '1.0'), [], $paths))();
+
+        $this->assertNotNull($openApi->getPaths()->getPath(self::CHECK_PATH), 'The refresh endpoint is still documented');
+    }
+
+    /**
      * The OpenAPI models hold the response schemas as plain arrays, so reading one out means
      * checking each step rather than chaining through them.
      *

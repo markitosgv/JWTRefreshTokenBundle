@@ -17,7 +17,6 @@ use Lexik\Bundle\JWTAuthenticationBundle\Exception\MissingClaimException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\BlockedTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\TokenExtractorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Blocks the JWT that was replaced, when the refresh request carried one.
@@ -45,19 +44,12 @@ final readonly class BlockPreviousJWTListener
         private BlockedTokenManagerInterface $blockedTokenManager,
         private TokenExtractorInterface $tokenExtractor,
         private JWTTokenManagerInterface $jwtManager,
-        private RequestStack $requestStack,
     ) {
     }
 
     public function __invoke(RefreshEvent $event): void
     {
-        $request = $this->requestStack->getCurrentRequest();
-
-        if (null === $request) {
-            return;
-        }
-
-        $jwt = $this->tokenExtractor->extract($request);
+        $jwt = $this->tokenExtractor->extract($event->getRequest());
 
         if (!is_string($jwt) || '' === $jwt) {
             return;

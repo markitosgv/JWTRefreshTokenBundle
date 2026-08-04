@@ -278,6 +278,20 @@ final class ConfigurationTest extends TestCase
         );
     }
 
+    public function test_an_empty_table_name_is_not_a_valid_identifier(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'dbal_connection' => 'doctrine.dbal.default_connection',
+                    'dbal_table_name' => '',
+                ],
+            ],
+            'valid SQL identifier'
+        );
+    }
+
     public function test_dbal_columns_configuration_defaults_to_empty_array(): void
     {
         $this->assertProcessedConfigurationEquals(

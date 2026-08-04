@@ -6,6 +6,7 @@ use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
@@ -20,18 +21,23 @@ final class RefreshEventTest extends TestCase
         $refreshToken = $this->createStub(RefreshTokenInterface::class);
         $token = $this->createStub(TokenInterface::class);
 
-        $event = new RefreshEvent($refreshToken, $token, 'api');
+        $request = Request::create('/api/token/refresh', 'POST');
+
+        $event = new RefreshEvent($refreshToken, $token, 'api', $request);
 
         $this->assertSame($refreshToken, $event->getRefreshToken());
         $this->assertSame($token, $event->getToken());
         $this->assertSame('api', $event->getFirewallName());
+        $this->assertSame($request, $event->getRequest(), 'The request the refresh was made with, so a listener need not go looking for it');
     }
 
     public function test_has_no_firewall_name_when_none_is_given(): void
     {
         $event = new RefreshEvent(
-            $this->createMock(RefreshTokenInterface::class),
-            $this->createMock(TokenInterface::class)
+            $this->createStub(RefreshTokenInterface::class),
+            $this->createStub(TokenInterface::class),
+            null,
+            Request::create('/api/token/refresh', 'POST')
         );
 
         $this->assertNull($event->getFirewallName());

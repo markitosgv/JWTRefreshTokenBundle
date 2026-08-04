@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Event;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -23,7 +24,8 @@ final class RefreshEvent extends Event
     public function __construct(
         private readonly RefreshTokenInterface $refreshToken,
         private readonly TokenInterface $token,
-        private readonly ?string $firewallName = null
+        private readonly ?string $firewallName,
+        private readonly Request $request,
     ) {
     }
 
@@ -40,5 +42,17 @@ final class RefreshEvent extends Event
     public function getFirewallName(): ?string
     {
         return $this->firewallName;
+    }
+
+    /**
+     * The request the refresh was made with.
+     *
+     * Whatever the client sent alongside the refresh token is here: the JWT being replaced, if it
+     * sent one, and anything else a listener needs to act on. Without it a listener has to reach
+     * for the request stack, which is the same request by a longer route.
+     */
+    public function getRequest(): Request
+    {
+        return $this->request;
     }
 }
