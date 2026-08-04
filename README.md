@@ -498,6 +498,35 @@ own](#use-another-class-for-refresh-tokens) with the column on it, and a decorat
 the client tells you about itself is worth exactly what the client is worth: it is useful for a
 person recognising a session of their own and revoking it, and it is not a security control.
 
+### Blocking the JWT a refresh replaces
+
+A JWT is verified by its signature and its expiry, with nothing consulted in between, so refreshing
+used to leave the previous one usable for the rest of its lifetime.
+LexikJWTAuthenticationBundle 3 can withdraw one, and this hands it the JWT being replaced:
+
+```yaml
+lexik_jwt_authentication:
+    blocklist_token:
+        enabled: true
+        cache: cache.app
+
+gesdinet_jwt_refresh_token:
+    block_previous_jwt: true
+```
+
+Two cases are left alone deliberately:
+
+* **A request carrying no JWT.** Refreshing does not require one, and a client that discards its JWT
+  before refreshing is the ordinary shape. There is nothing to block.
+* **A JWT that no longer parses**, which for an expired one is the point: it is refused everywhere
+  already, so recording it would fill the store to no end. What this catches is the JWT that is
+  still valid — a client refreshing before expiry, which is what
+  [`return_expiration`](#return-expiration-timestamp) encourages — where the old one would otherwise
+  keep working until it expired on its own.
+
+The blocklist is consulted on every authenticated request, so its store has to be one your
+application shares between processes. Lexik's `cache` option is where that is chosen.
+
 ### Storing hashes instead of tokens
 
 A refresh token gets its holder back into an account without a password. Stored as it is, a copy of

@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle;
 
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\AddExtractorsToChainCompilerPass;
+use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ValidateBlockedTokenManagerCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ValidateDBALConnectionCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ValidateObjectManagerCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Security\Factory\RefreshTokenAuthenticatorFactory;
@@ -20,6 +21,7 @@ final class GesdinetJWTRefreshTokenBundle extends Bundle
         $container->addCompilerPass(new AddExtractorsToChainCompilerPass());
         $container->addCompilerPass(new ValidateDBALConnectionCompilerPass());
         $container->addCompilerPass(new ValidateObjectManagerCompilerPass());
+        $container->addCompilerPass(new ValidateBlockedTokenManagerCompilerPass());
 
         /** @var SecurityExtension $extension */
         $extension = $container->getExtension('security');

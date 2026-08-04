@@ -23,9 +23,3 @@ parameters:
         -
             identifier: function.alreadyNarrowedType
             path: src/Doctrine/DBAL/TableSchemaManager.php
-        # Configuration::enableNativeLazyObjects() was added in doctrine/orm 3.6, but composer.json
-        # still allows ^2.20, where the method does not exist. The check only looks redundant
-        # because the analysis runs against the newest version the lock file resolves to.
-        -
-            identifier: function.alreadyNarrowedType
-            path: tests/Functional/ORMTestCase.php
