@@ -114,6 +114,14 @@ sub class of "Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken".
 Every Entity must have an identifier/primary key.
 ```
 
+or, depending on how far Doctrine got before it noticed:
+
+```text
+Class "App\Entity\RefreshToken" sub class of
+"Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken"
+is not a valid entity or mapped super class.
+```
+
 Name the mapping alongside your own and it is registered again:
 
 ```yaml
