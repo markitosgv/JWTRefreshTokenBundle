@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+* `block_previous_jwt`, which blocks the JWT a refresh replaces through LexikJWTAuthenticationBundle 3's blocklist, so refreshing no longer leaves the previous JWT usable for the rest of its lifetime. A request carrying no JWT, and a JWT that no longer parses, are left alone: an expired one is refused everywhere already. Off by default, and reported at compile time when Lexik's `blocklist_token` is not on
+
+### Changed
+
+* **BC break**: PHP 8.4 or later, Symfony 8.0 or later, and LexikJWTAuthenticationBundle 3. Symfony 6.4 and the 7 branch are dropped, which takes PHP 8.2 and 8.3 with them since Symfony 8 needs 8.4
+* **BC break**: `check_path` is required on the `refresh_jwt` authenticator. It defaulted to `/login_check`, Lexik's login path, which is never right for a refresh endpoint: left alone the authenticator took no requests and the router reported the refresh route as having no controller
+* **BC break**: the exceptions, the bundle class, the failure response and the post-refresh security token are `final`. The token models, `AbstractRefreshToken` and the two repositories are deliberately left extendable, being the documented way to bring your own
+
+## 2.2.1
+
+### Fixed
+
+* `ttl` and `max_tokens_per_user` can be read from an environment variable again. Both were checked with a `validate()` closure, which rejects every `%env(int:...)%` put in front of them: the container is compiled a second time with a sample value of the declared type in place, and for an integer that sample is `0`. `min()` is skipped while a placeholder is being handled and a closure is not, so the built-in constraint is used instead. Reported as #431 against 2.2.0, where the `ttl` check was introduced; 2.1.0 has no such check and is unaffected
+
 ## 2.2.0
 
 Released 2026-08-04. See [UPGRADE-2.2.md](UPGRADE-2.2.md) for what to check before upgrading.
