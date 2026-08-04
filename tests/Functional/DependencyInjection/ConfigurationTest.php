@@ -220,6 +220,42 @@ final class ConfigurationTest extends TestCase
         );
     }
 
+    /**
+     * @return iterable<string, array{int}>
+     */
+    public static function uselessTtlProvider(): iterable
+    {
+        // What somebody reaching for an unlimited token tries first, since that is the convention
+        // elsewhere. Here it means the token has expired by the time it is handed over
+        yield 'zero' => [0];
+        yield 'negative' => [-1];
+    }
+
+    #[DataProvider('uselessTtlProvider')]
+    public function test_a_ttl_that_issues_expired_tokens_is_rejected(int $ttl): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'ttl' => $ttl,
+                ],
+            ],
+            'must be a positive number of seconds'
+        );
+    }
+
+    public function test_a_ttl_can_be_as_long_as_the_application_wants(): void
+    {
+        $this->assertConfigurationIsValid([
+            [
+                'refresh_token_class' => RefreshToken::class,
+                // Ten years, which is how a token that outlives the application is configured
+                'ttl' => 315360000,
+            ],
+        ]);
+    }
+
     public function test_dbal_columns_configuration_defaults_to_empty_array(): void
     {
         $this->assertProcessedConfigurationEquals(

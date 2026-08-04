@@ -203,6 +203,28 @@ gesdinet_jwt_refresh_token:
     ttl: 2592000
 ```
 
+There is no value meaning never. A token is valid until this many seconds after it was issued, so a
+token meant to outlive the application is a large number of seconds rather than a special one:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    ttl: 315360000 # ten years
+```
+
+`0` is not it, and neither is a negative number: those describe a token that has already expired
+when it is handed over, so every refresh made with it fails. They are rejected rather than accepted
+quietly.
+
+Before reaching for ten years, it is worth being clear about what that is. The refresh token is the
+credential that gets a user back in without their password, so one that never expires is a password
+that cannot be changed and that you have stored in your database. It cannot be cleaned up either,
+since `gesdinet:jwt:clear` finds tokens by their expiry, so the table only grows.
+
+A long session without a permanent credential is what [single use tokens](#single-use-tokens) are
+for: each refresh replaces the token, so a stolen one stops working as soon as the real user
+refreshes, and `ttl` is how long a user may be away before signing in again rather than how long the
+credential lives.
+
 ### Update Token TTL
 
 You can configure the bundle to refresh the TTL on a refresh token when it is used, by default this feature is disabled. You can change this value adding this line to your config:
