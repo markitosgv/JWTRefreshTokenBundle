@@ -7,8 +7,10 @@ use Gesdinet\JWTRefreshTokenBundle\Command\ClearInvalidRefreshTokensCommand;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 final class ClearInvalidRefreshTokensCommandTest extends TestCase
@@ -31,7 +33,7 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
 
         $commandTester = new CommandTester($command);
-        $commandTester->execute([]);
+        $commandTester->execute([], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
 
@@ -59,7 +61,7 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
 
         $commandTester = new CommandTester($command);
-        $commandTester->execute(['datetime' => '2021-01-01']);
+        $commandTester->execute(['datetime' => '2021-01-01'], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
 
@@ -67,6 +69,32 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
 
         $this->assertStringContainsString('Revoked 1 invalid token(s)', $output, 'The output should include a summary of the number of invalidated tokens');
         $this->assertStringContainsString('* refresh-token', $output, 'The output should list all invalidated tokens');
+    }
+
+    /**
+     * Clearing a backlog revokes thousands of tokens, and listing them all buries the count.
+     */
+    public function test_does_not_list_the_tokens_unless_asked_to(): void
+    {
+        /** @var Stub&RefreshTokenInterface $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
+        $refreshToken->method('getRefreshToken')->willReturn('refresh-token');
+
+        /** @var MockObject&RefreshTokenManagerInterface $refreshTokenManager */
+        $refreshTokenManager = $this->createMock(RefreshTokenManagerInterface::class);
+        $refreshTokenManager->expects($this->once())
+            ->method('revokeAllInvalidBatch')
+            ->willReturn([$refreshToken]);
+
+        $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString('Revoked 1 invalid token(s)', $output, 'The count is always reported');
+        $this->assertStringNotContainsString('* refresh-token', $output, 'The tokens themselves need -v');
     }
 
     public function test_reports_when_there_was_nothing_to_revoke(): void
@@ -138,7 +166,7 @@ final class ClearInvalidRefreshTokensCommandTest extends TestCase
         $command = new ClearInvalidRefreshTokensCommand($refreshTokenManager, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
 
         $commandTester = new CommandTester($command);
-        $commandTester->execute(['--batch-size' => $batchSize]);
+        $commandTester->execute(['--batch-size' => $batchSize], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
 

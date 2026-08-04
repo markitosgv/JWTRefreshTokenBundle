@@ -491,6 +491,13 @@ You can also specify the batch size used by the command when clearing tokens wit
 php bin/console gesdinet:jwt:clear --batch-size=2500
 ```
 
+The command reports how many tokens it revoked. Add `-v` to list them, which is worth leaving off
+when clearing a backlog of thousands.
+
+```bash
+php bin/console gesdinet:jwt:clear -v
+```
+
 We recommend executing this command as a cronjob to remove invalid refresh tokens on an interval.
 
 ### Revoke a token

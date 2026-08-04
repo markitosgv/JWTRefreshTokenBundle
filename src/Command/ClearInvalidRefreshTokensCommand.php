@@ -84,10 +84,15 @@ final class ClearInvalidRefreshTokensCommand extends Command
             $io->info('There were no invalid tokens to revoke.');
         } else {
             $io->text(sprintf('Revoked %d invalid token(s) in batches of %d', count($revokedTokens), $batchSize));
-            $io->listing(array_map(
-                static fn (RefreshTokenInterface $revokedToken): string => $revokedToken->getRefreshToken() ?? '',
-                $revokedTokens,
-            ));
+
+            // A run clearing a backlog revokes thousands of tokens, and listing them all buries the
+            // line that says how many
+            if ($output->isVerbose()) {
+                $io->listing(array_map(
+                    static fn (RefreshTokenInterface $revokedToken): string => $revokedToken->getRefreshToken() ?? '',
+                    $revokedTokens,
+                ));
+            }
         }
 
         return 0;

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+* `gesdinet:jwt:clear` reports how many tokens it revoked and lists them only with `-v`. A run clearing a backlog revokes thousands, and listing them all buried the count
+
 ### Added
 
 * A DBAL backend, configured with `dbal_connection`, storing the tokens through a plain connection rather than the ORM or the ODM. The table and its columns are named with `dbal_table_name` and `dbal_columns`, and `dbal_auto_create_table` creates the table on the first request when a migration is not practical
