@@ -7,9 +7,11 @@ use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessList
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
+use LogicException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -147,6 +149,93 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             self::RETURN_EXPIRATION_PARAMETER_NAME,
             false
         ))->attachRefreshToken($event);
+    }
+
+    public function testRevokesTheOldestSessionsOnceTheUserIsOverTheLimit(): void
+    {
+        /** @var RefreshTokenInterface&Stub $newToken */
+        $newToken = $this->createStub(RefreshTokenInterface::class);
+        $newToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($newToken);
+
+        $user = $this->createStub(UserInterface::class);
+
+        /** @var RefreshTokenManagerInterface&RevokeRefreshTokenManagerInterface&MockObject $manager */
+        $manager = $this->createMockForIntersectionOfInterfaces([RefreshTokenManagerInterface::class, RevokeRefreshTokenManagerInterface::class]);
+        $manager
+            ->expects($this->once())
+            ->method('revokeAllButNewestForUser')
+            ->with($user, 3)
+            ->willReturn(1);
+
+        $this->listenerWith($manager, 3)->attachRefreshToken($this->eventFor($user));
+    }
+
+    public function testLeavesTheSessionsAloneWithoutALimit(): void
+    {
+        /** @var RefreshTokenInterface&Stub $newToken */
+        $newToken = $this->createStub(RefreshTokenInterface::class);
+        $newToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($newToken);
+
+        /** @var RefreshTokenManagerInterface&RevokeRefreshTokenManagerInterface&MockObject $manager */
+        $manager = $this->createMockForIntersectionOfInterfaces([RefreshTokenManagerInterface::class, RevokeRefreshTokenManagerInterface::class]);
+        $manager->expects($this->never())->method('revokeAllButNewestForUser');
+
+        $this->listenerWith($manager, null)->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+    }
+
+    /**
+     * A limit that cannot be applied is worse than no limit, because it is believed.
+     */
+    public function testRefusesToPretendToLimitSessionsAManagerCannotRevoke(): void
+    {
+        /** @var RefreshTokenInterface&Stub $newToken */
+        $newToken = $this->createStub(RefreshTokenInterface::class);
+        $newToken->method('getRefreshToken')->willReturn('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($newToken);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('needs a refresh token manager implementing');
+
+        $this->listenerWith($this->refreshTokenManager, 3)->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+    }
+
+    /**
+     * @param positive-int|null $maxTokensPerUser
+     */
+    private function listenerWith(RefreshTokenManagerInterface $manager, ?int $maxTokensPerUser): AttachRefreshTokenOnSuccessListener
+    {
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn(null);
+
+        return new AttachRefreshTokenOnSuccessListener(
+            $manager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true,
+            $maxTokensPerUser
+        );
+    }
+
+    private function eventFor(UserInterface $user): AuthenticationSuccessEvent
+    {
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($user);
+        $event->method('getData')->willReturn([]);
+
+        return $event;
     }
 
     /**

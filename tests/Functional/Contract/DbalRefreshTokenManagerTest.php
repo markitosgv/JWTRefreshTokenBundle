@@ -8,6 +8,7 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 
@@ -15,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 final class DbalRefreshTokenManagerTest extends TestCase
 {
     use RefreshTokenManagerContract;
+    use RevokeRefreshTokenManagerContract;
 
     private Connection $connection;
 
@@ -36,5 +38,14 @@ final class DbalRefreshTokenManagerTest extends TestCase
     protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
     {
         return new RefreshTokenManager($this->connection, $batchSize, 'refresh_tokens', RefreshToken::class);
+    }
+
+    protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof RevokeRefreshTokenManagerInterface);
+
+        return $manager;
     }
 }

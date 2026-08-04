@@ -374,6 +374,27 @@ So the table grows with logins, and it is meant to be emptied on a schedule rath
 by the bundle. [`gesdinet:jwt:clear`](#revoke-all-invalid-tokens) removes the expired ones and is
 worth running as a cron job.
 
+A user can also be held to a number of them:
+
+```yaml
+gesdinet_jwt_refresh_token:
+    max_tokens_per_user: 5
+```
+
+Signing in a sixth time revokes the session that has gone longest without being refreshed, so the
+oldest device is signed out rather than the newest being refused. The count is taken after the new
+token is stored, so the login that has just succeeded is one of the five and a limit of `1` leaves a
+user signed in on one device at a time.
+
+Newest is by expiry rather than by creation, which with [`ttl_update`](#update-token-ttl) on means
+least recently used. Tokens that have already expired sort last and go first, so a user at the limit
+never gives up a live session while a dead one is kept.
+
+There is no limit unless one is set. It needs a manager implementing
+`Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface`, which all three of the
+bundle's own do; a [manager of your own](#store-the-tokens-somewhere-else-entirely) has to implement
+it too, and is told so rather than left quietly enforcing nothing.
+
 What that does not cover is somebody hammering the login endpoint to insert rows on purpose. That is
 not something to solve here — a row is exactly what a successful login is supposed to leave behind —
 it belongs on the endpoint, where Symfony already has the tool:

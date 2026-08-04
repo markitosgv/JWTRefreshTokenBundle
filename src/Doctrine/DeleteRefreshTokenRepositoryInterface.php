@@ -37,4 +37,17 @@ interface DeleteRefreshTokenRepositoryInterface
      * @psalm-impure it writes to the storage
      */
     public function deleteToken(RefreshTokenInterface $refreshToken): int;
+
+    /**
+     * Deletes the refresh tokens of a user beyond the newest $keep of them, by expiry.
+     *
+     * Life-cycle events might not be triggered for the deleted tokens.
+     *
+     * @param positive-int $keep
+     *
+     * @return int the amount of deleted refresh tokens
+     *
+     * @psalm-impure it writes to the storage
+     */
+    public function deleteAllButNewestForUser(UserInterface $user, int $keep): int;
 }

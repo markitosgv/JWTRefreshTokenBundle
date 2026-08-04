@@ -14,10 +14,13 @@ namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
+use LogicException;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @internal
@@ -31,6 +34,7 @@ final class AttachRefreshTokenOnSuccessListener
 
     /**
      * @param array{enabled?: bool, same_site?: 'lax'|'none'|'strict', path?: string, domain?: string|null, http_only?: bool, secure?: bool, partitioned?: bool, remove_token_from_body?: bool} $cookieSettings
+     * @param positive-int|null                                                                                                                                                                    $maxTokensPerUser
      *
      * @psalm-mutation-free
      */
@@ -45,7 +49,8 @@ final class AttachRefreshTokenOnSuccessListener
         array $cookieSettings,
         private readonly bool $returnExpiration = false,
         private readonly string $returnExpirationParameterName = 'refresh_token_expiration',
-        private readonly bool $singleUseTtlUpdate = true
+        private readonly bool $singleUseTtlUpdate = true,
+        private readonly ?int $maxTokensPerUser = null,
     ) {
         $this->cookieSettings = array_merge([
             'enabled' => false,
@@ -63,6 +68,27 @@ final class AttachRefreshTokenOnSuccessListener
      * Seconds left before the token expires, never below zero: a replacement issued for no time at
      * all is the session having run out, not one lasting forever.
      */
+    /**
+     * Revokes the user's oldest sessions once they hold more tokens than they are allowed.
+     *
+     * Called after the new token is stored, so the login that has just succeeded is counted among
+     * them and is the newest, which is why a limit of one leaves exactly that one.
+     */
+    private function enforceTheTokenLimit(UserInterface $user): void
+    {
+        if (null === $this->maxTokensPerUser) {
+            return;
+        }
+
+        if (!$this->refreshTokenManager instanceof RevokeRefreshTokenManagerInterface) {
+            // Quietly not applying a limit somebody configured would leave them believing their
+            // sessions were bounded when they are not
+            throw new LogicException(sprintf('The "max_tokens_per_user" option needs a refresh token manager implementing "%s", and "%s" does not.', RevokeRefreshTokenManagerInterface::class, get_debug_type($this->refreshTokenManager)));
+        }
+
+        $this->refreshTokenManager->revokeAllButNewestForUser($user, $this->maxTokensPerUser);
+    }
+
     private function remainingTtl(RefreshTokenInterface $refreshToken): int
     {
         $valid = $refreshToken->getValid();
@@ -133,6 +159,7 @@ final class AttachRefreshTokenOnSuccessListener
             );
 
             $this->refreshTokenManager->save($refreshToken);
+            $this->enforceTheTokenLimit($user);
             $issuedToken = $refreshToken;
             $refreshTokenString = $refreshToken->getRefreshToken();
             $data[$this->tokenParameterName] = $refreshTokenString;

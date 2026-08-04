@@ -256,6 +256,28 @@ final class ConfigurationTest extends TestCase
         ]);
     }
 
+    public function test_a_token_limit_below_one_is_rejected(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'max_tokens_per_user' => 0,
+                ],
+            ],
+            'must be at least 1'
+        );
+    }
+
+    public function test_there_is_no_token_limit_unless_one_is_asked_for(): void
+    {
+        $this->assertProcessedConfigurationEquals(
+            [[]],
+            ['max_tokens_per_user' => null],
+            'max_tokens_per_user'
+        );
+    }
+
     public function test_dbal_columns_configuration_defaults_to_empty_array(): void
     {
         $this->assertProcessedConfigurationEquals(

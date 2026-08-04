@@ -78,6 +78,35 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
     }
 
     #[\Override]
+    public function deleteAllButNewestForUser(UserInterface $user, int $keep): int
+    {
+        // The rows to delete are found first: an offset cannot be put on a DELETE, and the ones to
+        // keep are the newest, which is an offset away from the front
+        /** @var list<RefreshToken> $stale */
+        $stale = $this->createQueryBuilder('rt')
+            ->where('rt.username = :user_identifier')
+            ->setParameter('user_identifier', $user->getUserIdentifier(), ParameterType::STRING)
+            ->orderBy('rt.valid', 'DESC')
+            ->setFirstResult($keep)
+            ->getQuery()
+            ->getResult();
+
+        if ([] === $stale) {
+            return 0;
+        }
+
+        /** @var int $deleted */
+        $deleted = $this->createQueryBuilder('rt')
+            ->delete()
+            ->where('rt.id IN (:ids)')
+            ->setParameter('ids', array_map(static fn (RefreshToken $token): int|string|null => $token->getId(), $stale))
+            ->getQuery()
+            ->execute();
+
+        return $deleted;
+    }
+
+    #[\Override]
     public function deleteToken(RefreshTokenInterface $refreshToken): int
     {
         /** @var int $deleted */

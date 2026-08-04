@@ -196,6 +196,16 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         return $this->repository->deleteByUser($user);
     }
 
+    #[\Override]
+    public function revokeAllButNewestForUser(UserInterface $user, int $keep): int
+    {
+        if (!$this->repository instanceof DeleteRefreshTokenRepositoryInterface) {
+            throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, DeleteRefreshTokenRepositoryInterface::class));
+        }
+
+        return $this->repository->deleteAllButNewestForUser($user, $keep);
+    }
+
     /**
      * Returns the fully qualified class name for a concrete RefreshTokenInterface class.
      *

@@ -11,13 +11,16 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL;
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var array<string, array{name: string, type: string}>
@@ -234,6 +237,42 @@ final readonly class RefreshTokenManager implements RefreshTokenManagerInterface
         );
 
         return (int) $result;
+    }
+
+    #[\Override]
+    public function revokeAllForUser(UserInterface $user): int
+    {
+        return (int) $this->connection->delete(
+            $this->quoteTableIdentifier(),
+            [$this->quoteColumnIdentifier('username') => $user->getUserIdentifier()]
+        );
+    }
+
+    #[\Override]
+    public function revokeAllButNewestForUser(UserInterface $user, int $keep): int
+    {
+        // The ids to delete are read first, since a DELETE takes neither an order nor an offset,
+        // and the ones to keep are the newest, which is an offset away from the front
+        $stale = $this->connection->createQueryBuilder()
+            ->select($this->quoteColumnIdentifier('id'))
+            ->from($this->quoteTableIdentifier())
+            ->where($this->quoteColumnIdentifier('username').' = :username')
+            ->setParameter('username', $user->getUserIdentifier())
+            ->orderBy($this->quoteColumnIdentifier('valid'), 'DESC')
+            ->setFirstResult($keep)
+            // Every driver needs a limit before it will honour an offset, and no user has this many
+            ->setMaxResults(PHP_INT_MAX)
+            ->fetchFirstColumn();
+
+        if ([] === $stale) {
+            return 0;
+        }
+
+        return (int) $this->connection->executeStatement(
+            sprintf('DELETE FROM %s WHERE %s IN (?)', $this->quoteTableIdentifier(), $this->quoteColumnIdentifier('id')),
+            [$stale],
+            [ArrayParameterType::INTEGER]
+        );
     }
 
     /**
