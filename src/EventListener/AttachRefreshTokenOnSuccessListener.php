@@ -34,7 +34,7 @@ final class AttachRefreshTokenOnSuccessListener
 
     /**
      * @param array{enabled?: bool, same_site?: 'lax'|'none'|'strict', path?: string, domain?: string|null, http_only?: bool, secure?: bool, partitioned?: bool, remove_token_from_body?: bool} $cookieSettings
-     * @param positive-int|null                                                                                                                                                                    $maxTokensPerUser
+     * @param positive-int|null                                                                                                                                                                 $maxTokensPerUser
      *
      * @psalm-mutation-free
      */
