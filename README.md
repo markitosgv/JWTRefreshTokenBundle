@@ -155,6 +155,17 @@ authenticator configured below answers it before any controller would be reached
 `controller: gesdinet.jwtrefreshtoken::refresh`, as versions before 2.0 did, loads a class that no
 longer exists.
 
+Which means the two have to agree. `check_path` on the authenticator is what decides the requests it
+takes over, and it defaults to `/login_check`, so `refresh_jwt: ~` leaves the refresh route
+unanswered. The request then reaches the router, which finds the route and no controller behind it:
+
+```text
+Unable to find the controller for path "/auth-token/refresh". The route is wrongly configured.
+```
+
+The message points at the route, but the route is fine — it is the authenticator that never took the
+request. Setting `check_path` to the same path, or to the route name, is the fix.
+
 #### Configure the authenticator
 
 To enable the authenticator, you should add it to your API firewall(s) alongside the `json_login` and `jwt` authenticators.

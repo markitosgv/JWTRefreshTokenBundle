@@ -53,6 +53,7 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
             ->children()
                 ->scalarNode('check_path')
                     ->defaultValue('/login_check')
+                    ->info('The path the refresh endpoint answers on, as a path or a route name. It has to be the route you defined for refreshing: the authenticator only takes over requests matching it, and one left at this default never sees them, which surfaces as the router reporting that the route has no controller.')
                 ->end()
                 ->scalarNode('provider')->end()
                 ->scalarNode('success_handler')->end()
