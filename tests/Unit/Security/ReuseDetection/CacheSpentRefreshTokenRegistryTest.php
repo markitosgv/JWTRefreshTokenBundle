@@ -71,7 +71,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
      */
     public function test_remembers_a_token_that_belongs_to_no_chain(): void
     {
-        $token = new class extends RefreshToken {};
+        $token = new class() extends RefreshToken {};
         $token->setRefreshToken('a-spent-token');
         $token->setUsername('someone');
 

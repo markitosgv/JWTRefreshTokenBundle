@@ -1,23 +1,39 @@
 # Formatting for the hosted check.
 #
-# php-cs-fixer is what decides how this codebase is formatted: it is in composer.json, it runs in
-# CI, it is configurable rule by rule, and .php-cs-fixer.php holds it to the current @Symfony
-# preset. This file exists so the hosted check agrees with it rather than competing with it.
+# Read this before changing it: at the time of writing StyleCI is NOT reading this file. Its
+# configuration comes from the project's settings on styleci.io, and switching that over to the
+# repository config needs admin rights on the account. The evidence is direct — a `preset: psr2`
+# here, which has no opinion about any of the three rules the check reports, changed nothing.
 #
-# It is set to PSR-2 rather than to StyleCI's own symfony preset on purpose. That preset is a
-# snapshot of php-cs-fixer from several major versions ago and disagrees with the current convention
-# in three places: it drops the blank line between the class and function import groups, puts
-# parentheses on anonymous classes, and indents a comment before a `} elseif` with the block above
-# rather than with the chain. Symfony's convention is what this project follows, and the
-# disagreement could not be configured away — the rules involved carry php-cs-fixer 3.x names that
-# this vocabulary does not know, so naming them under `disabled` did nothing at all.
+# So this file is a statement of intent rather than something in force. It is kept, and kept
+# matching what the hosted check actually does, so that turning the repository config on is a
+# no-op rather than a surprise.
 #
-# PSR-2 has no opinion about any of the three. What is left is a baseline both tools agree on: the
-# hosted check still catches what it is good at, and nothing it reports contradicts what
-# php-cs-fixer will do to the same file.
-preset: psr2
+# php-cs-fixer is what actually decides how this codebase is formatted: it is in composer.json, it
+# runs in CI, and .php-cs-fixer.php holds it to the current @Symfony preset — except for three
+# rules where this check deviates and cannot be argued with. Those three are listed in
+# .php-cs-fixer.php with the reason. If the repository config is ever switched on, they can come
+# out of there and Symfony's convention can be carried here instead.
+preset: symfony
 
-# Two more that both tools apply identically, so whichever runs first catches them.
+risky: true
+
 enabled:
-  - no_unused_imports
-  - single_blank_line_at_eof
+  - declare_strict_types
+
+disabled:
+  # The docblocks carry types PHP has no syntax for — positive-int, class-string<T>, list<Session>,
+  # array shapes. phpstan runs at level 10 and psalm at its strictest on the strength of them, so
+  # nothing here may decide they are superfluous.
+  - no_superfluous_phpdoc_tags
+
+  # Test names are sentences meant to be read as the failure message.
+  - php_unit_method_casing
+
+  # Rector does not import names, so neither does this. With both leaving them alone, an inline
+  # \DateTimeInterface stays inline instead of the two tools taking turns.
+  - fully_qualified_strict_types
+  - global_namespace_import
+
+  # Both spellings appear and neither is wrong; choosing one is a large diff that prevents nothing.
+  - native_function_invocation

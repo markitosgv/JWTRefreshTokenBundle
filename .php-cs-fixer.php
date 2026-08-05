@@ -59,11 +59,25 @@ return new PhpCsFixer\Config()
         // ---- Rules this project wants, or refuses ------------------------------------------
 
         'ordered_imports' => ['sort_algorithm' => 'alpha', 'imports_order' => ['class', 'function', 'const']],
-        // Three rules where the hosted check deviates from @Symfony: it drops the blank line
-        // between the class and function import groups, puts parentheses on anonymous classes, and
-        // indents a comment before a `} elseif` with the block rather than the chain. Symfony's
-        // convention wins, so none of them is overridden here and .styleci.yml brings the hosted
-        // check into line instead.
+        // Three rules where the hosted check deviates from @Symfony. Its configuration is taken
+        // from the project's StyleCI settings and not from .styleci.yml in this repository — a
+        // preset: psr2 there, which has no opinion about any of the three, changed nothing — and
+        // enabling the repository config needs an admin. So the check cannot be brought into line
+        // and these are the three places where it wins instead.
+        //
+        // They are matched here rather than left to fight: a formatter that undoes the hosted
+        // check on every run is worse than three settled differences. Revisit if the repository
+        // config is ever switched on, at which point .styleci.yml can carry Symfony's convention
+        // and these three overrides come out.
+
+        // Symfony puts a blank line between the class imports and the function ones.
+        'blank_line_between_import_groups' => false,
+
+        // Symfony writes `new class extends Foo {}` without them.
+        'new_with_parentheses' => ['anonymous_class' => true, 'named_class' => true],
+
+        // Symfony indents a comment before a `} elseif` with the chain, not with the block above.
+        'statement_indentation' => ['stick_comment_to_next_continuous_control_statement' => false],
         'phpdoc_separation' => true,
         'no_unused_imports' => true,
 
