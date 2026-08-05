@@ -2,8 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Entity;
 
-use DateTimeInterface;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityRepository;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenFamilyRepositoryInterface;

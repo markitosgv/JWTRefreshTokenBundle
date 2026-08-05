@@ -8,8 +8,8 @@ use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository as BundleRefres
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\BareRefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\RefreshToken;
-use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\ObjectManagerWithRepository;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\User;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\ObjectManagerWithRepository;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\ORMTestCase;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use LogicException;

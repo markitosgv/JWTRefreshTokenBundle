@@ -2,8 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
-use DateTimeInterface;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenFamilyRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;

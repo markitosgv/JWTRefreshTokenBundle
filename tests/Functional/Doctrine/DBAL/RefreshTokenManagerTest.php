@@ -7,9 +7,9 @@ use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\TokenWithoutAnIdentifier;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class RefreshTokenManagerTest extends TestCase
