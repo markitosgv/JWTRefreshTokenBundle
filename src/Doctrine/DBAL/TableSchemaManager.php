@@ -106,15 +106,15 @@ final readonly class TableSchemaManager
         }
 
         if (isset($this->columnConfig['refreshToken'])) {
-            $table->addUniqueIndex([$this->columnConfig['refreshToken']['name']], 'UNIQ_REFRESH_TOKEN');
+            $table->addUniqueIndex([$this->columnConfig['refreshToken']['name']], $this->indexName('UNIQ_REFRESH_TOKEN'));
         }
 
         if (isset($this->columnConfig['username'])) {
-            $table->addIndex([$this->columnConfig['username']['name']], 'IDX_USERNAME');
+            $table->addIndex([$this->columnConfig['username']['name']], $this->indexName('IDX_USERNAME'));
         }
 
         if (isset($this->columnConfig['valid'])) {
-            $table->addIndex([$this->columnConfig['valid']['name']], 'IDX_VALID');
+            $table->addIndex([$this->columnConfig['valid']['name']], $this->indexName('IDX_VALID'));
         }
 
         $queries = $schema->toSql($this->connection->getDatabasePlatform());
@@ -176,6 +176,35 @@ final readonly class TableSchemaManager
                 'type' => Types::DATETIME_MUTABLE,
             ],
         ];
+    }
+
+    /**
+     * Builds an index name unique to this table.
+     *
+     * Index names are scoped to the schema on PostgreSQL and to the whole database on SQLite, not
+     * to the table as they are on MySQL. A name fixed in the source therefore collides the moment
+     * an application has the bundle manage a second table: the second one fails to create, and the
+     * error names an index rather than anything identifying this bundle. Deriving the name from the
+     * table makes it unique for the same reason the table name is.
+     *
+     * @param non-empty-string $purpose
+     *
+     * @return non-empty-string
+     *
+     * @psalm-mutation-free
+     */
+    private function indexName(string $purpose): string
+    {
+        $name = $purpose.'_'.strtoupper((string) preg_replace('/[^A-Za-z0-9]+/', '_', $this->tableName));
+
+        // PostgreSQL truncates identifiers at 63 characters, which would fold two long table names
+        // back into one index name and reintroduce the collision. A hash of the full table name
+        // stays distinct where a truncated prefix does not.
+        if (\strlen($name) > 63) {
+            return $purpose.'_'.strtoupper(dechex(crc32($this->tableName)));
+        }
+
+        return $name;
     }
 
     /**

@@ -100,6 +100,21 @@ gesdinet_jwt_refresh_token:
         # ...
 ```
 
+## DBAL index names now include the table name
+
+Only affects the DBAL backend, and only tables created from now on.
+
+`refresh_tokens` used to get its indexes named `UNIQ_REFRESH_TOKEN`, `IDX_USERNAME` and `IDX_VALID`
+whatever it was called. Those names are scoped to the schema on PostgreSQL and to the database on
+SQLite, so having the bundle manage a second table was impossible — creating it failed with
+`index UNIQ_REFRESH_TOKEN already exists`, which names an index and nothing else. They are now
+`UNIQ_REFRESH_TOKEN_REFRESH_TOKENS`, `IDX_USERNAME_REFRESH_TOKENS` and `IDX_VALID_REFRESH_TOKENS`,
+and past 63 characters — PostgreSQL's identifier limit — the table part is hashed instead.
+
+**Existing tables are left alone.** The table is only built when it is absent, so nothing renames an
+index you already have, and nothing needs to. It matters if you assert on index names in a test, or
+if a migration of yours refers to one.
+
 ## New: blocking the JWT a refresh replaces
 
 The reason this release requires Lexik 3.

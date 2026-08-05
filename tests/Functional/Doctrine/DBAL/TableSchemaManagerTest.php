@@ -54,12 +54,12 @@ class TableSchemaManagerTest extends TestCase
         $indexes = $schemaManager->listTableIndexes('refresh_tokens');
 
         $this->assertArrayHasKey('primary', $indexes, 'Primary key should exist');
-        $this->assertArrayHasKey('uniq_refresh_token', $indexes, 'Unique index on refresh_token should exist');
-        $this->assertArrayHasKey('idx_username', $indexes, 'Index on username should exist');
-        $this->assertArrayHasKey('idx_valid', $indexes, 'Index on valid should exist');
+        $this->assertArrayHasKey('uniq_refresh_token_refresh_tokens', $indexes, 'Unique index on refresh_token should exist');
+        $this->assertArrayHasKey('idx_username_refresh_tokens', $indexes, 'Index on username should exist');
+        $this->assertArrayHasKey('idx_valid_refresh_tokens', $indexes, 'Index on valid should exist');
 
-        $this->assertTrue($indexes['uniq_refresh_token']->isUnique(), 'refresh_token index should be unique');
-        $this->assertFalse($indexes['idx_username']->isUnique(), 'username index should not be unique');
+        $this->assertTrue($indexes['uniq_refresh_token_refresh_tokens']->isUnique(), 'refresh_token index should be unique');
+        $this->assertFalse($indexes['idx_username_refresh_tokens']->isUnique(), 'username index should not be unique');
     }
 
     public function testCreateTableWithCustomTableName(): void
@@ -284,11 +284,11 @@ class TableSchemaManagerTest extends TestCase
 
         // Should have indexes for configured columns
         $this->assertArrayHasKey('primary', $indexes);
-        $this->assertArrayHasKey('uniq_refresh_token', $indexes);
+        $this->assertArrayHasKey('uniq_refresh_token_partial_table', $indexes);
 
         // Should not have indexes for missing columns
-        $this->assertArrayNotHasKey('idx_username', $indexes);
-        $this->assertArrayNotHasKey('idx_valid', $indexes);
+        $this->assertArrayNotHasKey('idx_username_partial_table', $indexes);
+        $this->assertArrayNotHasKey('idx_valid_partial_table', $indexes);
     }
 
     public function testCustomColumnTypesAreRespected(): void
@@ -373,6 +373,49 @@ class TableSchemaManagerTest extends TestCase
         $this->assertIsArray($result);
         $this->assertSame('test-token-123', $result['refresh_token']);
         $this->assertSame('testuser', $result['username']);
+    }
+
+    /**
+     * The reason index names are derived from the table name rather than fixed.
+     *
+     * SQLite scopes index names to the database and PostgreSQL to the schema, so two tables managed
+     * by the bundle used to be impossible: creating the second failed on a name the first had taken.
+     */
+    public function testTwoManagedTablesCoexistInOneSchema(): void
+    {
+        (new TableSchemaManager($this->connection, 'customer_tokens', []))->createTable();
+        (new TableSchemaManager($this->connection, 'employee_tokens', []))->createTable();
+
+        $schemaManager = $this->connection->createSchemaManager();
+
+        $this->assertArrayHasKey('uniq_refresh_token_customer_tokens', $schemaManager->listTableIndexes('customer_tokens'));
+        $this->assertArrayHasKey('uniq_refresh_token_employee_tokens', $schemaManager->listTableIndexes('employee_tokens'));
+    }
+
+    /**
+     * PostgreSQL truncates identifiers at 63 characters. Two table names sharing a long prefix would
+     * be cut back to the same index name, so past that length the name is hashed instead.
+     */
+    public function testLongTableNamesFallBackToAHashedIndexName(): void
+    {
+        $first = str_repeat('a', 60).'_one';
+        $second = str_repeat('a', 60).'_two';
+
+        (new TableSchemaManager($this->connection, $first, []))->createTable();
+        (new TableSchemaManager($this->connection, $second, []))->createTable();
+
+        $schemaManager = $this->connection->createSchemaManager();
+
+        // The primary key is left for the platform to name and is scoped to its table everywhere,
+        // so it is the one index the two tables are expected to have in common.
+        $firstNames = array_diff(array_keys($schemaManager->listTableIndexes($first)), ['primary']);
+        $secondNames = array_diff(array_keys($schemaManager->listTableIndexes($second)), ['primary']);
+
+        $this->assertSame([], array_intersect($firstNames, $secondNames), 'The two tables must not share an index name');
+
+        foreach (array_merge($firstNames, $secondNames) as $name) {
+            $this->assertLessThanOrEqual(63, \strlen($name), "Index name {$name} exceeds the PostgreSQL identifier limit");
+        }
     }
 
     public function testUniqueConstraintOnRefreshToken(): void
