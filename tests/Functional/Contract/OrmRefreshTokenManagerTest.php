@@ -18,6 +18,7 @@ final class OrmRefreshTokenManagerTest extends ORMTestCase
     use RefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use FamilyAwareRefreshTokenManagerContract;
 
     protected function setUp(): void
     {
@@ -35,6 +36,11 @@ final class OrmRefreshTokenManagerTest extends ORMTestCase
     protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
     {
         return new RefreshTokenManager($this->entityManager, RefreshToken::class, $batchSize);
+    }
+
+    protected function forgetLoadedObjects(): void
+    {
+        $this->entityManager->clear();
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

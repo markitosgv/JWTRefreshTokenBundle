@@ -12,7 +12,10 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Document;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyAwareRefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenFamilyTrait;
 
-class RefreshToken extends AbstractRefreshToken
+class RefreshToken extends AbstractRefreshToken implements FamilyAwareRefreshTokenInterface
 {
+    use RefreshTokenFamilyTrait;
 }

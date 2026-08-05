@@ -16,6 +16,7 @@ final class OdmRefreshTokenManagerTest extends ODMTestCase
     use RefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use FamilyAwareRefreshTokenManagerContract;
 
     protected function setUp(): void
     {
@@ -38,6 +39,11 @@ final class OdmRefreshTokenManagerTest extends ODMTestCase
     protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
     {
         return new RefreshTokenManager($this->documentManager, RefreshToken::class, $batchSize);
+    }
+
+    protected function forgetLoadedObjects(): void
+    {
+        $this->documentManager->clear();
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

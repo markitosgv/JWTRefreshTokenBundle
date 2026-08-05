@@ -13,5 +13,6 @@
         <field name="refreshToken" type="string" column="refresh_token" length="128" unique="true"/>
         <field name="username" type="string" length="255" column="username"/>
         <field name="valid" type="datetime"/>
+        <field name="family" type="string" column="family" length="32" nullable="true"/>
     </mapped-superclass>
 </doctrine-mapping>
