@@ -32,7 +32,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final readonly class HashedRefreshTokenManager implements FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
-    private const PREFIX = 'sha256$';
+    private const string PREFIX = 'sha256$';
 
     /**
      * @psalm-mutation-free

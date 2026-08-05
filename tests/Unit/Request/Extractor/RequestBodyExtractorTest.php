@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class RequestBodyExtractorTest extends TestCase
 {
-    private const PARAMETER_NAME = 'refresh_token';
+    private const string PARAMETER_NAME = 'refresh_token';
 
     private RequestBodyExtractor $requestBodyExtractor;
 

@@ -34,10 +34,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[AllowMockObjectsWithoutExpectations]
 final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
 {
-    public const TTL = 2592000;
-    public const TOKEN_PARAMETER_NAME = 'refresh_token';
-    public const RETURN_EXPIRATION = false;
-    public const RETURN_EXPIRATION_PARAMETER_NAME = 'refresh_token_ttl';
+    public const int TTL = 2592000;
+    public const string TOKEN_PARAMETER_NAME = 'refresh_token';
+    public const bool RETURN_EXPIRATION = false;
+    public const string RETURN_EXPIRATION_PARAMETER_NAME = 'refresh_token_ttl';
 
     private MockObject&RefreshTokenManagerInterface $refreshTokenManager;
 

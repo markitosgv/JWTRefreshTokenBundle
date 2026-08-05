@@ -15,8 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class OpenApiFactoryTest extends TestCase
 {
-    private const CHECK_PATH = '/api/token/refresh';
-    private const LOGIN_PATH = '/api/login';
+    private const string CHECK_PATH = '/api/token/refresh';
+    private const string LOGIN_PATH = '/api/login';
 
     public function testDocumentsTheRefreshEndpointTheFirewallAnswers(): void
     {

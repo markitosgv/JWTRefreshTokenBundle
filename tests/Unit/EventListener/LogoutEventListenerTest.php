@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 final class LogoutEventListenerTest extends TestCase
 {
-    public const TOKEN_PARAMETER_NAME = 'refresh_token';
+    public const string TOKEN_PARAMETER_NAME = 'refresh_token';
 
     private MockObject&RefreshTokenManagerInterface $refreshTokenManager;
 

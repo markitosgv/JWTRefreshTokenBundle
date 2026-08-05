@@ -54,7 +54,7 @@ final class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
 
         // The state comes back from the session, so it is not trusted to have the right shape
         if (!$refreshToken instanceof RefreshTokenInterface || !is_array($parentData)) {
-            throw new UnexpectedValueException(sprintf('The serialized state of "%s" is not usable.', static::class));
+            throw new UnexpectedValueException(sprintf('The serialized state of "%s" is not usable.', self::class));
         }
 
         $this->refreshToken = $refreshToken;

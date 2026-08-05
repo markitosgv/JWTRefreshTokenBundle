@@ -45,7 +45,7 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
         $stored = $this->entityManager->getConnection()->fetchOne('SELECT refresh_token FROM RefreshToken');
 
         $this->assertSame('sha256$'.hash('sha256', 'a-token-of-my-own'), $stored);
-        $this->assertStringNotContainsString('a-token-of-my-own', (string) $stored);
+        $this->assertStringNotContainsString('a-token-of-my-own', $stored);
     }
 
     /**

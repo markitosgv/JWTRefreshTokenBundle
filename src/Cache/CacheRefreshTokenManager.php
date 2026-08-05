@@ -38,7 +38,7 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 final readonly class CacheRefreshTokenManager implements RefreshTokenManagerInterface
 {
-    private const PREFIX = 'gesdinet_jwt_refresh_token_';
+    private const string PREFIX = 'gesdinet_jwt_refresh_token_';
 
     /**
      * @param class-string<RefreshTokenInterface> $class

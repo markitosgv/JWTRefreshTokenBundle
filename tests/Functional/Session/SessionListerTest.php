@@ -76,7 +76,7 @@ final class SessionListerTest extends ORMTestCase
 
         $this->assertSame(
             ['the-long-one', 'the-middling-one', 'the-short-one'],
-            array_map(static fn ($session): ?string => $session->id, $sessions)
+            array_map(static fn (\Gesdinet\JWTRefreshTokenBundle\Session\Session $session): ?string => $session->id, $sessions)
         );
     }
 
@@ -124,7 +124,7 @@ final class SessionListerTest extends ORMTestCase
 
         $sessions = $this->lister()->forUser(UserCreator::create('someone'), 'the-one-in-my-hand');
 
-        $current = array_values(array_filter($sessions, static fn ($session): bool => $session->current));
+        $current = array_values(array_filter($sessions, static fn (\Gesdinet\JWTRefreshTokenBundle\Session\Session $session): bool => $session->current));
 
         $this->assertCount(1, $current);
         $this->assertSame('this-device', $current[0]->id);
@@ -149,7 +149,7 @@ final class SessionListerTest extends ORMTestCase
         $sessions = $this->lister()->forUser(UserCreator::create('someone'));
 
         $this->assertCount(2, $sessions);
-        $this->assertSame([null, null], array_map(static fn ($session): ?string => $session->id, $sessions));
+        $this->assertSame([null, null], array_map(static fn (\Gesdinet\JWTRefreshTokenBundle\Session\Session $session): ?string => $session->id, $sessions));
     }
 
     public function test_ending_a_session_revokes_every_token_of_that_chain(): void

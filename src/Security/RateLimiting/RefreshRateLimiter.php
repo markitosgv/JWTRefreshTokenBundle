@@ -25,8 +25,8 @@ use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
  */
 final readonly class RefreshRateLimiter
 {
-    public const BY_IP = 'ip';
-    public const BY_TOKEN = 'token';
+    public const string BY_IP = 'ip';
+    public const string BY_TOKEN = 'token';
 
     /**
      * @param self::BY_IP|self::BY_TOKEN $key

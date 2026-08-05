@@ -22,10 +22,15 @@ final class RefreshTokenRepositoryTest extends ODMTestCase
         parent::setUp();
 
         foreach ($this->documentManager->getMetadataFactory()->getAllMetadata() as $class) {
-            if ($class->isMappedSuperclass || $class->isEmbeddedDocument || $class->isQueryResultDocument) {
+            if ($class->isMappedSuperclass) {
                 continue;
             }
-
+            if ($class->isEmbeddedDocument) {
+                continue;
+            }
+            if ($class->isQueryResultDocument) {
+                continue;
+            }
             $this->documentManager->getSchemaManager()->createDocumentCollection($class->name);
         }
 

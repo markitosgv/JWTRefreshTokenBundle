@@ -129,8 +129,7 @@ final class EnsureTableExistsListenerTest extends TestCase
             $this->schemaManager,
             true,
             $this->cacheDir,
-            false,
-            null // No logger
+            false // No logger
         );
 
         $event = $this->createRequestEvent();

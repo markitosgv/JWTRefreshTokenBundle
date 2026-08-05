@@ -137,10 +137,10 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 
             $loader->load('cache_services.php');
         } elseif (null !== $mergedConfig['dbal_connection']) {
-            $this->configureDBALManager($container, $mergedConfig, $loader);
+            $this->configureDBALManager($container, $mergedConfig);
             $loader->load('dbal_services.php');
         } else {
-            $this->configureObjectManager($container, $mergedConfig, $loader);
+            $this->configureObjectManager($container, $mergedConfig);
             $loader->load('om_services.php');
         }
     }
@@ -148,7 +148,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     /**
      * @param array{dbal_connection: string, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $config
      */
-    private function configureDBALManager(ContainerBuilder $container, array $config, PhpFileLoader $loader): void
+    private function configureDBALManager(ContainerBuilder $container, array $config): void
     {
         $container->setAlias('gesdinet_jwt_refresh_token.dbal.connection', $config['dbal_connection']);
 
@@ -161,7 +161,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     /**
      * @param array{object_manager: string|null} $mergedConfig
      */
-    private function configureObjectManager(ContainerBuilder $container, array $mergedConfig, PhpFileLoader $loader): void
+    private function configureObjectManager(ContainerBuilder $container, array $mergedConfig): void
     {
         if (null !== $mergedConfig['object_manager']) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $mergedConfig['object_manager']);

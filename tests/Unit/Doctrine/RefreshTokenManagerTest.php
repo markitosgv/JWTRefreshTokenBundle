@@ -203,7 +203,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->repository
             ->expects($this->exactly(2))
             ->method('findInvalidBatch')
-            ->willReturnCallback(function ($arg1, $arg2, $arg3) use (&$remainingTokens) {
+            ->willReturnCallback(function ($arg1, $arg2, $arg3) use (&$remainingTokens): array {
                 $this->assertNull($arg1);
                 $this->assertSame(1000, $arg2);
                 $this->assertSame(0, $arg3);

@@ -245,7 +245,7 @@ class TableSchemaManagerTest extends TestCase
         $defaultConfig = TableSchemaManager::getDefaultColumnConfig();
 
         // Verify all default columns are present
-        foreach ($defaultConfig as $alias => $config) {
+        foreach ($defaultConfig as $config) {
             $this->assertArrayHasKey($config['name'], $columns, "Column {$config['name']} should exist");
         }
     }

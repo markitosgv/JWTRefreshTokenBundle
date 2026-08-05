@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class RequestCookieExtractorTest extends TestCase
 {
-    private const PARAMETER_NAME = 'refresh_token';
+    private const string PARAMETER_NAME = 'refresh_token';
     private RequestCookieExtractor $requestCookieExtractor;
 
     protected function setUp(): void

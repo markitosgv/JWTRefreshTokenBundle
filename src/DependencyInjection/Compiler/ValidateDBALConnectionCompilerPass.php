@@ -48,7 +48,7 @@ final class ValidateDBALConnectionCompilerPass implements CompilerPassInterface
                 $connectionServiceId
             );
 
-            if (!empty($availableConnections)) {
+            if ([] !== $availableConnections) {
                 $errorMessage .= "\n".sprintf(
                     'Available DBAL connections: %s',
                     implode(', ', $availableConnections)

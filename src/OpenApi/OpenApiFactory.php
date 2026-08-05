@@ -41,7 +41,7 @@ final readonly class OpenApiFactory implements OpenApiFactoryInterface
      * The operation id Lexik gives the login endpoint, which is how it is found again here without
      * having to be told the login path a second time.
      */
-    private const LOGIN_OPERATION_ID = 'login_check_post';
+    private const string LOGIN_OPERATION_ID = 'login_check_post';
 
     /**
      * @param string[]             $checkPaths     the refresh paths, one per firewall the authenticator is enabled on
@@ -93,7 +93,6 @@ final readonly class OpenApiFactory implements OpenApiFactoryInterface
             // @codeCoverageIgnoreEnd
 
             $operation = $pathItem->getPost();
-
             if (null === $operation || self::LOGIN_OPERATION_ID !== $operation->getOperationId()) {
                 continue;
             }
