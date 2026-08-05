@@ -52,6 +52,13 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         $container->setParameter('gesdinet_jwt_refresh_token.refresh_token.class', $mergedConfig['refresh_token_class']);
         $container->setParameter('gesdinet_jwt_refresh_token.default_invalid_batch_size', $mergedConfig['default_invalid_batch_size']);
 
+        // Filled in by the authenticator factory, one entry per firewall that configures it. The
+        // bundle is usable without one on any firewall, so it has to exist either way — and the
+        // factory may have run first, in which case what it recorded stays
+        if (!$container->hasParameter('gesdinet_jwt_refresh_token.firewall_options')) {
+            $container->setParameter('gesdinet_jwt_refresh_token.firewall_options', []);
+        }
+
         if ($mergedConfig['block_previous_jwt']) {
             $loader->load('block_previous_jwt.php');
         }

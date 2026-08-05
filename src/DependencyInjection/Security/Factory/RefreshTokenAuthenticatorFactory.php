@@ -58,7 +58,6 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
             throw new InvalidArgumentException(sprintf('The "%s" authenticator can only be configured on an array node, "%s" given.', $this->getKey(), get_debug_type($builder)));
         }
 
-        // no-op TTL and param configuration until bundle is further updated to support per-authenticator configuration
         $builder
             ->children()
                 ->scalarNode('check_path')
@@ -73,26 +72,56 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
                     ->defaultTrue()
                     ->info('When enabled, the refresh token will be invalided on logout.')
                 ->end()
-                /*
+                // Every one of these defaults to null, meaning "whatever the bundle is configured
+                // with". Null is what distinguishes not saying anything from saying the same thing,
+                // which is what lets one firewall differ while the rest follow the default
                 ->integerNode('ttl')
                     ->defaultNull()
-                    ->info('Sets a TTL specific to this authenticator, if not set then the "ttl" bundle config is used.')
+                    ->min(1)
+                    ->info('How long a refresh token issued on this firewall lasts, in seconds. Falls back to the bundle\'s "ttl".')
                 ->end()
                 ->booleanNode('ttl_update')
                     ->defaultNull()
-                    ->info('Sets whether the TTL for refresh tokens should be refreshed for this authenticator, if not set then the "ttl_update" bundle config is used.')
+                    ->info('Whether using a refresh token on this firewall starts its ttl over. Falls back to the bundle\'s "ttl_update".')
                 ->end()
                 ->scalarNode('token_parameter_name')
                     ->defaultNull()
-                    ->info('Sets the parameter name for the refresh token for this authenticator, if not set then the "token_parameter_name" bundle config is used.')
+                    ->cannotBeEmpty()
+                    ->info('The request parameter carrying the refresh token on this firewall. Falls back to the bundle\'s "token_parameter_name".')
                 ->end()
-                */
+                ->booleanNode('single_use')
+                    ->defaultNull()
+                    ->info('Whether a refresh on this firewall replaces the token it used. Falls back to the bundle\'s "single_use".')
+                ->end()
+                ->booleanNode('single_use_ttl_update')
+                    ->defaultNull()
+                    ->info('Whether a token issued in place of a single use one on this firewall starts its ttl over. Falls back to the bundle\'s "single_use_ttl_update".')
+                ->end()
+                ->integerNode('max_session_lifetime')
+                    ->defaultNull()
+                    ->min(1)
+                    ->info('How long a chain of refreshes on this firewall may go on for, in seconds. Falls back to the bundle\'s "max_session_lifetime".')
+                ->end()
+                ->integerNode('max_tokens_per_user')
+                    ->defaultNull()
+                    ->min(1)
+                    ->info('How many refresh tokens a user may hold at once on this firewall. Falls back to the bundle\'s "max_tokens_per_user".')
+                ->end()
+                ->booleanNode('return_expiration')
+                    ->defaultNull()
+                    ->info('Whether the response on this firewall carries the token expiry. Falls back to the bundle\'s "return_expiration".')
+                ->end()
+                ->scalarNode('return_expiration_parameter_name')
+                    ->defaultNull()
+                    ->cannotBeEmpty()
+                    ->info('The response field carrying the expiry on this firewall. Falls back to the bundle\'s "return_expiration_parameter_name".')
+                ->end()
             ->end()
         ;
     }
 
     /**
-     * @param array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool} $config
+     * @param array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool, ttl?: int|null, ttl_update?: bool|null, token_parameter_name?: string|null, single_use?: bool|null, single_use_ttl_update?: bool|null, max_session_lifetime?: int|null, max_tokens_per_user?: int|null, return_expiration?: bool|null, return_expiration_parameter_name?: string|null} $config
      */
     #[\Override]
     public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId): string
@@ -100,13 +129,13 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         $authenticatorId = 'security.authenticator.refresh_jwt.'.$firewallName;
 
         $this->recordCheckPath($container, $config['check_path']);
+        $this->recordFirewallOptions($container, $firewallName, $config);
 
-        // When per-authenticator configuration is supported, this array should be updated to check the $config values before falling back to the bundle parameters
         $options = [
             'check_path' => $config['check_path'],
-            'ttl' => new Parameter('gesdinet_jwt_refresh_token.ttl'),
-            'ttl_update' => new Parameter('gesdinet_jwt_refresh_token.ttl_update'),
-            'token_parameter_name' => new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
+            'ttl' => $config['ttl'] ?? new Parameter('gesdinet_jwt_refresh_token.ttl'),
+            'ttl_update' => $config['ttl_update'] ?? new Parameter('gesdinet_jwt_refresh_token.ttl_update'),
+            'token_parameter_name' => $config['token_parameter_name'] ?? new Parameter('gesdinet_jwt_refresh_token.token_parameter_name'),
         ];
 
         $container->setDefinition($authenticatorId, new ChildDefinition('gesdinet_jwt_refresh_token.security.refresh_token_authenticator'))
@@ -144,6 +173,55 @@ final class RefreshTokenAuthenticatorFactory implements AuthenticatorFactoryInte
         $checkPaths[] = $checkPath;
 
         $container->setParameter('gesdinet_jwt_refresh_token.check_paths', $checkPaths);
+    }
+
+    /**
+     * Options set on one firewall, where the success listener can find them.
+     *
+     * The listener runs on Lexik's authentication success event, which is handed a user and the
+     * response data and knows nothing about the firewall — and on a login it is Lexik's authenticator
+     * that ran, not this one, so nothing can be carried across from here. What the listener does have
+     * is the request, and the firewall map turns a request into a firewall name. This is the other
+     * half of that lookup.
+     *
+     * Only options actually set are recorded. An option left out has to stay distinguishable from
+     * one set to the same value as the default, or a firewall could never follow a default that
+     * changed.
+     *
+     * @param array<string, mixed> $config
+     */
+    private function recordFirewallOptions(ContainerBuilder $container, string $firewallName, array $config): void
+    {
+        $overridable = [
+            'ttl',
+            'ttl_update',
+            'token_parameter_name',
+            'single_use',
+            'single_use_ttl_update',
+            'max_session_lifetime',
+            'max_tokens_per_user',
+            'return_expiration',
+            'return_expiration_parameter_name',
+        ];
+
+        $options = [];
+
+        foreach ($overridable as $option) {
+            if (null !== ($config[$option] ?? null)) {
+                $options[$option] = $config[$option];
+            }
+        }
+
+        /** @var array<string, array<string, mixed>> $firewalls */
+        $firewalls = $container->hasParameter('gesdinet_jwt_refresh_token.firewall_options')
+            ? (array) $container->getParameter('gesdinet_jwt_refresh_token.firewall_options')
+            : [];
+
+        // A firewall may be configured more than once, so what is already there is kept rather than
+        // replaced by a later pass that saw nothing
+        $firewalls[$firewallName] = $options + ($firewalls[$firewallName] ?? []);
+
+        $container->setParameter('gesdinet_jwt_refresh_token.firewall_options', $firewalls);
     }
 
     /**

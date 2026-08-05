@@ -57,6 +57,10 @@ return static function (ContainerConfigurator $container): void {
             // Only defined when reuse_detection is turned on, so this is null otherwise
             service($vendor.'.spent_refresh_token_registry')->nullOnInvalid(),
             param($vendor.'.max_session_lifetime'),
+            // Only set once a firewall configures the authenticator, so it has to survive not being
+            // there at all: the bundle works without one on any firewall
+            param($vendor.'.firewall_options'),
+            service('security.firewall.map')->nullOnInvalid(),
         ])
         ->tag('kernel.event_listener', [
             'event' => Events::AUTHENTICATION_SUCCESS,

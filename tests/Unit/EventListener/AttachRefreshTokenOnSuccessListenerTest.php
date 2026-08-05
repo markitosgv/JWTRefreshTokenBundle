@@ -19,6 +19,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -1113,6 +1115,145 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->refreshTokenManager->expects($this->once())->method('delete')->willReturn(1);
 
         $this->assertNotNull($this->issueOnRefreshReplacing($replaced)->getRefreshToken());
+    }
+
+    /**
+     * The whole point of per-firewall configuration: a customer API and an internal one wanting
+     * different session lengths, which used to be impossible because the listener never knew which
+     * firewall a request arrived on.
+     */
+    public function testUsesTheTtlTheFirewallAsksFor(): void
+    {
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->with($this->anything(), 3600)
+            ->willReturn($this->anIssuedToken());
+
+        $this->loginThrough($this->listenerForFirewall('internal', ['internal' => ['ttl' => 3600]]));
+    }
+
+    public function testFallsBackToTheBundleTtlForAFirewallThatSaysNothing(): void
+    {
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->with($this->anything(), self::TTL)
+            ->willReturn($this->anIssuedToken());
+
+        $this->loginThrough($this->listenerForFirewall('customers', ['internal' => ['ttl' => 3600]]));
+    }
+
+    /**
+     * A request matching no firewall at all, and one where the security bundle is not installed,
+     * behave as the bundle did before firewalls could say anything.
+     */
+    public function testFallsBackToTheBundleTtlWithoutAFirewallAtAll(): void
+    {
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->with($this->anything(), self::TTL)
+            ->willReturn($this->anIssuedToken());
+
+        $this->loginThrough($this->listenerForFirewall(null, ['internal' => ['ttl' => 3600]]));
+    }
+
+    public function testUsesTheTokenParameterNameTheFirewallAsksFor(): void
+    {
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($this->anIssuedToken());
+
+        /** @var AuthenticationSuccessEvent&MockObject $event */
+        $event = $this->createMock(AuthenticationSuccessEvent::class);
+        $event->method('getUser')->willReturn($this->createStub(UserInterface::class));
+        $event->method('getData')->willReturn([]);
+        $event
+            ->expects($this->once())
+            ->method('setData')
+            ->with($this->callback(static fn (array $data): bool => array_key_exists('rt', $data)));
+
+        $this->listenerForFirewall('internal', ['internal' => ['token_parameter_name' => 'rt']])
+            ->attachRefreshToken($event);
+    }
+
+    /**
+     * The one #242 was about: one firewall rotating its tokens while another does not.
+     */
+    public function testHonoursSingleUsePerFirewall(): void
+    {
+        $replaced = new EntityRefreshToken();
+        $replaced->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $replaced->setValid(new DateTime('+600 seconds'));
+
+        $this->refreshTokenManager->method('get')->willReturn($replaced);
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($this->anIssuedToken());
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+
+        // The bundle default is single_use off, so without the firewall saying so nothing is deleted
+        $this->refreshTokenManager->expects($this->once())->method('delete')->willReturn(1);
+
+        $this->listenerForFirewall('internal', ['internal' => ['single_use' => true]])
+            ->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+    }
+
+    public function testHonoursTheSessionLimitPerFirewall(): void
+    {
+        /** @var RefreshTokenManagerInterface&RevokeRefreshTokenManagerInterface&MockObject $manager */
+        $manager = $this->createMockForIntersectionOfInterfaces([RefreshTokenManagerInterface::class, RevokeRefreshTokenManagerInterface::class]);
+        $manager->expects($this->once())->method('revokeAllButNewestForUser')->with($this->anything(), 2)->willReturn(0);
+
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($this->anIssuedToken());
+
+        $this->listenerForFirewall('internal', ['internal' => ['max_tokens_per_user' => 2]], $manager)
+            ->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+    }
+
+    private function anIssuedToken(): EntityRefreshToken
+    {
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        return $issued;
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $firewallOptions
+     */
+    private function listenerForFirewall(?string $firewall, array $firewallOptions, ?RefreshTokenManagerInterface $manager = null): AttachRefreshTokenOnSuccessListener
+    {
+        $map = $this->createStub(FirewallMap::class);
+        $map->method('getFirewallConfig')->willReturn(
+            null === $firewall ? null : new FirewallConfig($firewall, 'user_checker')
+        );
+
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        return new AttachRefreshTokenOnSuccessListener(
+            $manager ?? $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true,
+            null,
+            null,
+            null,
+            null,
+            $firewallOptions,
+            $map
+        );
+    }
+
+    private function loginThrough(AttachRefreshTokenOnSuccessListener $listener): void
+    {
+        $this->extractor->method('getRefreshToken')->willReturn(null);
+
+        $listener->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
     }
 
     /**

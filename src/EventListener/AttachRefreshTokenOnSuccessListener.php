@@ -22,7 +22,9 @@ use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshTokenRegi
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use LogicException;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -58,6 +60,11 @@ final class AttachRefreshTokenOnSuccessListener
         private readonly ?TokenStorageInterface $tokenStorage = null,
         private readonly ?SpentRefreshTokenRegistryInterface $spentTokens = null,
         private readonly ?int $maxSessionLifetime = null,
+        /**
+         * @var array<string, array<string, mixed>> options set on a firewall, keyed by its name
+         */
+        private readonly array $firewallOptions = [],
+        private readonly ?FirewallMap $firewallMap = null,
     ) {
         $this->cookieSettings = array_merge([
             'enabled' => false,
@@ -76,10 +83,12 @@ final class AttachRefreshTokenOnSuccessListener
      *
      * Called after the new token is stored, so the login that has just succeeded is counted among
      * them and is the newest, which is why a limit of one leaves exactly that one.
+     *
+     * @param positive-int|null $maxTokensPerUser
      */
-    private function enforceTheTokenLimit(UserInterface $user): void
+    private function enforceTheTokenLimit(UserInterface $user, ?int $maxTokensPerUser): void
     {
-        if (null === $this->maxTokensPerUser) {
+        if (null === $maxTokensPerUser) {
             return;
         }
 
@@ -89,7 +98,41 @@ final class AttachRefreshTokenOnSuccessListener
             throw new LogicException(sprintf('The "max_tokens_per_user" option needs a refresh token manager implementing "%s", and "%s" does not.', RevokeRefreshTokenManagerInterface::class, get_debug_type($this->refreshTokenManager)));
         }
 
-        $this->refreshTokenManager->revokeAllButNewestForUser($user, $this->maxTokensPerUser);
+        $this->refreshTokenManager->revokeAllButNewestForUser($user, $maxTokensPerUser);
+    }
+
+    /**
+     * What this request is to be treated with, once the firewall it arrived on has had its say.
+     *
+     * The awkward part of per-firewall configuration is that this listener runs on Lexik's
+     * authentication success event, which is handed a user and some response data and knows nothing
+     * about the firewall — and on a login it is Lexik's authenticator that ran, not this bundle's, so
+     * there is nothing to carry the name across from. What there is, is the request, and the firewall
+     * map turns a request into a firewall.
+     *
+     * Without the map, or on a request matching no firewall, every value is the bundle's, which is
+     * how this behaved before firewalls could say anything.
+     *
+     * @return array{ttl: int, token_parameter_name: string, single_use: bool, single_use_ttl_update: bool, max_session_lifetime: positive-int|null, max_tokens_per_user: positive-int|null, return_expiration: bool, return_expiration_parameter_name: string}
+     */
+    private function optionsFor(Request $request): array
+    {
+        $firewall = $this->firewallMap?->getFirewallConfig($request)?->getName();
+        $set = null !== $firewall ? ($this->firewallOptions[$firewall] ?? []) : [];
+
+        /** @var array{ttl: int, token_parameter_name: string, single_use: bool, single_use_ttl_update: bool, max_session_lifetime: positive-int|null, max_tokens_per_user: positive-int|null, return_expiration: bool, return_expiration_parameter_name: string} $options */
+        $options = [
+            'ttl' => $set['ttl'] ?? $this->ttl,
+            'token_parameter_name' => $set['token_parameter_name'] ?? $this->tokenParameterName,
+            'single_use' => $set['single_use'] ?? $this->singleUse,
+            'single_use_ttl_update' => $set['single_use_ttl_update'] ?? $this->singleUseTtlUpdate,
+            'max_session_lifetime' => $set['max_session_lifetime'] ?? $this->maxSessionLifetime,
+            'max_tokens_per_user' => $set['max_tokens_per_user'] ?? $this->maxTokensPerUser,
+            'return_expiration' => $set['return_expiration'] ?? $this->returnExpiration,
+            'return_expiration_parameter_name' => $set['return_expiration_parameter_name'] ?? $this->returnExpirationParameterName,
+        ];
+
+        return $options;
     }
 
     /**
@@ -124,15 +167,15 @@ final class AttachRefreshTokenOnSuccessListener
      * recomputing it is what makes the ceiling absolute: recomputed on every refresh it would move
      * forward each time, which is the unbounded session it exists to prevent.
      */
-    private function newFamilyDeadline(): ?\DateTimeInterface
+    private static function newFamilyDeadline(?int $maxSessionLifetime): ?\DateTimeInterface
     {
-        if (null === $this->maxSessionLifetime) {
+        if (null === $maxSessionLifetime) {
             return null;
         }
 
         // Mutable, like the expiry the model already carries: the mapping that ships is Doctrine's
         // `datetime`, which refuses a DateTimeImmutable outright
-        return (new \DateTime())->setTimestamp(time() + $this->maxSessionLifetime);
+        return (new \DateTime())->setTimestamp(time() + $maxSessionLifetime);
     }
 
     /**
@@ -175,9 +218,13 @@ final class AttachRefreshTokenOnSuccessListener
         $user = $event->getUser();
         $data = $event->getData();
 
+        // Everything below reads from here rather than from the properties, so that a firewall
+        // saying something different is honoured and one saying nothing follows the bundle
+        $options = $this->optionsFor($request);
+
         // Extract refreshToken from the request, treating an empty value as no value at all so the
         // checks below only have to care about null
-        $refreshTokenString = $this->extractor->getRefreshToken($request, $this->tokenParameterName);
+        $refreshTokenString = $this->extractor->getRefreshToken($request, $options['token_parameter_name']);
 
         if ('' === $refreshTokenString || '0' === $refreshTokenString) {
             $refreshTokenString = null;
@@ -192,7 +239,7 @@ final class AttachRefreshTokenOnSuccessListener
         $inheritedFamilyValid = null;
 
         // Remove the current refreshToken if it is single-use
-        if (null !== $refreshTokenString && true === $this->singleUse) {
+        if (null !== $refreshTokenString && true === $options['single_use']) {
             $refreshToken = $this->refreshTokenFor($refreshTokenString);
             $refreshTokenString = null;
 
@@ -216,16 +263,16 @@ final class AttachRefreshTokenOnSuccessListener
         $issuedToken = null;
 
         if (null !== $refreshTokenString) {
-            $data[$this->tokenParameterName] = $refreshTokenString;
+            $data[$options['token_parameter_name']] = $refreshTokenString;
 
             // Only read back when the expiry is going to be used, either in the body or on the
             // cookie
-            if ($this->returnExpiration || $this->cookieSettings['enabled']) {
+            if ($options['return_expiration'] || $this->cookieSettings['enabled']) {
                 $issuedToken = $this->refreshTokenFor($refreshTokenString);
             }
 
-            if ($this->returnExpiration) {
-                $data[$this->returnExpirationParameterName] = $issuedToken?->getValid()?->getTimestamp() ?? 0;
+            if ($options['return_expiration']) {
+                $data[$options['return_expiration_parameter_name']] = $issuedToken?->getValid()?->getTimestamp() ?? 0;
             }
         } else {
             // Starting the ttl over on every rotation means refreshing can be chained for as long
@@ -233,7 +280,7 @@ final class AttachRefreshTokenOnSuccessListener
             // replaces would have
             $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl(
                 $user,
-                $this->singleUseTtlUpdate || null === $remainingTtl ? $this->ttl : $remainingTtl
+                $options['single_use_ttl_update'] || null === $remainingTtl ? $options['ttl'] : $remainingTtl
             );
 
             // A refresh carries on the chain it came from; anything else is the start of one. An
@@ -241,7 +288,7 @@ final class AttachRefreshTokenOnSuccessListener
             if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
                 $refreshToken->setFamily($inheritedFamily ?? bin2hex(random_bytes(16)));
 
-                $familyValid = $inheritedFamilyValid ?? $this->newFamilyDeadline();
+                $familyValid = $inheritedFamilyValid ?? self::newFamilyDeadline($options['max_session_lifetime']);
 
                 if (null !== $familyValid) {
                     $refreshToken->setFamilyValid($familyValid);
@@ -258,12 +305,12 @@ final class AttachRefreshTokenOnSuccessListener
             $refreshTokenString = $refreshToken->getRefreshToken();
 
             $this->refreshTokenManager->save($refreshToken);
-            $this->enforceTheTokenLimit($user);
+            $this->enforceTheTokenLimit($user, $options['max_tokens_per_user']);
             $issuedToken = $refreshToken;
-            $data[$this->tokenParameterName] = $refreshTokenString;
+            $data[$options['token_parameter_name']] = $refreshTokenString;
 
-            if ($this->returnExpiration) {
-                $data[$this->returnExpirationParameterName] = $refreshToken->getValid()?->getTimestamp() ?? 0;
+            if ($options['return_expiration']) {
+                $data[$options['return_expiration_parameter_name']] = $refreshToken->getValid()?->getTimestamp() ?? 0;
             }
         }
 
@@ -271,11 +318,11 @@ final class AttachRefreshTokenOnSuccessListener
         if ($this->cookieSettings['enabled']) {
             $event->getResponse()->headers->setCookie(
                 new Cookie(
-                    $this->tokenParameterName,
+                    $options['token_parameter_name'],
                     $refreshTokenString,
                     // The cookie goes when the token does, which is not a ttl from now once the
                     // replacement inherits the expiry of the one it replaced
-                    $issuedToken?->getValid()?->getTimestamp() ?? time() + $this->ttl,
+                    $issuedToken?->getValid()?->getTimestamp() ?? time() + $options['ttl'],
                     $this->cookieSettings['path'],
                     $this->cookieSettings['domain'],
                     $this->cookieSettings['secure'],
@@ -288,7 +335,7 @@ final class AttachRefreshTokenOnSuccessListener
 
             // Remove the refreshTokenString from the response body
             if ($this->cookieSettings['remove_token_from_body']) {
-                unset($data[$this->tokenParameterName]);
+                unset($data[$options['token_parameter_name']]);
             }
         }
 

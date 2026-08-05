@@ -64,12 +64,26 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         );
     }
 
+    /**
+     * Every overridable option defaults to null rather than to the bundle's value. Null is what
+     * distinguishes a firewall saying nothing from one saying the same thing as the default, and it
+     * is what lets a firewall follow a default that later changes.
+     */
     public function test_firewall_configuration_defaults(): void
     {
         $this->assertSame(
             [
                 'check_path' => '/api/token/refresh',
                 'invalidate_token_on_logout' => true,
+                'ttl' => null,
+                'ttl_update' => null,
+                'token_parameter_name' => null,
+                'single_use' => null,
+                'single_use_ttl_update' => null,
+                'max_session_lifetime' => null,
+                'max_tokens_per_user' => null,
+                'return_expiration' => null,
+                'return_expiration_parameter_name' => null,
             ],
             $this->processConfiguration([])
         );
@@ -83,6 +97,15 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
             'success_handler' => 'app.security.authentication.success_handler',
             'failure_handler' => 'app.security.authentication.failure_handler',
             'invalidate_token_on_logout' => false,
+            'ttl' => 3600,
+            'ttl_update' => true,
+            'token_parameter_name' => 'rt',
+            'single_use' => true,
+            'single_use_ttl_update' => false,
+            'max_session_lifetime' => 604800,
+            'max_tokens_per_user' => 3,
+            'return_expiration' => true,
+            'return_expiration_parameter_name' => 'rt_exp',
         ];
 
         $this->assertSame($config, $this->processConfiguration($config), 'Every supported value is kept, and nothing else is added');
@@ -119,6 +142,88 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->factory->createAuthenticator($this->container, 'other', $this->processConfiguration(['check_path' => '/api/token/refresh']), 'app.user_provider');
 
         $this->assertSame(['/api/token/refresh'], $this->container->getParameter('gesdinet_jwt_refresh_token.check_paths'));
+    }
+
+    /**
+     * The other half of the firewall lookup: the success listener runs on Lexik's event, which knows
+     * nothing about firewalls, so it reads what was recorded here against the name the firewall map
+     * gives it.
+     */
+    public function test_only_the_options_a_firewall_actually_set_are_recorded(): void
+    {
+        $this->factory->createAuthenticator(
+            $this->container,
+            'internal',
+            $this->processConfiguration(['check_path' => '/internal/token/refresh', 'ttl' => 3600, 'single_use' => true]),
+            'app.user_provider'
+        );
+        $this->factory->createAuthenticator(
+            $this->container,
+            'customers',
+            $this->processConfiguration(['check_path' => '/api/token/refresh']),
+            'app.user_provider'
+        );
+
+        $this->assertSame(
+            [
+                'internal' => ['ttl' => 3600, 'single_use' => true],
+                // Nothing was said, so nothing is recorded and every value stays the bundle's. An
+                // option recorded as its current default would freeze this firewall on that value
+                'customers' => [],
+            ],
+            $this->container->getParameter('gesdinet_jwt_refresh_token.firewall_options')
+        );
+    }
+
+    /**
+     * A firewall may be configured more than once, and a later pass that saw nothing must not undo
+     * what an earlier one recorded.
+     */
+    public function test_a_firewall_configured_twice_keeps_what_was_already_recorded(): void
+    {
+        $this->factory->createAuthenticator(
+            $this->container,
+            'api',
+            $this->processConfiguration(['check_path' => '/api/token/refresh', 'ttl' => 3600]),
+            'app.user_provider'
+        );
+        $this->factory->createAuthenticator(
+            $this->container,
+            'api',
+            $this->processConfiguration(['check_path' => '/api/token/refresh', 'single_use' => true]),
+            'app.user_provider'
+        );
+
+        $this->assertSame(
+            ['api' => ['single_use' => true, 'ttl' => 3600]],
+            $this->container->getParameter('gesdinet_jwt_refresh_token.firewall_options')
+        );
+    }
+
+    /**
+     * The authenticator reads its own three from the options array rather than from the recorded
+     * map, so a firewall saying something has to reach it there too.
+     */
+    public function test_the_authenticator_is_given_what_its_firewall_asked_for(): void
+    {
+        $authenticatorId = $this->factory->createAuthenticator(
+            $this->container,
+            'internal',
+            $this->processConfiguration([
+                'check_path' => '/internal/token/refresh',
+                'ttl' => 3600,
+                'ttl_update' => true,
+                'token_parameter_name' => 'rt',
+            ]),
+            'app.user_provider'
+        );
+
+        $options = $this->container->getDefinition($authenticatorId)->getArgument(6);
+
+        $this->assertIsArray($options);
+        $this->assertSame(3600, $options['ttl']);
+        $this->assertTrue($options['ttl_update']);
+        $this->assertSame('rt', $options['token_parameter_name']);
     }
 
     public function test_authenticator_service_takes_its_options_from_the_bundle_parameters(): void

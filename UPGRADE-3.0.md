@@ -176,6 +176,52 @@ when the first token would have expired, so the ceiling and the ttl are forced t
 number. `max_session_lifetime` separates them, which is usually what people wanted: a short-lived
 token that rotates often, inside a session that ends on a schedule of its own.
 
+## New: configuring the refresh behaviour per firewall
+
+```yaml
+gesdinet_jwt_refresh_token:
+    ttl: 2592000          # what every firewall gets unless it says otherwise
+
+security:
+    firewalls:
+        customers:
+            refresh_jwt:
+                check_path: /api/token/refresh
+        internal:
+            refresh_jwt:
+                check_path: /internal/token/refresh
+                ttl: 3600         # short sessions for staff
+                single_use: true
+                max_tokens_per_user: 1
+```
+
+The longest-standing thing this bundle could not do (#242). An application with a customer API and an
+internal one usually wants different session lengths, and until now `ttl`, `single_use` and the rest
+were one global setting.
+
+Overridable on the authenticator: `ttl`, `ttl_update`, `token_parameter_name`, `single_use`,
+`single_use_ttl_update`, `max_session_lifetime`, `max_tokens_per_user`, `return_expiration` and
+`return_expiration_parameter_name`.
+
+**Every one defaults to null, meaning "whatever the bundle says".** That is not the same as
+defaulting to the bundle's current value: null is what lets a firewall keep following a default you
+later change, and it is what tells "said nothing" apart from "said the same thing".
+
+**How it works**, since the obstacle was real. The listener that attaches the token runs on Lexik's
+authentication success event, which is handed a user and the response data and knows nothing about
+the firewall — and on a login it is Lexik's authenticator that ran, not this bundle's, so there is
+nothing to carry a name across from. What the listener does have is the request, and Symfony's
+firewall map turns a request into a firewall. That is the lookup, and it works for logins and
+refreshes alike.
+
+**`cookie` is still global**, and is the one thing on that list which is not overridable. It is an
+array of eight settings whose "not set" state cannot be told from "set to the default" the way a
+scalar's can, so per-firewall cookies want a design of their own rather than a null check. If you
+need different cookie settings per firewall, set them on the response in a listener for now.
+
+Nothing changes for an application that configures no firewall overrides: with none recorded, every
+value is the bundle's, which is how this behaved before.
+
 ## New: withdrawing a user's JWTs when their sessions are revoked
 
 Off by default.
