@@ -2,6 +2,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Doctrine;
 
+use DateTime;
 use DateTimeInterface;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
@@ -17,6 +18,7 @@ use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
 use LogicException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Constraint\IsEqualWithDelta;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -396,6 +398,48 @@ class RefreshTokenManagerTest extends TestCase
         $this->expectExceptionMessage(sprintf('Repository mapped for "%s" should implement %s.', RefreshToken::class, DeleteRefreshTokenRepositoryInterface::class));
 
         $manager->revokeAllForUser(UserCreator::create());
+    }
+
+    public function testRevokesAllExpiredTokens(): void
+    {
+        $this->repository
+            ->expects($this->once())
+            ->method('deleteAllExpired')
+            ->with(new IsEqualWithDelta(new DateTime(), 0.01))
+            ->willReturn(3);
+
+        $this->assertSame(3, $this->refreshTokenManager->revokeAllExpired(), 'The number of revoked tokens should reach the caller');
+    }
+
+    public function testRevokesAllExpiredTokensBeforeDateTime(): void
+    {
+        $datetime = new DateTime('yesterday');
+
+        $this->repository
+            ->expects($this->once())
+            ->method('deleteAllExpired')
+            ->with($datetime)
+            ->willReturn(2);
+
+        $this->assertSame(2, $this->refreshTokenManager->revokeAllExpired($datetime), 'The number of revoked tokens should reach the caller');
+    }
+
+    public function testRefusesToRevokeExpiredWhenRepositoryCannotDelete(): void
+    {
+        $metadata = $this->createStub(ClassMetadata::class);
+        $metadata->method('getName')->willReturn(self::REFRESH_TOKEN_ENTITY_CLASS);
+
+        // A repository predating DeleteRefreshTokenRepositoryInterface still satisfies the rest
+        $objectManager = $this->createStub(ObjectManager::class);
+        $objectManager->method('getRepository')->willReturn($this->createStub(RefreshTokenRepositoryInterface::class));
+        $objectManager->method('getClassMetadata')->willReturn($metadata);
+
+        $manager = new RefreshTokenManager($objectManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(sprintf('Repository mapped for "%s" should implement method "deleteAllExpired".', RefreshToken::class));
+
+        $manager->revokeAllExpired();
     }
 
     public function testProvidesTheModelClass(): void

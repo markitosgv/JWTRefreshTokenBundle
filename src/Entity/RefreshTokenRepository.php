@@ -106,6 +106,19 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
         return $deleted;
     }
 
+    public function deleteAllExpired(DateTimeInterface $dateTime = new DateTime()): int
+    {
+        /** @var int */
+        $deleted = $this->createQueryBuilder('rt')
+            ->delete()
+            ->where('rt.valid < :datetime')
+            ->setParameter('datetime', $dateTime)
+            ->getQuery()
+            ->execute();
+
+        return $deleted;
+    }
+
     #[\Override]
     public function deleteToken(RefreshTokenInterface $refreshToken): int
     {

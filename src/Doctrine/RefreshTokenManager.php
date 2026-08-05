@@ -11,6 +11,7 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
+use DateTime;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -195,6 +196,15 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
         }
 
         return $this->repository->deleteByUser($user);
+    }
+
+    public function revokeAllExpired(DateTimeInterface $datetime = new DateTime()): int
+    {
+        if (!method_exists($this->repository, 'deleteAllExpired')) {
+            throw new LogicException(sprintf('Repository mapped for "%s" should implement method "deleteAllExpired".', $this->class));
+        }
+
+        return $this->repository->deleteAllExpired($datetime);
     }
 
     #[\Override]

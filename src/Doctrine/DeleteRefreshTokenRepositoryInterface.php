@@ -7,6 +7,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @psalm-mutable
+ *
+ * @method int deleteAllExpired(\DateTimeInterface $datetime = new \DateTime())
  */
 interface DeleteRefreshTokenRepositoryInterface
 {

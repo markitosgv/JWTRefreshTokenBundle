@@ -101,6 +101,28 @@ trait RevokeRefreshTokenManagerContract
         $this->assertNull($manager->get('expired'));
     }
 
+    public function test_revokes_every_expired_token(): void
+    {
+        $manager = $this->revokingManager();
+
+        $this->storeFor($manager, 'someone', 'expired', -600);
+        $this->storeFor($manager, 'someone', 'still-valid', 600);
+
+        $this->assertSame(1, $manager->revokeAllExpired());
+        $this->assertNotNull($manager->get('still-valid'));
+        $this->assertNull($manager->get('expired'));
+    }
+
+    public function test_revoking_expired_tokens_when_none_are_expired_reports_none(): void
+    {
+        $manager = $this->revokingManager();
+
+        $this->storeFor($manager, 'someone', 'still-valid', 600);
+
+        $this->assertSame(0, $manager->revokeAllExpired());
+        $this->assertNotNull($manager->get('still-valid'));
+    }
+
     private function storeFor(RefreshTokenManagerInterface $manager, string $username, string $token, int $ttl): RefreshTokenInterface
     {
         $class = $manager->getClass();

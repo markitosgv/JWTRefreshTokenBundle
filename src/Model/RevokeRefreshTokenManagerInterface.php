@@ -11,6 +11,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * working without this method.
  *
  * @psalm-mutable
+ *
+ * @method int revokeAllExpired(\DateTimeInterface $datetime = new \DateTime())
  */
 interface RevokeRefreshTokenManagerInterface
 {
