@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\DependencyInjection;
 
 use Doctrine\DBAL\Connection;
+use Gesdinet\JWTRefreshTokenBundle\Cache\CacheRefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ValidateDBALConnectionCompilerPass;
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenExtension;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
@@ -167,6 +168,32 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertNotNull($decoration);
         $this->assertSame('gesdinet_jwt_refresh_token.refresh_token_manager', $decoration[0]);
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.hash_tokens.accept_stored_in_the_clear', true);
+    }
+
+    public function test_a_cache_pool_replaces_the_doctrine_backend_entirely(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'cache_pool' => 'cache.app',
+        ]);
+
+        $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.refresh_token_manager', CacheRefreshTokenManager::class);
+        $this->assertContainerBuilderHasAlias(RefreshTokenManagerInterface::class, 'gesdinet_jwt_refresh_token.refresh_token_manager');
+    }
+
+    /**
+     * A pool cannot answer what those interfaces ask, so nothing is aliased to them: a service
+     * wanting one fails to wire rather than receiving a manager that would throw when called.
+     */
+    public function test_a_cache_pool_offers_no_listing_or_revoking(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'cache_pool' => 'cache.app',
+        ]);
+
+        $this->assertFalse($this->container->hasAlias(ListRefreshTokenManagerInterface::class));
+        $this->assertFalse($this->container->hasAlias(RevokeRefreshTokenManagerInterface::class));
     }
 
     public function test_the_endpoint_is_not_rate_limited_unless_it_is_asked_for(): void

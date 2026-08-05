@@ -155,6 +155,64 @@ final class ConfigurationTest extends TestCase
     {
         yield 'an object manager' => ['object_manager', 'doctrine.orm.entity_manager'];
         yield 'a DBAL connection' => ['dbal_connection', 'doctrine.dbal.default_connection'];
+        yield 'a cache pool' => ['cache_pool', 'cache.app'];
+    }
+
+    #[DataProvider('doctrineBackendProvider')]
+    public function test_configuration_is_invalid_when_a_cache_pool_is_given_a_database_too(string $node, string $service): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                [
+                    'refresh_token_class' => RefreshToken::class,
+                    'cache_pool' => 'cache.app',
+                    $node => $service,
+                ],
+            ],
+            'nothing left to configure'
+        );
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function doctrineBackendProvider(): iterable
+    {
+        yield 'an object manager' => ['object_manager', 'doctrine.orm.entity_manager'];
+        yield 'a DBAL connection' => ['dbal_connection', 'doctrine.dbal.default_connection'];
+    }
+
+    /**
+     * Both need to find a user's other tokens, and a pool cannot be enumerated. Accepting the
+     * configuration would leave somebody believing their sessions were bounded when they were not.
+     *
+     * @return iterable<string, array{array<string, mixed>}>
+     */
+    public static function optionsNeedingToFindAUsersTokens(): iterable
+    {
+        yield 'a limit on sessions' => [['max_tokens_per_user' => 5]];
+        yield 'reuse detection' => [['single_use' => true, 'reuse_detection' => ['enabled' => true]]];
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    #[DataProvider('optionsNeedingToFindAUsersTokens')]
+    public function test_configuration_is_invalid_when_a_cache_pool_is_asked_for_what_it_cannot_do(array $options): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [
+                ['refresh_token_class' => RefreshToken::class, 'cache_pool' => 'cache.app'] + $options,
+            ],
+            'cannot be enumerated'
+        );
+    }
+
+    public function test_a_cache_pool_is_valid_on_its_own(): void
+    {
+        $this->assertConfigurationIsValid([
+            ['refresh_token_class' => RefreshToken::class, 'cache_pool' => 'cache.app'],
+        ]);
     }
 
     #[DataProvider('backendProvider')]

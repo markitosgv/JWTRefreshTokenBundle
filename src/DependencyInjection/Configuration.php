@@ -173,6 +173,10 @@ final class Configuration implements ConfigurationInterface
                     ->defaultNull()
                     ->info('Set the DBAL connection to use for direct database access. Mutually exclusive with object_manager.')
                 ->end()
+                ->scalarNode('cache_pool')
+                    ->defaultNull()
+                    ->info('Store the tokens in a PSR-6 pool instead of a database, as a service id. Expiry is then the pool\'s job, so nothing has to be scheduled to clear them. It cannot list or revoke a user\'s sessions, which rules out max_tokens_per_user, reuse detection and gesdinet:jwt:revoke. Mutually exclusive with object_manager and dbal_connection.')
+                ->end()
                 ->scalarNode('dbal_table_name')
                     ->defaultValue('refresh_tokens')
                     ->info('The table name for refresh tokens when using DBAL')
@@ -261,9 +265,22 @@ final class Configuration implements ConfigurationInterface
                 ->thenInvalid('The "object_manager" and "dbal_connection" options are mutually exclusive. Use one or the other.')
             ->end()
             ->validate()
-                ->ifTrue(static fn (array $v): bool => null !== ($v['refresh_token_manager'] ?? null)
+                ->ifTrue(static fn (array $v): bool => null !== ($v['cache_pool'] ?? null)
                     && (null !== ($v['object_manager'] ?? null) || null !== ($v['dbal_connection'] ?? null)))
-                ->thenInvalid('The "refresh_token_manager" option replaces the manager the bundle would build, so "object_manager" and "dbal_connection" have nothing left to configure. Drop them, or drop "refresh_token_manager".')
+                ->thenInvalid('The "cache_pool" option stores the tokens instead of a database, so "object_manager" and "dbal_connection" have nothing left to configure. Drop them, or drop "cache_pool".')
+            ->end()
+            ->validate()
+                ->ifTrue(static fn (array $v): bool => null !== ($v['refresh_token_manager'] ?? null)
+                    && (null !== ($v['object_manager'] ?? null) || null !== ($v['dbal_connection'] ?? null) || null !== ($v['cache_pool'] ?? null)))
+                ->thenInvalid('The "refresh_token_manager" option replaces the manager the bundle would build, so "object_manager", "dbal_connection" and "cache_pool" have nothing left to configure. Drop them, or drop "refresh_token_manager".')
+            ->end()
+            ->validate()
+                // Quietly not applying a limit somebody configured leaves them believing their
+                // sessions are bounded when they are not, and a pool cannot be asked for a user's
+                ->ifTrue(static fn (array $v): bool => null !== ($v['cache_pool'] ?? null)
+                    && (null !== ($v['max_tokens_per_user'] ?? null)
+                        || (is_array($v['reuse_detection'] ?? null) && true === ($v['reuse_detection']['enabled'] ?? false))))
+                ->thenInvalid('"max_tokens_per_user" and "reuse_detection" both need to find a user\'s other tokens, and a PSR-6 pool cannot be enumerated. Store the tokens in a database, or drop those options.')
             ->end();
 
         return $treeBuilder;

@@ -176,6 +176,37 @@ when the first token would have expired, so the ceiling and the ttl are forced t
 number. `max_session_lifetime` separates them, which is usually what people wanted: a short-lived
 token that rotates often, inside a session that ends on a schedule of its own.
 
+## New: storing the tokens in a cache
+
+```yaml
+gesdinet_jwt_refresh_token:
+    cache_pool: cache.app   # instead of object_manager or dbal_connection
+```
+
+A refresh token has a natural expiry, which is the one thing a cache does without being asked. With
+this there is no `gesdinet:jwt:clear` to schedule and no table to watch grow: an expired token is
+gone because the pool dropped it.
+
+**What it deliberately cannot do**, because a pool answers for keys you already hold and cannot be
+enumerated:
+
+* `getLastFromUsername()` throws rather than returning null, which would read as "this user has no
+  tokens" — a different thing from "this cannot be known", and the answer a caller would act on.
+* `revokeAllInvalid()` and `revokeAllInvalidBatch()` return nothing. Not a stub: there is genuinely
+  nothing left to revoke.
+* `ListRefreshTokenManagerInterface` and `RevokeRefreshTokenManagerInterface` are not implemented and
+  **their aliases are removed**, so a service asking for one fails to wire rather than being handed a
+  manager that throws when called. `gesdinet:jwt:revoke` and session listing are unavailable.
+* `max_tokens_per_user` and `reuse_detection` are configuration errors alongside it. Both need to
+  find a user's other tokens, and quietly ignoring them would leave you believing your sessions were
+  bounded when they were not.
+
+The pool has to be shared between your processes and it has to be persistent. Losing the pool is
+losing every session, so an in-memory or per-machine one signs everybody out on deploy.
+
+One behavioural difference worth knowing: an expired token is absent rather than present-and-invalid,
+so a refresh with one fails as "token not found" rather than "token invalid".
+
 ## New: rate limiting the refresh endpoint
 
 Off by default, and needs `composer require symfony/rate-limiter`.

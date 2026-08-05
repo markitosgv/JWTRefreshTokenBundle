@@ -29,7 +29,7 @@ use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     /**
-     * @param array{ttl: int, ttl_update: bool, rate_limiter: array{enabled: bool, limiter: string, key: string}, reuse_detection: array{enabled: bool, cache: string, ttl: int}, max_session_lifetime: int|null, max_tokens_per_user: int|null, single_use: bool, single_use_ttl_update: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, refresh_token_manager: string|null, api_platform: array{enabled: bool}, block_previous_jwt: bool, hash_tokens: array{enabled: bool, accept_stored_in_the_clear: bool}, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
+     * @param array{ttl: int, ttl_update: bool, rate_limiter: array{enabled: bool, limiter: string, key: string}, reuse_detection: array{enabled: bool, cache: string, ttl: int}, max_session_lifetime: int|null, max_tokens_per_user: int|null, single_use: bool, single_use_ttl_update: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, refresh_token_manager: string|null, cache_pool: string|null, api_platform: array{enabled: bool}, block_previous_jwt: bool, hash_tokens: array{enabled: bool, accept_stored_in_the_clear: bool}, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
      */
     #[\Override]
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
@@ -117,6 +117,10 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             // Nothing Doctrine is loaded, so the bundle runs on storage it knows nothing about
             $container->setAlias('gesdinet_jwt_refresh_token.refresh_token_manager', $mergedConfig['refresh_token_manager'])
                 ->setPublic(true);
+        } elseif (null !== $mergedConfig['cache_pool']) {
+            $container->setParameter('gesdinet_jwt_refresh_token.cache_pool', $mergedConfig['cache_pool']);
+
+            $loader->load('cache_services.php');
         } elseif (null !== $mergedConfig['dbal_connection']) {
             $this->configureDBALManager($container, $mergedConfig, $loader);
             $loader->load('dbal_services.php');
