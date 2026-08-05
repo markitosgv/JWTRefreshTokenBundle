@@ -1,12 +1,25 @@
 # Changelog
 
-## Unreleased
+## 3.0.0
 
-See [UPGRADE-3.0.md](UPGRADE-3.0.md) for what to check before upgrading.
+See [UPGRADE-3.0.md](UPGRADE-3.0.md) for what to check before upgrading, and
+[UPGRADE-RECTOR.md](UPGRADE-RECTOR.md) if you are coming from further back than 2.2.
+
+**This release needs a schema change before the application will run.** Refresh tokens gained
+`family` and `family_valid` columns, and Doctrine reads every mapped field.
 
 ### Added
 
+* Refresh tokens belong to a family: a token issued in place of another carries the family of the one it replaced, so a login and every refresh descending from it share one value. That is what makes a session addressable — without it, "end this session" can only mean "delete this one token", which the next refresh has already replaced. Kept in `Model\FamilyAwareRefreshTokenInterface` and `Model\RefreshTokenFamilyTrait`, separate from `RefreshTokenInterface` so a token class of your own is untouched. `Model\FamilyRefreshTokenManagerInterface::revokeFamily()` revokes a whole chain
+* `reuse_detection`, which recognises a single use refresh token being presented after it was spent and revokes the chain it belonged to. Rotation alone leaves a stolen token working until the legitimate client happens to refresh, and nobody learns why it broke; a spent token is deleted, so a replay is indistinguishable from any other unknown token unless spent ones are remembered. Off by default, refused without `single_use`, and it dispatches `RefreshTokenReuseDetectedEvent` because the bundle cannot tell theft from a client racing itself
+* `max_session_lifetime`, a ceiling on how long a chain of refreshes may go on for, whatever `ttl` says. A ttl that starts over on every rotation means a session never ends. The deadline is set when a chain starts and carried along it unchanged
+* `block_jwts_on_revocation`, which refuses the JWTs already issued to a user when `revokeAllForUser()` takes their refresh tokens away. Lexik's blocklist cannot do this — it is keyed by `jti`, so it withdraws a token you are holding, and these are in clients — so what is recorded is when the revocation happened, per user, and any JWT issued at or before it is refused on decode
+* `rate_limiter`, bounding how often the refresh endpoint will answer. Consumed before the token is looked at, so a refusal costs no query and its timing says nothing about whether the token exists. Refused requests answer `429` with `Retry-After`. Keyed by IP or by token, which is a trade-off rather than a detail. Needs `symfony/rate-limiter`
+* `Session\SessionLister`, for showing a user where they are signed in and letting them end one. Grouping by chain is what turns `findAllForUser()` from a list of moments into a list of sessions. `end()` checks the chain belongs to the caller, since a session list is exactly where such an identifier gets handed out
+* `cache_pool`, storing the tokens in a PSR-6 pool instead of a database. Expiry is then the pool's job, so nothing has to be scheduled to clear them. It implements only what a pool can honour, and `max_tokens_per_user` and `reuse_detection` are configuration errors alongside it rather than options that quietly do nothing
+* The refresh behaviour can be configured per firewall: `ttl`, `ttl_update`, `token_parameter_name`, `single_use`, `single_use_ttl_update`, `max_session_lifetime`, `max_tokens_per_user`, `return_expiration` and `return_expiration_parameter_name` on the `refresh_jwt` authenticator. Every one defaults to null, meaning "whatever the bundle says", which is not the same as defaulting to its current value. Cookie settings stay global
 * `block_previous_jwt`, which blocks the JWT a refresh replaces through LexikJWTAuthenticationBundle 3's blocklist, so refreshing no longer leaves the previous JWT usable for the rest of its lifetime. A request carrying no JWT, and a JWT that no longer parses, are left alone: an expired one is refused everywhere already. Off by default, and reported at compile time when Lexik's `blocklist_token` is not on
+* Rector rule sets for every hop from 1.5 to 3.0, under `rector/sets`, with the upgrade path in [UPGRADE-RECTOR.md](UPGRADE-RECTOR.md). Only the 1.5 to 2.0 set rewrites anything; the other three are empty and say why
 
 ### Changed
 
@@ -16,6 +29,14 @@ See [UPGRADE-3.0.md](UPGRADE-3.0.md) for what to check before upgrading.
 * **BC break**: doctrine/dbal 3 is dropped, along with the shims for `quoteIdentifier()` and `setPrimaryKey()`
 * `dbal_columns`, when configured, has to name the `id` column. A map without one produced a table whose expired tokens could never be revoked: batches are deleted by identifier, so with none to delete by, `gesdinet:jwt:clear` read the same batch forever
 * **BC break**: the exceptions, the bundle class, the failure response and the post-refresh security token are `final`. The token models, `AbstractRefreshToken` and the two repositories are deliberately left extendable, being the documented way to bring your own
+* Every file declares `strict_types`, so the calls this bundle makes pass their arguments without coercion
+* The codebase uses the PHP 8.4 syntax its minimum already requires, and `rector.php` and `.php-cs-fixer.php` now keep it that way. `rector/rector` had been a development dependency for a long time with nothing configured to run it
+
+### Fixed
+
+* DBAL index names include the table name. `UNIQ_REFRESH_TOKEN`, `IDX_USERNAME` and `IDX_VALID` were fixed whatever the table was called, and index names are scoped to the schema on PostgreSQL and to the whole database on SQLite — so a second table managed by the bundle could not be created, and the error named an index rather than anything identifying this bundle. Existing tables are untouched, since the schema is only built when absent
+* `Session\SessionLister` keys chains by `array-key` rather than `string`. A family is 32 hex characters, and PHP turns one that happens to be all digits into an integer key
+* The nineteen open code scanning alerts. Seven were real, including a missing mutation annotation on `RefreshTokenFamilyTrait` that stopped psalm's taint analysis reasoning about where a family came from, and four array shapes that were sealed promises about keys the method never looks at. The rest are by design or belong to Symfony, Doctrine and API Platform, and are suppressed in `psalm.xml.dist` scoped to the files they concern, each with the reason
 
 ## 2.2.1
 
