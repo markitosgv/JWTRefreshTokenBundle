@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\EventListener;
 
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyAwareRefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -150,6 +151,9 @@ final class AttachRefreshTokenOnSuccessListener
         // How long the token being replaced had left, read before it goes
         $remainingTtl = null;
 
+        // The chain the token being replaced belonged to, likewise read before it goes
+        $inheritedFamily = null;
+
         // Remove the current refreshToken if it is single-use
         if (null !== $refreshTokenString && true === $this->singleUse) {
             $refreshToken = $this->refreshTokenFor($refreshTokenString);
@@ -157,6 +161,10 @@ final class AttachRefreshTokenOnSuccessListener
 
             if ($refreshToken instanceof RefreshTokenInterface) {
                 $remainingTtl = $this->remainingTtl($refreshToken);
+
+                if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
+                    $inheritedFamily = $refreshToken->getFamily();
+                }
 
                 $this->refreshTokenManager->delete($refreshToken);
             }
@@ -185,6 +193,12 @@ final class AttachRefreshTokenOnSuccessListener
                 $user,
                 $this->singleUseTtlUpdate || null === $remainingTtl ? $this->ttl : $remainingTtl
             );
+
+            // A refresh carries on the chain it came from; anything else is the start of one. An
+            // unknown token being refreshed also starts one, since there is nothing to carry on.
+            if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
+                $refreshToken->setFamily($inheritedFamily ?? bin2hex(random_bytes(16)));
+            }
 
             // Read before storing: a manager that hashes the token keeps the hash on the model,
             // since what is stored is all it may ever hand back. This is the only moment the value

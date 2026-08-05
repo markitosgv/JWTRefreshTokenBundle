@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\EventListener;
 
 use DateTime;
+use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as EntityRefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
@@ -818,6 +819,138 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ->with($this->callback('is_array'));
 
         $this->attachRefreshTokenOnSuccessListener->attachRefreshToken($event);
+    }
+
+    public function testGivesAFreshlyIssuedTokenAFamilyOfItsOwn(): void
+    {
+        $issued = $this->issueOnLogin();
+
+        $this->assertNotNull($issued->getFamily(), 'A login starts a chain, so its token belongs to one');
+    }
+
+    public function testStartsADifferentChainForEveryLogin(): void
+    {
+        $first = $this->issueOnLogin();
+        $second = $this->issueOnLogin();
+
+        $this->assertNotSame(
+            $first->getFamily(),
+            $second->getFamily(),
+            'Two logins are two sessions; ending one must not be able to end the other'
+        );
+    }
+
+    /**
+     * The point of the family: the token handed out on a refresh belongs to the same chain as the
+     * one it replaced, so a session survives being refreshed while staying one session.
+     */
+    public function testCarriesTheFamilyOverToTheReplacementToken(): void
+    {
+        $replaced = new EntityRefreshToken();
+        $replaced->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $replaced->setValid(new DateTime('+600 seconds'));
+        $replaced->setFamily('the-chain-this-session-started-as');
+
+        $issued = $this->issueOnRefreshReplacing($replaced);
+
+        $this->assertSame('the-chain-this-session-started-as', $issued->getFamily());
+    }
+
+    /**
+     * A token class of an application's own need not have families. The replacement then starts a
+     * chain rather than the listener reaching for a method that is not there.
+     */
+    public function testStartsAChainWhenTheTokenBeingReplacedHasNoFamilies(): void
+    {
+        /** @var RefreshTokenInterface&Stub $replaced */
+        $replaced = $this->createStub(RefreshTokenInterface::class);
+        $replaced->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+        $replaced->method('getValid')->willReturn(new DateTime('+600 seconds'));
+
+        $this->assertNotNull($this->issueOnRefreshReplacing($replaced)->getFamily());
+    }
+
+    /**
+     * Refreshing a token the storage has never heard of leaves nothing to carry on from, so the
+     * replacement starts its own chain rather than being left without one.
+     */
+    public function testStartsAChainWhenTheTokenBeingRefreshedIsUnknown(): void
+    {
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenManager->method('get')->willReturn(null);
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn('atokennobodyissued');
+
+        $this->singleUseListener()->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+
+        $this->assertNotNull($issued->getFamily());
+    }
+
+    /**
+     * Runs one login through the listener and hands back the token it issued.
+     */
+    private function issueOnLogin(): EntityRefreshToken
+    {
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        $generator = $this->createStub(RefreshTokenGeneratorInterface::class);
+        $generator->method('createForUserWithTtl')->willReturn($issued);
+
+        $requestStack = $this->createStub(RequestStack::class);
+        $requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        $extractor = $this->createStub(ExtractorInterface::class);
+        $extractor->method('getRefreshToken')->willReturn(null);
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $generator,
+            $extractor,
+            []
+        ))->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+
+        return $issued;
+    }
+
+    /**
+     * Runs one single-use refresh of the given token through the listener and hands back the token
+     * issued in its place.
+     */
+    private function issueOnRefreshReplacing(RefreshTokenInterface $replaced): EntityRefreshToken
+    {
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenManager->method('get')->willReturn($replaced);
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+
+        $this->singleUseListener()->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+
+        return $issued;
+    }
+
+    private function singleUseListener(): AttachRefreshTokenOnSuccessListener
+    {
+        return new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            []
+        );
     }
 
     private function setSingleUseOnEventListener(bool $singleUse): void
