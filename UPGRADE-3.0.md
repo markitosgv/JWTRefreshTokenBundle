@@ -24,6 +24,9 @@ exists is `block_previous_jwt`, which needs Lexik 3.
 Upgrading Lexik from 2.x to 3.x is its own step, with its own upgrade notes. Do that first, on 2.2,
 and confirm your application still works before coming here.
 
+Coming from further back than 2.2, [UPGRADE-RECTOR.md](UPGRADE-RECTOR.md) walks the whole path one
+release at a time.
+
 ## `check_path` is now required
 
 ```yaml

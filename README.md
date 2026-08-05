@@ -25,6 +25,10 @@ For support with older Symfony versions, please use the 1.x release.
 When upgrading, see [UPGRADE-3.0.md](UPGRADE-3.0.md), [UPGRADE-2.2.md](UPGRADE-2.2.md), [UPGRADE-2.1.md](UPGRADE-2.1.md) and [UPGRADE-2.0.md](UPGRADE-2.0.md) for what
 changed, and the [changelog](CHANGELOG.md) for the full list.
 
+Coming from an older version, [UPGRADE-RECTOR.md](UPGRADE-RECTOR.md) walks the whole path from 1.5
+one release at a time, with rule sets for the renames Rector can do and a checklist for the parts it
+cannot.
+
 ## Installation
 
 ### Step 1: Download the Bundle
