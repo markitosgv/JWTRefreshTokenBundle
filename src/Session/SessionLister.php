@@ -47,7 +47,10 @@ final readonly class SessionLister
      */
     public function forUser(UserInterface $user, ?string $currentRefreshToken = null): array
     {
-        /** @var array<string, non-empty-list<RefreshTokenInterface>> $chains */
+        // Keyed by array-key rather than string: a family is 32 hex characters and PHP turns one
+        // that happens to be all digits into an integer key. Rare, not impossible, and the cast
+        // below is what puts it back
+        /** @var array<array-key, non-empty-list<RefreshTokenInterface>> $chains */
         $chains = [];
 
         // A token with no chain is its own session rather than one of a group: nothing says the

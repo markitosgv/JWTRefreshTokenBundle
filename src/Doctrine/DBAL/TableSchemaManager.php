@@ -111,8 +111,13 @@ final readonly class TableSchemaManager
             }
         }
 
-        if (isset($this->columnConfig['id']) && '' !== $this->columnConfig['id']['name']) {
-            $this->addPrimaryKey($table, $this->columnConfig['id']['name']);
+        // Read into a variable first: the emptiness check narrows a variable, where re-reading the
+        // array offset hands the analysers a plain string again and the non-empty-string the
+        // primary key needs has to be taken on trust
+        $idColumn = $this->columnConfig['id']['name'] ?? '';
+
+        if ('' !== $idColumn) {
+            $this->addPrimaryKey($table, $idColumn);
         }
 
         if (isset($this->columnConfig['refreshToken'])) {

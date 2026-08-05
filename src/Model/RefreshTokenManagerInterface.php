@@ -25,7 +25,7 @@ use DateTimeInterface;
  */
 interface RefreshTokenManagerInterface
 {
-    public const DEFAULT_BATCH_SIZE = 1000;
+    public const int DEFAULT_BATCH_SIZE = 1000;
 
     /**
      * @psalm-impure it queries the storage

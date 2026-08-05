@@ -12,6 +12,10 @@
         Starting point, deliberately lax. Lower errorLevel towards 1 as the code is cleaned up.
         findUnusedCode is off because this is a library: its public API is used by the applications
         that install it, not from within the bundle.
+
+        The CI run reports informational issues too, so everything below reaches GitHub's code scanning as an
+        alert. Each suppression here is scoped to the files it is about and says why, because an
+        unexplained one is indistinguishable from a bug somebody gave up on.
     -->
     <projectFiles>
         <directory name="src" />
@@ -19,4 +23,87 @@
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+        <!--
+            "Never extended and not part of the public API" is right about the first half and wrong
+            about the second: extending these is the documented way to bring your own token class or
+            repository, and which classes are final in 3.0 is a decision recorded in UPGRADE-3.0.md.
+            Nothing inside a library extends its own extension points.
+        -->
+        <ClassMustBeFinal>
+            <errorLevel type="suppress">
+                <file name="src/Entity/RefreshToken.php" />
+                <file name="src/Document/RefreshToken.php" />
+                <file name="src/Entity/RefreshTokenRepository.php" />
+                <file name="src/Document/RefreshTokenRepository.php" />
+            </errorLevel>
+        </ClassMustBeFinal>
+
+        <!--
+            The configuration arrays are documented as array shapes while the framework types them
+            as array<string, mixed>. Being more specific than the interface is the point: phpstan
+            runs at level 10 on the strength of those shapes, and widening them to match would throw
+            away everything they buy.
+        -->
+        <MoreSpecificImplementedParamType>
+            <errorLevel type="suppress">
+                <file name="src/DependencyInjection/GesdinetJWTRefreshTokenExtension.php" />
+                <file name="src/DependencyInjection/Security/Factory/RefreshTokenAuthenticatorFactory.php" />
+            </errorLevel>
+        </MoreSpecificImplementedParamType>
+
+        <!--
+            findOneBy() takes an optional $orderBy, which RefreshTokenRepositoryInterface documents
+            with a @method tag rather than declaring. Declaring it would break every repository
+            implementing the interface from scratch, which is why 2.1 left it as documentation —
+            see UPGRADE-2.1.md. Doctrine's own repositories accept it.
+        -->
+        <TooManyArguments>
+            <errorLevel type="suppress">
+                <file name="src/Doctrine/RefreshTokenManager.php" />
+            </errorLevel>
+        </TooManyArguments>
+
+        <!--
+            DBAL 4 marks PrimaryKeyConstraint's constructor internal and offers nothing public in its
+            place: building a table without the ORM means using it. Revisit if DBAL grows an API for
+            this.
+        -->
+        <InternalMethod>
+            <errorLevel type="suppress">
+                <file name="src/Doctrine/DBAL/TableSchemaManager.php" />
+            </errorLevel>
+        </InternalMethod>
+
+        <!--
+            API Platform types withContent() as ArrayObject<array-key, mixed> and is handed the
+            narrower ArrayObject<string, MediaType> it actually wants. Theirs to widen, not ours.
+        -->
+        <InvalidArgument>
+            <errorLevel type="suppress">
+                <file name="src/OpenApi/OpenApiFactory.php" />
+            </errorLevel>
+        </InvalidArgument>
+
+        <!--
+            $headers belongs to Symfony's JsonResponse and is set by its constructor, which psalm
+            does not follow through the parent call.
+        -->
+        <PropertyNotSetInConstructor>
+            <errorLevel type="suppress">
+                <file name="src/Http/RefreshAuthenticationFailureResponse.php" />
+            </errorLevel>
+        </PropertyNotSetInConstructor>
+
+        <!--
+            Symfony deprecated BundleInterface, and a bundle is still what this is. Nothing to do
+            here until Symfony offers the replacement.
+        -->
+        <DeprecatedInterface>
+            <errorLevel type="suppress">
+                <file name="src/GesdinetJWTRefreshTokenBundle.php" />
+            </errorLevel>
+        </DeprecatedInterface>
+    </issueHandlers>
 </psalm>

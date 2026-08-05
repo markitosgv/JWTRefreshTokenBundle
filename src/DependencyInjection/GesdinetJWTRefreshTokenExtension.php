@@ -142,13 +142,17 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             $this->configureDBALManager($container, $mergedConfig);
             $loader->load('dbal_services.php');
         } else {
-            $this->configureObjectManager($container, $mergedConfig);
+            $this->configureObjectManager($container, $mergedConfig['object_manager']);
             $loader->load('om_services.php');
         }
     }
 
     /**
-     * @param array{dbal_connection: string, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $config
+     * Trailing `...` because what arrives is the whole merged configuration, of which this reads
+     * four keys. A sealed shape would be a promise that nothing else is in the array, which is not
+     * true and which both analysers are right to object to.
+     *
+     * @param array{dbal_connection: string, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>, ...} $config
      */
     private function configureDBALManager(ContainerBuilder $container, array $config): void
     {
@@ -161,12 +165,13 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     }
 
     /**
-     * @param array{object_manager: string|null} $mergedConfig
+     * Takes the one value it reads rather than the whole configuration, which is both what it wants
+     * and what stops the array shape being a claim about keys it never looks at.
      */
-    private function configureObjectManager(ContainerBuilder $container, array $mergedConfig): void
+    private function configureObjectManager(ContainerBuilder $container, ?string $objectManager): void
     {
-        if (null !== $mergedConfig['object_manager']) {
-            $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $mergedConfig['object_manager']);
+        if (null !== $objectManager) {
+            $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $objectManager);
         // @codeCoverageIgnoreStart
         // willBeAvailable() asks whether a package is a runtime dependency of something
         // installed, and names doctrine-bundle and mongodb-odm-bundle as the packages that
