@@ -8,6 +8,7 @@ use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessList
 use Gesdinet\JWTRefreshTokenBundle\EventListener\LogoutEventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -19,6 +20,7 @@ use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
+use Gesdinet\JWTRefreshTokenBundle\Session\SessionLister;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 
 return static function (ContainerConfigurator $container): void {
@@ -70,11 +72,22 @@ return static function (ContainerConfigurator $container): void {
 
     $services->alias(RefreshTokenGeneratorInterface::class, $vendor.'.refresh_token_generator');
 
-    // The manager itself comes from the backend in use, so only the aliases are shared. Every one
-    // of the backends implements all three interfaces
+    // The manager itself comes from the backend in use, so only the aliases are shared. Every
+    // Doctrine backend implements all four interfaces; the cache one takes back what it cannot
+    // answer
     $services->alias(RefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
     $services->alias(RevokeRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
     $services->alias(ListRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
+    $services->alias(FamilyRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
+
+    $services->set($vendor.'.session_lister')
+        ->class(SessionLister::class)
+        ->public()
+        ->args([
+            service($vendor.'.refresh_token_manager'),
+        ]);
+
+    $services->alias(SessionLister::class, $vendor.'.session_lister');
 
     $services->set($vendor.'.request.extractor.chain')
         ->class(ChainExtractor::class)

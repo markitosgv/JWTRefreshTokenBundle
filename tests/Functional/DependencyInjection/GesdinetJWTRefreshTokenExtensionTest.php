@@ -8,9 +8,11 @@ use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\Compiler\ValidateDBALConn
 use Gesdinet\JWTRefreshTokenBundle\DependencyInjection\GesdinetJWTRefreshTokenExtension;
 use Gesdinet\JWTRefreshTokenBundle\Document\RefreshToken as RefreshTokenDocument;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as RefreshTokenEntity;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Session\SessionLister;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -194,6 +196,19 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
 
         $this->assertFalse($this->container->hasAlias(ListRefreshTokenManagerInterface::class));
         $this->assertFalse($this->container->hasAlias(RevokeRefreshTokenManagerInterface::class));
+        $this->assertFalse($this->container->hasAlias(FamilyRefreshTokenManagerInterface::class));
+
+        // Listing sessions is grouping a user's tokens by chain, and neither query is one a pool can
+        // be asked, so the service goes with them
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.session_lister'));
+    }
+
+    public function test_the_session_lister_is_available_over_a_doctrine_backend(): void
+    {
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
+
+        $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.session_lister', SessionLister::class);
+        $this->assertContainerBuilderHasAlias(SessionLister::class, 'gesdinet_jwt_refresh_token.session_lister');
     }
 
     public function test_the_endpoint_is_not_rate_limited_unless_it_is_asked_for(): void

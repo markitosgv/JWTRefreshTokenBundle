@@ -176,6 +176,52 @@ when the first token would have expired, so the ceiling and the ttl are forced t
 number. `max_session_lifetime` separates them, which is usually what people wanted: a short-lived
 token that rotates often, inside a session that ends on a schedule of its own.
 
+## New: listing and ending a user's sessions
+
+`Gesdinet\JWTRefreshTokenBundle\Session\SessionLister` is registered with every Doctrine backend and
+needs no configuration.
+
+```php
+public function __construct(private SessionLister $sessions)
+{
+}
+
+#[Route('/account/sessions')]
+public function list(#[CurrentUser] UserInterface $user, Request $request): Response
+{
+    // Passing the token the request came with marks that session as the current one
+    return $this->json($this->sessions->forUser($user, $request->cookies->get('refresh_token')));
+}
+
+#[Route('/account/sessions/{id}', methods: ['DELETE'])]
+public function end(#[CurrentUser] UserInterface $user, string $id): Response
+{
+    return $this->json(['revoked' => $this->sessions->end($user, $id)]);
+}
+```
+
+A `Session` carries the chain id, when it stops being refreshable, when the chain itself runs out if
+`max_session_lifetime` is set, how many of its tokens are still stored, and whether it is the one the
+request came from.
+
+**Why this rather than `findAllForUser()`.** That returns tokens, and with `single_use` a token is
+replaced on every refresh — so the same browser appears as a new row each time it refreshes, one
+session looks like a dozen devices, and the row you revoke is usually one that is already gone.
+Grouping by chain is what turns the list into the thing a user recognises.
+
+**`end()` checks the session is the caller's.** A chain is addressed by an identifier the client
+hands back, and a session list is exactly where such an identifier is handed out; without the check
+anybody who learnt one could sign a stranger out. A session that is not theirs and one that does not
+exist give the same answer, so the call cannot be used to find out which chains exist.
+
+Tokens stored before chains existed are shown with a null `id`, each on its own. They cannot be
+ended individually, because nothing links them to anything; they go as they expire.
+
+There is deliberately no device or browser label. A `User-Agent` changes on every browser update and
+is whatever the client says it is, so a name built from one is neither stable nor evidence. If you
+want one, put it on your own token class — [bringing your own](README.md) is already supported — and
+you will know exactly what it is worth.
+
 ## New: storing the tokens in a cache
 
 ```yaml
