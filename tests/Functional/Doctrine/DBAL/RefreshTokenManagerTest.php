@@ -174,7 +174,7 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertCount(1, $allTokens, 'Should have exactly one token (updated, not inserted)');
     }
 
-    public function testRevokeExpiredTokens(): void
+    public function testRevokeInvalidTokens(): void
     {
         $valid = new RefreshToken();
         $valid->setRefreshToken('valid-token');
@@ -387,5 +387,79 @@ class RefreshTokenManagerTest extends TestCase
         $this->assertSame('expired-token', $revoked[0]->getRefreshToken());
         $this->assertSame('testuser', $revoked[0]->getUsername());
         $this->assertInstanceOf(\DateTimeInterface::class, $revoked[0]->getValid());
+    }
+
+    public function testRevokeAllExpiredTokens(): void
+    {
+        $valid = new RefreshToken();
+        $valid->setRefreshToken('valid-token');
+        $valid->setUsername('user1');
+        $valid->setValid(new \DateTime('+1 hour'));
+        $this->manager->save($valid);
+
+        $expired = new RefreshToken();
+        $expired->setRefreshToken('expired-token');
+        $expired->setUsername('user2');
+        $expired->setValid(new \DateTime('-1 hour'));
+        $this->manager->save($expired);
+
+        $revoked = $this->manager->revokeAllExpired();
+
+        $this->assertSame(1, $revoked);
+        $this->assertNotNull($this->manager->get('valid-token'));
+        $this->assertNull($this->manager->get('expired-token'));
+    }
+
+    public function testRevokeAllExpiredTokensWithNoExpiredTokens(): void
+    {
+        // Create only valid tokens
+        for ($i = 1; $i <= 3; ++$i) {
+            $valid = new RefreshToken();
+            $valid->setRefreshToken("valid-{$i}");
+            $valid->setUsername("user{$i}");
+            $valid->setValid(new \DateTime('+1 hour'));
+            $this->manager->save($valid);
+        }
+
+        $revoked = $this->manager->revokeAllExpired();
+
+        $this->assertSame(0, $revoked, 'Should not revoke any tokens when none are expired');
+
+        // Verify all tokens remain
+        $totalTokens = $this->connection->fetchOne('SELECT COUNT(*) FROM refresh_tokens');
+        $this->assertSame(3, $totalTokens);
+    }
+
+    public function testRevokeAllExpiredTokensWithCustomDateTime(): void
+    {
+        // Create tokens with different expiration dates
+        $token1 = new RefreshToken();
+        $token1->setRefreshToken('expires-in-2-hours');
+        $token1->setUsername('user1');
+        $token1->setValid(new \DateTime('+2 hours'));
+        $this->manager->save($token1);
+
+        $token2 = new RefreshToken();
+        $token2->setRefreshToken('expires-in-1-hour');
+        $token2->setUsername('user2');
+        $token2->setValid(new \DateTime('+1 hour'));
+        $this->manager->save($token2);
+
+        $token3 = new RefreshToken();
+        $token3->setRefreshToken('expired-1-hour-ago');
+        $token3->setUsername('user3');
+        $token3->setValid(new \DateTime('-1 hour'));
+        $this->manager->save($token3);
+
+        // Revoke tokens expiring before 90 minutes from now
+        $cutoffTime = new \DateTime('+90 minutes');
+        $revoked = $this->manager->revokeAllExpired($cutoffTime);
+
+        $this->assertSame(2, $revoked, 'Should revoke tokens expiring within 90 minutes');
+
+        // Verify only the 2-hour token remains
+        $this->assertNotNull($this->manager->get('expires-in-2-hours'));
+        $this->assertNull($this->manager->get('expires-in-1-hour'));
+        $this->assertNull($this->manager->get('expired-1-hour-ago'));
     }
 }

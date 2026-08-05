@@ -15,6 +15,7 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Types\Types;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -286,6 +287,15 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
             [$stale],
             [ArrayParameterType::INTEGER]
         );
+    }
+
+    public function revokeAllExpired(\DateTimeInterface $datetime = new \DateTime()): int
+    {
+        return (int) $this->connection->createQueryBuilder()
+            ->delete($this->quoteTableIdentifier())
+            ->where($this->quoteColumnIdentifier('valid').' < :datetime')
+            ->setParameter('datetime', $datetime, Types::DATETIME_MUTABLE)
+            ->executeStatement();
     }
 
     /**

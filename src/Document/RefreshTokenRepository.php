@@ -101,6 +101,19 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
         return $result->isAcknowledged() ? $result->getDeletedCount() : 0;
     }
 
+    public function deleteAllExpired(DateTimeInterface $datetime = new DateTime()): int
+    {
+        /** @var DeleteResult $result */
+        $result = $this->createQueryBuilder()
+            ->field('valid')
+            ->lt($datetime)
+            ->remove()
+            ->getQuery()
+            ->execute();
+
+        return $result->isAcknowledged() ? $result->getDeletedCount() : 0;
+    }
+
     #[\Override]
     public function deleteToken(RefreshTokenInterface $refreshToken): int
     {

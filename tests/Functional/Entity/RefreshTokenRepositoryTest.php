@@ -158,6 +158,66 @@ final class RefreshTokenRepositoryTest extends ORMTestCase
         $this->assertCount(1, $repo->findBy(['username' => $users[1]->getUserIdentifier()]));
     }
 
+    public function test_deletes_all_expired_tokens(): void
+    {
+        $ttl = 500;
+
+        for ($i = 1; $i <= 5; ++$i) {
+            $user = new User("user-{$i}@localhost");
+            $token = $this->generator->createForUserWithTtl($user, $ttl);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->persist($token);
+
+            $ttl -= 300;
+        }
+
+        $this->entityManager->flush();
+
+        /** @var RefreshTokenRepository $repo */
+        $repo = $this->entityManager->getRepository(RefreshToken::class);
+
+        $this->assertSame(3, $repo->deleteAllExpired());
+        $this->assertCount(2, $repo->findAll());
+    }
+
+    public function test_deletes_no_tokens_when_all_are_valid(): void
+    {
+        for ($i = 1; $i <= 2; ++$i) {
+            $user = new User("user-{$i}@localhost");
+            $token = $this->generator->createForUserWithTtl($user, 500);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->persist($token);
+        }
+
+        $this->entityManager->flush();
+
+        /** @var RefreshTokenRepository $repo */
+        $repo = $this->entityManager->getRepository(RefreshToken::class);
+
+        $this->assertSame(0, $repo->deleteAllExpired());
+        $this->assertCount(2, $repo->findAll());
+    }
+
+    public function test_deletes_all_tokens_older_than_specified_time(): void
+    {
+        for ($i = 1; $i <= 2; ++$i) {
+            $user = new User("user-{$i}@localhost");
+            $token = $this->generator->createForUserWithTtl($user, 500);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->persist($token);
+        }
+
+        $this->entityManager->flush();
+
+        /** @var RefreshTokenRepository $repo */
+        $repo = $this->entityManager->getRepository(RefreshToken::class);
+
+        $this->assertSame(2, $repo->deleteAllExpired(new DateTime('+501 seconds')));
+    }
+
     private function persistExpiredTokens(int $count): void
     {
         for ($i = 1; $i <= $count; ++$i) {
