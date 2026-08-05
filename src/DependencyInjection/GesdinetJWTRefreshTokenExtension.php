@@ -15,6 +15,7 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
@@ -27,7 +28,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     /**
-     * @param array{ttl: int, ttl_update: bool, max_tokens_per_user: int|null, single_use: bool, single_use_ttl_update: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, refresh_token_manager: string|null, api_platform: array{enabled: bool}, block_previous_jwt: bool, hash_tokens: array{enabled: bool, accept_stored_in_the_clear: bool}, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
+     * @param array{ttl: int, ttl_update: bool, reuse_detection: array{enabled: bool, cache: string, ttl: int}, max_tokens_per_user: int|null, single_use: bool, single_use_ttl_update: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, refresh_token_manager: string|null, api_platform: array{enabled: bool}, block_previous_jwt: bool, hash_tokens: array{enabled: bool, accept_stored_in_the_clear: bool}, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
      */
     #[\Override]
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
@@ -57,6 +58,20 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             $container->setParameter('gesdinet_jwt_refresh_token.hash_tokens.accept_stored_in_the_clear', $mergedConfig['hash_tokens']['accept_stored_in_the_clear']);
 
             $loader->load('hashed_manager.php');
+        }
+
+        if ($mergedConfig['reuse_detection']['enabled']) {
+            if (!$mergedConfig['single_use']) {
+                // Without single_use a token is not spent when it is used, so it is never recorded
+                // and nothing is ever recognised. Turning this on would cost a cache round trip per
+                // failed refresh and detect nothing, while reading in configuration as protection
+                throw new InvalidConfigurationException('The "reuse_detection" option needs "single_use" to be true. Without it a refresh token is not replaced when it is used, so there is no spent token for a reuse to be recognised against.');
+            }
+
+            $container->setParameter('gesdinet_jwt_refresh_token.reuse_detection.cache', $mergedConfig['reuse_detection']['cache']);
+            $container->setParameter('gesdinet_jwt_refresh_token.reuse_detection.ttl', $mergedConfig['reuse_detection']['ttl']);
+
+            $loader->load('reuse_detection.php');
         }
 
         if ($mergedConfig['api_platform']['enabled']) {

@@ -18,6 +18,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
+use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshTokenRegistryInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use LogicException;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -55,6 +56,7 @@ final class AttachRefreshTokenOnSuccessListener
         private readonly bool $singleUseTtlUpdate = true,
         private readonly ?int $maxTokensPerUser = null,
         private readonly ?TokenStorageInterface $tokenStorage = null,
+        private readonly ?SpentRefreshTokenRegistryInterface $spentTokens = null,
     ) {
         $this->cookieSettings = array_merge([
             'enabled' => false,
@@ -165,6 +167,10 @@ final class AttachRefreshTokenOnSuccessListener
                 if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
                     $inheritedFamily = $refreshToken->getFamily();
                 }
+
+                // Recorded before the row goes, since afterwards there is nothing left to say the
+                // token ever existed and a replay of it would look like any other wrong token
+                $this->spentTokens?->remember($refreshToken);
 
                 $this->refreshTokenManager->delete($refreshToken);
             }

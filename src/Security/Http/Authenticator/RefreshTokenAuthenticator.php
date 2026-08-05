@@ -21,6 +21,7 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
+use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\RefreshTokenReuseDetector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -59,7 +60,8 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         private readonly AuthenticationSuccessHandlerInterface $successHandler,
         private readonly AuthenticationFailureHandlerInterface $failureHandler,
         array $options,
-        private readonly HttpUtils $httpUtils
+        private readonly HttpUtils $httpUtils,
+        private readonly ?RefreshTokenReuseDetector $reuseDetector = null,
     ) {
         $this->options = array_merge([
             'ttl' => 2592000,
@@ -86,6 +88,11 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         $refreshToken = $this->refreshTokenManager->get($token);
 
         if (null === $refreshToken) {
+            // A token nobody has a row for is usually just wrong, but it is also what a token that
+            // was already spent looks like, and those two want telling apart. The request is
+            // refused either way; what changes is whether the chain it came from survives
+            $this->reuseDetector?->unknownTokenPresented($token, $request);
+
             throw new TokenNotFoundException();
         }
 

@@ -52,6 +52,8 @@ return static function (ContainerConfigurator $container): void {
             $singleUseTtlUpdate,
             $maxTokensPerUser,
             service('security.token_storage')->nullOnInvalid(),
+            // Only defined when reuse_detection is turned on, so this is null otherwise
+            service($vendor.'.spent_refresh_token_registry')->nullOnInvalid(),
         ])
         ->tag('kernel.event_listener', [
             'event' => Events::AUTHENTICATION_SUCCESS,
@@ -116,6 +118,7 @@ return static function (ContainerConfigurator $container): void {
             abstract_arg('authentication failure handler'),
             abstract_arg('options'),
             service('security.http_utils'),
+            service($vendor.'.refresh_token_reuse_detector')->nullOnInvalid(),
         ]);
 
     $services->set(ClearInvalidRefreshTokensCommand::class)

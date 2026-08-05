@@ -11,7 +11,12 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
+use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\RefreshTokenReuseDetector;
+use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshTokenRegistryInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -235,6 +240,69 @@ final class RefreshTokenAuthenticatorTest extends TestCase
         $this->expectExceptionObject(new TokenNotFoundException());
 
         $this->refreshTokenAuthenticator->authenticate($request);
+    }
+
+    /**
+     * A token with no row is either simply wrong or one that was already spent, and only the
+     * registry can tell. The request fails either way; what the detector changes is whether the
+     * chain the token came from survives.
+     */
+    public function testAsksWhetherAnUnknownTokenIsOneThatWasAlreadySpent(): void
+    {
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
+
+        $this->createExtractorGetRefreshTokenExpectation($request, 'a-replayed-token');
+        $this->createRefreshTokenManagerGetExpectation('a-replayed-token', null);
+
+        $registry = $this->createMock(SpentRefreshTokenRegistryInterface::class);
+        $registry
+            ->expects($this->once())
+            ->method('recall')
+            ->with('a-replayed-token')
+            ->willReturn(new SpentRefreshToken('the-chain', 'someone'));
+
+        /** @var RefreshTokenManagerInterface&FamilyRefreshTokenManagerInterface&MockObject $manager */
+        $manager = $this->createMockForIntersectionOfInterfaces([RefreshTokenManagerInterface::class, FamilyRefreshTokenManagerInterface::class]);
+        $manager->expects($this->once())->method('revokeFamily')->with('the-chain')->willReturn(1);
+
+        $this->expectExceptionObject(new TokenNotFoundException());
+
+        $this->authenticatorDetectingReuseWith($registry, $manager)->authenticate($request);
+    }
+
+    /**
+     * Reuse detection is off unless it is configured, and an authenticator without it behaves as it
+     * always did rather than reaching for a service that is not there.
+     */
+    public function testRefusesAnUnknownTokenWithoutADetectorAtAll(): void
+    {
+        /** @var Request&Stub $request */
+        $request = $this->createStub(Request::class);
+
+        $this->createExtractorGetRefreshTokenExpectation($request, 'a-token-nobody-ever-had');
+        $this->createRefreshTokenManagerGetExpectation('a-token-nobody-ever-had', null);
+
+        $this->expectExceptionObject(new TokenNotFoundException());
+
+        $this->refreshTokenAuthenticator->authenticate($request);
+    }
+
+    private function authenticatorDetectingReuseWith(
+        SpentRefreshTokenRegistryInterface $registry,
+        RefreshTokenManagerInterface $manager,
+    ): RefreshTokenAuthenticator {
+        return new RefreshTokenAuthenticator(
+            $this->refreshTokenManager,
+            $this->createMock(EventDispatcherInterface::class),
+            $this->extractor,
+            $this->createMock(UserProviderInterface::class),
+            $this->successHandler,
+            $this->failureHandler,
+            ['check_path' => '/api/token/refresh'],
+            $this->httpUtils,
+            new RefreshTokenReuseDetector($registry, $manager, new EventDispatcher())
+        );
     }
 
     public function testDoesNotAuthenticateTheRequestWhenTheTokenIsNotFoundInTheRequest(): void

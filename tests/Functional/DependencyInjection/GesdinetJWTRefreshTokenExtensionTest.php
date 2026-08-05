@@ -12,6 +12,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -166,6 +167,48 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertNotNull($decoration);
         $this->assertSame('gesdinet_jwt_refresh_token.refresh_token_manager', $decoration[0]);
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.hash_tokens.accept_stored_in_the_clear', true);
+    }
+
+    public function test_reuse_is_not_detected_unless_it_is_asked_for(): void
+    {
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
+
+        // The authenticator and the listener ask for these with nullOnInvalid(), so leaving them
+        // undefined is what turns the feature off
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.spent_refresh_token_registry'));
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.refresh_token_reuse_detector'));
+    }
+
+    public function test_reuse_detection_registers_the_registry_over_the_configured_pool(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'single_use' => true,
+            'reuse_detection' => ['enabled' => true, 'cache' => 'cache.redis', 'ttl' => 900],
+        ]);
+
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.reuse_detection.cache', 'cache.redis');
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.reuse_detection.ttl', 900);
+        $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.spent_refresh_token_registry');
+        $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.refresh_token_reuse_detector');
+    }
+
+    /**
+     * Without single_use a token is not replaced when it is used, so nothing is ever spent and
+     * nothing can be recognised. Left to load, it would read in configuration as protection while
+     * detecting nothing at all.
+     */
+    public function test_refuses_reuse_detection_without_single_use(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('needs "single_use" to be true');
+
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'reuse_detection' => ['enabled' => true],
+        ]);
     }
 
     public function test_the_openapi_factory_is_not_registered_unless_it_is_asked_for(): void

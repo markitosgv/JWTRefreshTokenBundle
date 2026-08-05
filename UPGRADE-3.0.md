@@ -150,6 +150,57 @@ than not having families at all.
 to carry on without them. A map that does not name the column is taken to mean the table has none,
 and no query goes near it.
 
+## New: recognising a refresh token that was already spent
+
+Off by default, and the reason families exist.
+
+```yaml
+gesdinet_jwt_refresh_token:
+    single_use: true          # required
+    reuse_detection:
+        enabled: true
+        cache: cache.app      # has to be shared between your processes
+        ttl: 2592000          # how long a spent token stays recognisable
+```
+
+`single_use` rotates the token on every refresh, which sounds like it protects against a stolen one
+and mostly does not: the thief's copy keeps working until the legitimate client happens to refresh,
+and when that finally breaks it, nobody learns why. The missing half is noticing the replay. A spent
+token is deleted, so presenting it again is indistinguishable from presenting a token that never
+existed — both are "unknown" — and that is the one distinction worth having.
+
+With this on, a spent token is remembered by digest for `ttl` seconds. If one comes back, the whole
+chain it belonged to is revoked and `RefreshTokenReuseDetectedEvent` is dispatched on
+`gesdinet.refresh_token_reuse_detected`.
+
+```php
+#[AsEventListener('gesdinet.refresh_token_reuse_detected')]
+public function __invoke(RefreshTokenReuseDetectedEvent $event): void
+{
+    $this->logger->warning('A spent refresh token was presented again', [
+        'user' => $event->getSpentToken()->username,
+        'revoked' => $event->getRevokedTokens(),
+        'ip' => $event->getRequest()->getClientIp(),
+    ]);
+}
+```
+
+**It cannot tell theft from a client racing itself**, and neither can anything else in the bundle:
+two requests refreshing at once produce exactly the same evidence. The chain is revoked either way,
+because that is the safe answer to the case that matters. What the event is for is the judgement the
+bundle cannot make — an occasional reuse for one user reads differently from the same thing across
+many, and only your application has the rest of the picture.
+
+The token itself is never stored: what goes into the pool is a SHA-256 of it, keyed by that digest.
+Cache keys turn up in file names, in `redis-cli KEYS` output and in profiler dumps, and a refresh
+token is a credential.
+
+`ttl` defaults to the same 30 days as the refresh token. Shorter leaves a window in which a replay
+reads as an ordinary wrong token.
+
+Turning it on without `single_use` is a configuration error: nothing would ever be spent, so nothing
+could be recognised, and the option would read as protection while detecting nothing.
+
 ## DBAL index names now include the table name
 
 Only affects the DBAL backend, and only tables created from now on.

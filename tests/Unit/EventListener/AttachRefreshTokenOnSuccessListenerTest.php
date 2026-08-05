@@ -10,6 +10,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
+use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshTokenRegistryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
@@ -887,6 +888,78 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->singleUseListener()->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
 
         $this->assertNotNull($issued->getFamily());
+    }
+
+    /**
+     * The record has to be written while the row is still there. Afterwards nothing says the token
+     * ever existed, and a replay of it is indistinguishable from any other wrong token.
+     */
+    public function testRecordsTheSpentTokenBeforeDeletingIt(): void
+    {
+        $replaced = new EntityRefreshToken();
+        $replaced->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $replaced->setValid(new DateTime('+600 seconds'));
+
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        $order = [];
+
+        $registry = $this->createMock(SpentRefreshTokenRegistryInterface::class);
+        $registry
+            ->expects($this->once())
+            ->method('remember')
+            ->with($replaced)
+            ->willReturnCallback(static function () use (&$order): void {
+                $order[] = 'remembered';
+            });
+
+        $this->refreshTokenManager
+            ->expects($this->once())
+            ->method('delete')
+            ->willReturnCallback(static function () use (&$order): int {
+                $order[] = 'deleted';
+
+                return 1;
+            });
+
+        $this->refreshTokenManager->method('get')->willReturn($replaced);
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true,
+            null,
+            null,
+            $registry
+        ))->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+
+        $this->assertSame(['remembered', 'deleted'], $order);
+    }
+
+    /**
+     * Reuse detection is off unless it is configured, and the listener without it behaves as before.
+     */
+    public function testRecordsNothingWithoutARegistry(): void
+    {
+        $replaced = new EntityRefreshToken();
+        $replaced->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $replaced->setValid(new DateTime('+600 seconds'));
+
+        $this->refreshTokenManager->expects($this->once())->method('delete')->willReturn(1);
+
+        $this->assertNotNull($this->issueOnRefreshReplacing($replaced)->getRefreshToken());
     }
 
     /**
