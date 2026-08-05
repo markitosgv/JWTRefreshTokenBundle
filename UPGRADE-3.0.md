@@ -111,10 +111,10 @@ php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
 ```
 
-The columns are `family VARCHAR(32) NULL` and `family_valid DATETIME NULL`. Existing rows keep a null family, which is read as "this token
-belongs to no chain" — they carry on working, and the tokens issued after them get families
-normally. For the DBAL backend, tables the bundle creates itself get the column, but a table already
-in place does not:
+The columns are `family VARCHAR(32) NULL` and `family_valid DATETIME NULL`. Existing rows keep a null
+family, which is read as "this token belongs to no chain" — they carry on working, and the tokens
+issued after them get families normally. For the DBAL backend, tables the bundle creates itself get
+the columns, but a table already in place does not:
 
 ```sql
 ALTER TABLE refresh_tokens ADD family VARCHAR(32) NULL, ADD family_valid DATETIME NULL;
@@ -146,9 +146,10 @@ that a class written against the latter is untouched. To opt in, implement the i
 unmapped property satisfies the interface and silently loses the value on every read, which is worse
 than not having families at all.
 
-**If you configure `dbal_columns`**, add a `family` entry to gain families, or leave the map as it is
-to carry on without them. A map that does not name the column is taken to mean the table has none,
-and no query goes near it.
+**If you configure `dbal_columns`**, add `family` and `familyValid` entries to gain families, or
+leave the map as it is to carry on without them. A map naming neither is taken to mean the table has
+no chains and no query goes near either column; naming one and not the other describes a table half
+the queries would fail against, so both are needed together.
 
 ## New: `max_session_lifetime`
 
