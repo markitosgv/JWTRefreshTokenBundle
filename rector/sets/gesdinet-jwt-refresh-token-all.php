@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the GesdinetJWTRefreshTokenBundle package.
  *
@@ -11,7 +13,7 @@
 
 use Rector\Config\RectorConfig;
 
-/**
+/*
  * Every hop from 1.5 to 3.0, in order.
  *
  * For going the whole way at once. The rules are ordered and none of them undoes another, so the

@@ -25,10 +25,8 @@ declare(strict_types=1);
  * here, change it there.
  */
 $finder = PhpCsFixer\Finder::create()
-    ->in([__DIR__.'/src', __DIR__.'/tests', __DIR__.'/config'])
-    // Consumer-facing Rector sets, whose comments carry more than their code. Left to people.
-    ->notPath('#^'.preg_quote(__DIR__.'/rector', '#').'#')
-    // The two config files themselves, so the tooling holds to the same style as the code
+    ->in([__DIR__.'/src', __DIR__.'/tests', __DIR__.'/config', __DIR__.'/rector'])
+    // The config files themselves, so the tooling holds to the same style as the code it formats
     ->append([__FILE__, __DIR__.'/rector.php']);
 
 return new PhpCsFixer\Config()
@@ -61,6 +59,19 @@ return new PhpCsFixer\Config()
         // ---- Rules this project wants, or refuses ------------------------------------------
 
         'ordered_imports' => ['sort_algorithm' => 'alpha', 'imports_order' => ['class', 'function', 'const']],
+        // @Symfony separates the class imports from the function ones with a blank line; the hosted
+        // check does not. Matched to the hosted one, since that is what gates a pull request.
+        'blank_line_between_import_groups' => false,
+
+        // A comment sitting before a `} elseif` belongs to the branch above it, not to the chain.
+        // @Symfony's default sticks it to the outer indentation and the hosted check indents it
+        // with the block, which is where the @codeCoverageIgnore comments in the extension read
+        // right. Matched to the hosted one.
+        'statement_indentation' => ['stick_comment_to_next_continuous_control_statement' => false],
+
+        // An anonymous class gets its parentheses. @Symfony leaves them off and the hosted check
+        // puts them on, and a disagreement here is two tools editing the same line forever.
+        'new_with_parentheses' => ['anonymous_class' => true, 'named_class' => true],
         'phpdoc_separation' => true,
         'no_unused_imports' => true,
 

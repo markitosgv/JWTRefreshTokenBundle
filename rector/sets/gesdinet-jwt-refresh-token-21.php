@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the GesdinetJWTRefreshTokenBundle package.
  *
@@ -11,7 +13,7 @@
 
 use Rector\Config\RectorConfig;
 
-/**
+/*
  * 2.0 to 2.1.
  *
  * Empty, and honestly so. Nothing was renamed, moved or removed in 2.1: it fixed methods that were

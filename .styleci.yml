@@ -13,6 +13,7 @@ risky: true
 
 enabled:
   - declare_strict_types
+  - new_with_parentheses
   - blank_line_before_namespace
   - ordered_imports
   - phpdoc_separation
@@ -37,8 +38,6 @@ disabled:
   # Both spellings appear and neither is wrong; choosing one is a large diff that prevents nothing.
   - native_function_invocation
 
-finder:
-  not-path:
-    # Consumer-facing Rector sets. Their comments carry more than their code, and nothing should
-    # tidy them but a person.
-    - rector/sets
+# No finder section. An earlier attempt excluded rector/sets here and StyleCI formatted them
+# anyway — the key was wrong — so they are formatted like everything else, which costs their
+# comments nothing and keeps one fewer thing to be wrong about.
