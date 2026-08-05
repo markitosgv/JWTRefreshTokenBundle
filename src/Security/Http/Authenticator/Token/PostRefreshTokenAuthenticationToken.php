@@ -27,7 +27,7 @@ final class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
         UserInterface $user,
         string $firewallName,
         array $roles,
-        private RefreshTokenInterface $refreshToken
+        private RefreshTokenInterface $refreshToken,
     ) {
         parent::__construct($user, $firewallName, $roles);
     }

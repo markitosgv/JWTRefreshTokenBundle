@@ -24,7 +24,7 @@ final class RefreshTokenNotFoundEvent extends Event
      */
     public function __construct(
         private readonly AuthenticationException $exception,
-        private ?Response $response = null
+        private ?Response $response = null,
     ) {
     }
 

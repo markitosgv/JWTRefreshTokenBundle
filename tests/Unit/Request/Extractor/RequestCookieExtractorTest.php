@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\RequestCookieExtractor;

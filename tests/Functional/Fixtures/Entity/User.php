@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity;
 
 use Deprecated;
@@ -21,7 +23,7 @@ class User implements UserInterface
         #[ORM\Column]
         private string $email,
         #[ORM\Column(nullable: true)]
-        private ?string $password = null
+        private ?string $password = null,
     ) {
     }
 

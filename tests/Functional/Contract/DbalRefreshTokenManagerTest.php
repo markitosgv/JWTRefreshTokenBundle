@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Doctrine\DBAL\Connection;
@@ -16,10 +18,10 @@ use PHPUnit\Framework\TestCase;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class DbalRefreshTokenManagerTest extends TestCase
 {
-    use RefreshTokenManagerContract;
-    use ListRefreshTokenManagerContract;
-    use RevokeRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
+    use ListRefreshTokenManagerContract;
+    use RefreshTokenManagerContract;
+    use RevokeRefreshTokenManagerContract;
 
     private Connection $connection;
 

@@ -1,4 +1,4 @@
-name: Rector
+name: Rector and PHP-CS-Fixer
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   rector:
-    name: Rector
+    name: Rector and PHP-CS-Fixer
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -37,3 +37,8 @@ jobs:
       # composer.json: it was installed for a long time with nothing configured to run it.
       - name: Rector
         run: bin/rector process --dry-run --no-progress-bar
+
+      # Same reason, and the two are configured to agree: .php-cs-fixer.php and rector.php each say
+      # which of them owns the rules they both have an opinion about.
+      - name: PHP-CS-Fixer
+        run: bin/php-cs-fixer fix --dry-run --diff

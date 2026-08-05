@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Security\Revocation;
 
 use Gesdinet\JWTRefreshTokenBundle\Security\Revocation\CacheJWTRevocationRegistry;

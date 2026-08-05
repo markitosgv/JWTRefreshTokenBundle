@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Session;
 
 use Doctrine\ORM\Tools\SchemaTool;

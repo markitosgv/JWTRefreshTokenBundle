@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Doctrine\ORM\Tools\SchemaTool;
@@ -15,10 +17,10 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class OrmRefreshTokenManagerTest extends ORMTestCase
 {
-    use RefreshTokenManagerContract;
-    use ListRefreshTokenManagerContract;
-    use RevokeRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
+    use ListRefreshTokenManagerContract;
+    use RefreshTokenManagerContract;
+    use RevokeRefreshTokenManagerContract;
 
     protected function setUp(): void
     {

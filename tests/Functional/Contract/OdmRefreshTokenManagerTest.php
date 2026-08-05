@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
@@ -13,10 +15,10 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('mongodb')]
 final class OdmRefreshTokenManagerTest extends ODMTestCase
 {
-    use RefreshTokenManagerContract;
-    use ListRefreshTokenManagerContract;
-    use RevokeRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
+    use ListRefreshTokenManagerContract;
+    use RefreshTokenManagerContract;
+    use RevokeRefreshTokenManagerContract;
 
     protected function setUp(): void
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Gesdinet JWTRefreshTokenBundle package.
  *
@@ -44,7 +46,7 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
         private int $defaultBatchSize,
         private string $tableName,
         private string $class,
-        array $columnConfig = []
+        array $columnConfig = [],
     ) {
         $this->columnConfig = $columnConfig ?: TableSchemaManager::getDefaultColumnConfig();
     }
@@ -327,7 +329,7 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
             ->orderBy($this->quoteColumnIdentifier('valid'), 'DESC')
             ->setFirstResult($keep)
             // Every driver needs a limit before it will honour an offset, and no user has this many
-            ->setMaxResults(PHP_INT_MAX)
+            ->setMaxResults(\PHP_INT_MAX)
             ->fetchFirstColumn();
 
         if ([] === $stale) {

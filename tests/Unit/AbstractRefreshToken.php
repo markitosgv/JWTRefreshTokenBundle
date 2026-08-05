@@ -23,7 +23,7 @@ abstract class AbstractRefreshToken extends TestCase
     abstract protected function createRefreshToken(
         string $refreshToken,
         UserInterface $user,
-        int $ttl
+        int $ttl,
     ): RefreshTokenInterface;
 
     public function testCanBeConvertedToAString(): void

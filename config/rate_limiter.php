@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Gesdinet\JWTRefreshTokenBundle\Security\RateLimiting\RefreshRateLimiter;
@@ -14,7 +16,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set($vendor.'.refresh_rate_limiter')
         ->class(RefreshRateLimiter::class)
         ->args([
-            service(param($vendor.'.rate_limiter.limiter')),
+            // The parameter holds a service id, so it is turned into the `%name%` placeholder
+            // service() takes. The cast used to be implicit; declare(strict_types=1) makes it
+            // the caller's job, which is the better place for it to be visible
+            service((string) param($vendor.'.rate_limiter.limiter')),
             param($vendor.'.rate_limiter.key'),
         ]);
 };

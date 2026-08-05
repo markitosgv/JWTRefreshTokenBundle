@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -93,7 +95,7 @@ final class RectorSetsTest extends TestCase
             sprintf("/'(%s[^']+)'\s*=>\s*'([^']+)'/", $leftPattern),
             $source,
             $matches,
-            PREG_SET_ORDER
+            \PREG_SET_ORDER
         );
 
         return array_map(

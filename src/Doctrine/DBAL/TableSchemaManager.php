@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Gesdinet JWTRefreshTokenBundle package.
  *
@@ -43,7 +45,7 @@ final readonly class TableSchemaManager
     public function __construct(
         private Connection $connection,
         private string $tableName,
-        array $columnConfig
+        array $columnConfig,
     ) {
         $this->columnConfig = [] === $columnConfig ? self::getDefaultColumnConfig() : $columnConfig;
     }

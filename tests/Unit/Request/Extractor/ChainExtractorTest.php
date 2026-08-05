@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Request\Extractor;
 
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ChainExtractor;
@@ -71,7 +73,7 @@ final class ChainExtractorTest extends TestCase
         $this->chainExtractor->addExtractor($secondExtractor);
         $this->chainExtractor->addExtractor($thirdExtractor);
 
-        $this->assertSame(null, $this->chainExtractor->getRefreshToken($request, self::PARAMETER_NAME));
+        $this->assertNull($this->chainExtractor->getRefreshToken($request, self::PARAMETER_NAME));
     }
 
     private function createExtractorGetRefreshTokenExpectation(MockObject $extractor, ?string $return): void

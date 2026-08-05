@@ -30,7 +30,7 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
      */
     public function __construct(
         private readonly AuthenticationSuccessHandlerInterface $lexikAuthenticationSuccessHandler,
-        private readonly EventDispatcherInterface $eventDispatcher
+        private readonly EventDispatcherInterface $eventDispatcher,
     ) {
     }
 

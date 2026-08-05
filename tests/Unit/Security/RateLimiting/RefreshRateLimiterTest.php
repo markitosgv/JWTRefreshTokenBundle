@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Security\RateLimiting;
 
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TooManyRefreshRequestsException;
@@ -172,7 +174,7 @@ final class RefreshRateLimiterTest extends TestCase
     }
 
     /**
-     * @param positive-int                                        $requests
+     * @param positive-int                                           $requests
      * @param RefreshRateLimiter::BY_IP|RefreshRateLimiter::BY_TOKEN $key
      */
     private function limiterAllowing(int $requests, string $key = RefreshRateLimiter::BY_IP): RefreshRateLimiter

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Security\Http\Authentication;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshEvent;

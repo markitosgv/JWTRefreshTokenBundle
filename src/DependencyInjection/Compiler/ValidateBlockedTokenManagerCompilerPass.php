@@ -39,6 +39,6 @@ final class ValidateBlockedTokenManagerCompilerPass implements CompilerPassInter
             return;
         }
 
-        throw new RuntimeException('The "block_previous_jwt" option needs the blocklist of LexikJWTAuthenticationBundle, which is off. Turn it on with:'."\n\n"."lexik_jwt_authentication:\n"."    blocklist_token:\n"."        enabled: true\n"."        cache: cache.app\n\n".'Its store is what a blocked JWT is recorded in, so it has to outlive the request. A shared cache pool rather than a per-process one, where more than one process serves your traffic.');
+        throw new RuntimeException('The "block_previous_jwt" option needs the blocklist of LexikJWTAuthenticationBundle, which is off. Turn it on with:'."\n\nlexik_jwt_authentication:\n    blocklist_token:\n        enabled: true\n        cache: cache.app\n\n".'Its store is what a blocked JWT is recorded in, so it has to outlive the request. A shared cache pool rather than a per-process one, where more than one process serves your traffic.');
     }
 }

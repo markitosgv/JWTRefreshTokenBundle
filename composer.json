@@ -46,7 +46,8 @@
     "rector/rector": "^2.2",
     "symfony/cache": "^8.0",
     "vimeo/psalm": "^7.0@beta",
-    "symfony/rate-limiter": "^8.0"
+    "symfony/rate-limiter": "^8.0",
+    "friendsofphp/php-cs-fixer": "^3.95"
   },
   "suggest": {
     "api-platform/core": "To document the refresh token in the OpenAPI specification when using API Platform",

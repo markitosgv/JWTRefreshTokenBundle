@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Gesdinet JWTRefreshTokenBundle package.
  *
@@ -39,7 +41,7 @@ final class EnsureTableExistsListener implements EventSubscriberInterface
         private readonly bool $autoCreateTable,
         private readonly string $cacheDir,
         private readonly bool $debug = false,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
     }

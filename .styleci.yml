@@ -1,0 +1,44 @@
+# Formatting for the hosted check.
+#
+# There was no file here, which meant StyleCI fell back to its own default preset — a set of rules
+# nobody on this project chose, and the reason the check had been failing on files that php-cs-fixer
+# was perfectly happy with. This makes the choice explicit.
+#
+# It mirrors `.php-cs-fixer.php`. If you change a rule there, change it here: two formatters that
+# disagree is the same problem as a formatter and Rector that disagree, only harder to see because
+# one of them runs somewhere else.
+preset: symfony
+
+risky: true
+
+enabled:
+  - declare_strict_types
+  - blank_line_before_namespace
+  - ordered_imports
+  - phpdoc_separation
+  - no_unused_imports
+  - yoda_style
+
+disabled:
+  # The docblocks carry types PHP has no syntax for — positive-int, class-string<T>, list<Session>,
+  # array shapes. phpstan runs at level 10 and psalm at its strictest on the strength of them, so
+  # nothing here may decide they are superfluous.
+  - no_superfluous_phpdoc_tags
+  - phpdoc_to_comment
+
+  # Test names are sentences meant to be read as the failure message.
+  - php_unit_method_casing
+
+  # Rector does not import names, so neither does this. With both leaving them alone, an inline
+  # \DateTimeInterface stays inline instead of the two tools taking turns.
+  - fully_qualified_strict_types
+  - global_namespace_import
+
+  # Both spellings appear and neither is wrong; choosing one is a large diff that prevents nothing.
+  - native_function_invocation
+
+finder:
+  not-path:
+    # Consumer-facing Rector sets. Their comments carry more than their code, and nothing should
+    # tidy them but a person.
+    - rector/sets

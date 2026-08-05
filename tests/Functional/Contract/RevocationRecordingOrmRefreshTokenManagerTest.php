@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Doctrine\ORM\Tools\SchemaTool;
@@ -24,10 +26,10 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
 {
-    use RefreshTokenManagerContract;
-    use ListRefreshTokenManagerContract;
-    use RevokeRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
+    use ListRefreshTokenManagerContract;
+    use RefreshTokenManagerContract;
+    use RevokeRefreshTokenManagerContract;
 
     private ArrayAdapter $pool;
 

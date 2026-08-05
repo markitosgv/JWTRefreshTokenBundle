@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the GesdinetJWTRefreshTokenBundle package.
  *
@@ -16,6 +18,7 @@ use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPromotedPropertyRector;
 use Rector\EarlyReturn\Rector\If_\ChangeOrIfContinueToMultiContinueRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
+use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
 use Rector\ValueObject\PhpVersion;
 
 /**
@@ -63,6 +66,12 @@ return RectorConfig::configure()
 
         // This file configures the run; it is not part of the codebase being tidied.
         __DIR__.'/rector.php',
+
+        // php-cs-fixer owns `declare(strict_types=1)`. This rule adds it only where it can prove
+        // nothing relies on coercion, which is the careful answer and leaves the codebase split
+        // between files that have it and files that do not. Having one tool apply it everywhere is
+        // the clearer outcome, and leaving both enabled is how the two end up undoing each other.
+        SafeDeclareStrictTypesRector::class,
 
         // The constructors of the listeners and managers take arguments the container fills and
         // some that exist only so an application can pass something else. An argument that nothing

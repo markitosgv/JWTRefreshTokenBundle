@@ -24,7 +24,7 @@ final class RefreshAuthenticationFailureEvent extends Event
      */
     public function __construct(
         private readonly AuthenticationException $exception,
-        private Response $response
+        private Response $response,
     ) {
     }
 

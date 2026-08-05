@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the GesdinetJWTRefreshTokenBundle package.
  *
@@ -38,7 +40,7 @@ final class LogoutEventListener
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
         private readonly ExtractorInterface $refreshTokenExtractor,
         private readonly string $tokenParameterName,
-        array $cookieSettings
+        array $cookieSettings,
     ) {
         $this->cookieSettings = array_merge([
             'enabled' => false,
