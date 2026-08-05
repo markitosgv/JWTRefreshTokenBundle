@@ -15,7 +15,6 @@ use Rector\CodeQuality\Rector\Identical\FlipTypeControlToUseExclusiveTypeRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPromotedPropertyRector;
 use Rector\EarlyReturn\Rector\If_\ChangeOrIfContinueToMultiContinueRector;
-use Rector\Php84\Rector\MethodCall\NewMethodCallWithoutParenthesesRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
 use Rector\ValueObject\PhpVersion;
 
@@ -69,12 +68,6 @@ return RectorConfig::configure()
         // some that exist only so an application can pass something else. An argument that nothing
         // inside the bundle reads is not an unused one; removing it breaks every caller.
         RemoveUnusedPromotedPropertyRector::class,
-
-        // PHP 8.4 lets `new Foo()->bar()` drop the wrapping parentheses. The bundle requires 8.4,
-        // so this would parse — but it rewrites fifty files to prevent no bug and improve no type,
-        // and the older spelling is the one every reader already knows. Delete this line if the
-        // house style is to be the newest syntax available.
-        NewMethodCallWithoutParenthesesRector::class,
 
         // It rewrites `@return T` on a generic helper into the one class it happens to see, which
         // is what delegateOrFail() has a `@template` for: the whole point is that the return type

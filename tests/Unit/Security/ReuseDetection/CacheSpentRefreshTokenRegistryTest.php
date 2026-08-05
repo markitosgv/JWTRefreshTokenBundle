@@ -153,7 +153,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
         $pool->method('getItem')->willReturn($item);
         $pool->expects($this->once())->method('save')->with($item);
 
-        (new CacheSpentRefreshTokenRegistry($pool, 900))
+        new CacheSpentRefreshTokenRegistry($pool, 900)
             ->remember(RefreshToken::createForUserWithTtl('a-spent-token', UserCreator::create('someone'), 600));
     }
 

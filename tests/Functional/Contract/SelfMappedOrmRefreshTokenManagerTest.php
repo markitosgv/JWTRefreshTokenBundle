@@ -28,7 +28,7 @@ final class SelfMappedOrmRefreshTokenManagerTest extends ORMTestCase
     {
         parent::setUp();
 
-        (new SchemaTool($this->entityManager))->createSchema([
+        new SchemaTool($this->entityManager)->createSchema([
             $this->entityManager->getClassMetadata(SelfMappedRefreshToken::class),
             $this->entityManager->getClassMetadata(User::class),
         ]);

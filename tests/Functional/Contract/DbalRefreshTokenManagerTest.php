@@ -27,7 +27,7 @@ final class DbalRefreshTokenManagerTest extends TestCase
     {
         $this->connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
 
-        (new TableSchemaManager($this->connection, 'refresh_tokens', []))->createTable(true);
+        new TableSchemaManager($this->connection, 'refresh_tokens', [])->createTable(true);
     }
 
     protected function tearDown(): void

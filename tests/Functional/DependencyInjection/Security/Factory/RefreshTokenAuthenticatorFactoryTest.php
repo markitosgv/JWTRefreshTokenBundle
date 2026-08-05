@@ -41,7 +41,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage('check_path');
 
-        (new Processor())->process($treeBuilder->buildTree(), [[]]);
+        new Processor()->process($treeBuilder->buildTree(), [[]]);
     }
 
     public function test_is_registered_under_the_refresh_jwt_key(): void
@@ -59,7 +59,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
     public function test_is_tried_before_the_jwt_authenticator(): void
     {
         $this->assertGreaterThan(
-            (new JWTAuthenticatorFactory())->getPriority(),
+            new JWTAuthenticatorFactory()->getPriority(),
             $this->factory->getPriority()
         );
     }
@@ -113,7 +113,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
 
     public function test_configuration_is_rejected_on_a_node_that_cannot_hold_children(): void
     {
-        $node = (new TreeBuilder('refresh-jwt', 'scalar'))->getRootNode();
+        $node = new TreeBuilder('refresh-jwt', 'scalar')->getRootNode();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The "refresh-jwt" authenticator can only be configured on an array node');
@@ -295,7 +295,7 @@ final class RefreshTokenAuthenticatorFactoryTest extends TestCase
         $this->factory->addConfiguration($treeBuilder->getRootNode());
 
         /** @var array{check_path: string, provider?: string, success_handler?: string, failure_handler?: string, invalidate_token_on_logout: bool} $processed */
-        $processed = (new Processor())->process($treeBuilder->buildTree(), [$config + ['check_path' => '/api/token/refresh']]);
+        $processed = new Processor()->process($treeBuilder->buildTree(), [$config + ['check_path' => '/api/token/refresh']]);
 
         return $processed;
     }

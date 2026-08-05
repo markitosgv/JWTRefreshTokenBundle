@@ -19,7 +19,7 @@ final class SessionListerTest extends ORMTestCase
     {
         parent::setUp();
 
-        (new SchemaTool($this->entityManager))->createSchema([
+        new SchemaTool($this->entityManager)->createSchema([
             $this->entityManager->getClassMetadata(RefreshToken::class),
             $this->entityManager->getClassMetadata(User::class),
         ]);
@@ -95,7 +95,7 @@ final class SessionListerTest extends ORMTestCase
 
     public function test_reports_when_the_chain_itself_runs_out(): void
     {
-        $deadline = (new \DateTime())->setTimestamp(time() + 86400);
+        $deadline = new \DateTime()->setTimestamp(time() + 86400);
 
         $token = RefreshToken::createForUserWithTtl('a-token', UserCreator::create('someone'), 600);
         $token->setFamily('a-bounded-chain');

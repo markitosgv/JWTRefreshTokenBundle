@@ -183,7 +183,7 @@ class TableSchemaManagerTest extends TestCase
         $this->connection->insert('refresh_tokens', [
             'refresh_token' => 'test-token',
             'username' => 'testuser',
-            'valid' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s'),
+            'valid' => new \DateTime('+1 hour')->format('Y-m-d H:i:s'),
         ]);
 
         $count = $this->connection->fetchOne('SELECT COUNT(*) FROM refresh_tokens');
@@ -383,8 +383,8 @@ class TableSchemaManagerTest extends TestCase
      */
     public function testTwoManagedTablesCoexistInOneSchema(): void
     {
-        (new TableSchemaManager($this->connection, 'customer_tokens', []))->createTable();
-        (new TableSchemaManager($this->connection, 'employee_tokens', []))->createTable();
+        new TableSchemaManager($this->connection, 'customer_tokens', [])->createTable();
+        new TableSchemaManager($this->connection, 'employee_tokens', [])->createTable();
 
         $schemaManager = $this->connection->createSchemaManager();
 
@@ -401,8 +401,8 @@ class TableSchemaManagerTest extends TestCase
         $first = str_repeat('a', 60).'_one';
         $second = str_repeat('a', 60).'_two';
 
-        (new TableSchemaManager($this->connection, $first, []))->createTable();
-        (new TableSchemaManager($this->connection, $second, []))->createTable();
+        new TableSchemaManager($this->connection, $first, [])->createTable();
+        new TableSchemaManager($this->connection, $second, [])->createTable();
 
         $schemaManager = $this->connection->createSchemaManager();
 
@@ -428,7 +428,7 @@ class TableSchemaManagerTest extends TestCase
         $this->connection->insert('refresh_tokens', [
             'refresh_token' => 'duplicate-token',
             'username' => 'user1',
-            'valid' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s'),
+            'valid' => new \DateTime('+1 hour')->format('Y-m-d H:i:s'),
         ]);
 
         // Attempting to insert duplicate refresh_token should fail
@@ -437,7 +437,7 @@ class TableSchemaManagerTest extends TestCase
         $this->connection->insert('refresh_tokens', [
             'refresh_token' => 'duplicate-token',
             'username' => 'user2', // Different username but same token
-            'valid' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s'),
+            'valid' => new \DateTime('+1 hour')->format('Y-m-d H:i:s'),
         ]);
     }
 }

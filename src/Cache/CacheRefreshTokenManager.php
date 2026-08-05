@@ -194,7 +194,7 @@ final readonly class CacheRefreshTokenManager implements RefreshTokenManagerInte
         $token = new $class();
         $token->setRefreshToken($value);
         $token->setUsername($username);
-        $token->setValid((new \DateTime())->setTimestamp($valid));
+        $token->setValid(new \DateTime()->setTimestamp($valid));
 
         $family = $stored['family'] ?? null;
         $familyValid = $stored['familyValid'] ?? null;
@@ -203,7 +203,7 @@ final readonly class CacheRefreshTokenManager implements RefreshTokenManagerInte
             $token->setFamily($family);
 
             if (is_int($familyValid)) {
-                $token->setFamilyValid((new \DateTime())->setTimestamp($familyValid));
+                $token->setFamilyValid(new \DateTime()->setTimestamp($familyValid));
             }
         }
 

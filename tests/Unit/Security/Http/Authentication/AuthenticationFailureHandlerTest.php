@@ -53,7 +53,7 @@ final class AuthenticationFailureHandlerTest extends TestCase
 
         $response = $this->authenticationFailureHandler->onAuthenticationFailure(
             new Request(),
-            (new TooManyRefreshRequestsException())->setRetryAfter(new \DateTimeImmutable('@'.(time() + 42)))
+            new TooManyRefreshRequestsException()->setRetryAfter(new \DateTimeImmutable('@'.(time() + 42)))
         );
 
         $this->assertSame(Response::HTTP_TOO_MANY_REQUESTS, $response->getStatusCode());
@@ -86,7 +86,7 @@ final class AuthenticationFailureHandlerTest extends TestCase
 
         $response = $this->authenticationFailureHandler->onAuthenticationFailure(
             new Request(),
-            (new TooManyRefreshRequestsException())->setRetryAfter(new \DateTimeImmutable('@'.(time() - 60)))
+            new TooManyRefreshRequestsException()->setRetryAfter(new \DateTimeImmutable('@'.(time() - 60)))
         );
 
         $this->assertSame('0', $response->headers->get('Retry-After'));

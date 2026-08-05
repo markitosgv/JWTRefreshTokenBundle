@@ -50,7 +50,7 @@ final class CacheRefreshTokenManagerTest extends TestCase
 
         $token = RefreshToken::createForUserWithTtl('a-token-in-a-chain', UserCreator::create('someone'), 600);
         $token->setFamily('the-chain');
-        $token->setFamilyValid((new \DateTime())->setTimestamp(time() + 86400));
+        $token->setFamilyValid(new \DateTime()->setTimestamp(time() + 86400));
 
         $manager->save($token);
 

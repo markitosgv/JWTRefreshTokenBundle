@@ -154,8 +154,8 @@ final class OpenApiFactoryTest extends TestCase
     public function testLeavesOtherPathsAlone(): void
     {
         $paths = $this->emptySpecification()->getPaths();
-        $paths->addPath('/api/books', (new PathItem())->withPost(
-            (new Operation())->withOperationId('api_books_post')->withResponses([
+        $paths->addPath('/api/books', new PathItem()->withPost(
+            new Operation()->withOperationId('api_books_post')->withResponses([
                 Response::HTTP_OK => ['content' => ['application/json' => ['schema' => ['type' => 'object', 'properties' => ['title' => ['type' => 'string']]]]]],
             ])
         ));
@@ -175,8 +175,8 @@ final class OpenApiFactoryTest extends TestCase
     public function testLeavesALoginEndpointItCannotCompleteAlone(): void
     {
         $paths = $this->emptySpecification()->getPaths();
-        $paths->addPath(self::LOGIN_PATH, (new PathItem())->withPost(
-            (new Operation())->withOperationId('login_check_post')->withResponses([
+        $paths->addPath(self::LOGIN_PATH, new PathItem()->withPost(
+            new Operation()->withOperationId('login_check_post')->withResponses([
                 // No content, so nothing to add the refresh token to
                 Response::HTTP_OK => ['description' => 'User token created'],
             ])
@@ -190,8 +190,8 @@ final class OpenApiFactoryTest extends TestCase
     public function testLeavesALoginResponseThatIsNotAnArrayAlone(): void
     {
         $paths = $this->emptySpecification()->getPaths();
-        $paths->addPath(self::LOGIN_PATH, (new PathItem())->withPost(
-            (new Operation())->withOperationId('login_check_post')->withResponses([
+        $paths->addPath(self::LOGIN_PATH, new PathItem()->withPost(
+            new Operation()->withOperationId('login_check_post')->withResponses([
                 Response::HTTP_OK => 'not a response description at all',
             ])
         ));
@@ -272,8 +272,8 @@ final class OpenApiFactoryTest extends TestCase
     {
         $openApi = $this->emptySpecification();
 
-        $openApi->getPaths()->addPath(self::LOGIN_PATH, (new PathItem())->withPost(
-            (new Operation())
+        $openApi->getPaths()->addPath(self::LOGIN_PATH, new PathItem()->withPost(
+            new Operation()
                 ->withOperationId('login_check_post')
                 ->withTags(['Login Check'])
                 ->withResponses([

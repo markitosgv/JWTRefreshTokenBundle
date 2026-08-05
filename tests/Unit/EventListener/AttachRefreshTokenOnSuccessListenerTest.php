@@ -142,7 +142,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
         $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $this->requestStack,
@@ -154,7 +154,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             false,
             self::RETURN_EXPIRATION_PARAMETER_NAME,
             false
-        ))->attachRefreshToken($event);
+        )->attachRefreshToken($event);
     }
 
     /**
@@ -367,7 +367,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
         $this->extractor->method('getRefreshToken')->willReturn(null);
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $this->requestStack,
@@ -378,7 +378,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ['enabled' => true],
             false,
             self::RETURN_EXPIRATION_PARAMETER_NAME
-        ))->attachRefreshToken($event);
+        )->attachRefreshToken($event);
 
         $cookies = $response->headers->getCookies();
 
@@ -412,7 +412,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
         $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $this->requestStack,
@@ -424,7 +424,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             false,
             self::RETURN_EXPIRATION_PARAMETER_NAME,
             true
-        ))->attachRefreshToken($event);
+        )->attachRefreshToken($event);
     }
 
     public function testAttachesTheExpirationOfTheReusedToken(): void
@@ -618,7 +618,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ->method('setData')
             ->with($this->equalTo([]));
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $this->requestStack,
@@ -629,7 +629,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ['enabled' => true],
             self::RETURN_EXPIRATION,
             self::RETURN_EXPIRATION_PARAMETER_NAME
-        ))->attachRefreshToken($event);
+        )->attachRefreshToken($event);
     }
 
     /**
@@ -671,7 +671,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ->method('setData')
             ->with($this->equalTo([self::RETURN_EXPIRATION_PARAMETER_NAME => $expiration->getTimestamp()]));
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $this->requestStack,
@@ -682,7 +682,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             ['enabled' => true, 'http_only' => true, 'remove_token_from_body' => true],
             true,
             self::RETURN_EXPIRATION_PARAMETER_NAME
-        ))->attachRefreshToken($event);
+        )->attachRefreshToken($event);
 
         $cookies = $response->headers->getCookies();
 
@@ -992,7 +992,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
         $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $this->requestStack,
@@ -1008,7 +1008,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             null,
             null,
             $seconds
-        ))->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+        )->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
 
         return $issued;
     }
@@ -1083,7 +1083,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
         $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $this->requestStack,
@@ -1098,7 +1098,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             null,
             null,
             $registry
-        ))->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+        )->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
 
         $this->assertSame(['remembered', 'deleted'], $order);
     }
@@ -1273,7 +1273,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $extractor = $this->createStub(ExtractorInterface::class);
         $extractor->method('getRefreshToken')->willReturn(null);
 
-        (new AttachRefreshTokenOnSuccessListener(
+        new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
             self::TTL,
             $requestStack,
@@ -1282,7 +1282,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             $generator,
             $extractor,
             []
-        ))->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+        )->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
 
         return $issued;
     }

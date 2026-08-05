@@ -164,7 +164,7 @@ final class RefreshRateLimiterTest extends TestCase
             }
         };
 
-        (new RefreshRateLimiter($factory, RefreshRateLimiter::BY_TOKEN))
+        new RefreshRateLimiter($factory, RefreshRateLimiter::BY_TOKEN)
             ->check($this->requestFrom('203.0.113.1'), 'a-token-worth-stealing');
 
         $this->assertNotSame([], $seen);

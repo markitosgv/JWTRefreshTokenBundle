@@ -67,7 +67,7 @@ final readonly class OpenApiFactory implements OpenApiFactoryInterface
         $this->completeTheLoginResponse($openApi);
 
         foreach ($this->checkPaths as $checkPath) {
-            $openApi->getPaths()->addPath($checkPath, (new PathItem())->withPost($this->refreshOperation()));
+            $openApi->getPaths()->addPath($checkPath, new PathItem()->withPost($this->refreshOperation()));
         }
 
         return $openApi;
@@ -143,7 +143,7 @@ final readonly class OpenApiFactory implements OpenApiFactoryInterface
 
     private function refreshOperation(): Operation
     {
-        return (new Operation())
+        return new Operation()
             ->withOperationId('gesdinet_jwt_refresh_token_post')
             ->withTags(['Login Check'])
             ->withSummary('Exchanges a refresh token for a new JWT.')
@@ -175,7 +175,7 @@ final readonly class OpenApiFactory implements OpenApiFactoryInterface
 
     private function refreshRequestBody(): RequestBody
     {
-        return (new RequestBody())
+        return new RequestBody()
             ->withDescription('The refresh token issued alongside the JWT being replaced')
             ->withContent(new \ArrayObject([
                 'application/json' => new MediaType(new \ArrayObject([

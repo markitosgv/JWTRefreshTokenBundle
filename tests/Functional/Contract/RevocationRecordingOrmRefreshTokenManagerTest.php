@@ -37,7 +37,7 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
 
         $this->pool = new ArrayAdapter();
 
-        (new SchemaTool($this->entityManager))->createSchema([
+        new SchemaTool($this->entityManager)->createSchema([
             $this->entityManager->getClassMetadata(RefreshToken::class),
             $this->entityManager->getClassMetadata(User::class),
         ]);
@@ -58,7 +58,7 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
 
         $this->assertEqualsWithDelta(
             time(),
-            (new CacheJWTRevocationRegistry($this->pool, 3600))->revokedBefore('someone'),
+            new CacheJWTRevocationRegistry($this->pool, 3600)->revokedBefore('someone'),
             5
         );
     }
@@ -77,7 +77,7 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
 
         $manager->revokeAllButNewestForUser(UserCreator::create('someone'), 1);
 
-        $this->assertNull((new CacheJWTRevocationRegistry($this->pool, 3600))->revokedBefore('someone'));
+        $this->assertNull(new CacheJWTRevocationRegistry($this->pool, 3600)->revokedBefore('someone'));
     }
 
     /**
@@ -96,7 +96,7 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
 
         $manager->revokeFamily('a-chain');
 
-        $this->assertNull((new CacheJWTRevocationRegistry($this->pool, 3600))->revokedBefore('someone'));
+        $this->assertNull(new CacheJWTRevocationRegistry($this->pool, 3600)->revokedBefore('someone'));
     }
 
     public function test_says_so_when_the_manager_underneath_cannot_revoke_by_user(): void

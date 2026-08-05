@@ -100,7 +100,7 @@ trait FamilyAwareRefreshTokenManagerContract
 
         \assert($token instanceof FamilyAwareRefreshTokenInterface);
 
-        $deadline = (new \DateTime())->setTimestamp(time() + 86400);
+        $deadline = new \DateTime()->setTimestamp(time() + 86400);
         $token->setFamily('a-bounded-chain');
         $token->setFamilyValid($deadline);
 

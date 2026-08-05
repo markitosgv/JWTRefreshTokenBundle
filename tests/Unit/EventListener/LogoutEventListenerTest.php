@@ -54,7 +54,7 @@ final class LogoutEventListenerTest extends TestCase
             ->method('delete')
             ->with($this->equalTo($refreshToken));
 
-        (new LogoutEventListener($this->refreshTokenManager, $this->extractor, self::TOKEN_PARAMETER_NAME, []))
+        new LogoutEventListener($this->refreshTokenManager, $this->extractor, self::TOKEN_PARAMETER_NAME, [])
             ->onLogout($event);
 
         $this->assertStringContainsString('has been invalidated', (string) $event->getResponse()?->getContent());
@@ -88,7 +88,7 @@ final class LogoutEventListenerTest extends TestCase
             ->expects($this->never())
             ->method('delete');
 
-        (new LogoutEventListener($this->refreshTokenManager, $this->extractor, self::TOKEN_PARAMETER_NAME, []))
+        new LogoutEventListener($this->refreshTokenManager, $this->extractor, self::TOKEN_PARAMETER_NAME, [])
             ->onLogout($event);
 
         $this->assertStringContainsString('already invalid', (string) $event->getResponse()?->getContent(), 'The answer should not say the token exists');

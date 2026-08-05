@@ -68,7 +68,7 @@ final class CacheJWTRevocationRegistryTest extends TestCase
         $pool->method('getItem')->willReturn($item);
         $pool->expects($this->once())->method('save')->with($item);
 
-        (new CacheJWTRevocationRegistry($pool, 7200))->revokeIssuedBefore('someone', new \DateTimeImmutable());
+        new CacheJWTRevocationRegistry($pool, 7200)->revokeIssuedBefore('someone', new \DateTimeImmutable());
     }
 
     /**

@@ -22,7 +22,7 @@ final class RefreshTokenRepositoryTest extends ORMTestCase
     {
         parent::setUp();
 
-        (new SchemaTool($this->entityManager))->createSchema([
+        new SchemaTool($this->entityManager)->createSchema([
             $this->entityManager->getClassMetadata(RefreshToken::class),
             $this->entityManager->getClassMetadata(User::class),
         ]);

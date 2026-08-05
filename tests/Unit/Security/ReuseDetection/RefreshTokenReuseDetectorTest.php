@@ -34,7 +34,7 @@ final class RefreshTokenReuseDetectorTest extends TestCase
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
         $dispatcher->expects($this->never())->method('dispatch');
 
-        (new RefreshTokenReuseDetector($registry, $manager, $dispatcher))
+        new RefreshTokenReuseDetector($registry, $manager, $dispatcher)
             ->unknownTokenPresented('a-token-nobody-ever-had', Request::create('/token/refresh', 'POST'));
     }
 
@@ -144,7 +144,7 @@ final class RefreshTokenReuseDetectorTest extends TestCase
             }
         );
 
-        (new RefreshTokenReuseDetector($registry, $manager, $dispatcher))
+        new RefreshTokenReuseDetector($registry, $manager, $dispatcher)
             ->unknownTokenPresented('a-replayed-token', $request ?? Request::create('/token/refresh', 'POST'));
 
         return $dispatched;

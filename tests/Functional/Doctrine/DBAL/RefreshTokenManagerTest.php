@@ -436,7 +436,7 @@ class RefreshTokenManagerTest extends TestCase
         $columns = TableSchemaManager::getDefaultColumnConfig();
         unset($columns['family']);
 
-        (new TableSchemaManager($this->connection, 'tokens_without_families', $columns))->createTable(true);
+        new TableSchemaManager($this->connection, 'tokens_without_families', $columns)->createTable(true);
 
         $manager = new RefreshTokenManager(
             $this->connection,
@@ -467,7 +467,7 @@ class RefreshTokenManagerTest extends TestCase
         $columns = TableSchemaManager::getDefaultColumnConfig();
         unset($columns['family']);
 
-        (new TableSchemaManager($this->connection, 'tokens_without_families', $columns))->createTable(true);
+        new TableSchemaManager($this->connection, 'tokens_without_families', $columns)->createTable(true);
 
         $manager = new RefreshTokenManager(
             $this->connection,

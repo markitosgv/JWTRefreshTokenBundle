@@ -175,7 +175,7 @@ final class AttachRefreshTokenOnSuccessListener
 
         // Mutable, like the expiry the model already carries: the mapping that ships is Doctrine's
         // `datetime`, which refuses a DateTimeImmutable outright
-        return (new \DateTime())->setTimestamp(time() + $maxSessionLifetime);
+        return new \DateTime()->setTimestamp(time() + $maxSessionLifetime);
     }
 
     /**

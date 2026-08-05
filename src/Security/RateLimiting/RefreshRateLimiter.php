@@ -57,7 +57,7 @@ final readonly class RefreshRateLimiter
             return;
         }
 
-        throw (new TooManyRefreshRequestsException())->setRetryAfter($limit->getRetryAfter());
+        throw new TooManyRefreshRequestsException()->setRetryAfter($limit->getRetryAfter());
     }
 
     /**

@@ -26,7 +26,7 @@ final class GesdinetJWTRefreshTokenBundleTest extends TestCase
 
     public function test_registers_the_pass_collecting_the_tagged_extractors(): void
     {
-        (new GesdinetJWTRefreshTokenBundle())->build($this->container);
+        new GesdinetJWTRefreshTokenBundle()->build($this->container);
 
         $passes = array_filter(
             $this->container->getCompiler()->getPassConfig()->getPasses(),
@@ -38,7 +38,7 @@ final class GesdinetJWTRefreshTokenBundleTest extends TestCase
 
     public function test_registers_the_authenticator_factory_on_the_security_extension(): void
     {
-        (new GesdinetJWTRefreshTokenBundle())->build($this->container);
+        new GesdinetJWTRefreshTokenBundle()->build($this->container);
 
         $keys = array_map(
             static fn (AuthenticatorFactoryInterface $factory): string => $factory->getKey(),
@@ -50,6 +50,6 @@ final class GesdinetJWTRefreshTokenBundleTest extends TestCase
 
     public function test_path_points_at_the_root_of_the_bundle(): void
     {
-        $this->assertFileExists((new GesdinetJWTRefreshTokenBundle())->getPath().'/composer.json');
+        $this->assertFileExists(new GesdinetJWTRefreshTokenBundle()->getPath().'/composer.json');
     }
 }
