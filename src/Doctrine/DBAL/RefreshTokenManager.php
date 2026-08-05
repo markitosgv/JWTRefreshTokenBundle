@@ -16,13 +16,14 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyAwareRefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var array<string, array{name: string, type: string}>
@@ -282,6 +283,21 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
         return (int) $this->connection->delete(
             $this->quoteTableIdentifier(),
             [$this->quoteColumnIdentifier('username') => $user->getUserIdentifier()]
+        );
+    }
+
+    #[\Override]
+    public function revokeFamily(string $family): int
+    {
+        if (!$this->hasFamilyColumn()) {
+            // Deleting nothing and reporting it would read as "that chain held no tokens", which is
+            // the same answer a table that simply cannot record chains would give to every call
+            throw new \LogicException(sprintf('The "dbal_columns" map for table "%s" names no "family" column, so there are no chains to revoke.', $this->tableName));
+        }
+
+        return (int) $this->connection->delete(
+            $this->quoteTableIdentifier(),
+            [$this->quoteColumnIdentifier('family') => $family]
         );
     }
 

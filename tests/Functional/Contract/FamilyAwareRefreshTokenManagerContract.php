@@ -3,6 +3,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyAwareRefreshTokenInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 
@@ -83,6 +84,64 @@ trait FamilyAwareRefreshTokenManagerContract
         );
 
         $this->assertSame(['one-chain', 'one-chain', 'another-chain'], $families);
+    }
+
+    /**
+     * What ending a session means. Revoking the token the client holds does not do it: with
+     * single_use that token is replaced on every refresh, so the one you revoked is usually already
+     * gone while the chain carries on.
+     */
+    public function test_revokes_every_token_of_one_chain_and_leaves_the_others(): void
+    {
+        $manager = $this->manager();
+
+        $this->storeTokenInFamily($manager, 'first-of-the-doomed-chain', 'the-doomed-chain');
+        $this->storeTokenInFamily($manager, 'second-of-the-doomed-chain', 'the-doomed-chain');
+        $this->storeTokenInFamily($manager, 'of-another-chain', 'another-chain');
+
+        \assert($manager instanceof FamilyRefreshTokenManagerInterface);
+
+        $this->assertSame(2, $manager->revokeFamily('the-doomed-chain'));
+
+        $this->forgetLoadedObjects();
+
+        $this->assertNull($manager->get('first-of-the-doomed-chain'));
+        $this->assertNull($manager->get('second-of-the-doomed-chain'));
+        $this->assertNotNull($manager->get('of-another-chain'), 'Another session must be untouched');
+    }
+
+    public function test_revoking_a_chain_that_holds_nothing_reports_nothing(): void
+    {
+        $manager = $this->manager();
+
+        $this->storeTokenInFamily($manager, 'of-a-chain-that-stays', 'a-chain-that-stays');
+
+        \assert($manager instanceof FamilyRefreshTokenManagerInterface);
+
+        $this->assertSame(0, $manager->revokeFamily('a-chain-that-never-existed'));
+        $this->assertNotNull($manager->get('of-a-chain-that-stays'));
+    }
+
+    /**
+     * A token stored before families existed has a null family. Revoking by family must not sweep
+     * those up as though they all belonged to one chain.
+     */
+    public function test_does_not_treat_tokens_without_a_family_as_one_chain(): void
+    {
+        $manager = $this->manager();
+
+        $class = $manager->getClass();
+        $manager->save($class::createForUserWithTtl('one-with-no-family', UserCreator::create('someone'), 600));
+        $manager->save($class::createForUserWithTtl('another-with-no-family', UserCreator::create('someone'), 600));
+
+        \assert($manager instanceof FamilyRefreshTokenManagerInterface);
+
+        $this->assertSame(0, $manager->revokeFamily(''));
+
+        $this->forgetLoadedObjects();
+
+        $this->assertNotNull($manager->get('one-with-no-family'));
+        $this->assertNotNull($manager->get('another-with-no-family'));
     }
 
     private function storeTokenInFamily(RefreshTokenManagerInterface $manager, string $token, string $family): void

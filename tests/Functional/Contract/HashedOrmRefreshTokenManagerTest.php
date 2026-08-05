@@ -4,6 +4,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\HashedRefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -144,6 +145,36 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
         $this->assertCount(1, $manager->revokeAllInvalid());
         $this->assertSame(1, $manager->revokeAllButNewestForUser(UserCreator::create('someone'), 1));
         $this->assertSame(1, $manager->revokeAllForUser(UserCreator::create('someone')));
+    }
+
+    /**
+     * The family is not the token, so it is not hashed on the way through. Hashing what the chain is
+     * keyed by would leave the tokens of one chain unable to find each other.
+     */
+    public function test_revokes_a_chain_through_the_manager_underneath(): void
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof FamilyRefreshTokenManagerInterface);
+
+        foreach (['one', 'two'] as $value) {
+            $token = RefreshToken::createForUserWithTtl($value, UserCreator::create('someone'), 600);
+            $token->setFamily('the-chain');
+            $manager->save($token);
+        }
+
+        $this->assertSame(2, $manager->revokeFamily('the-chain'));
+        $this->assertNull($manager->get('one'));
+    }
+
+    public function test_says_so_when_the_manager_underneath_cannot_revoke_a_chain(): void
+    {
+        $bare = new HashedRefreshTokenManager($this->createStub(RefreshTokenManagerInterface::class));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('does not implement');
+
+        $bare->revokeFamily('a-chain');
     }
 
     public function test_deletes_the_token_it_was_given(): void

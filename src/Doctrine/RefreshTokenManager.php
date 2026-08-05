@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -20,7 +21,7 @@ use DateTimeInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var class-string<RefreshTokenInterface>
@@ -195,6 +196,16 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
         }
 
         return $this->repository->deleteByUser($user);
+    }
+
+    #[\Override]
+    public function revokeFamily(string $family): int
+    {
+        if (!$this->repository instanceof DeleteRefreshTokenFamilyRepositoryInterface) {
+            throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, DeleteRefreshTokenFamilyRepositoryInterface::class));
+        }
+
+        return $this->repository->deleteByFamily($family);
     }
 
     #[\Override]

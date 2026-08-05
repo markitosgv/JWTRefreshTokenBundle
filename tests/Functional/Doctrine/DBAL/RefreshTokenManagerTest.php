@@ -459,6 +459,31 @@ class RefreshTokenManagerTest extends TestCase
     }
 
     /**
+     * Reporting nothing revoked would read as "that chain held no tokens", which is the answer a
+     * table with no family column would give to every call ever made.
+     */
+    public function testRefusesToRevokeAChainInATableThatCannotRecordOne(): void
+    {
+        $columns = TableSchemaManager::getDefaultColumnConfig();
+        unset($columns['family']);
+
+        (new TableSchemaManager($this->connection, 'tokens_without_families', $columns))->createTable(true);
+
+        $manager = new RefreshTokenManager(
+            $this->connection,
+            RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
+            'tokens_without_families',
+            RefreshToken::class,
+            $columns
+        );
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('names no "family" column');
+
+        $manager->revokeFamily('a-chain');
+    }
+
+    /**
      * Saving twice takes the update path rather than the insert, which writes the family separately.
      */
     public function testUpdatesTheFamilyOfATokenAlreadyStored(): void

@@ -74,6 +74,18 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
         $this->manager()->revokeAllButNewestForUser(UserCreator::create('someone'), 1);
     }
 
+    /**
+     * Revoking a chain is a query of its own, so it names its own interface rather than the one the
+     * other two revocations need.
+     */
+    public function test_says_which_interface_revoking_a_chain_needs(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('DeleteRefreshTokenFamilyRepositoryInterface');
+
+        $this->manager()->revokeFamily('a-chain');
+    }
+
     private function manager(): RefreshTokenManager
     {
         $repository = $this->entityManager->getRepository(RefreshToken::class);

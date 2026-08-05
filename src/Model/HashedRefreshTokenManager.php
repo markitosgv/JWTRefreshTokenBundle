@@ -30,7 +30,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * issued before this was turned on keep working: they are looked up as they are, and rewritten
  * hashed the first time they are used.
  */
-final readonly class HashedRefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class HashedRefreshTokenManager implements FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     private const PREFIX = 'sha256$';
 
@@ -130,6 +130,15 @@ final readonly class HashedRefreshTokenManager implements ListRefreshTokenManage
     public function revokeAllButNewestForUser(UserInterface $user, int $keep): int
     {
         return $this->delegateOrFail(RevokeRefreshTokenManagerInterface::class)->revokeAllButNewestForUser($user, $keep);
+    }
+
+    /**
+     * The family is not the token, so nothing here needs hashing: it goes straight through.
+     */
+    #[\Override]
+    public function revokeFamily(string $family): int
+    {
+        return $this->delegateOrFail(FamilyRefreshTokenManagerInterface::class)->revokeFamily($family);
     }
 
     #[\Override]
