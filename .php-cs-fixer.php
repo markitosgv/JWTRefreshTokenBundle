@@ -59,19 +59,11 @@ return new PhpCsFixer\Config()
         // ---- Rules this project wants, or refuses ------------------------------------------
 
         'ordered_imports' => ['sort_algorithm' => 'alpha', 'imports_order' => ['class', 'function', 'const']],
-        // @Symfony separates the class imports from the function ones with a blank line; the hosted
-        // check does not. Matched to the hosted one, since that is what gates a pull request.
-        'blank_line_between_import_groups' => false,
-
-        // A comment sitting before a `} elseif` belongs to the branch above it, not to the chain.
-        // @Symfony's default sticks it to the outer indentation and the hosted check indents it
-        // with the block, which is where the @codeCoverageIgnore comments in the extension read
-        // right. Matched to the hosted one.
-        'statement_indentation' => ['stick_comment_to_next_continuous_control_statement' => false],
-
-        // An anonymous class gets its parentheses. @Symfony leaves them off and the hosted check
-        // puts them on, and a disagreement here is two tools editing the same line forever.
-        'new_with_parentheses' => ['anonymous_class' => true, 'named_class' => true],
+        // Three rules where the hosted check deviates from @Symfony: it drops the blank line
+        // between the class and function import groups, puts parentheses on anonymous classes, and
+        // indents a comment before a `} elseif` with the block rather than the chain. Symfony's
+        // convention wins, so none of them is overridden here and .styleci.yml brings the hosted
+        // check into line instead.
         'phpdoc_separation' => true,
         'no_unused_imports' => true,
 
@@ -80,14 +72,17 @@ return new PhpCsFixer\Config()
         // 10 and psalm at its strictest on the strength of them, so nothing may strip them.
         'no_superfluous_phpdoc_tags' => false,
 
-        // A comment above `return RectorConfig::configure()` documents a returned closure, not a
-        // structure, so it is a comment and not a docblock — which is what the hosted check makes
-        // of it too. The exceptions are what the analysers read: an inline `/** @var Foo&MockObject
-        // $x */` is the only thing telling phpstan what a mock is, and turning those into comments
-        // would take its knowledge of the test suite away.
-        'phpdoc_to_comment' => ['ignored_tags' => ['var', 'phpstan-var', 'psalm-var', 'template', 'psalm-suppress', 'phpstan-ignore']],
+        // This one is @Symfony's own — allow_before_return_statement is false there too, so a
+        // comment above `return RectorConfig::configure()` is a comment. Only the ignored tags are
+        // added: an inline `/** @var Foo&MockObject $x */` is the only thing telling phpstan what a
+        // mock is, and turning those into comments would take its knowledge of the suite away.
+        'phpdoc_to_comment' => [
+            'allow_before_return_statement' => false,
+            'ignored_tags' => ['var', 'phpstan-var', 'psalm-var', 'template', 'psalm-suppress', 'phpstan-ignore'],
+        ],
 
-        // The other direction, which is what kept turning those file comments back into docblocks.
+        // Not part of @Symfony; it arrives with the risky set and turns those file comments back
+        // into docblocks, so the two rules were taking turns on every run.
         'comment_to_phpdoc' => false,
 
         // `/** @var Foo&MockObject $x */` in the tests is what tells the analysers what a mock is.

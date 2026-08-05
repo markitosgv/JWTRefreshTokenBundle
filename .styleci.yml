@@ -13,14 +13,26 @@ risky: true
 
 enabled:
   - declare_strict_types
-  - new_with_parentheses
   - blank_line_before_namespace
+  # Symfony puts a blank line between the class imports and the function ones. StyleCI's snapshot
+  # of the preset predates the rule, so it has to be asked for by name.
+  - blank_line_between_import_groups
   - ordered_imports
   - phpdoc_separation
   - no_unused_imports
   - yoda_style
 
 disabled:
+  # Three where StyleCI's snapshot of the symfony preset deviates from the current convention.
+  # Symfony's is what this project follows, so they are switched off here and .php-cs-fixer.php
+  # is left on @Symfony's own defaults for them.
+  #
+  # An anonymous class takes no parentheses: `new class extends Foo {}`.
+  - new_with_braces
+  - new_with_parentheses
+  # A comment before a `} elseif` is indented with the chain, not with the block above it.
+  - statement_indentation
+
   # The docblocks carry types PHP has no syntax for — positive-int, class-string<T>, list<Session>,
   # array shapes. phpstan runs at level 10 and psalm at its strictest on the strength of them, so
   # nothing here may decide they are superfluous.

@@ -167,18 +167,18 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
     {
         if (null !== $mergedConfig['object_manager']) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', $mergedConfig['object_manager']);
-            // @codeCoverageIgnoreStart
-            // willBeAvailable() asks whether a package is a runtime dependency of something
-            // installed, and names doctrine-bundle and mongodb-odm-bundle as the packages that
-            // would make it so. Neither is a dependency here — the tests build entity and document
-            // managers directly — so both of these are false whatever is installed. Adding those
-            // bundles to require-dev would pull a Symfony application's worth of packages to reach
-            // two setAlias() calls.
+        // @codeCoverageIgnoreStart
+        // willBeAvailable() asks whether a package is a runtime dependency of something
+        // installed, and names doctrine-bundle and mongodb-odm-bundle as the packages that
+        // would make it so. Neither is a dependency here — the tests build entity and document
+        // managers directly — so both of these are false whatever is installed. Adding those
+        // bundles to require-dev would pull a Symfony application's worth of packages to reach
+        // two setAlias() calls.
         } elseif (ContainerBuilder::willBeAvailable('doctrine/orm', EntityManager::class, ['doctrine/doctrine-bundle'])) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine.orm.entity_manager');
         } elseif (ContainerBuilder::willBeAvailable('doctrine/mongodb-odm', DocumentManager::class, ['doctrine/mongodb-odm-bundle'])) {
             $container->setAlias('gesdinet_jwt_refresh_token.object_manager', 'doctrine_mongodb.odm.document_manager');
-            // @codeCoverageIgnoreEnd
+        // @codeCoverageIgnoreEnd
         } else {
             throw new RuntimeException('The "object_manager" node must be configured when neither "doctrine/orm" or "doctrine/mongodb-odm" are installed.');
         }

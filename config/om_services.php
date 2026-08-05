@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
