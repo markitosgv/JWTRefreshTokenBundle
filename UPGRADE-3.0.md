@@ -176,6 +176,44 @@ when the first token would have expired, so the ceiling and the ttl are forced t
 number. `max_session_lifetime` separates them, which is usually what people wanted: a short-lived
 token that rotates often, inside a session that ends on a schedule of its own.
 
+## New: withdrawing a user's JWTs when their sessions are revoked
+
+Off by default.
+
+```yaml
+gesdinet_jwt_refresh_token:
+    block_jwts_on_revocation:
+        enabled: true
+        cache: cache.app
+        ttl: 3600            # at least your lexik_jwt_authentication.token_ttl
+        user_claim: username # Lexik's user_id_claim
+```
+
+`revokeAllForUser()` is what you call after a password reset or when disabling an account, and on its
+own it only takes the refresh tokens away: every JWT already issued keeps working until it expires.
+That is the wrong outcome at exactly the moment it matters.
+
+**Lexik's blocklist cannot do this**, which is worth saying plainly. It is keyed by `jti`, so it
+withdraws a token you are holding — and the tokens that need withdrawing here are in clients, where
+you cannot see them. What can be recorded instead is *when* the revocation happened, per user, and
+any JWT whose `iat` is at or before that moment is refused on decode.
+
+`ttl` only has to outlive the JWTs issued before the mark, which is why it is your JWT ttl rather
+than your refresh token ttl. **Set it too short and the oldest of those tokens start being accepted
+again**, which is the one way to get this wrong.
+
+Deliberately narrow:
+
+* Only `revokeAllForUser()`. `revokeAllButNewestForUser()` prunes older sessions while the user
+  carries on with the newest, so marking there would sign them out of the device in their hand.
+* `revokeFamily()` — ending one session — marks nothing. Nothing on a JWT says which chain issued it,
+  so there is no way to refuse only that session's tokens.
+* A payload without both the user claim and `iat` is left to the rest of the verification rather than
+  refused, so an application whose tokens carry different claims is unaffected.
+
+The mark is read on every authenticated request, so use a fast pool, and it has to be shared between
+your processes: a local one leaves a revoked user signed in wherever the mark did not reach.
+
 ## New: listing and ending a user's sessions
 
 `Gesdinet\JWTRefreshTokenBundle\Session\SessionLister` is registered with every Doctrine backend and

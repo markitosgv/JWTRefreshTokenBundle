@@ -211,6 +211,42 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertContainerBuilderHasAlias(SessionLister::class, 'gesdinet_jwt_refresh_token.session_lister');
     }
 
+    public function test_jwts_are_not_blocked_on_revocation_unless_it_is_asked_for(): void
+    {
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
+
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.jwt_revocation_registry'));
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.event_listener.reject_jwts_issued_before_revocation'));
+    }
+
+    /**
+     * It decorates, so it works over whichever backend is in use and every alias still resolves to
+     * the recording manager.
+     */
+    public function test_blocking_jwts_on_revocation_wraps_the_manager_and_listens_on_decode(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'block_jwts_on_revocation' => ['enabled' => true, 'cache' => 'cache.redis', 'ttl' => 7200, 'user_claim' => 'email'],
+        ]);
+
+        $decoration = $this->container->getDefinition('gesdinet_jwt_refresh_token.revocation_recording_refresh_token_manager')->getDecoratedService();
+
+        $this->assertNotNull($decoration);
+        $this->assertSame('gesdinet_jwt_refresh_token.refresh_token_manager', $decoration[0]);
+
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.cache', 'cache.redis');
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.ttl', 7200);
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.user_claim', 'email');
+
+        $this->assertContainerBuilderHasServiceDefinitionWithTag(
+            'gesdinet_jwt_refresh_token.event_listener.reject_jwts_issued_before_revocation',
+            'kernel.event_listener',
+            ['event' => 'lexik_jwt_authentication.on_jwt_decoded']
+        );
+    }
+
     public function test_the_endpoint_is_not_rate_limited_unless_it_is_asked_for(): void
     {
         $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
