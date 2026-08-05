@@ -17,7 +17,6 @@ use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPromotedPropertyRector;
 use Rector\EarlyReturn\Rector\If_\ChangeOrIfContinueToMultiContinueRector;
 use Rector\Php84\Rector\MethodCall\NewMethodCallWithoutParenthesesRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
-use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
 use Rector\ValueObject\PhpVersion;
 
 /**
@@ -70,12 +69,6 @@ return RectorConfig::configure()
         // some that exist only so an application can pass something else. An argument that nothing
         // inside the bundle reads is not an unused one; removing it breaks every caller.
         RemoveUnusedPromotedPropertyRector::class,
-
-        // `declare(strict_types=1)` is not a style choice and does not belong in a tooling run. It
-        // changes how every call this bundle makes coerces its arguments, which is a behavioural
-        // change across 103 files, and it wants its own decision, its own commit and a release to
-        // land in. Turn this off deliberately if that is the decision; do not let Rector make it.
-        SafeDeclareStrictTypesRector::class,
 
         // PHP 8.4 lets `new Foo()->bar()` drop the wrapping parentheses. The bundle requires 8.4,
         // so this would parse — but it rewrites fifty files to prevent no bug and improve no type,

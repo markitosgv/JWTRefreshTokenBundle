@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Entity;
 
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;

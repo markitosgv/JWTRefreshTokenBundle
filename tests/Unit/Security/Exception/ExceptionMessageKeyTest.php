@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Security\Exception;
 
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;

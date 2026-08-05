@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit\Event;
 
 use Gesdinet\JWTRefreshTokenBundle\Event\RefreshTokenNotFoundEvent;
