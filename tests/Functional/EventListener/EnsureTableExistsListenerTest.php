@@ -6,13 +6,13 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\EventListener\EnsureTableExistsListener;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\TestLogger;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 final class EnsureTableExistsListenerTest extends TestCase
 {

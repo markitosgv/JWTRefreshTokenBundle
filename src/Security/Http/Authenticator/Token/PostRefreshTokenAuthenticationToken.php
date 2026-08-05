@@ -13,8 +13,8 @@ namespace Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use UnexpectedValueException;
 use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
+use UnexpectedValueException;
 
 final class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
 {

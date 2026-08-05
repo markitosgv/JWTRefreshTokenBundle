@@ -2,8 +2,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Unit;
 
-use DateTimeInterface;
 use DateTime;
+use DateTimeInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
 use PHPUnit\Framework\TestCase;

@@ -11,8 +11,8 @@
 
 namespace Gesdinet\JWTRefreshTokenBundle\Model;
 
-use DateTimeInterface;
 use DateTime;
+use DateTimeInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
