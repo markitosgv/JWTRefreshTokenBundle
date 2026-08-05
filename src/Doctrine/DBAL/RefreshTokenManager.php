@@ -15,6 +15,7 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Gesdinet\JWTRefreshTokenBundle\Model\FamilyAwareRefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -116,6 +117,16 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
             $instance->setValid($valid);
         }
 
+        // A family only reaches the model when the token class has somewhere to put it; a class of
+        // an application's own need not, and a row predating the column has nothing to put there
+        if ($instance instanceof FamilyAwareRefreshTokenInterface && $this->hasFamilyColumn()) {
+            $family = $data[$this->getColumnName('family')] ?? null;
+
+            if (is_string($family)) {
+                $instance->setFamily($family);
+            }
+        }
+
         $this->assignIdentifier($instance, $data[$this->getColumnName('id')] ?? $data['id'] ?? null);
 
         return $instance;
@@ -196,27 +207,41 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
         ];
         $types = ['valid' => 'datetime'];
 
+        $writesFamily = $this->hasFamilyColumn() && $refreshToken instanceof FamilyAwareRefreshTokenInterface;
+
+        if ($writesFamily) {
+            $parameters['family'] = $refreshToken->getFamily();
+        }
+
         // Updating first tells us whether the row is there, so the read the other way round needs
         // does not happen. The token string is the natural key, so at most one row matches.
-        $updated = $this->connection->createQueryBuilder()
+        $update = $this->connection->createQueryBuilder()
             ->update($this->quoteTableIdentifier())
             ->set($this->quoteColumnIdentifier('username'), ':username')
             ->set($this->quoteColumnIdentifier('valid'), ':valid')
-            ->where($this->quoteColumnIdentifier('refreshToken').' = :refresh_token')
-            ->setParameters($parameters, $types)
-            ->executeStatement();
+            ->where($this->quoteColumnIdentifier('refreshToken').' = :refresh_token');
 
-        if ($updated > 0) {
+        if ($writesFamily) {
+            $update->set($this->quoteColumnIdentifier('family'), ':family');
+        }
+
+        if ($update->setParameters($parameters, $types)->executeStatement() > 0) {
             return;
+        }
+
+        $values = [
+            $this->quoteColumnIdentifier('refreshToken') => ':refresh_token',
+            $this->quoteColumnIdentifier('username') => ':username',
+            $this->quoteColumnIdentifier('valid') => ':valid',
+        ];
+
+        if ($writesFamily) {
+            $values[$this->quoteColumnIdentifier('family')] = ':family';
         }
 
         $this->connection->createQueryBuilder()
             ->insert($this->quoteTableIdentifier())
-            ->values([
-                $this->quoteColumnIdentifier('refreshToken') => ':refresh_token',
-                $this->quoteColumnIdentifier('username') => ':username',
-                $this->quoteColumnIdentifier('valid') => ':valid',
-            ])
+            ->values($values)
             ->setParameters($parameters, $types)
             ->executeStatement();
     }
@@ -421,13 +446,29 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
 
     private function query(): QueryBuilder
     {
+        $columns = [
+            $this->quoteColumnIdentifier('id'),
+            $this->quoteColumnIdentifier('refreshToken'),
+            $this->quoteColumnIdentifier('username'),
+            $this->quoteColumnIdentifier('valid'),
+        ];
+
+        // Only selected when it is configured: a dbal_columns map written before families existed
+        // names no family column, and asking for one the table does not have fails every read
+        if ($this->hasFamilyColumn()) {
+            $columns[] = $this->quoteColumnIdentifier('family');
+        }
+
         return $this->connection->createQueryBuilder()
-            ->select(
-                $this->quoteColumnIdentifier('id'),
-                $this->quoteColumnIdentifier('refreshToken'),
-                $this->quoteColumnIdentifier('username'),
-                $this->quoteColumnIdentifier('valid')
-            )
+            ->select(...$columns)
             ->from($this->quoteTableIdentifier());
+    }
+
+    /**
+     * @psalm-mutation-free
+     */
+    private function hasFamilyColumn(): bool
+    {
+        return isset($this->columnConfig['family']);
     }
 }

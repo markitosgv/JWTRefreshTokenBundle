@@ -98,6 +98,10 @@ final readonly class TableSchemaManager
                 $column->setLength(255)->setNotnull(true);
             } elseif ('valid' === $alias) {
                 $column->setNotnull(true);
+            } elseif ('family' === $alias) {
+                // Nullable because a token stored before the column existed has no chain to name,
+                // and because a token class of your own need not have families at all
+                $column->setLength(32)->setNotnull(false);
             }
         }
 
@@ -174,6 +178,10 @@ final readonly class TableSchemaManager
             'valid' => [
                 'name' => 'valid',
                 'type' => Types::DATETIME_MUTABLE,
+            ],
+            'family' => [
+                'name' => 'family',
+                'type' => Types::STRING,
             ],
         ];
     }

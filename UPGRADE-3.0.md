@@ -100,6 +100,56 @@ gesdinet_jwt_refresh_token:
         # ...
 ```
 
+## Refresh tokens have a family, and that means a migration
+
+**This one needs a schema change before the application will run.** The token classes that ship with
+the bundle gained a `family` column, and Doctrine reads every mapped field, so until the column is
+there the first query fails.
+
+```bash
+php bin/console doctrine:migrations:diff
+php bin/console doctrine:migrations:migrate
+```
+
+The column is `VARCHAR(32) NULL`. Existing rows keep a null family, which is read as "this token
+belongs to no chain" — they carry on working, and the tokens issued after them get families
+normally. For the DBAL backend, tables the bundle creates itself get the column, but a table already
+in place does not:
+
+```sql
+ALTER TABLE refresh_tokens ADD family VARCHAR(32) NULL;
+```
+
+MongoDB needs nothing; a missing field reads as null.
+
+**What it is for.** A token issued in place of another carries the family of the one it replaced, so
+a login and every refresh descending from it share one value. Without it the bundle holds a set of
+tokens with nothing relating them, and "end this session" can only mean "delete this one token" —
+which, if the client has refreshed since, is a token that no longer exists while the session carries
+on. It is what `single_use` rotation needs to be more than a moving target.
+
+Recommended, since every family lookup is a query on it — the mapped superclass cannot declare it,
+so it goes on your entity:
+
+```php
+#[ORM\Entity]
+#[ORM\Index(fields: ['family'])]
+class RefreshToken extends BaseRefreshToken
+{
+}
+```
+
+**If you bring your own token class**, nothing changes and nothing breaks: families live in
+`Model\FamilyAwareRefreshTokenInterface`, which is separate from `RefreshTokenInterface` precisely so
+that a class written against the latter is untouched. To opt in, implement the interface, use
+`Model\RefreshTokenFamilyTrait`, and map the property. Mapping it is the part that matters — an
+unmapped property satisfies the interface and silently loses the value on every read, which is worse
+than not having families at all.
+
+**If you configure `dbal_columns`**, add a `family` entry to gain families, or leave the map as it is
+to carry on without them. A map that does not name the column is taken to mean the table has none,
+and no query goes near it.
+
 ## DBAL index names now include the table name
 
 Only affects the DBAL backend, and only tables created from now on.

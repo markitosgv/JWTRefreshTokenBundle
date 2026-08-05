@@ -426,6 +426,58 @@ class RefreshTokenManagerTest extends TestCase
     }
 
     /**
+     * A `dbal_columns` map written before families existed names no family column, and the table it
+     * describes has none. Reading or writing one would fail every query against such a table, so a
+     * map without it is taken to mean the backend has no families rather than that it should make
+     * the column up.
+     */
+    public function testWorksAgainstATableWithNoFamilyColumn(): void
+    {
+        $columns = TableSchemaManager::getDefaultColumnConfig();
+        unset($columns['family']);
+
+        (new TableSchemaManager($this->connection, 'tokens_without_families', $columns))->createTable(true);
+
+        $manager = new RefreshTokenManager(
+            $this->connection,
+            RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE,
+            'tokens_without_families',
+            RefreshToken::class,
+            $columns
+        );
+
+        $token = RefreshToken::createForUserWithTtl('a-token-with-nowhere-to-put-a-family', UserCreator::create('someone'), 600);
+        $token->setFamily('a-family-that-cannot-be-stored');
+
+        $manager->save($token);
+
+        $stored = $manager->get('a-token-with-nowhere-to-put-a-family');
+
+        $this->assertNotNull($stored, 'The token stores and reads back as it always did');
+        $this->assertInstanceOf(RefreshToken::class, $stored);
+        $this->assertNull($stored->getFamily(), 'There was nowhere to keep the family, so none comes back');
+    }
+
+    /**
+     * Saving twice takes the update path rather than the insert, which writes the family separately.
+     */
+    public function testUpdatesTheFamilyOfATokenAlreadyStored(): void
+    {
+        $token = RefreshToken::createForUserWithTtl('a-token-saved-twice', UserCreator::create('someone'), 600);
+        $token->setFamily('the-chain-it-started-in');
+
+        $this->manager->save($token);
+
+        $token->setFamily('the-chain-it-was-moved-to');
+        $this->manager->save($token);
+
+        $stored = $this->manager->get('a-token-saved-twice');
+
+        $this->assertInstanceOf(RefreshToken::class, $stored);
+        $this->assertSame('the-chain-it-was-moved-to', $stored->getFamily());
+    }
+
+    /**
      * The batch revocation runs in a transaction, so a statement failing part way through has to
      * leave the table as it was rather than half cleared.
      */

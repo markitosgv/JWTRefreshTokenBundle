@@ -19,6 +19,7 @@ final class DbalRefreshTokenManagerTest extends TestCase
     use RefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use FamilyAwareRefreshTokenManagerContract;
 
     private Connection $connection;
 
@@ -40,6 +41,13 @@ final class DbalRefreshTokenManagerTest extends TestCase
     protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
     {
         return new RefreshTokenManager($this->connection, $batchSize, 'refresh_tokens', RefreshToken::class);
+    }
+
+    /**
+     * Nothing sits between this manager and the database: every read is already a real one.
+     */
+    protected function forgetLoadedObjects(): void
+    {
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface
