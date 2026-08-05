@@ -425,7 +425,7 @@ sessions together and, with `single_use` on, log one device out whenever another
 
 So the table grows with logins, and it is meant to be emptied on a schedule rather than kept small
 by the bundle. [`gesdinet:jwt:clear`](#revoke-all-invalid-tokens) removes the expired ones and is
-worth running as a cron job.
+worth running [on a schedule](#revoke-all-invalid-tokens), by cron or by Symfony Scheduler.
 
 A user can also be held to a number of them:
 
@@ -1078,7 +1078,49 @@ when clearing a backlog of thousands.
 php bin/console gesdinet:jwt:clear -v
 ```
 
-We recommend executing this command as a cronjob to remove invalid refresh tokens on an interval.
+Something has to run it on a schedule. Nothing in the bundle clears the table on its own, so left
+alone it grows with every login for as long as the application is up.
+
+A cron job is one way:
+
+```cron
+0 3 * * * /usr/bin/php /path/to/app/bin/console gesdinet:jwt:clear --no-interaction
+```
+
+If you already use [Symfony Scheduler](https://symfony.com/doc/current/scheduler.html), it is
+usually the better home for this: it lives with the code, it is deployed with the code, and it does
+not need access to the crontab of whatever the application runs on — which is why the cron job so
+often never gets set up.
+
+```php
+namespace App\Scheduler;
+
+use Symfony\Component\Console\Messenger\RunCommandMessage;
+use Symfony\Component\Scheduler\Attribute\AsSchedule;
+use Symfony\Component\Scheduler\RecurringMessage;
+use Symfony\Component\Scheduler\Schedule;
+use Symfony\Component\Scheduler\ScheduleProviderInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+
+#[AsSchedule('default')]
+final class MaintenanceSchedule implements ScheduleProviderInterface
+{
+    public function __construct(private CacheInterface $cache)
+    {
+    }
+
+    public function getSchedule(): Schedule
+    {
+        return (new Schedule())
+            ->add(RecurringMessage::cron('0 3 * * *', new RunCommandMessage('gesdinet:jwt:clear')))
+            // Without this two workers both run it, which is harmless here but rarely is elsewhere
+            ->lock($this->cache->getItem('maintenance-schedule'));
+    }
+}
+```
+
+Either way it needs a worker or a cron daemon actually running. A schedule nothing consumes is the
+same as no schedule, and the symptom is a table that quietly grows for months.
 
 ### Revoke a token
 
