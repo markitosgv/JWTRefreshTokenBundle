@@ -68,10 +68,6 @@ final class AttachRefreshTokenOnSuccessListener
     }
 
     /**
-     * Seconds left before the token expires, never below zero: a replacement issued for no time at
-     * all is the session having run out, not one lasting forever.
-     */
-    /**
      * Revokes the user's oldest sessions once they hold more tokens than they are allowed.
      *
      * Called after the new token is stored, so the login that has just succeeded is counted among
@@ -117,6 +113,10 @@ final class AttachRefreshTokenOnSuccessListener
         return $this->refreshTokenManager->get($refreshTokenString);
     }
 
+    /**
+     * Seconds left before the token expires, never below zero: a replacement issued for no time at
+     * all is the session having run out, not one lasting forever.
+     */
     private function remainingTtl(RefreshTokenInterface $refreshToken): int
     {
         $valid = $refreshToken->getValid();
