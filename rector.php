@@ -45,6 +45,9 @@ return RectorConfig::configure()
         // by people deciding whether to trust them, and the comments in them carry more than the
         // code does. Nothing should tidy them but a person.
     ])
+    // Picks up this file itself, and anything else that lands at the root
+    ->withRootFiles()
+    ->withParallel(timeoutSeconds: 120, maxNumberOfProcess: 4, jobSize: 10)
     // From composer.json, which asks for ^8.4. Pinned rather than detected so that running this on
     // a newer PHP does not quietly rewrite the code into something the minimum cannot parse
     ->withPhpVersion(PhpVersion::PHP_84)
@@ -59,6 +62,9 @@ return RectorConfig::configure()
         // Both analysers already run at their strictest here, so these sets are a second opinion
         // rather than a source of truth. What follows is where that second opinion is wrong for
         // this project.
+
+        // This file configures the run; it is not part of the codebase being tidied.
+        __DIR__.'/rector.php',
 
         // The constructors of the listeners and managers take arguments the container fills and
         // some that exist only so an application can pass something else. An argument that nothing
