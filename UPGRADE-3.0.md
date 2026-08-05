@@ -195,7 +195,7 @@ That is the wrong outcome at exactly the moment it matters.
 
 **Lexik's blocklist cannot do this**, which is worth saying plainly. It is keyed by `jti`, so it
 withdraws a token you are holding — and the tokens that need withdrawing here are in clients, where
-you cannot see them. What can be recorded instead is *when* the revocation happened, per user, and
+you cannot see them. What can be recorded instead is _when_ the revocation happened, per user, and
 any JWT whose `iat` is at or before that moment is refused on decode.
 
 `ttl` only has to outlive the JWTs issued before the mark, which is why it is your JWT ttl rather
