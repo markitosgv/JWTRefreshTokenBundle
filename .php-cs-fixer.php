@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-/**
+/*
  * Formatting for the bundle.
  *
  * Kept deliberately close to `rector.php`, because the two tools overlap and an overlap left
@@ -79,7 +79,16 @@ return new PhpCsFixer\Config()
         // about: positive-int, class-string<T>, list<Session>, array shapes. phpstan runs at level
         // 10 and psalm at its strictest on the strength of them, so nothing may strip them.
         'no_superfluous_phpdoc_tags' => false,
-        'phpdoc_to_comment' => false,
+
+        // A comment above `return RectorConfig::configure()` documents a returned closure, not a
+        // structure, so it is a comment and not a docblock — which is what the hosted check makes
+        // of it too. The exceptions are what the analysers read: an inline `/** @var Foo&MockObject
+        // $x */` is the only thing telling phpstan what a mock is, and turning those into comments
+        // would take its knowledge of the test suite away.
+        'phpdoc_to_comment' => ['ignored_tags' => ['var', 'phpstan-var', 'psalm-var', 'template', 'psalm-suppress', 'phpstan-ignore']],
+
+        // The other direction, which is what kept turning those file comments back into docblocks.
+        'comment_to_phpdoc' => false,
 
         // `/** @var Foo&MockObject $x */` in the tests is what tells the analysers what a mock is.
         // Turning those into plain comments would take phpstan's knowledge of the test suite away.

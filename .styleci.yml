@@ -25,7 +25,6 @@ disabled:
   # array shapes. phpstan runs at level 10 and psalm at its strictest on the strength of them, so
   # nothing here may decide they are superfluous.
   - no_superfluous_phpdoc_tags
-  - phpdoc_to_comment
 
   # Test names are sentences meant to be read as the failure message.
   - php_unit_method_casing

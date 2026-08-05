@@ -21,7 +21,7 @@ use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
 use Rector\ValueObject\PhpVersion;
 
-/**
+/*
  * Rector for the bundle's own code.
  *
  * Not to be confused with `rector/sets/`, which is what an application imports to upgrade *from* an

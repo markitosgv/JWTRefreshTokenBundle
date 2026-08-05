@@ -15,7 +15,7 @@ use Rector\Config\RectorConfig;
 use Rector\Renaming\Rector\Name\RenameClassRector;
 use Rector\Renaming\Rector\String_\RenameStringRector;
 
-/**
+/*
  * 1.5 to 2.0.
  *
  * The hop with the most to rewrite, because 2.0 dropped the Guard-based authentication Symfony had
