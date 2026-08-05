@@ -14,5 +14,6 @@
         <field name="username" type="string" length="255" column="username"/>
         <field name="valid" type="datetime"/>
         <field name="family" type="string" column="family" length="32" nullable="true"/>
+        <field name="familyValid" type="datetime" column="family_valid" nullable="true"/>
     </mapped-superclass>
 </doctrine-mapping>

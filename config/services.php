@@ -54,6 +54,7 @@ return static function (ContainerConfigurator $container): void {
             service('security.token_storage')->nullOnInvalid(),
             // Only defined when reuse_detection is turned on, so this is null otherwise
             service($vendor.'.spent_refresh_token_registry')->nullOnInvalid(),
+            param($vendor.'.max_session_lifetime'),
         ])
         ->tag('kernel.event_listener', [
             'event' => Events::AUTHENTICATION_SUCCESS,

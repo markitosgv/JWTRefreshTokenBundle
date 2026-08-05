@@ -23,9 +23,26 @@ trait RefreshTokenFamilyTrait
 {
     protected ?string $family = null;
 
+    protected ?\DateTimeInterface $familyValid = null;
+
     public function getFamily(): ?string
     {
         return $this->family;
+    }
+
+    public function getFamilyValid(): ?\DateTimeInterface
+    {
+        return $this->familyValid;
+    }
+
+    /**
+     * @psalm-external-mutation-free
+     */
+    public function setFamilyValid(\DateTimeInterface $familyValid): static
+    {
+        $this->familyValid = $familyValid;
+
+        return $this;
     }
 
     /**

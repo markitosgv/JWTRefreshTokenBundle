@@ -111,13 +111,13 @@ php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
 ```
 
-The column is `VARCHAR(32) NULL`. Existing rows keep a null family, which is read as "this token
+The columns are `family VARCHAR(32) NULL` and `family_valid DATETIME NULL`. Existing rows keep a null family, which is read as "this token
 belongs to no chain" — they carry on working, and the tokens issued after them get families
 normally. For the DBAL backend, tables the bundle creates itself get the column, but a table already
 in place does not:
 
 ```sql
-ALTER TABLE refresh_tokens ADD family VARCHAR(32) NULL;
+ALTER TABLE refresh_tokens ADD family VARCHAR(32) NULL, ADD family_valid DATETIME NULL;
 ```
 
 MongoDB needs nothing; a missing field reads as null.
@@ -149,6 +149,31 @@ than not having families at all.
 **If you configure `dbal_columns`**, add a `family` entry to gain families, or leave the map as it is
 to carry on without them. A map that does not name the column is taken to mean the table has none,
 and no query goes near it.
+
+## New: `max_session_lifetime`
+
+```yaml
+gesdinet_jwt_refresh_token:
+    ttl: 3600                    # each token lasts an hour
+    max_session_lifetime: 604800 # but the chain of them ends after a week
+```
+
+A `ttl` that starts over on every rotation means a session never ends: a client that keeps refreshing
+keeps it alive forever. This is the ceiling on that, and it is a different thing from `ttl` — one
+bounds a token, the other bounds the chain.
+
+The deadline is set when a chain starts and carried along it unchanged, so it means the same at the
+hundredth refresh as at the first. A token whose `ttl` would outlive the chain has its expiry cut
+back to it; one expiring sooner is left alone. Null, the default, is the behaviour the bundle has
+always had.
+
+Stored in a `family_valid` column, which is part of the same migration as `family` above. It needs a
+token class with families.
+
+**`single_use_ttl_update: false` is the older way of doing this** and still works. It ends the chain
+when the first token would have expired, so the ceiling and the ttl are forced to be the same
+number. `max_session_lifetime` separates them, which is usually what people wanted: a short-lived
+token that rotates often, inside a session that ends on a schedule of its own.
 
 ## New: recognising a refresh token that was already spent
 

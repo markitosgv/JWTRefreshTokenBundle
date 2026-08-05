@@ -57,6 +57,7 @@ final class AttachRefreshTokenOnSuccessListener
         private readonly ?int $maxTokensPerUser = null,
         private readonly ?TokenStorageInterface $tokenStorage = null,
         private readonly ?SpentRefreshTokenRegistryInterface $spentTokens = null,
+        private readonly ?int $maxSessionLifetime = null,
     ) {
         $this->cookieSettings = array_merge([
             'enabled' => false,
@@ -117,6 +118,38 @@ final class AttachRefreshTokenOnSuccessListener
     }
 
     /**
+     * When a chain starting now would run out, or null if chains are not bounded.
+     *
+     * Only ever called for a chain that is starting. Carrying the value along the chain rather than
+     * recomputing it is what makes the ceiling absolute: recomputed on every refresh it would move
+     * forward each time, which is the unbounded session it exists to prevent.
+     */
+    private function newFamilyDeadline(): ?\DateTimeInterface
+    {
+        if (null === $this->maxSessionLifetime) {
+            return null;
+        }
+
+        // Mutable, like the expiry the model already carries: the mapping that ships is Doctrine's
+        // `datetime`, which refuses a DateTimeImmutable outright
+        return (new \DateTime())->setTimestamp(time() + $this->maxSessionLifetime);
+    }
+
+    /**
+     * Brings the token's expiry back to the chain's, when the chain ends first.
+     *
+     * @psalm-external-mutation-free
+     */
+    private function capExpiryAt(RefreshTokenInterface $refreshToken, \DateTimeInterface $familyValid): void
+    {
+        $valid = $refreshToken->getValid();
+
+        if (null === $valid || $valid > $familyValid) {
+            $refreshToken->setValid($familyValid);
+        }
+    }
+
+    /**
      * Seconds left before the token expires, never below zero: a replacement issued for no time at
      * all is the session having run out, not one lasting forever.
      */
@@ -153,8 +186,10 @@ final class AttachRefreshTokenOnSuccessListener
         // How long the token being replaced had left, read before it goes
         $remainingTtl = null;
 
-        // The chain the token being replaced belonged to, likewise read before it goes
+        // The chain the token being replaced belonged to, likewise read before it goes, along with
+        // when that chain itself runs out
         $inheritedFamily = null;
+        $inheritedFamilyValid = null;
 
         // Remove the current refreshToken if it is single-use
         if (null !== $refreshTokenString && true === $this->singleUse) {
@@ -166,6 +201,7 @@ final class AttachRefreshTokenOnSuccessListener
 
                 if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
                     $inheritedFamily = $refreshToken->getFamily();
+                    $inheritedFamilyValid = $refreshToken->getFamilyValid();
                 }
 
                 // Recorded before the row goes, since afterwards there is nothing left to say the
@@ -204,6 +240,16 @@ final class AttachRefreshTokenOnSuccessListener
             // unknown token being refreshed also starts one, since there is nothing to carry on.
             if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
                 $refreshToken->setFamily($inheritedFamily ?? bin2hex(random_bytes(16)));
+
+                $familyValid = $inheritedFamilyValid ?? $this->newFamilyDeadline();
+
+                if (null !== $familyValid) {
+                    $refreshToken->setFamilyValid($familyValid);
+
+                    // The chain's ceiling is not a ttl of its own: it cuts the token's expiry short
+                    // when the chain would end first, which is the whole point of having it
+                    $this->capExpiryAt($refreshToken, $familyValid);
+                }
             }
 
             // Read before storing: a manager that hashes the token keeps the hash on the model,

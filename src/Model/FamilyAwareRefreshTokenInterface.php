@@ -42,4 +42,23 @@ interface FamilyAwareRefreshTokenInterface extends RefreshTokenInterface
      * @psalm-external-mutation-free
      */
     public function setFamily(string $family): static;
+
+    /**
+     * When the chain itself runs out, whatever the token's own expiry says.
+     *
+     * A ttl that starts over on every rotation means refreshing can be chained indefinitely: the
+     * client keeps a session alive forever by using it. This is the ceiling on that, and it is
+     * carried along the chain unchanged so it means the same at the hundredth refresh as the first.
+     *
+     * Null when no ceiling was configured, which is the default and how the bundle has always
+     * behaved.
+     *
+     * @psalm-mutation-free
+     */
+    public function getFamilyValid(): ?\DateTimeInterface;
+
+    /**
+     * @psalm-external-mutation-free
+     */
+    public function setFamilyValid(\DateTimeInterface $familyValid): static;
 }

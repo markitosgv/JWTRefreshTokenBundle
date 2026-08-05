@@ -102,6 +102,10 @@ final readonly class TableSchemaManager
                 // Nullable because a token stored before the column existed has no chain to name,
                 // and because a token class of your own need not have families at all
                 $column->setLength(32)->setNotnull(false);
+            } elseif ('familyValid' === $alias) {
+                // Nullable for the same reasons, and because a chain has no ceiling unless
+                // max_session_lifetime puts one on it
+                $column->setNotnull(false);
             }
         }
 
@@ -182,6 +186,10 @@ final readonly class TableSchemaManager
             'family' => [
                 'name' => 'family',
                 'type' => Types::STRING,
+            ],
+            'familyValid' => [
+                'name' => 'family_valid',
+                'type' => Types::DATETIME_MUTABLE,
             ],
         ];
     }

@@ -87,6 +87,48 @@ trait FamilyAwareRefreshTokenManagerContract
     }
 
     /**
+     * The chain's deadline has to survive storage for the same reason the family does: it is read
+     * back on every refresh and copied to the replacement, so losing it would quietly lift the
+     * ceiling max_session_lifetime exists to impose.
+     */
+    public function test_reads_back_the_deadline_of_the_chain(): void
+    {
+        $manager = $this->manager();
+
+        $class = $manager->getClass();
+        $token = $class::createForUserWithTtl('a-token-in-a-bounded-chain', UserCreator::create('someone'), 600);
+
+        \assert($token instanceof FamilyAwareRefreshTokenInterface);
+
+        $deadline = (new \DateTime())->setTimestamp(time() + 86400);
+        $token->setFamily('a-bounded-chain');
+        $token->setFamilyValid($deadline);
+
+        $manager->save($token);
+
+        $this->forgetLoadedObjects();
+
+        $stored = $manager->get('a-token-in-a-bounded-chain');
+
+        $this->assertInstanceOf(FamilyAwareRefreshTokenInterface::class, $stored);
+        $this->assertSame($deadline->getTimestamp(), $stored->getFamilyValid()?->getTimestamp());
+    }
+
+    public function test_a_chain_with_no_deadline_reads_back_without_one(): void
+    {
+        $manager = $this->manager();
+
+        $this->storeTokenInFamily($manager, 'a-token-in-an-unbounded-chain', 'an-unbounded-chain');
+
+        $this->forgetLoadedObjects();
+
+        $stored = $manager->get('a-token-in-an-unbounded-chain');
+
+        $this->assertInstanceOf(FamilyAwareRefreshTokenInterface::class, $stored);
+        $this->assertNull($stored->getFamilyValid());
+    }
+
+    /**
      * What ending a session means. Revoking the token the client holds does not do it: with
      * single_use that token is replaced on every refresh, so the one you revoked is usually already
      * gone while the chain carries on.

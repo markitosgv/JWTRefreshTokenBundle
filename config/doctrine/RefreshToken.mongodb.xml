@@ -11,5 +11,6 @@
         <field field-name="username" type="string" />
         <field field-name="valid" type="date"/>
         <field field-name="family" type="string" nullable="true"/>
+        <field field-name="familyValid" type="date" nullable="true"/>
     </mapped-superclass>
 </doctrine-mongo-mapping>

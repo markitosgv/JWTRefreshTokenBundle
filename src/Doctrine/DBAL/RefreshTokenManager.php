@@ -126,6 +126,15 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
             if (is_string($family)) {
                 $instance->setFamily($family);
             }
+
+            $familyValid = $this->connection->convertToPHPValue(
+                $data[$this->getColumnName('familyValid')] ?? null,
+                $this->columnConfig['familyValid']['type'] ?? 'datetime'
+            );
+
+            if ($familyValid instanceof \DateTimeInterface) {
+                $instance->setFamilyValid($familyValid);
+            }
         }
 
         $this->assignIdentifier($instance, $data[$this->getColumnName('id')] ?? $data['id'] ?? null);
@@ -212,6 +221,8 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
 
         if ($writesFamily) {
             $parameters['family'] = $refreshToken->getFamily();
+            $parameters['family_valid'] = $refreshToken->getFamilyValid();
+            $types['family_valid'] = 'datetime';
         }
 
         // Updating first tells us whether the row is there, so the read the other way round needs
@@ -224,6 +235,7 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
 
         if ($writesFamily) {
             $update->set($this->quoteColumnIdentifier('family'), ':family');
+            $update->set($this->quoteColumnIdentifier('familyValid'), ':family_valid');
         }
 
         if ($update->setParameters($parameters, $types)->executeStatement() > 0) {
@@ -238,6 +250,7 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
 
         if ($writesFamily) {
             $values[$this->quoteColumnIdentifier('family')] = ':family';
+            $values[$this->quoteColumnIdentifier('familyValid')] = ':family_valid';
         }
 
         $this->connection->createQueryBuilder()
@@ -473,6 +486,7 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
         // names no family column, and asking for one the table does not have fails every read
         if ($this->hasFamilyColumn()) {
             $columns[] = $this->quoteColumnIdentifier('family');
+            $columns[] = $this->quoteColumnIdentifier('familyValid');
         }
 
         return $this->connection->createQueryBuilder()
@@ -485,6 +499,8 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
      */
     private function hasFamilyColumn(): bool
     {
-        return isset($this->columnConfig['family']);
+        // The two arrived together and are configured together; a map naming one and not the other
+        // describes a table half of the queries below would fail against
+        return isset($this->columnConfig['family'], $this->columnConfig['familyValid']);
     }
 }

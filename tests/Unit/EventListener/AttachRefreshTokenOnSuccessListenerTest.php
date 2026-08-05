@@ -890,6 +890,159 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->assertNotNull($issued->getFamily());
     }
 
+    public function testLeavesChainsUnboundedWithoutAMaximumSessionLifetime(): void
+    {
+        $this->assertNull($this->issueOnLogin()->getFamilyValid(), 'The default is the behaviour the bundle has always had');
+    }
+
+    public function testGivesANewChainTheConfiguredDeadline(): void
+    {
+        $issued = $this->issueOnLoginWithAMaximumSessionLifetimeOf(86400);
+
+        $deadline = $issued->getFamilyValid();
+
+        $this->assertNotNull($deadline);
+        $this->assertEqualsWithDelta(time() + 86400, $deadline->getTimestamp(), 5);
+    }
+
+    /**
+     * The whole point of the ceiling. Recomputed on every refresh it would move forward each time,
+     * which is exactly the unbounded session it exists to prevent.
+     */
+    public function testCarriesTheChainDeadlineOverUnchanged(): void
+    {
+        $deadline = new DateTime('+2 hours');
+
+        $replaced = new EntityRefreshToken();
+        $replaced->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $replaced->setValid(new DateTime('+600 seconds'));
+        $replaced->setFamily('the-chain');
+        $replaced->setFamilyValid($deadline);
+
+        $issued = $this->issueOnRefreshReplacingWithAMaximumSessionLifetimeOf($replaced, 86400);
+
+        $this->assertSame(
+            $deadline->getTimestamp(),
+            $issued->getFamilyValid()?->getTimestamp(),
+            'The deadline is the one the chain started with, not one counted from this refresh'
+        );
+    }
+
+    /**
+     * A ttl longer than what is left of the chain would outlive the session, so it is cut short.
+     */
+    public function testCutsTheTokenExpiryBackToTheChainDeadline(): void
+    {
+        $deadline = new DateTime('+60 seconds');
+
+        $replaced = new EntityRefreshToken();
+        $replaced->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $replaced->setValid(new DateTime('+600 seconds'));
+        $replaced->setFamily('the-chain');
+        $replaced->setFamilyValid($deadline);
+
+        // self::TTL is 30 days, far past the minute the chain has left
+        $issued = $this->issueOnRefreshReplacingWithAMaximumSessionLifetimeOf($replaced, 86400);
+
+        $this->assertSame($deadline->getTimestamp(), $issued->getValid()?->getTimestamp());
+    }
+
+    /**
+     * The ceiling is a ceiling, not a ttl of its own: a token expiring first is left alone.
+     */
+    public function testLeavesATokenExpiringBeforeTheChainAlone(): void
+    {
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+        $issued->setValid(new DateTime('+600 seconds'));
+
+        $generator = $this->createStub(RefreshTokenGeneratorInterface::class);
+        $generator->method('createForUserWithTtl')->willReturn($issued);
+
+        $expected = $issued->getValid()?->getTimestamp();
+
+        $this->runLoginThrough($this->listenerWithAMaximumSessionLifetimeOf(86400, $generator));
+
+        $this->assertSame($expected, $issued->getValid()?->getTimestamp());
+    }
+
+    private function issueOnLoginWithAMaximumSessionLifetimeOf(int $seconds): EntityRefreshToken
+    {
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        $generator = $this->createStub(RefreshTokenGeneratorInterface::class);
+        $generator->method('createForUserWithTtl')->willReturn($issued);
+
+        $this->runLoginThrough($this->listenerWithAMaximumSessionLifetimeOf($seconds, $generator));
+
+        return $issued;
+    }
+
+    private function issueOnRefreshReplacingWithAMaximumSessionLifetimeOf(EntityRefreshToken $replaced, int $seconds): EntityRefreshToken
+    {
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+        $issued->setValid(new DateTime('+'.self::TTL.' seconds'));
+
+        $this->refreshTokenManager->method('get')->willReturn($replaced);
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+
+        (new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true,
+            null,
+            null,
+            null,
+            $seconds
+        ))->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+
+        return $issued;
+    }
+
+    private function listenerWithAMaximumSessionLifetimeOf(int $seconds, RefreshTokenGeneratorInterface $generator): AttachRefreshTokenOnSuccessListener
+    {
+        $requestStack = $this->createStub(RequestStack::class);
+        $requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        $extractor = $this->createStub(ExtractorInterface::class);
+        $extractor->method('getRefreshToken')->willReturn(null);
+
+        return new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            false,
+            $generator,
+            $extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true,
+            null,
+            null,
+            null,
+            $seconds
+        );
+    }
+
+    private function runLoginThrough(AttachRefreshTokenOnSuccessListener $listener): void
+    {
+        $listener->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+    }
+
     /**
      * The record has to be written while the row is still there. Afterwards nothing says the token
      * ever existed, and a replay of it is indistinguishable from any other wrong token.
