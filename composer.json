@@ -45,11 +45,13 @@
     "rector/jack": "^1.0.0",
     "rector/rector": "^2.2",
     "symfony/cache": "^8.0",
-    "vimeo/psalm": "^7.0@beta"
+    "vimeo/psalm": "^7.0@beta",
+    "symfony/rate-limiter": "^8.0"
   },
   "suggest": {
     "api-platform/core": "To document the refresh token in the OpenAPI specification when using API Platform",
-    "doctrine/dbal": "To store the refresh tokens through a plain connection, without the ORM or the ODM"
+    "doctrine/dbal": "To store the refresh tokens through a plain connection, without the ORM or the ODM",
+    "symfony/rate-limiter": "To bound how often the refresh endpoint will answer"
   },
   "conflict": {
     "doctrine/mongodb-odm": "<2.7",

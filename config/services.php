@@ -120,6 +120,7 @@ return static function (ContainerConfigurator $container): void {
             abstract_arg('options'),
             service('security.http_utils'),
             service($vendor.'.refresh_token_reuse_detector')->nullOnInvalid(),
+            service($vendor.'.refresh_rate_limiter')->nullOnInvalid(),
         ]);
 
     $services->set(ClearInvalidRefreshTokensCommand::class)

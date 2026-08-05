@@ -176,6 +176,47 @@ when the first token would have expired, so the ceiling and the ttl are forced t
 number. `max_session_lifetime` separates them, which is usually what people wanted: a short-lived
 token that rotates often, inside a session that ends on a schedule of its own.
 
+## New: rate limiting the refresh endpoint
+
+Off by default, and needs `composer require symfony/rate-limiter`.
+
+```yaml
+framework:
+    rate_limiter:
+        refresh:
+            policy: sliding_window
+            limit: 20
+            interval: '1 minute'
+
+gesdinet_jwt_refresh_token:
+    rate_limiter:
+        enabled: true
+        limiter: limiter.refresh   # a limiter named "refresh" is the service "limiter.refresh"
+        key: ip                    # or "token"
+```
+
+This endpoint trades a refresh token for a JWT with no password in between, which makes it worth
+limiting on its own terms rather than leaving it to whatever protects the login form.
+
+The limiter is consumed **before** the token is looked at, let alone looked up. A limit applied only
+to requests that got as far as a query would not bound the work the endpoint does, and the time a
+refusal took would tell a caller whether the token they sent exists.
+
+**`key` is a real trade-off, not a detail.**
+
+* `ip`, the default, protects the endpoint: one caller cannot hammer it whatever tokens they present.
+  The cost is that everybody behind one address shares an allowance, which for a mobile network or an
+  office is a lot of people. Behind a proxy it also needs `framework.trusted_proxies` set, or every
+  request arrives from the same address and they all share one allowance.
+* `token` gives each session its own allowance, so no legitimate client can be shut out by another.
+  It bounds how fast one session may refresh and does nothing at all about a caller arriving with a
+  different token every time.
+
+A refused request is answered `429` with `Retry-After` in seconds, rather than the `401` every other
+failure here gets: being refused for asking too often is not a credentials problem, and `401` tells a
+client to go and get new ones — which is more requests, at an endpoint already saying it has had too
+many.
+
 ## New: recognising a refresh token that was already spent
 
 Off by default, and the reason families exist.

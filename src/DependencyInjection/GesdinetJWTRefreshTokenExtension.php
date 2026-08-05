@@ -21,6 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 /**
  * @internal
@@ -28,7 +29,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
 {
     /**
-     * @param array{ttl: int, ttl_update: bool, reuse_detection: array{enabled: bool, cache: string, ttl: int}, max_session_lifetime: int|null, max_tokens_per_user: int|null, single_use: bool, single_use_ttl_update: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, refresh_token_manager: string|null, api_platform: array{enabled: bool}, block_previous_jwt: bool, hash_tokens: array{enabled: bool, accept_stored_in_the_clear: bool}, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
+     * @param array{ttl: int, ttl_update: bool, rate_limiter: array{enabled: bool, limiter: string, key: string}, reuse_detection: array{enabled: bool, cache: string, ttl: int}, max_session_lifetime: int|null, max_tokens_per_user: int|null, single_use: bool, single_use_ttl_update: bool, token_parameter_name: string, cookie?: array<string, mixed>, return_expiration: bool, return_expiration_parameter_name: string, refresh_token_class: class-string<\Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface>, default_invalid_batch_size: int, refresh_token_manager: string|null, api_platform: array{enabled: bool}, block_previous_jwt: bool, hash_tokens: array{enabled: bool, accept_stored_in_the_clear: bool}, object_manager: string|null, dbal_connection: string|null, dbal_table_name: string, dbal_auto_create_table: bool, dbal_columns: array<string, array{name: string, type: string}>} $mergedConfig
      */
     #[\Override]
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
@@ -59,6 +60,23 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             $container->setParameter('gesdinet_jwt_refresh_token.hash_tokens.accept_stored_in_the_clear', $mergedConfig['hash_tokens']['accept_stored_in_the_clear']);
 
             $loader->load('hashed_manager.php');
+        }
+
+        if ($mergedConfig['rate_limiter']['enabled']) {
+            // @codeCoverageIgnoreStart
+            // symfony/rate-limiter is a development dependency of this bundle, so the interface is
+            // always there while the tests run and this branch cannot be reached from them. Taking
+            // it out of the test environment to exercise one throw would cost the RefreshRateLimiter
+            // tests, which are worth more.
+            if (!interface_exists(RateLimiterFactoryInterface::class)) {
+                throw new RuntimeException('The "rate_limiter" option needs the Symfony RateLimiter component. Try running "composer require symfony/rate-limiter".');
+            }
+            // @codeCoverageIgnoreEnd
+
+            $container->setParameter('gesdinet_jwt_refresh_token.rate_limiter.limiter', $mergedConfig['rate_limiter']['limiter']);
+            $container->setParameter('gesdinet_jwt_refresh_token.rate_limiter.key', $mergedConfig['rate_limiter']['key']);
+
+            $loader->load('rate_limiter.php');
         }
 
         if ($mergedConfig['reuse_detection']['enabled']) {

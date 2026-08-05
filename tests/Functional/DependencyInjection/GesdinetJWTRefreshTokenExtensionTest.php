@@ -169,6 +169,26 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.hash_tokens.accept_stored_in_the_clear', true);
     }
 
+    public function test_the_endpoint_is_not_rate_limited_unless_it_is_asked_for(): void
+    {
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);
+
+        $this->assertFalse($this->container->hasDefinition('gesdinet_jwt_refresh_token.refresh_rate_limiter'));
+    }
+
+    public function test_rate_limiting_consumes_from_the_configured_limiter(): void
+    {
+        $this->load([
+            'refresh_token_class' => RefreshTokenEntity::class,
+            'object_manager' => 'doctrine.orm.entity_manager',
+            'rate_limiter' => ['enabled' => true, 'limiter' => 'limiter.refresh', 'key' => 'token'],
+        ]);
+
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.rate_limiter.limiter', 'limiter.refresh');
+        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.rate_limiter.key', 'token');
+        $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.refresh_rate_limiter');
+    }
+
     public function test_reuse_is_not_detected_unless_it_is_asked_for(): void
     {
         $this->load(['refresh_token_class' => RefreshTokenEntity::class, 'object_manager' => 'doctrine.orm.entity_manager']);

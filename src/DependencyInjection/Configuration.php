@@ -13,6 +13,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\DependencyInjection;
 
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Security\RateLimiting\RefreshRateLimiter;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -123,6 +124,22 @@ final class Configuration implements ConfigurationInterface
                     ->defaultNull()
                     ->min(1)
                     ->info('How long a chain of refreshes may go on for, in seconds, whatever "ttl" says. A ttl that starts over on every rotation means a session can be kept alive indefinitely by using it; this is the ceiling on that. Null, the default, leaves chains unbounded. Needs a token class with families.')
+                ->end()
+                ->arrayNode('rate_limiter')
+                    ->canBeEnabled()
+                    ->info('Bounds how often the refresh endpoint will answer. Off by default. Needs symfony/rate-limiter and a limiter configured under framework.rate_limiter.')
+                    ->children()
+                        ->scalarNode('limiter')
+                            ->isRequired()
+                            ->cannotBeEmpty()
+                            ->info('The limiter service to consume from, as a service id: a limiter named "refresh" under framework.rate_limiter is the service "limiter.refresh".')
+                        ->end()
+                        ->enumNode('key')
+                            ->values([RefreshRateLimiter::BY_IP, RefreshRateLimiter::BY_TOKEN])
+                            ->defaultValue(RefreshRateLimiter::BY_IP)
+                            ->info('What the requests are counted against. "ip" protects the endpoint but makes everyone behind one address share an allowance; "token" gives each session its own, which bounds how fast a session may refresh and does nothing about a caller arriving with a different token every time.')
+                        ->end()
+                    ->end()
                 ->end()
                 ->arrayNode('reuse_detection')
                     ->canBeEnabled()

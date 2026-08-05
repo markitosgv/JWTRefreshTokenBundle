@@ -13,7 +13,11 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
+use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TooManyRefreshRequestsException;
+use Gesdinet\JWTRefreshTokenBundle\Security\RateLimiting\RefreshRateLimiter;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\RefreshTokenReuseDetector;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshTokenRegistryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -286,6 +290,61 @@ final class RefreshTokenAuthenticatorTest extends TestCase
         $this->expectExceptionObject(new TokenNotFoundException());
 
         $this->refreshTokenAuthenticator->authenticate($request);
+    }
+
+    /**
+     * The limit is on the endpoint, so it applies before the token is looked at: one applied only to
+     * requests that got as far as a query would not bound the work the endpoint does, and the time
+     * the refusal took would tell a caller whether their token existed.
+     */
+    public function testRefusesARateLimitedRequestWithoutTouchingTheStorage(): void
+    {
+        $request = Request::create('/api/token/refresh', 'POST', server: ['REMOTE_ADDR' => '203.0.113.1']);
+
+        $this->extractor->method('getRefreshToken')->willReturn('a-perfectly-good-token');
+
+        // Twice through with an allowance of one: the first is answered, the second is refused. One
+        // query for two requests is what says the refusal never reached the storage
+        $this->refreshTokenManager->expects($this->once())->method('get')->willReturn($this->aValidToken());
+
+        $authenticator = $this->authenticatorLimitedTo(1);
+
+        $authenticator->authenticate($request);
+
+        $this->expectException(TooManyRefreshRequestsException::class);
+
+        $authenticator->authenticate($request);
+    }
+
+    private function aValidToken(): RefreshTokenInterface
+    {
+        /** @var RefreshTokenInterface&Stub $refreshToken */
+        $refreshToken = $this->createStub(RefreshTokenInterface::class);
+        $refreshToken->method('isValid')->willReturn(true);
+        $refreshToken->method('getUsername')->willReturn('someone');
+
+        return $refreshToken;
+    }
+
+    private function authenticatorLimitedTo(int $requests): RefreshTokenAuthenticator
+    {
+        return new RefreshTokenAuthenticator(
+            $this->refreshTokenManager,
+            $this->createMock(EventDispatcherInterface::class),
+            $this->extractor,
+            $this->createMock(UserProviderInterface::class),
+            $this->successHandler,
+            $this->failureHandler,
+            ['check_path' => '/api/token/refresh'],
+            $this->httpUtils,
+            null,
+            new RefreshRateLimiter(
+                new RateLimiterFactory(
+                    ['id' => 'refresh', 'policy' => 'fixed_window', 'limit' => $requests, 'interval' => '1 minute'],
+                    new InMemoryStorage()
+                )
+            )
+        );
     }
 
     private function authenticatorDetectingReuseWith(

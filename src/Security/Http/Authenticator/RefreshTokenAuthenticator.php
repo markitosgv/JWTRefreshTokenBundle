@@ -21,6 +21,7 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Exception\InvalidTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
+use Gesdinet\JWTRefreshTokenBundle\Security\RateLimiting\RefreshRateLimiter;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\RefreshTokenReuseDetector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,6 +63,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         array $options,
         private readonly HttpUtils $httpUtils,
         private readonly ?RefreshTokenReuseDetector $reuseDetector = null,
+        private readonly ?RefreshRateLimiter $rateLimiter = null,
     ) {
         $this->options = array_merge([
             'ttl' => 2592000,
@@ -80,6 +82,10 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
     public function authenticate(Request $request): Passport
     {
         $token = $this->extractor->getRefreshToken($request, $this->options['token_parameter_name']);
+
+        // Before the token is looked at, let alone looked up: a limit applied only to requests that
+        // got as far as a query is not a limit on the work the endpoint does
+        $this->rateLimiter?->check($request, $token);
 
         if (null === $token) {
             throw new MissingTokenException();
