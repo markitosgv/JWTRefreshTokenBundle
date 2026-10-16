@@ -38,13 +38,15 @@ final class BareEntityRepository extends EntityRepository implements RefreshToke
      */
     public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
     {
-        /** @var list<BareRepositoryRefreshToken> */
-        return $this->createQueryBuilder('t')
+        /** @var list<BareRepositoryRefreshToken> $tokens */
+        $tokens = $this->createQueryBuilder('t')
             ->where('t.valid < :datetime')
             ->setParameter('datetime', $datetime ?? new DateTime())
             ->setFirstResult($offset)
             ->setMaxResults($batchSize)
             ->getQuery()
             ->getResult();
+
+        return $tokens;
     }
 }
