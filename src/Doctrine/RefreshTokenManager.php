@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use DateTimeInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
@@ -89,14 +90,20 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
     {
         // Asking the storage what it deleted is the only answer that holds when two callers race
         // for the same token: reading it back first tells both of them they won
-        if ($this->repository instanceof DeleteRefreshTokenRepositoryInterface) {
-            $deleted = $this->repository->deleteToken($refreshToken);
+        $deleted = match (true) {
+            $this->repository instanceof DeleteRefreshTokenRepositoryInterface => $this->repository->deleteToken($refreshToken),
+            $this->objectManager instanceof EntityManagerInterface => $this->deleteByQuery($this->objectManager, $refreshToken),
+            default => null,
+        };
 
+        if (null !== $deleted) {
             $this->objectManager->detach($refreshToken);
 
             return $deleted;
         }
 
+        // An object manager of any other kind has no delete reporting what it removed, so two
+        // callers racing for the same token can both be told they deleted it
         if (null === $this->repository->findOneBy(['id' => $refreshToken->getId()])) {
             return 0;
         }
@@ -108,6 +115,22 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
         }
 
         return 1;
+    }
+
+    /**
+     * Deletes the token with a query of its own, for a repository that cannot be asked to.
+     */
+    private function deleteByQuery(EntityManagerInterface $entityManager, RefreshTokenInterface $refreshToken): int
+    {
+        /** @var int $deleted */
+        $deleted = $entityManager->createQueryBuilder()
+            ->delete($this->class, 'rt')
+            ->where('rt.id = :id')
+            ->setParameter('id', $refreshToken->getId())
+            ->getQuery()
+            ->execute();
+
+        return $deleted;
     }
 
     /**

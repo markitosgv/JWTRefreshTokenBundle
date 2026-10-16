@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+* With `single_use`, two refresh requests presenting the same token at the same time could both be given a new pair, which is the stolen-token case rotation exists to end. The success listener ignored what `delete()` reported, and with `hash_tokens` it looked the token up a second time, so a request whose token had just been spent by the other was handed a replacement in a chain of its own, out of reach of reuse detection and `max_session_lifetime`. The token is now spent only when the storage reports deleting its row; the request that loses is refused like a replayed token, with nothing issued. The listener uses the token the authenticator loaded, recognised by the value presented, which `PostRefreshTokenAuthenticationToken::getPresentedRefreshToken()` now carries for the request (it is not serialized)
+* `Doctrine\RefreshTokenManager::delete()` asks the database what it deleted for a repository that does not implement `DeleteRefreshTokenRepositoryInterface`, when it sits behind an ORM entity manager. It read the token back and reported a deleted row, which both of two concurrent callers were told
+
 ## 3.0.0
 
 See [UPGRADE-3.0.md](UPGRADE-3.0.md) for what to check before upgrading, and

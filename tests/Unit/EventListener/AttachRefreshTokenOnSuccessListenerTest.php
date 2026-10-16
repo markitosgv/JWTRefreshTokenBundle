@@ -12,6 +12,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshTokenRegistryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Services\UserCreator;
@@ -26,6 +27,7 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -122,6 +124,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $oldToken->method('getValid')->willReturn(new DateTime(sprintf('+%d seconds', $expiresIn)));
 
         $this->refreshTokenManager->method('get')->willReturn($oldToken);
+        $this->refreshTokenManager->method('delete')->willReturn(1);
 
         /** @var RefreshTokenInterface&Stub $newToken */
         $newToken = $this->createStub(RefreshTokenInterface::class);
@@ -226,14 +229,116 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $this->listenerReading($somebodyElses, true)->attachRefreshToken($event);
     }
 
+    /**
+     * Hashed storage puts the hash on the model, so it is the value presented that identifies the
+     * token, and the one the authenticator loaded is still the one used.
+     */
+    public function testUsesTheTokenTheAuthenticatorLoadedWhenStorageHoldsItsHash(): void
+    {
+        $alreadyLoaded = new EntityRefreshToken();
+        $alreadyLoaded->setRefreshToken('sha256$'.hash('sha256', 'thepreviouslyissuedrefreshtoken'));
+        $alreadyLoaded->setValid(new DateTime('+600 seconds'));
+        $alreadyLoaded->setFamily('the-chain');
+
+        $this->refreshTokenManager->expects($this->never())->method('get');
+        $this->refreshTokenManager->expects($this->once())->method('delete')->with($alreadyLoaded)->willReturn(1);
+
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
+
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        $this->singleUseListenerAuthenticatedWith($alreadyLoaded, 'thepreviouslyissuedrefreshtoken')
+            ->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+
+        $this->assertSame('the-chain', $issued->getFamily());
+    }
+
+    /**
+     * Two requests presenting the same token both authenticate with it, and only one of their
+     * deletes reaches the row. The other is refused rather than handed a pair of its own.
+     */
+    public function testRefusesTheRefreshWhenAnotherRequestSpentTheTokenFirst(): void
+    {
+        $alreadyLoaded = new EntityRefreshToken();
+        $alreadyLoaded->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $alreadyLoaded->setValid(new DateTime('+600 seconds'));
+
+        $this->refreshTokenManager->method('delete')->willReturn(0);
+        $this->refreshTokenManager->expects($this->never())->method('save');
+        $this->refreshTokenGenerator->expects($this->never())->method('createForUserWithTtl');
+
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        $tokenStorage = new TokenStorage();
+        $listener = $this->singleUseListenerAuthenticatedWith($alreadyLoaded, 'thepreviouslyissuedrefreshtoken', $tokenStorage);
+
+        try {
+            $listener->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+            $this->fail('The refresh was not refused');
+        } catch (TokenNotFoundException) {
+        }
+
+        $this->assertNull($tokenStorage->getToken(), 'Nobody is left signed in on a token that was refused');
+    }
+
+    /**
+     * A login carrying a token it did not authenticate with is not refused for it: when the token
+     * turns out to be spent already, there is simply no chain to carry on.
+     */
+    public function testStartsAChainOnLoginWhenTheTokenItCarriedWasSpentFirst(): void
+    {
+        $carried = new EntityRefreshToken();
+        $carried->setRefreshToken('thepreviouslyissuedrefreshtoken');
+        $carried->setValid(new DateTime('+600 seconds'));
+        $carried->setFamily('somebody-elses-chain');
+
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenManager->method('get')->willReturn($carried);
+        $this->refreshTokenManager->method('delete')->willReturn(0);
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+
+        $this->singleUseListener()->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+
+        $this->assertNotNull($issued->getFamily());
+        $this->assertNotSame('somebody-elses-chain', $issued->getFamily());
+    }
+
+    private function singleUseListenerAuthenticatedWith(RefreshTokenInterface $refreshToken, string $presented, ?TokenStorage $tokenStorage = null): AttachRefreshTokenOnSuccessListener
+    {
+        $tokenStorage ??= new TokenStorage();
+        $tokenStorage->setToken(new PostRefreshTokenAuthenticationToken(UserCreator::create(), 'api', [], $refreshToken, $presented));
+
+        return new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            tokenStorage: $tokenStorage,
+        );
+    }
+
     private function listenerReading(RefreshTokenInterface $inStorage, bool $cookie): AttachRefreshTokenOnSuccessListener
     {
-        // A real one rather than a stub: the class is final, and it is a value object anyway
+        // A real one rather than a stub: the class is final, and it is a value object anyway. The
+        // value presented is the one the token carries, as it is when storage keeps it in the clear
         $securityToken = new PostRefreshTokenAuthenticationToken(
             $this->createStub(UserInterface::class),
             'api',
             [],
-            $inStorage
+            $inStorage,
+            $inStorage->getRefreshToken()
         );
 
         $tokenStorage = $this->createStub(TokenStorageInterface::class);
@@ -395,6 +500,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $oldToken->method('getValid')->willReturn(new DateTime('+60 seconds'));
 
         $this->refreshTokenManager->method('get')->willReturn($oldToken);
+        $this->refreshTokenManager->method('delete')->willReturn(1);
 
         /** @var RefreshTokenInterface&Stub $newToken */
         $newToken = $this->createStub(RefreshTokenInterface::class);
@@ -990,6 +1096,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $issued->setValid(new DateTime('+'.self::TTL.' seconds'));
 
         $this->refreshTokenManager->method('get')->willReturn($replaced);
+        $this->refreshTokenManager->method('delete')->willReturn(1);
         $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
         $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
         $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
@@ -1299,6 +1406,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $issued->setRefreshToken('thenewlyissuedrefreshtoken');
 
         $this->refreshTokenManager->method('get')->willReturn($replaced);
+        $this->refreshTokenManager->method('delete')->willReturn(1);
         $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
         $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
         $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');

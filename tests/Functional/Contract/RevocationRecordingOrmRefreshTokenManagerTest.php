@@ -30,6 +30,7 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use StorageDecidesTheDeleteContract;
 
     private ArrayAdapter $pool;
 
@@ -146,5 +147,13 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
         \assert($manager instanceof ListRefreshTokenManagerInterface);
 
         return $manager;
+    }
+
+    /**
+     * Leaves the row where it is and deletes nothing, as the delete that lost a race does.
+     */
+    protected function makeTheStorageDeleteNothing(): void
+    {
+        $this->entityManager->getConnection()->executeStatement('CREATE TRIGGER lose_the_race BEFORE DELETE ON RefreshToken BEGIN SELECT RAISE(IGNORE); END');
     }
 }

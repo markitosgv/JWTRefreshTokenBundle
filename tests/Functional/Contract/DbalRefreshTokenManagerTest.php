@@ -22,6 +22,7 @@ final class DbalRefreshTokenManagerTest extends TestCase
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use StorageDecidesTheDeleteContract;
 
     private Connection $connection;
 
@@ -68,5 +69,13 @@ final class DbalRefreshTokenManagerTest extends TestCase
         \assert($manager instanceof ListRefreshTokenManagerInterface);
 
         return $manager;
+    }
+
+    /**
+     * Leaves the row where it is and deletes nothing, as the delete that lost a race does.
+     */
+    protected function makeTheStorageDeleteNothing(): void
+    {
+        $this->connection->executeStatement('CREATE TRIGGER lose_the_race BEFORE DELETE ON refresh_tokens BEGIN SELECT RAISE(IGNORE); END');
     }
 }

@@ -27,6 +27,8 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
 {
+    use StorageDecidesTheDeleteContract;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -234,5 +236,13 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
         return new HashedRefreshTokenManager(
             new RefreshTokenManager($this->entityManager, RefreshToken::class, $batchSize)
         );
+    }
+
+    /**
+     * Leaves the row where it is and deletes nothing, as the delete that lost a race does.
+     */
+    protected function makeTheStorageDeleteNothing(): void
+    {
+        $this->entityManager->getConnection()->executeStatement('CREATE TRIGGER lose_the_race BEFORE DELETE ON RefreshToken BEGIN SELECT RAISE(IGNORE); END');
     }
 }

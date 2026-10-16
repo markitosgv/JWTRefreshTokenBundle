@@ -16,6 +16,7 @@ use Gesdinet\JWTRefreshTokenBundle\Security\Exception\MissingTokenException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TooManyRefreshRequestsException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\RefreshTokenAuthenticator;
+use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
 use Gesdinet\JWTRefreshTokenBundle\Security\RateLimiting\RefreshRateLimiter;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\RefreshTokenReuseDetector;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshToken;
@@ -388,6 +389,32 @@ final class RefreshTokenAuthenticatorTest extends TestCase
         $this->assertInstanceOf(TokenInterface::class, $token);
     }
 
+    /**
+     * Storage may hold a hash, so what the client presented is carried along for the success
+     * listener to recognise the token by.
+     */
+    public function testCarriesTheValuePresentedOverToTheToken(): void
+    {
+        $request = Request::create('/');
+        $refreshToken = $this->aValidToken();
+
+        $this->createExtractorGetRefreshTokenExpectation($request, 'the-presented-token');
+        $this->refreshTokenManager->method('get')->willReturn($refreshToken);
+
+        $authenticated = $this->refreshTokenAuthenticator->authenticate($request);
+
+        // The user is loaded by the firewall rather than here, so the passport handed back is
+        // given a user before the token is made from it
+        $passport = $this->createUserPassport('someone', UserCreator::create('someone'));
+        $passport->setAttribute('refreshToken', $authenticated->getAttribute('refreshToken'));
+        $passport->setAttribute('presentedRefreshToken', $authenticated->getAttribute('presentedRefreshToken'));
+
+        $token = $this->refreshTokenAuthenticator->createToken($passport, 'test');
+
+        $this->assertInstanceOf(PostRefreshTokenAuthenticationToken::class, $token);
+        $this->assertSame('the-presented-token', $token->getPresentedRefreshToken());
+    }
+
     public function testDoesNotCreateTheTokenWhenThePassportDoesNotHaveTheRefreshToken(): void
     {
         $username = 'username';
@@ -420,6 +447,27 @@ final class RefreshTokenAuthenticatorTest extends TestCase
             $response,
             $this->refreshTokenAuthenticator->onAuthenticationSuccess($request, $token, 'test')
         );
+    }
+
+    /**
+     * The token is spent once the user is authenticated, and a request racing with the same token
+     * may have spent it first. The refusal is answered like any other failed refresh.
+     */
+    public function testAnswersARefusalFromTheSuccessHandlerAsAFailure(): void
+    {
+        $request = Request::create('/');
+        $token = $this->createStub(TokenInterface::class);
+        $refusal = new TokenNotFoundException();
+        $response = new Response('', Response::HTTP_UNAUTHORIZED);
+
+        $this->successHandler->method('onAuthenticationSuccess')->willThrowException($refusal);
+        $this->failureHandler
+            ->expects($this->once())
+            ->method('onAuthenticationFailure')
+            ->with($request, $refusal)
+            ->willReturn($response);
+
+        $this->assertSame($response, $this->refreshTokenAuthenticator->onAuthenticationSuccess($request, $token, 'test'));
     }
 
     public function testHandlesAnAuthenticationFailure(): void
