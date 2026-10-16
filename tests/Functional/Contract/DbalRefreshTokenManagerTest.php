@@ -72,10 +72,10 @@ final class DbalRefreshTokenManagerTest extends TestCase
     }
 
     /**
-     * Leaves the row where it is and deletes nothing, as the delete that lost a race does.
+     * @return array{Connection, string}
      */
-    protected function makeTheStorageDeleteNothing(): void
+    protected function tokenTable(): array
     {
-        $this->connection->executeStatement('CREATE TRIGGER lose_the_race BEFORE DELETE ON refresh_tokens BEGIN SELECT RAISE(IGNORE); END');
+        return [$this->connection, 'refresh_tokens'];
     }
 }

@@ -90,35 +90,22 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
     {
         // Asking the storage what it deleted is the only answer that holds when two callers race
         // for the same token: reading it back first tells both of them they won
-        $deleted = match (true) {
-            $this->repository instanceof DeleteRefreshTokenRepositoryInterface => $this->repository->deleteToken($refreshToken),
-            $this->objectManager instanceof EntityManagerInterface => $this->deleteByQuery($this->objectManager, $refreshToken),
-            default => null,
-        };
-
-        if (null !== $deleted) {
-            $this->objectManager->detach($refreshToken);
-
-            return $deleted;
+        if ($this->repository instanceof DeleteRefreshTokenRepositoryInterface) {
+            $deleted = $this->repository->deleteToken($refreshToken);
+        } elseif ($this->objectManager instanceof EntityManagerInterface) {
+            $deleted = $this->deleteByQuery($this->objectManager, $refreshToken);
+        } else {
+            return $this->deleteByReadingBack($refreshToken, $andFlush);
         }
 
-        // An object manager of any other kind has no delete reporting what it removed, so two
-        // callers racing for the same token can both be told they deleted it
-        if (null === $this->repository->findOneBy(['id' => $refreshToken->getId()])) {
-            return 0;
-        }
+        $this->objectManager->detach($refreshToken);
 
-        $this->objectManager->remove($refreshToken);
-
-        if ($andFlush) {
-            $this->objectManager->flush();
-        }
-
-        return 1;
+        return $deleted;
     }
 
     /**
-     * Deletes the token with a query of its own, for a repository that cannot be asked to.
+     * Deletes the token with a query of its own, as {@see DeleteRefreshTokenRepositoryInterface::deleteToken()}
+     * does, for a repository that cannot be asked to.
      */
     private function deleteByQuery(EntityManagerInterface $entityManager, RefreshTokenInterface $refreshToken): int
     {
@@ -131,6 +118,25 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
             ->execute();
 
         return $deleted;
+    }
+
+    /**
+     * An object manager of any other kind has no delete reporting what it removed, so two callers
+     * racing for the same token can both be told they deleted it.
+     */
+    private function deleteByReadingBack(RefreshTokenInterface $refreshToken, bool $andFlush): int
+    {
+        if (null === $this->repository->findOneBy(['id' => $refreshToken->getId()])) {
+            return 0;
+        }
+
+        $this->objectManager->remove($refreshToken);
+
+        if ($andFlush) {
+            $this->objectManager->flush();
+        }
+
+        return 1;
     }
 
     /**

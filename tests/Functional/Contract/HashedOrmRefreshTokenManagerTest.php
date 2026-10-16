@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
@@ -239,10 +240,10 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
     }
 
     /**
-     * Leaves the row where it is and deletes nothing, as the delete that lost a race does.
+     * @return array{Connection, string}
      */
-    protected function makeTheStorageDeleteNothing(): void
+    protected function tokenTable(): array
     {
-        $this->entityManager->getConnection()->executeStatement('CREATE TRIGGER lose_the_race BEFORE DELETE ON RefreshToken BEGIN SELECT RAISE(IGNORE); END');
+        return [$this->entityManager->getConnection(), 'RefreshToken'];
     }
 }

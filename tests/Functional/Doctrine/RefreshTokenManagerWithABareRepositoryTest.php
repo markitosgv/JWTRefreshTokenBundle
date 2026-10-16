@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Doctrine;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository as BundleRefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract\StorageDecidesTheDeleteContract;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\BareRefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\BareRepositoryRefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\RefreshToken;
@@ -29,6 +31,8 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
 {
+    use StorageDecidesTheDeleteContract;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -42,7 +46,7 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
 
     public function test_deletes_a_stored_token_by_reading_it_back_first(): void
     {
-        $manager = $this->manager();
+        $manager = $this->managerBehindAPlainObjectManager();
 
         $token = RefreshToken::createForUserWithTtl('a-stored-token', UserCreator::create('someone'), 600);
         $manager->save($token);
@@ -55,34 +59,12 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
     {
         $token = RefreshToken::createForUserWithTtl('a-token-never-stored', UserCreator::create('someone'), 600);
 
-        $this->assertSame(0, $this->manager()->delete($token));
-    }
-
-    /**
-     * Two requests spending the same token have both read it, and only one of their deletes
-     * reaches the row: on PostgreSQL or MySQL the other waits on the row lock and then deletes
-     * nothing. The trigger stands in for that here, leaving the row and deleting nothing.
-     *
-     * Reading the token back first finds it, so only the storage's answer can tell the caller it
-     * lost.
-     */
-    public function test_reports_nothing_deleted_when_the_storage_deleted_nothing(): void
-    {
-        $manager = new RefreshTokenManager($this->entityManager, BareRepositoryRefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
-
-        $token = BareRepositoryRefreshToken::createForUserWithTtl('a-token-spent-concurrently', UserCreator::create('someone'), 600);
-        $manager->save($token);
-
-        $this->entityManager->getConnection()->executeStatement(
-            'CREATE TRIGGER lose_the_race BEFORE DELETE ON bare_refresh_tokens BEGIN SELECT RAISE(IGNORE); END'
-        );
-
-        $this->assertSame(0, $manager->delete($token));
+        $this->assertSame(0, $this->managerBehindAPlainObjectManager()->delete($token));
     }
 
     public function test_deletes_a_stored_token_behind_an_entity_manager(): void
     {
-        $manager = new RefreshTokenManager($this->entityManager, BareRepositoryRefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+        $manager = $this->manager();
 
         $token = BareRepositoryRefreshToken::createForUserWithTtl('a-stored-token', UserCreator::create('someone'), 600);
         $manager->save($token);
@@ -101,7 +83,7 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('DeleteRefreshTokenRepositoryInterface');
 
-        $this->manager()->revokeAllForUser(UserCreator::create('someone'));
+        $this->managerBehindAPlainObjectManager()->revokeAllForUser(UserCreator::create('someone'));
     }
 
     public function test_says_the_same_for_pruning(): void
@@ -109,7 +91,7 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('DeleteRefreshTokenRepositoryInterface');
 
-        $this->manager()->revokeAllButNewestForUser(UserCreator::create('someone'), 1);
+        $this->managerBehindAPlainObjectManager()->revokeAllButNewestForUser(UserCreator::create('someone'), 1);
     }
 
     /**
@@ -121,10 +103,28 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('DeleteRefreshTokenFamilyRepositoryInterface');
 
-        $this->manager()->revokeFamily('a-chain');
+        $this->managerBehindAPlainObjectManager()->revokeFamily('a-chain');
     }
 
-    private function manager(): RefreshTokenManager
+    /**
+     * The bare repository behind a real entity manager, as an application maps its own.
+     *
+     * @param positive-int $batchSize
+     */
+    protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
+    {
+        return new RefreshTokenManager($this->entityManager, BareRepositoryRefreshToken::class, $batchSize);
+    }
+
+    /**
+     * @return array{Connection, string}
+     */
+    protected function tokenTable(): array
+    {
+        return [$this->entityManager->getConnection(), 'bare_refresh_tokens'];
+    }
+
+    private function managerBehindAPlainObjectManager(): RefreshTokenManager
     {
         $repository = $this->entityManager->getRepository(RefreshToken::class);
 

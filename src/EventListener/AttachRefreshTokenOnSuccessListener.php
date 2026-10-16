@@ -163,11 +163,6 @@ final class AttachRefreshTokenOnSuccessListener
         return null;
     }
 
-    private function refreshTokenFor(string $refreshTokenString): ?RefreshTokenInterface
-    {
-        return $this->authenticatedWith($refreshTokenString) ?? $this->refreshTokenManager->get($refreshTokenString);
-    }
-
     /**
      * Spends a single-use token, and says whether this caller is the one that did.
      *
@@ -292,7 +287,7 @@ final class AttachRefreshTokenOnSuccessListener
             // Only read back when the expiry is going to be used, either in the body or on the
             // cookie
             if ($options['return_expiration'] || $this->cookieSettings['enabled']) {
-                $issuedToken = $this->refreshTokenFor($refreshTokenString);
+                $issuedToken = $this->authenticatedWith($refreshTokenString) ?? $this->refreshTokenManager->get($refreshTokenString);
             }
 
             if ($options['return_expiration']) {

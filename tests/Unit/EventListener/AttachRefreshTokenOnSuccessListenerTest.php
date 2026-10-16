@@ -316,17 +316,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $tokenStorage ??= new TokenStorage();
         $tokenStorage->setToken(new PostRefreshTokenAuthenticationToken(UserCreator::create(), 'api', [], $refreshToken, $presented));
 
-        return new AttachRefreshTokenOnSuccessListener(
-            $this->refreshTokenManager,
-            self::TTL,
-            $this->requestStack,
-            self::TOKEN_PARAMETER_NAME,
-            true,
-            $this->refreshTokenGenerator,
-            $this->extractor,
-            [],
-            tokenStorage: $tokenStorage,
-        );
+        return $this->singleUseListener($tokenStorage);
     }
 
     private function listenerReading(RefreshTokenInterface $inStorage, bool $cookie): AttachRefreshTokenOnSuccessListener
@@ -1416,7 +1406,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         return $issued;
     }
 
-    private function singleUseListener(): AttachRefreshTokenOnSuccessListener
+    private function singleUseListener(?TokenStorageInterface $tokenStorage = null): AttachRefreshTokenOnSuccessListener
     {
         return new AttachRefreshTokenOnSuccessListener(
             $this->refreshTokenManager,
@@ -1426,7 +1416,8 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
             true,
             $this->refreshTokenGenerator,
             $this->extractor,
-            []
+            [],
+            tokenStorage: $tokenStorage,
         );
     }
 
