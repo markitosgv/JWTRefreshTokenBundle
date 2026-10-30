@@ -183,7 +183,10 @@ final class AttachRefreshTokenOnSuccessListener
     /**
      * Brings the token's expiry back to the chain's, when the chain ends first.
      *
-     * @psalm-external-mutation-free
+     * Not mutation-free of any kind: it writes to the token it is handed, which is a mutation of
+     * something outside this object however it is spelled.
+     *
+     * @psalm-impure it writes to the token it is given
      */
     private function capExpiryAt(RefreshTokenInterface $refreshToken, \DateTimeInterface $familyValid): void
     {
