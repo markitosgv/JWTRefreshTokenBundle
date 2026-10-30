@@ -72,7 +72,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
         }
 
         if ($mergedConfig['block_jwts_on_revocation']['enabled']) {
-            $container->setParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.cache', $mergedConfig['block_jwts_on_revocation']['cache']);
+            $container->setAlias('gesdinet_jwt_refresh_token.block_jwts_on_revocation.cache', $mergedConfig['block_jwts_on_revocation']['cache']);
             $container->setParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.ttl', $mergedConfig['block_jwts_on_revocation']['ttl']);
             $container->setParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.user_claim', $mergedConfig['block_jwts_on_revocation']['user_claim']);
 
@@ -90,7 +90,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             }
             // @codeCoverageIgnoreEnd
 
-            $container->setParameter('gesdinet_jwt_refresh_token.rate_limiter.limiter', $mergedConfig['rate_limiter']['limiter']);
+            $container->setAlias('gesdinet_jwt_refresh_token.rate_limiter.limiter', $mergedConfig['rate_limiter']['limiter']);
             $container->setParameter('gesdinet_jwt_refresh_token.rate_limiter.key', $mergedConfig['rate_limiter']['key']);
 
             $loader->load('rate_limiter.php');
@@ -104,7 +104,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
                 throw new InvalidConfigurationException('The "reuse_detection" option needs "single_use" to be true. Without it a refresh token is not replaced when it is used, so there is no spent token for a reuse to be recognised against.');
             }
 
-            $container->setParameter('gesdinet_jwt_refresh_token.reuse_detection.cache', $mergedConfig['reuse_detection']['cache']);
+            $container->setAlias('gesdinet_jwt_refresh_token.reuse_detection.cache', $mergedConfig['reuse_detection']['cache']);
             $container->setParameter('gesdinet_jwt_refresh_token.reuse_detection.ttl', $mergedConfig['reuse_detection']['ttl']);
 
             $loader->load('reuse_detection.php');
@@ -135,7 +135,7 @@ final class GesdinetJWTRefreshTokenExtension extends ConfigurableExtension
             $container->setAlias('gesdinet_jwt_refresh_token.refresh_token_manager', $mergedConfig['refresh_token_manager'])
                 ->setPublic(true);
         } elseif (null !== $mergedConfig['cache_pool']) {
-            $container->setParameter('gesdinet_jwt_refresh_token.cache_pool', $mergedConfig['cache_pool']);
+            $container->setAlias('gesdinet_jwt_refresh_token.cache_pool', $mergedConfig['cache_pool']);
 
             $loader->load('cache_services.php');
         } elseif (null !== $mergedConfig['dbal_connection']) {

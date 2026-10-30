@@ -16,10 +16,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set($vendor.'.refresh_rate_limiter')
         ->class(RefreshRateLimiter::class)
         ->args([
-            // The parameter holds a service id, so it is turned into the `%name%` placeholder
-            // service() takes. The cast used to be implicit; declare(strict_types=1) makes it
-            // the caller's job, which is the better place for it to be visible
-            service((string) param($vendor.'.rate_limiter.limiter')),
+            // An alias the extension points at the configured service. A `%parameter%` inside a
+            // service reference is never resolved, so the id cannot be passed as one
+            service($vendor.'.rate_limiter.limiter'),
             param($vendor.'.rate_limiter.key'),
         ]);
 };
