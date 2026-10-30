@@ -242,6 +242,10 @@ final class AttachRefreshTokenOnSuccessListener
 
         // Remove the current refreshToken if it is single-use
         if (null !== $refreshTokenString && true === $options['single_use']) {
+            // Held before the variable is cleared: this is the value the client sent, and a replay
+            // will arrive with the same one. What the model carries may be a hash of it
+            $presentedToken = $refreshTokenString;
+
             $refreshToken = $this->refreshTokenFor($refreshTokenString);
             $refreshTokenString = null;
 
@@ -255,7 +259,7 @@ final class AttachRefreshTokenOnSuccessListener
 
                 // Recorded before the row goes, since afterwards there is nothing left to say the
                 // token ever existed and a replay of it would look like any other wrong token
-                $this->spentTokens?->remember($refreshToken);
+                $this->spentTokens?->remember($presentedToken, $refreshToken);
 
                 $this->refreshTokenManager->delete($refreshToken);
             }
