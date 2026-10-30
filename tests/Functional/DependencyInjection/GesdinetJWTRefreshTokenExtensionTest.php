@@ -18,6 +18,7 @@ use Gesdinet\JWTRefreshTokenBundle\Session\SessionLister;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -238,7 +239,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
         $this->assertNotNull($decoration);
         $this->assertSame('gesdinet_jwt_refresh_token.refresh_token_manager', $decoration[0]);
 
-        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.cache', 'cache.redis');
+        $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.block_jwts_on_revocation.cache', 'cache.redis');
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.ttl', 7200);
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.block_jwts_on_revocation.user_claim', 'email');
 
@@ -264,7 +265,7 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'rate_limiter' => ['enabled' => true, 'limiter' => 'limiter.refresh', 'key' => 'token'],
         ]);
 
-        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.rate_limiter.limiter', 'limiter.refresh');
+        $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.rate_limiter.limiter', 'limiter.refresh');
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.rate_limiter.key', 'token');
         $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.refresh_rate_limiter');
     }
@@ -288,10 +289,69 @@ final class GesdinetJWTRefreshTokenExtensionTest extends AbstractExtensionTestCa
             'reuse_detection' => ['enabled' => true, 'cache' => 'cache.redis', 'ttl' => 900],
         ]);
 
-        $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.reuse_detection.cache', 'cache.redis');
+        $this->assertContainerBuilderHasAlias('gesdinet_jwt_refresh_token.reuse_detection.cache', 'cache.redis');
         $this->assertContainerBuilderHasParameter('gesdinet_jwt_refresh_token.reuse_detection.ttl', 900);
         $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.spent_refresh_token_registry');
         $this->assertContainerBuilderHasService('gesdinet_jwt_refresh_token.refresh_token_reuse_detector');
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, string, string}>
+     */
+    public static function configuredServiceProvider(): iterable
+    {
+        yield 'cache_pool' => [
+            ['cache_pool' => 'app.cache'],
+            'gesdinet_jwt_refresh_token.refresh_token_manager',
+            'app.cache',
+        ];
+        yield 'block_jwts_on_revocation' => [
+            ['refresh_token_manager' => 'app.refresh_token_manager', 'block_jwts_on_revocation' => ['enabled' => true, 'cache' => 'app.cache']],
+            'gesdinet_jwt_refresh_token.jwt_revocation_registry',
+            'app.cache',
+        ];
+        yield 'rate_limiter' => [
+            ['refresh_token_manager' => 'app.refresh_token_manager', 'rate_limiter' => ['enabled' => true, 'limiter' => 'app.limiter']],
+            'gesdinet_jwt_refresh_token.refresh_rate_limiter',
+            'app.limiter',
+        ];
+        yield 'reuse_detection' => [
+            ['refresh_token_manager' => 'app.refresh_token_manager', 'single_use' => true, 'reuse_detection' => ['enabled' => true, 'cache' => 'app.cache']],
+            'gesdinet_jwt_refresh_token.spent_refresh_token_registry',
+            'app.cache',
+        ];
+    }
+
+    /**
+     * A service id given in configuration has to reach the service that uses it once the container
+     * is compiled. A `%parameter%` placeholder inside a reference is never resolved, so the container
+     * would otherwise refuse to compile over a dependency on a service named after the placeholder.
+     *
+     * @param array<string, mixed> $config
+     */
+    #[DataProvider('configuredServiceProvider')]
+    public function test_the_configured_service_is_the_one_injected(array $config, string $serviceId, string $injectedId): void
+    {
+        $this->container->register('app.refresh_token_manager', RefreshTokenManagerInterface::class);
+        // Public so it is not inlined, which would leave a definition where the reference is asserted
+        $this->container->register($injectedId, \stdClass::class)->setPublic(true);
+        $this->container->register('event_dispatcher', \stdClass::class);
+
+        $this->load(['refresh_token_class' => RefreshTokenEntity::class] + $config);
+
+        // The test case turns these off. They are what resolves an alias in an argument and what
+        // refuses a reference to a service that does not exist, so they are the point here
+        $passes = new PassConfig();
+        $this->container->getCompilerPassConfig()->setOptimizationPasses($passes->getOptimizationPasses());
+        $this->container->getCompilerPassConfig()->setRemovingPasses($passes->getRemovingPasses());
+        $this->container->getCompilerPassConfig()->setAfterRemovingPasses($passes->getAfterRemovingPasses());
+
+        // Private and otherwise unused here, so it would be taken out before there was anything to look at
+        $this->container->getDefinition($serviceId)->setPublic(true);
+
+        $this->compile();
+
+        $this->assertEquals(new Reference($injectedId), $this->container->getDefinition($serviceId)->getArgument(0));
     }
 
     /**

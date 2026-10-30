@@ -77,14 +77,42 @@
         </InternalMethod>
 
         <!--
-            API Platform types withContent() as ArrayObject<array-key, mixed> and is handed the
-            narrower ArrayObject<string, MediaType> it actually wants. Theirs to widen, not ours.
+            The two analysers disagree about this one and cannot both be satisfied. psalm asks for
+            @psalm-pure on sessionFor(), and with that annotation phpstan refuses the getter calls
+            and the DateTimeImmutable it builds, since it cannot prove either is pure. The method
+            reads the tokens it is handed and returns a value object; nothing is written. psalm's
+            request is the one dropped, because phpstan runs at level 10 here and its objection is
+            about code rather than about an annotation.
         -->
-        <InvalidArgument>
+        <MissingPureAnnotation>
             <errorLevel type="suppress">
-                <file name="src/OpenApi/OpenApiFactory.php" />
+                <file name="src/Session/SessionLister.php" />
             </errorLevel>
-        </InvalidArgument>
+        </MissingPureAnnotation>
+
+        <!--
+            doctrine/dbal 4.5 deprecated the mutable schema API this builds a table with, in favour
+            of Schema::edit() and SchemaEditor::addTable(). That replacement only exists from 4.5,
+            and doctrine/dbal is a suggest here rather than a requirement, so an application may
+            well be on 4.0: calling the new API would break it with no constraint to warn anybody.
+            The migration is worth doing once the floor can move, and until then this is noise from
+            a dependency rather than something fixable in this file.
+        -->
+        <DeprecatedMethod>
+            <errorLevel type="suppress">
+                <file name="src/Doctrine/DBAL/TableSchemaManager.php" />
+            </errorLevel>
+        </DeprecatedMethod>
+
+        <!--
+            setData() returns whatever Symfony's JsonResponse returns, which is typed `static` and
+            which psalm cannot prove is this same instance. The signature matches the parent's.
+        -->
+        <InvalidReturnStatement>
+            <errorLevel type="suppress">
+                <file name="src/Http/RefreshAuthenticationFailureResponse.php" />
+            </errorLevel>
+        </InvalidReturnStatement>
 
         <!--
             $headers belongs to Symfony's JsonResponse and is set by its constructor, which psalm

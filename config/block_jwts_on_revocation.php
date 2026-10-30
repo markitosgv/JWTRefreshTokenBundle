@@ -17,10 +17,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set($vendor.'.jwt_revocation_registry')
         ->class(CacheJWTRevocationRegistry::class)
         ->args([
-            // The parameter holds a service id, so it is turned into the `%name%` placeholder
-            // service() takes. The cast used to be implicit; declare(strict_types=1) makes it
-            // the caller's job, which is the better place for it to be visible
-            service((string) param($vendor.'.block_jwts_on_revocation.cache')),
+            // An alias the extension points at the configured service. A `%parameter%` inside a
+            // service reference is never resolved, so the id cannot be passed as one
+            service($vendor.'.block_jwts_on_revocation.cache'),
             param($vendor.'.block_jwts_on_revocation.ttl'),
         ]);
 
