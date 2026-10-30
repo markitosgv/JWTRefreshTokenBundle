@@ -1163,7 +1163,7 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         $registry
             ->expects($this->once())
             ->method('remember')
-            ->with($replaced)
+            ->with('thepreviouslyissuedrefreshtoken', $replaced)
             ->willReturnCallback(static function () use (&$order): void {
                 $order[] = 'remembered';
             });
@@ -1200,6 +1200,54 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
         )->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
 
         $this->assertSame(['remembered', 'deleted'], $order);
+    }
+
+    /**
+     * What the client sent is what gets recorded, not what the model carries. With `hash_tokens` on
+     * the two are different strings: the model read back from storage holds the hash. Recording the
+     * model's value keyed the spend under the hash while every replay asks with the raw token, so
+     * the detection never fired, with no error and no log. Reported as #433.
+     */
+    public function testRecordsTheTokenTheClientSentRatherThanTheStoredHash(): void
+    {
+        $raw = 'thepreviouslyissuedrefreshtoken';
+
+        // What a hashing manager hands back for that raw value
+        $replaced = new EntityRefreshToken();
+        $replaced->setRefreshToken('sha256$'.hash('sha256', $raw));
+        $replaced->setValid(new DateTime('+600 seconds'));
+
+        $registry = $this->createMock(SpentRefreshTokenRegistryInterface::class);
+        $registry
+            ->expects($this->once())
+            ->method('remember')
+            ->with($raw, $replaced);
+
+        $issued = new EntityRefreshToken();
+        $issued->setRefreshToken('thenewlyissuedrefreshtoken');
+
+        $this->refreshTokenManager->method('get')->willReturn($replaced);
+        $this->refreshTokenManager->method('delete')->willReturn(1);
+        $this->refreshTokenGenerator->method('createForUserWithTtl')->willReturn($issued);
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn($raw);
+
+        new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            true,
+            null,
+            null,
+            $registry
+        )->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
     }
 
     /**

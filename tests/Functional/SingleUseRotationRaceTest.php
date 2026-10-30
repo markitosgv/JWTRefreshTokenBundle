@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\User\InMemoryUserProvider;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Component\Security\Http\HttpUtils;
@@ -157,7 +158,7 @@ final class SingleUseRotationRaceTest extends ORMTestCase
         );
 
         $user = $tokenStorage->getToken()?->getUser();
-        \assert(null !== $user);
+        \assert($user instanceof UserInterface);
 
         $listener->attachRefreshToken(new AuthenticationSuccessEvent([], $user, new Response()));
     }

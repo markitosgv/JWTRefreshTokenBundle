@@ -33,7 +33,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
         $token->setFamily('the-chain-it-belonged-to');
 
         $registry = $this->registry();
-        $registry->remember($token);
+        $registry->remember('a-spent-token', $token);
 
         $spent = $registry->recall('a-spent-token');
 
@@ -58,7 +58,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
         foreach (['one' => 'first-chain', 'two' => 'second-chain'] as $value => $family) {
             $token = RefreshToken::createForUserWithTtl($value, UserCreator::create('someone'), 600);
             $token->setFamily($family);
-            $registry->remember($token);
+            $registry->remember($value, $token);
         }
 
         $this->assertSame('first-chain', $registry->recall('one')?->family);
@@ -76,7 +76,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
         $token->setUsername('someone');
 
         $registry = $this->registry();
-        $registry->remember($token);
+        $registry->remember('a-spent-token', $token);
 
         $spent = $registry->recall('a-spent-token');
 
@@ -90,7 +90,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
      */
     public function test_ignores_a_token_with_no_value(): void
     {
-        $this->registry()->remember($this->createStub(RefreshTokenInterface::class));
+        $this->registry()->remember('', $this->createStub(RefreshTokenInterface::class));
 
         $this->assertSame([], $this->pool->getValues());
     }
@@ -104,7 +104,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
         $token = RefreshToken::createForUserWithTtl('a-token-worth-stealing', UserCreator::create('someone'), 600);
         $token->setFamily('a-chain');
 
-        $this->registry()->remember($token);
+        $this->registry()->remember('a-token-worth-stealing', $token);
 
         $stored = $this->pool->getValues();
 
@@ -122,6 +122,25 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
     }
 
     /**
+     * The entry is keyed on what the client sent, never on what the model carries. With
+     * `hash_tokens` on the model holds the hash, so keying on it recorded the spend under
+     * sha256(hash) while every lookup asks for sha256(raw), and nothing was ever recalled: the
+     * detection was inert with no error and no log. Reported as #433.
+     */
+    public function test_keys_on_the_presented_token_and_not_on_what_the_model_stores(): void
+    {
+        // What a hashing manager hands back: the stored value, not the one the client was given
+        $token = RefreshToken::createForUserWithTtl('sha256$'.hash('sha256', 'the-raw-token'), UserCreator::create('someone'), 600);
+        $token->setFamily('the-chain');
+
+        $registry = $this->registry();
+        $registry->remember('the-raw-token', $token);
+
+        $this->assertSame('the-chain', $registry->recall('the-raw-token')?->family, 'A replay arrives with the raw token');
+        $this->assertNull($registry->recall((string) $token->getRefreshToken()), 'The stored value is not what a client ever sends');
+    }
+
+    /**
      * The pool belongs to the application, not to this bundle. Anything else found under the key is
      * treated as nothing having been recorded rather than handed on as a record.
      */
@@ -130,7 +149,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
         $registry = $this->registry();
 
         $token = RefreshToken::createForUserWithTtl('a-spent-token', UserCreator::create('someone'), 600);
-        $registry->remember($token);
+        $registry->remember('a-spent-token', $token);
 
         // Overwrite whatever key it chose with a value of the wrong shape
         $key = array_keys($this->pool->getValues())[0];
@@ -156,7 +175,7 @@ final class CacheSpentRefreshTokenRegistryTest extends TestCase
         $pool->expects($this->once())->method('save')->with($item);
 
         new CacheSpentRefreshTokenRegistry($pool, 900)
-            ->remember(RefreshToken::createForUserWithTtl('a-spent-token', UserCreator::create('someone'), 600));
+            ->remember('a-spent-token', RefreshToken::createForUserWithTtl('a-spent-token', UserCreator::create('someone'), 600));
     }
 
     private function registry(): CacheSpentRefreshTokenRegistry

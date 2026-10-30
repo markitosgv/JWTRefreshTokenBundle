@@ -169,11 +169,11 @@ final class AttachRefreshTokenOnSuccessListener
      * Only the storage can answer that: two requests racing with the same token have both read it,
      * and only one of their deletes reaches the row.
      */
-    private function spend(RefreshTokenInterface $refreshToken): bool
+    private function spend(string $presentedToken, RefreshTokenInterface $refreshToken): bool
     {
         // Recorded before the row goes, since afterwards there is nothing left to say the token
         // ever existed and a replay of it would look like any other wrong token
-        $this->spentTokens?->remember($refreshToken);
+        $this->spentTokens?->remember($presentedToken, $refreshToken);
 
         return 1 === $this->refreshTokenManager->delete($refreshToken);
     }
@@ -258,11 +258,15 @@ final class AttachRefreshTokenOnSuccessListener
 
         // Remove the current refreshToken if it is single-use
         if (null !== $refreshTokenString && true === $options['single_use']) {
+            // Held before the variable is cleared: this is the value the client sent, and a replay
+            // will arrive with the same one. What the model carries may be a hash of it
+            $presentedToken = $refreshTokenString;
+
             $authenticatedWith = $this->authenticatedWith($refreshTokenString);
             $refreshToken = $authenticatedWith ?? $this->refreshTokenManager->get($refreshTokenString);
             $refreshTokenString = null;
 
-            if (null !== $refreshToken && $this->spend($refreshToken)) {
+            if (null !== $refreshToken && $this->spend($presentedToken, $refreshToken)) {
                 $remainingTtl = $this->remainingTtl($refreshToken);
 
                 if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
