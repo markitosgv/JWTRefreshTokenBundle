@@ -13,10 +13,9 @@ declare(strict_types=1);
 
 use Rector\CodeQuality\Rector\Class_\InlineConstructorDefaultToPropertyRector;
 use Rector\CodeQuality\Rector\ClassMethod\LocallyCalledStaticMethodToNonStaticRector;
-use Rector\CodeQuality\Rector\Identical\FlipTypeControlToUseExclusiveTypeRector;
+use Rector\CodeQuality\Rector\If_\ExplicitNullableObjectInstanceRector;
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPromotedPropertyRector;
-use Rector\EarlyReturn\Rector\If_\ChangeOrIfContinueToMultiContinueRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\NarrowObjectReturnTypeRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
 use Rector\ValueObject\PhpVersion;
@@ -84,19 +83,24 @@ return RectorConfig::configure()
         NarrowObjectReturnTypeRector::class,
 
         // `null !== $token` becomes `$token instanceof Some\Fully\Qualified\Name`, which is longer,
-        // drags a FQN into the middle of a condition, and says less than the null check it replaces
-        // — the question really being asked is whether there is one.
-        FlipTypeControlToUseExclusiveTypeRector::class,
+        // drags a FQN into the middle of a condition, and says less than the null check it replaces:
+        // the question really being asked is whether there is one.
+        //
+        // This was FlipTypeControlToUseExclusiveTypeRector until Rector deprecated that name and
+        // moved the same behaviour here. Renamed rather than reconsidered.
+        ExplicitNullableObjectInstanceRector::class,
 
         // The private static helpers are static on purpose. `self::hash()` and `self::key()` touch
         // no state and are marked `@psalm-pure`, which is exactly what being static asserts; turning
         // them into `$this->` calls throws that away for no gain.
         LocallyCalledStaticMethodToNonStaticRector::class,
 
-        // `if ($a || $b || $c) { continue; }` becomes three ifs and three continues. Each guard is
-        // one thought — "this class is not one to create a collection for" — and splitting it into
-        // three makes the reader reassemble what the condition already said.
-        ChangeOrIfContinueToMultiContinueRector::class,
+        // ChangeOrIfContinueToMultiContinueRector used to be skipped here, and was dropped from the
+        // list once Rector deprecated it and stopped registering it: a skip for a rule that cannot
+        // fire is reported as dead configuration. The reason is kept in case it comes back under
+        // another name, as the rule above did. It split `if ($a || $b || $c) { continue; }` into
+        // three ifs and three continues, where each guard is one thought and splitting it makes the
+        // reader reassemble what the condition already said.
 
         // The cookie defaults are merged in the constructor body on purpose: the array arrives
         // partial from configuration and the merge is what fills it in.

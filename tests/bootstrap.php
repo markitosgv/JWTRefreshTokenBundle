@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-require_once dirname(__DIR__).'/vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 // Defined here rather than in the <php> section of phpunit.xml.dist so that static analysis and any
 // tool running the suite without that configuration file sees them too.

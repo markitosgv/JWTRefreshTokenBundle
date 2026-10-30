@@ -41,15 +41,15 @@ final readonly class CacheSpentRefreshTokenRegistry implements SpentRefreshToken
     }
 
     #[\Override]
-    public function remember(RefreshTokenInterface $refreshToken): void
+    public function remember(string $presentedToken, RefreshTokenInterface $refreshToken): void
     {
-        $value = $refreshToken->getRefreshToken();
-
-        if (null === $value) {
+        if ('' === $presentedToken) {
             return;
         }
 
-        $item = $this->pool->getItem(self::key($value));
+        // Keyed on what the client sent, never on what the model carries. With `hash_tokens` on
+        // those are different strings, and a replay arrives with the one the client was given
+        $item = $this->pool->getItem(self::key($presentedToken));
 
         $item->set(new SpentRefreshToken(
             $refreshToken instanceof FamilyAwareRefreshTokenInterface ? $refreshToken->getFamily() : null,

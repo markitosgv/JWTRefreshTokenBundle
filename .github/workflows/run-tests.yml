@@ -10,13 +10,15 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.4', '8.5']
-        symfony: ['8.0.*', '8.1.*']
+        # 8.0 is gone: every symfony/http-foundation 8.0.x is affected by CVE-2026-108082 with no
+        # patched release on that branch, so composer refuses to install it at all
+        symfony: ['8.1.*']
         composer-flags: ['--prefer-stable']
         can-fail: [false]
         extensions: ['curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip']
         include:
           - php: '8.4'
-            symfony: '8.0.*'
+            symfony: '8.1.*'
             composer-flags: '--prefer-stable --prefer-lowest'
             can-fail: false
             extensions: 'curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip'
