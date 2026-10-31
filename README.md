@@ -546,6 +546,11 @@ The client still receives the token; what the database holds is `sha256$` follow
 a refresh hashes what arrives to find the row. A leaked table cannot be used, because the values in
 it are not the ones the endpoint accepts.
 
+A value in that stored format is refused on its own account, whatever the migration window below
+allows: no client is ever given one, so presenting one is only ever somebody who has read the table.
+That makes the `sha256$` prefix reserved. A generator of your own producing values that start with
+it would have them stored in the clear and then refused, so do not.
+
 SHA-256 rather than bcrypt or argon2 on purpose. Slow hashing exists to make guessing expensive, and
 a token of 64 random bytes is not guessable. It also has to be deterministic: a refresh request
 carries the token and nothing else, so the row has to be findable from it, which rules out a
