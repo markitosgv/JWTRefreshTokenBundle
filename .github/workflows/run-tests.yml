@@ -10,15 +10,20 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4']
-        symfony: ['6.4.*', '7.0.*', '7.2.*', '7.3.*', '7.4.*', '8.0.*']
+        # 7.0, 7.2, 7.3 and 8.0 are gone: they are end of life, so every release on those
+        # branches is affected by a published advisory with no patched release to move to, and
+        # composer refuses to install them at all. 6.4 and 7.4 are still maintained, and 8.1 is
+        # what 8.0 users are expected to be on
+        symfony: ['6.4.*', '7.4.*', '8.1.*']
         composer-flags: ['--prefer-stable']
         can-fail: [false]
         extensions: ['curl, iconv, mbstring, mongodb, pdo, pdo_sqlite, sqlite, zip']
+        # Symfony 8 needs PHP 8.4
         exclude:
           - php: '8.2'
-            symfony: '8.0.*'
+            symfony: '8.1.*'
           - php: '8.3'
-            symfony: '8.0.*'
+            symfony: '8.1.*'
         include:
           - php: '8.2'
             symfony: '6.4.*'
