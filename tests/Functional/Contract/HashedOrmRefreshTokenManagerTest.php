@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
@@ -27,6 +28,8 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
 {
+    use StorageDecidesTheDeleteContract;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -290,5 +293,13 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
         return new HashedRefreshTokenManager(
             new RefreshTokenManager($this->entityManager, RefreshToken::class, $batchSize)
         );
+    }
+
+    /**
+     * @return array{Connection, string}
+     */
+    protected function tokenTable(): array
+    {
+        return [$this->entityManager->getConnection(), 'RefreshToken'];
     }
 }

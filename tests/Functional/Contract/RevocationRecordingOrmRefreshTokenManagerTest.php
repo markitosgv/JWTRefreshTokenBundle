@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
@@ -30,6 +31,7 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use StorageDecidesTheDeleteContract;
 
     private ArrayAdapter $pool;
 
@@ -146,5 +148,13 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
         \assert($manager instanceof ListRefreshTokenManagerInterface);
 
         return $manager;
+    }
+
+    /**
+     * @return array{Connection, string}
+     */
+    protected function tokenTable(): array
+    {
+        return [$this->entityManager->getConnection(), 'RefreshToken'];
     }
 }

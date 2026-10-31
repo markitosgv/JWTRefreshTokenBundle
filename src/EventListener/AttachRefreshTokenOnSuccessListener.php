@@ -19,6 +19,7 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Request\Extractor\ExtractorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Security\Exception\TokenNotFoundException;
 use Gesdinet\JWTRefreshTokenBundle\Security\Http\Authenticator\Token\PostRefreshTokenAuthenticationToken;
 use Gesdinet\JWTRefreshTokenBundle\Security\ReuseDetection\SpentRefreshTokenRegistryInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
@@ -141,25 +142,40 @@ final class AttachRefreshTokenOnSuccessListener
      * The token the authenticator has just read from this very request, when there is one.
      *
      * A refresh goes through the authenticator, which loads the token to authenticate with it, and
-     * then through here, which loaded it again: two queries for one request. Symfony puts the
-     * authenticated security token in storage before calling the success handler, so it is already
-     * to hand.
+     * then through here. Symfony puts the authenticated security token in storage before calling the
+     * success handler, so it is already to hand, and using it rather than loading it again is what
+     * keeps a concurrent request that spent the row in between from making it look unknown.
      *
-     * The value is compared rather than trusted on type alone, so a token left in storage by
-     * anything other than this request is never the one acted on. That comparison cannot match when
-     * the stored value is a hash, which simply means the query happens as it used to.
+     * The presented value is compared rather than the type trusted on its own, so a token left in
+     * storage by anything other than this request is never the one acted on. It is the presented
+     * value rather than the stored one because storage may hold a hash.
      */
-    private function refreshTokenFor(string $refreshTokenString): ?RefreshTokenInterface
+    private function authenticatedWith(string $refreshTokenString): ?RefreshTokenInterface
     {
         $token = $this->tokenStorage?->getToken();
 
         if ($token instanceof PostRefreshTokenAuthenticationToken
-            && $token->getRefreshToken()->getRefreshToken() === $refreshTokenString
+            && $token->getPresentedRefreshToken() === $refreshTokenString
         ) {
             return $token->getRefreshToken();
         }
 
-        return $this->refreshTokenManager->get($refreshTokenString);
+        return null;
+    }
+
+    /**
+     * Spends a single-use token, and says whether this caller is the one that did.
+     *
+     * Only the storage can answer that: two requests racing with the same token have both read it,
+     * and only one of their deletes reaches the row.
+     */
+    private function spend(string $presentedToken, RefreshTokenInterface $refreshToken): bool
+    {
+        // Recorded before the row goes, since afterwards there is nothing left to say the token
+        // ever existed and a replay of it would look like any other wrong token
+        $this->spentTokens?->remember($presentedToken, $refreshToken);
+
+        return 1 === $this->refreshTokenManager->delete($refreshToken);
     }
 
     /**
@@ -249,22 +265,23 @@ final class AttachRefreshTokenOnSuccessListener
             // will arrive with the same one. What the model carries may be a hash of it
             $presentedToken = $refreshTokenString;
 
-            $refreshToken = $this->refreshTokenFor($refreshTokenString);
+            $authenticatedWith = $this->authenticatedWith($refreshTokenString);
+            $refreshToken = $authenticatedWith ?? $this->refreshTokenManager->get($refreshTokenString);
             $refreshTokenString = null;
 
-            if ($refreshToken instanceof RefreshTokenInterface) {
+            if (null !== $refreshToken && $this->spend($presentedToken, $refreshToken)) {
                 $remainingTtl = $this->remainingTtl($refreshToken);
 
                 if ($refreshToken instanceof FamilyAwareRefreshTokenInterface) {
                     $inheritedFamily = $refreshToken->getFamily();
                     $inheritedFamilyValid = $refreshToken->getFamilyValid();
                 }
+            } elseif (null !== $authenticatedWith) {
+                // The token this request authenticated with was spent by another one in the
+                // meantime, so it is refused as a replay would be, and nobody stays signed in on it
+                $this->tokenStorage?->setToken(null);
 
-                // Recorded before the row goes, since afterwards there is nothing left to say the
-                // token ever existed and a replay of it would look like any other wrong token
-                $this->spentTokens?->remember($presentedToken, $refreshToken);
-
-                $this->refreshTokenManager->delete($refreshToken);
+                throw new TokenNotFoundException();
             }
         }
 
@@ -277,7 +294,7 @@ final class AttachRefreshTokenOnSuccessListener
             // Only read back when the expiry is going to be used, either in the body or on the
             // cookie
             if ($options['return_expiration'] || $this->cookieSettings['enabled']) {
-                $issuedToken = $this->refreshTokenFor($refreshTokenString);
+                $issuedToken = $this->authenticatedWith($refreshTokenString) ?? $this->refreshTokenManager->get($refreshTokenString);
             }
 
             if ($options['return_expiration']) {

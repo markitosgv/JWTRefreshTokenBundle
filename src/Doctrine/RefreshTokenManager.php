@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use DateTimeInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
@@ -91,12 +92,40 @@ final readonly class RefreshTokenManager implements FamilyRefreshTokenManagerInt
         // for the same token: reading it back first tells both of them they won
         if ($this->repository instanceof DeleteRefreshTokenRepositoryInterface) {
             $deleted = $this->repository->deleteToken($refreshToken);
-
-            $this->objectManager->detach($refreshToken);
-
-            return $deleted;
+        } elseif ($this->objectManager instanceof EntityManagerInterface) {
+            $deleted = $this->deleteByQuery($this->objectManager, $refreshToken);
+        } else {
+            return $this->deleteByReadingBack($refreshToken, $andFlush);
         }
 
+        $this->objectManager->detach($refreshToken);
+
+        return $deleted;
+    }
+
+    /**
+     * Deletes the token with a query of its own, as {@see DeleteRefreshTokenRepositoryInterface::deleteToken()}
+     * does, for a repository that cannot be asked to.
+     */
+    private function deleteByQuery(EntityManagerInterface $entityManager, RefreshTokenInterface $refreshToken): int
+    {
+        /** @var int $deleted */
+        $deleted = $entityManager->createQueryBuilder()
+            ->delete($this->class, 'rt')
+            ->where('rt.id = :id')
+            ->setParameter('id', $refreshToken->getId())
+            ->getQuery()
+            ->execute();
+
+        return $deleted;
+    }
+
+    /**
+     * An object manager of any other kind has no delete reporting what it removed, so two callers
+     * racing for the same token can both be told they deleted it.
+     */
+    private function deleteByReadingBack(RefreshTokenInterface $refreshToken, bool $andFlush): int
+    {
         if (null === $this->repository->findOneBy(['id' => $refreshToken->getId()])) {
             return 0;
         }
