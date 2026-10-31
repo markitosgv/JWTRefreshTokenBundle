@@ -60,6 +60,14 @@ final readonly class HashedRefreshTokenManager implements ListRefreshTokenManage
             return null;
         }
 
+        // A value in the stored format is never one a client was given: the hash of it cannot match
+        // a row, and the lookup below, which takes the presented value as it is, would match the
+        // row holding it. Reading the table is the attack this class exists to defend against, so
+        // what the table holds cannot be accepted back as a token
+        if (self::isHashed($refreshToken)) {
+            return null;
+        }
+
         // Issued before hashing was turned on. Taking it now and rewriting it hashed is what keeps
         // the change from signing everybody out
         $inTheClear = $this->manager->get($refreshToken);

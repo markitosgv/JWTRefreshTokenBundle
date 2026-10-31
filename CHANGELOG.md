@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+* With `hash_tokens` on, the value stored for a token was accepted as the token. The lookup of the
+  hash of what was presented cannot match a row, but the fallback that keeps tokens issued before
+  hashing was turned on working looks the presented value up as it is, and the stored value matches
+  the row holding it. Anyone able to read the table, which is the one thing hashing is there to
+  survive, could hand a row back and be given a JWT and a refresh token for its owner, and go on
+  doing it with each replacement. A value in the stored format is now refused before that fallback.
+  Affects 2.2.0 to 2.2.2 and 3.0.0, both with `hash_tokens` enabled, and only reachable with read
+  access to the stored rows. Reported privately by Rathnadeepan (HotWater)
+
 ## 2.2.2
 
 ### Fixed

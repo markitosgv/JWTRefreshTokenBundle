@@ -159,6 +159,62 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
         $this->assertNull($manager->get('a-token-of-my-own'));
     }
 
+    /**
+     * The stored value is not a credential. Reading the table is the attack hashing exists to
+     * defend against, so the one thing a reader of it must not be able to do is hand the value
+     * back and be let in.
+     *
+     * The lookup of the hash of what was presented cannot match (that would be the hash of a
+     * hash), but the fallback for tokens stored before hashing was turned on looks the presented
+     * value up as it is, and the stored value matches itself. Reported privately by
+     * Rathnadeepan (HotWater).
+     */
+    public function test_refuses_the_stored_hash_offered_as_though_it_were_the_token(): void
+    {
+        $manager = $this->manager();
+
+        $manager->save(RefreshToken::createForUserWithTtl('a-token-of-my-own', UserCreator::create('someone'), 600));
+
+        $stored = $this->entityManager->getConnection()->fetchOne('SELECT refresh_token FROM RefreshToken');
+
+        $this->assertIsString($stored);
+        $this->assertNull($manager->get($stored), 'A row read out of the table is not a token');
+        $this->assertNotNull($manager->get('a-token-of-my-own'), 'The token the client holds still works');
+    }
+
+    /**
+     * Rotation does not help if the new row is as good as the old one, so the refusal cannot depend
+     * on which value the row happens to hold.
+     */
+    public function test_refuses_any_value_in_the_stored_format(): void
+    {
+        $manager = $this->manager();
+
+        $this->assertNull($manager->get('sha256$'.hash('sha256', 'a-token-nobody-was-given')));
+        $this->assertNull($manager->get('sha256$'));
+        $this->assertNull($manager->get('sha256$not-even-a-digest'));
+    }
+
+    /**
+     * Refusing it is not the same as taking it and failing to find a row: a value in the stored
+     * format is turned away before the fallback looks anything up, so a token stored before hashing
+     * was turned on cannot be reached by one either.
+     */
+    public function test_does_not_look_up_a_value_in_the_stored_format_at_all(): void
+    {
+        $this->storeInTheClear('sha256$a-token-stored-in-the-clear-of-all-things');
+
+        $manager = $this->manager();
+
+        $this->assertNull($manager->get('sha256$a-token-stored-in-the-clear-of-all-things'));
+
+        $this->assertSame(
+            'sha256$a-token-stored-in-the-clear-of-all-things',
+            $this->entityManager->getConnection()->fetchOne('SELECT refresh_token FROM RefreshToken'),
+            'Nothing was rewritten for it either'
+        );
+    }
+
     private function storeInTheClear(string $token): void
     {
         $unhashed = new RefreshTokenManager($this->entityManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
