@@ -2,10 +2,36 @@
 
 ## Unreleased
 
+### Security
+
+
+* With `hash_tokens` on, the value stored for a token was accepted as the token. The lookup of the
+  hash of what was presented cannot match a row, but the fallback that keeps tokens issued before
+  hashing was turned on working looks the presented value up as it is, and the stored value matches
+  the row holding it. Anyone able to read the table, which is the one thing hashing is there to
+  survive, could hand a row back and be given a JWT and a refresh token for its owner, and go on
+  doing it with each replacement. A value in the stored format is now refused before that fallback.
+  Affects 2.2.0 to 2.2.2 and 3.0.0, both with `hash_tokens` enabled, and only reachable with read
+  access to the stored rows. Reported privately by Rathnadeepan (HotWater)
+
 ### Fixed
+
+
+* `reuse_detection` recorded a spent token under the value the model carries, which is the hash with
+  `hash_tokens` on, while every lookup asks for the value the client sent. Nothing was ever recalled
+  and the detection was inert, with no error and no log ([#433](https://github.com/markitosgv/JWTRefreshTokenBundle/issues/433))
+* Four options taking a service id were referenced as `%parameter%` placeholders inside a service id,
+  which Symfony never resolves, so turning on `cache_pool`, `block_jwts_on_revocation`,
+  `rate_limiter` or `reuse_detection` left the container unable to compile ([#434](https://github.com/markitosgv/JWTRefreshTokenBundle/issues/434))
 
 * With `single_use`, two refresh requests presenting the same token at the same time could both be given a new pair, which is the stolen-token case rotation exists to end. The success listener ignored what `delete()` reported, and with `hash_tokens` it looked the token up a second time, so a request whose token had just been spent by the other was handed a replacement in a chain of its own, out of reach of reuse detection and `max_session_lifetime`. The token is now spent only when the storage reports deleting its row; the request that loses is refused like a replayed token, with nothing issued. The listener uses the token the authenticator loaded, recognised by the value presented, which `PostRefreshTokenAuthenticationToken::getPresentedRefreshToken()` now carries for the request (it is not serialized)
 * `Doctrine\RefreshTokenManager::delete()` asks the database what it deleted for a repository that does not implement `DeleteRefreshTokenRepositoryInterface`, when it sits behind an ORM entity manager. It read the token back and reported a deleted row, which both of two concurrent callers were told
+
+### Changed
+
+
+* Requires Symfony 8.1. `symfony/http-foundation` 8.0 is affected by CVE-2026-108082, fixed only in
+  8.1.7, so there is no 8.0 left to support
 
 ## 3.0.0
 

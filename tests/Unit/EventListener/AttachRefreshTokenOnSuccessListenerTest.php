@@ -163,6 +163,43 @@ final class AttachRefreshTokenOnSuccessListenerTest extends TestCase
     }
 
     /**
+     * A token with no expiry has no time left to hand on, so a replacement made without the
+     * single use ttl update is issued for none at all, rather than the listener's full ttl.
+     */
+    public function testIssuesNoTimeForASingleUseTokenWithoutAnExpiry(): void
+    {
+        /** @var RefreshTokenInterface&Stub $noExpiry */
+        $noExpiry = $this->createStub(RefreshTokenInterface::class);
+        $noExpiry->method('getValid')->willReturn(null);
+
+        $this->refreshTokenManager->method('get')->willReturn($noExpiry);
+        $this->refreshTokenManager->method('delete')->willReturn(1);
+
+        $this->refreshTokenGenerator
+            ->expects($this->once())
+            ->method('createForUserWithTtl')
+            ->with($this->anything(), 0)
+            ->willReturn(new EntityRefreshToken());
+
+        $this->requestStack->method('getCurrentRequest')->willReturn(Request::create('/', 'POST'));
+        $this->extractor->method('getRefreshToken')->willReturn('thepreviouslyissuedrefreshtoken');
+
+        new AttachRefreshTokenOnSuccessListener(
+            $this->refreshTokenManager,
+            self::TTL,
+            $this->requestStack,
+            self::TOKEN_PARAMETER_NAME,
+            true,
+            $this->refreshTokenGenerator,
+            $this->extractor,
+            [],
+            false,
+            self::RETURN_EXPIRATION_PARAMETER_NAME,
+            false
+        )->attachRefreshToken($this->eventFor($this->createStub(UserInterface::class)));
+    }
+
+    /**
      * The authenticator has already loaded the token to authenticate with it, and Symfony puts the
      * security token in storage before the success handler runs, so looking it up again is a second
      * query for the same row.
