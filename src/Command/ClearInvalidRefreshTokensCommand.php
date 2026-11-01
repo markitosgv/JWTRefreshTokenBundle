@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Gesdinet\JWTRefreshTokenBundle\Command;
 
 use DateTime;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -42,11 +43,21 @@ final class ClearInvalidRefreshTokensCommand extends Command
     {
         $this->addArgument('datetime', InputArgument::OPTIONAL, 'An optional date, all tokens before this date will be removed; the value should be able to be parsed by DateTime.', 'now');
         $this->addOption('batch-size', 'b', InputOption::VALUE_REQUIRED, 'Number of tokens to process per batch', $this->defaultBatchSize);
+        $this->addOption('direct', null, InputOption::VALUE_NONE, 'Delete the tokens with one statement instead of reading them first');
         $this->setHelp(
             <<<'EOT'
             The <info>%command.name%</info> command revokes all invalid (expired) refresh tokens.
             You can specify a date to revoke tokens that are invalid before that date.
             If no date is specified, it defaults to the current date and time.
+
+            By default every token is read before it is deleted, which is what lets the command
+            list them with <info>-v</info> and what raises the life-cycle events an application may
+            be listening for. Clearing a long backlog that way costs one object per dead row.
+
+            <info>--direct</info> sends a single statement to the database instead. What it costs
+            does not grow with the size of the backlog, and the trade is that the tokens are only
+            counted: nothing is listed with <info>-v</info>, no life-cycle events are raised, and
+            <info>--batch-size</info> has nothing to do.
             EOT
         );
         $this->setAliases(['gesdinet:jwt:clear-invalid-tokens']);
@@ -70,6 +81,11 @@ final class ClearInvalidRefreshTokensCommand extends Command
         }
 
         $datetime = new DateTime($datetimeArgument);
+
+        if (true === $input->getOption('direct')) {
+            return $this->clearDirectly($input, $output, $io, $datetime);
+        }
+
         $batchSize = (int) $batchSizeOption;
 
         // A batch of zero or less reads nothing, so the command would report that there was
@@ -95,6 +111,42 @@ final class ClearInvalidRefreshTokensCommand extends Command
                     $revokedTokens,
                 ));
             }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Deletes the expired tokens without reading them, for a backlog too large to hydrate.
+     */
+    private function clearDirectly(InputInterface $input, OutputInterface $output, SymfonyStyle $io, DateTime $datetime): int
+    {
+        // The option is on the command rather than on the manager interface, so a manager that
+        // cannot do this has to be turned away here. Saying which interface is missing beats
+        // calling a method that is not there
+        if (!$this->refreshTokenManager instanceof ExpiredRefreshTokenManagerInterface) {
+            $io->error(sprintf('The refresh token manager in use, "%s", cannot clear tokens directly: it does not implement %s. Run the command without --direct.', get_debug_type($this->refreshTokenManager), ExpiredRefreshTokenManagerInterface::class));
+
+            return Command::INVALID;
+        }
+
+        // Silently ignoring it would leave someone believing their batches were being honoured
+        if ($input->hasParameterOption(['--batch-size', '-b'], true)) {
+            $io->warning('The batch size is ignored with --direct: the tokens go in one statement.');
+        }
+
+        $revoked = $this->refreshTokenManager->revokeAllExpired($datetime);
+
+        if (0 === $revoked) {
+            $io->info('There were no invalid tokens to revoke.');
+
+            return 0;
+        }
+
+        $io->text(sprintf('Revoked %d invalid token(s) directly', $revoked));
+
+        if ($output->isVerbose()) {
+            $io->note('The tokens cannot be listed with --direct: they were deleted without being read.');
         }
 
         return 0;

@@ -7,6 +7,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -27,6 +28,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
 {
+    use ExpiredRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
@@ -103,6 +105,23 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
         $this->assertNull(new CacheJWTRevocationRegistry($this->pool, 3600)->revokedBefore('someone'));
     }
 
+    /**
+     * Clearing expired tokens is housekeeping over the whole table, and the tokens it takes had
+     * stopped working on their own. A mark left by it would sign out every user whose dead rows were
+     * swept up.
+     */
+    public function test_clearing_expired_tokens_marks_nothing(): void
+    {
+        $manager = $this->manager();
+        $manager->save(RefreshToken::createForUserWithTtl('long-gone', UserCreator::create('someone'), -600));
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        $this->assertSame(1, $manager->revokeAllExpired());
+
+        $this->assertNull(new CacheJWTRevocationRegistry($this->pool, 3600)->revokedBefore('someone'));
+    }
+
     public function test_says_so_when_the_manager_underneath_cannot_revoke_by_user(): void
     {
         $bare = new RevocationRecordingRefreshTokenManager(
@@ -130,6 +149,15 @@ final class RevocationRecordingOrmRefreshTokenManagerTest extends ORMTestCase
     protected function forgetLoadedObjects(): void
     {
         $this->entityManager->clear();
+    }
+
+    protected function expiringManager(): ExpiredRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        return $manager;
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

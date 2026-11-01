@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -15,6 +16,7 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('mongodb')]
 final class OdmRefreshTokenManagerTest extends ODMTestCase
 {
+    use ExpiredRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
@@ -46,6 +48,15 @@ final class OdmRefreshTokenManagerTest extends ODMTestCase
     protected function forgetLoadedObjects(): void
     {
         $this->documentManager->clear();
+    }
+
+    protected function expiringManager(): ExpiredRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        return $manager;
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

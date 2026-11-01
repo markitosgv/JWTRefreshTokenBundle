@@ -10,6 +10,7 @@ use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessList
 use Gesdinet\JWTRefreshTokenBundle\EventListener\LogoutEventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -79,12 +80,13 @@ return static function (ContainerConfigurator $container): void {
     $services->alias(RefreshTokenGeneratorInterface::class, $vendor.'.refresh_token_generator');
 
     // The manager itself comes from the backend in use, so only the aliases are shared. Every
-    // Doctrine backend implements all four interfaces; the cache one takes back what it cannot
+    // Doctrine backend implements all five interfaces; the cache one takes back what it cannot
     // answer
     $services->alias(RefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
     $services->alias(RevokeRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
     $services->alias(ListRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
     $services->alias(FamilyRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
+    $services->alias(ExpiredRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
 
     $services->set($vendor.'.session_lister')
         ->class(SessionLister::class)

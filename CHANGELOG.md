@@ -2,8 +2,27 @@
 
 ## Unreleased
 
-### Security
+### Fixed
 
+* With `single_use`, two refresh requests presenting the same token at the same time could both be given a new pair, which is the stolen-token case rotation exists to end. The success listener ignored what `delete()` reported, and with `hash_tokens` it looked the token up a second time, so a request whose token had just been spent by the other was handed a replacement in a chain of its own, out of reach of reuse detection and `max_session_lifetime`. The token is now spent only when the storage reports deleting its row; the request that loses is refused like a replayed token, with nothing issued. The listener uses the token the authenticator loaded, recognised by the value presented, which `PostRefreshTokenAuthenticationToken::getPresentedRefreshToken()` now carries for the request (it is not serialized)
+* `Doctrine\RefreshTokenManager::delete()` asks the database what it deleted for a repository that does not implement `DeleteRefreshTokenRepositoryInterface`, when it sits behind an ORM entity manager. It read the token back and reported a deleted row, which both of two concurrent callers were told
+
+## 3.1.0
+
+### Added
+
+* `Model\ExpiredRefreshTokenManagerInterface::revokeAllExpired()`, which clears expired tokens with
+  one statement sent to the database rather than reading each one first, and `--direct` on
+  `gesdinet:jwt:clear` to use it. The hydrating path costs one object per dead row, so clearing a
+  long backlog that way is the one thing the command is bad at; what this costs does not grow with
+  the backlog. The trade is that the tokens are only counted: nothing is listed with `-v` and no
+  life-cycle events are raised, which is why it is a flag and not the new behaviour. Available with
+  the ORM, ODM and DBAL backends, and a repository of your own gains it by implementing
+  `Doctrine\DeleteExpiredRefreshTokenRepositoryInterface`. The implementation is
+  [@Rainrider](https://github.com/Rainrider)'s, from [#432](https://github.com/markitosgv/JWTRefreshTokenBundle/pull/432),
+  which he withdrew
+
+### Security
 
 * With `hash_tokens` on, the value stored for a token was accepted as the token. The lookup of the
   hash of what was presented cannot match a row, but the fallback that keeps tokens issued before
@@ -16,7 +35,6 @@
 
 ### Fixed
 
-
 * `reuse_detection` recorded a spent token under the value the model carries, which is the hash with
   `hash_tokens` on, while every lookup asks for the value the client sent. Nothing was ever recalled
   and the detection was inert, with no error and no log ([#433](https://github.com/markitosgv/JWTRefreshTokenBundle/issues/433))
@@ -24,11 +42,7 @@
   which Symfony never resolves, so turning on `cache_pool`, `block_jwts_on_revocation`,
   `rate_limiter` or `reuse_detection` left the container unable to compile ([#434](https://github.com/markitosgv/JWTRefreshTokenBundle/issues/434))
 
-* With `single_use`, two refresh requests presenting the same token at the same time could both be given a new pair, which is the stolen-token case rotation exists to end. The success listener ignored what `delete()` reported, and with `hash_tokens` it looked the token up a second time, so a request whose token had just been spent by the other was handed a replacement in a chain of its own, out of reach of reuse detection and `max_session_lifetime`. The token is now spent only when the storage reports deleting its row; the request that loses is refused like a replayed token, with nothing issued. The listener uses the token the authenticator loaded, recognised by the value presented, which `PostRefreshTokenAuthenticationToken::getPresentedRefreshToken()` now carries for the request (it is not serialized)
-* `Doctrine\RefreshTokenManager::delete()` asks the database what it deleted for a repository that does not implement `DeleteRefreshTokenRepositoryInterface`, when it sits behind an ORM entity manager. It read the token back and reported a deleted row, which both of two concurrent callers were told
-
 ### Changed
-
 
 * Requires Symfony 8.1. `symfony/http-foundation` 8.0 is affected by CVE-2026-108082, fixed only in
   8.1.7, so there is no 8.0 left to support

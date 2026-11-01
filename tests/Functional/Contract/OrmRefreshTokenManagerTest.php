@@ -7,6 +7,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class OrmRefreshTokenManagerTest extends ORMTestCase
 {
+    use ExpiredRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
@@ -45,6 +47,15 @@ final class OrmRefreshTokenManagerTest extends ORMTestCase
     protected function forgetLoadedObjects(): void
     {
         $this->entityManager->clear();
+    }
+
+    protected function expiringManager(): ExpiredRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        return $manager;
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

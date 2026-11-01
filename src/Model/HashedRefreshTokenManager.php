@@ -32,7 +32,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * issued before this was turned on keep working: they are looked up as they are, and rewritten
  * hashed the first time they are used.
  */
-final readonly class HashedRefreshTokenManager implements FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class HashedRefreshTokenManager implements ExpiredRefreshTokenManagerInterface, FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     private const string PREFIX = 'sha256$';
 
@@ -149,6 +149,16 @@ final readonly class HashedRefreshTokenManager implements FamilyRefreshTokenMana
     public function revokeFamily(string $family): int
     {
         return $this->delegateOrFail(FamilyRefreshTokenManagerInterface::class)->revokeFamily($family);
+    }
+
+    /**
+     * When a token expires is in the row rather than in the token, so nothing here needs hashing:
+     * it goes straight through.
+     */
+    #[\Override]
+    public function revokeAllExpired(?DateTimeInterface $datetime = null): int
+    {
+        return $this->delegateOrFail(ExpiredRefreshTokenManagerInterface::class)->revokeAllExpired($datetime);
     }
 
     #[\Override]
