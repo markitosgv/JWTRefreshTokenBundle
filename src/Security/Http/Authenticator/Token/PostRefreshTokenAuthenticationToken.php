@@ -28,6 +28,12 @@ final class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
         string $firewallName,
         array $roles,
         private RefreshTokenInterface $refreshToken,
+        /**
+         * The value the client presented, which is not what the token carries once storage hashes
+         * it. Deliberately left out of the serialized state: it is a credential, and it only means
+         * anything to the request that presented it.
+         */
+        private readonly ?string $presentedRefreshToken = null,
     ) {
         parent::__construct($user, $firewallName, $roles);
     }
@@ -35,6 +41,14 @@ final class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
     public function getRefreshToken(): RefreshTokenInterface
     {
         return $this->refreshToken;
+    }
+
+    /**
+     * The value this request authenticated with, or null for a token restored from a session.
+     */
+    public function getPresentedRefreshToken(): ?string
+    {
+        return $this->presentedRefreshToken;
     }
 
     /**
@@ -60,6 +74,7 @@ final class PostRefreshTokenAuthenticationToken extends PostAuthenticationToken
         }
 
         $this->refreshToken = $refreshToken;
+        $this->presentedRefreshToken = null;
 
         parent::__unserialize($parentData);
     }

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Doctrine;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository as BundleRefreshTokenRepository;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract\StorageDecidesTheDeleteContract;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\BareRefreshTokenRepository;
+use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\BareRepositoryRefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\RefreshToken;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\Entity\User;
 use Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Fixtures\ObjectManagerWithRepository;
@@ -28,19 +31,22 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
 {
+    use StorageDecidesTheDeleteContract;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         new SchemaTool($this->entityManager)->createSchema([
             $this->entityManager->getClassMetadata(RefreshToken::class),
+            $this->entityManager->getClassMetadata(BareRepositoryRefreshToken::class),
             $this->entityManager->getClassMetadata(User::class),
         ]);
     }
 
     public function test_deletes_a_stored_token_by_reading_it_back_first(): void
     {
-        $manager = $this->manager();
+        $manager = $this->managerBehindAPlainObjectManager();
 
         $token = RefreshToken::createForUserWithTtl('a-stored-token', UserCreator::create('someone'), 600);
         $manager->save($token);
@@ -53,7 +59,19 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
     {
         $token = RefreshToken::createForUserWithTtl('a-token-never-stored', UserCreator::create('someone'), 600);
 
-        $this->assertSame(0, $this->manager()->delete($token));
+        $this->assertSame(0, $this->managerBehindAPlainObjectManager()->delete($token));
+    }
+
+    public function test_deletes_a_stored_token_behind_an_entity_manager(): void
+    {
+        $manager = $this->manager();
+
+        $token = BareRepositoryRefreshToken::createForUserWithTtl('a-stored-token', UserCreator::create('someone'), 600);
+        $manager->save($token);
+
+        $this->assertSame(1, $manager->delete($token));
+        $this->assertSame(0, $manager->delete($token), 'The one that came second deleted nothing');
+        $this->assertNull($manager->get('a-stored-token'));
     }
 
     /**
@@ -65,7 +83,7 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('DeleteRefreshTokenRepositoryInterface');
 
-        $this->manager()->revokeAllForUser(UserCreator::create('someone'));
+        $this->managerBehindAPlainObjectManager()->revokeAllForUser(UserCreator::create('someone'));
     }
 
     public function test_says_the_same_for_pruning(): void
@@ -73,7 +91,7 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('DeleteRefreshTokenRepositoryInterface');
 
-        $this->manager()->revokeAllButNewestForUser(UserCreator::create('someone'), 1);
+        $this->managerBehindAPlainObjectManager()->revokeAllButNewestForUser(UserCreator::create('someone'), 1);
     }
 
     /**
@@ -85,10 +103,28 @@ final class RefreshTokenManagerWithABareRepositoryTest extends ORMTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('DeleteRefreshTokenFamilyRepositoryInterface');
 
-        $this->manager()->revokeFamily('a-chain');
+        $this->managerBehindAPlainObjectManager()->revokeFamily('a-chain');
     }
 
-    private function manager(): RefreshTokenManager
+    /**
+     * The bare repository behind a real entity manager, as an application maps its own.
+     *
+     * @param positive-int $batchSize
+     */
+    protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
+    {
+        return new RefreshTokenManager($this->entityManager, BareRepositoryRefreshToken::class, $batchSize);
+    }
+
+    /**
+     * @return array{Connection, string}
+     */
+    protected function tokenTable(): array
+    {
+        return [$this->entityManager->getConnection(), 'bare_refresh_tokens'];
+    }
+
+    private function managerBehindAPlainObjectManager(): RefreshTokenManager
     {
         $repository = $this->entityManager->getRepository(RefreshToken::class);
 

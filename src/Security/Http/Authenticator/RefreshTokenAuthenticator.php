@@ -131,6 +131,7 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
 
         $passport = new SelfValidatingPassport(new UserBadge($username, $this->userProvider->loadUserByIdentifier(...)));
         $passport->setAttribute('refreshToken', $refreshToken);
+        $passport->setAttribute('presentedRefreshToken', $token);
 
         return $passport;
     }
@@ -141,6 +142,9 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
         /** @var RefreshTokenInterface|null $refreshToken */
         $refreshToken = $passport->getAttribute('refreshToken');
 
+        /** @var string|null $presentedRefreshToken */
+        $presentedRefreshToken = $passport->getAttribute('presentedRefreshToken');
+
         if (null === $refreshToken) {
             throw new LogicException('Passport does not contain the refresh token.');
         }
@@ -149,14 +153,22 @@ final class RefreshTokenAuthenticator extends AbstractAuthenticator implements A
             $passport->getUser(),
             $firewallName,
             $passport->getUser()->getRoles(),
-            $refreshToken
+            $refreshToken,
+            $presentedRefreshToken
         );
     }
 
     #[\Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return $this->successHandler->onAuthenticationSuccess($request, $token);
+        try {
+            return $this->successHandler->onAuthenticationSuccess($request, $token);
+        } catch (AuthenticationException $exception) {
+            // The token is only spent once the user is authenticated, and a request presenting the
+            // same token at the same time may have spent it first. That is still a refused refresh,
+            // and it is answered like one
+            return $this->onAuthenticationFailure($request, $exception);
+        }
     }
 
     #[\Override]

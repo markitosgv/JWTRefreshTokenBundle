@@ -41,6 +41,26 @@ final class PostRefreshTokenAuthenticationTokenTest extends TestCase
         $this->assertSame('api', $restored->getFirewallName());
     }
 
+    /**
+     * The value presented is a credential and only means anything to the request that presented
+     * it, so it is not written to the session along with the rest.
+     */
+    public function test_leaves_the_value_presented_out_of_the_serialized_state(): void
+    {
+        $token = new PostRefreshTokenAuthenticationToken(UserCreator::create(), 'api', ['ROLE_USER'], new RefreshToken(), 'the-presented-token');
+
+        $this->assertSame('the-presented-token', $token->getPresentedRefreshToken());
+
+        $serialized = serialize($token);
+
+        $this->assertStringNotContainsString('the-presented-token', $serialized);
+
+        /** @var PostRefreshTokenAuthenticationToken $restored */
+        $restored = unserialize($serialized);
+
+        $this->assertNull($restored->getPresentedRefreshToken());
+    }
+
     public function test_refuses_serialized_state_that_does_not_hold_a_refresh_token(): void
     {
         $token = new PostRefreshTokenAuthenticationToken(UserCreator::create(), 'api', ['ROLE_USER'], new RefreshToken());

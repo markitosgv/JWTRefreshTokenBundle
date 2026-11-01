@@ -24,6 +24,7 @@ final class DbalRefreshTokenManagerTest extends TestCase
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use StorageDecidesTheDeleteContract;
 
     private Connection $connection;
 
@@ -79,5 +80,13 @@ final class DbalRefreshTokenManagerTest extends TestCase
         \assert($manager instanceof ListRefreshTokenManagerInterface);
 
         return $manager;
+    }
+
+    /**
+     * @return array{Connection, string}
+     */
+    protected function tokenTable(): array
+    {
+        return [$this->connection, 'refresh_tokens'];
     }
 }
