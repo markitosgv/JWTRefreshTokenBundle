@@ -7,6 +7,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Document;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteExpiredRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenFamilyRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
@@ -19,7 +20,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @implements RefreshTokenRepositoryInterface<RefreshToken>
  */
-class RefreshTokenRepository extends DocumentRepository implements RefreshTokenRepositoryInterface, DeleteRefreshTokenRepositoryInterface, DeleteRefreshTokenFamilyRepositoryInterface
+class RefreshTokenRepository extends DocumentRepository implements RefreshTokenRepositoryInterface, DeleteExpiredRefreshTokenRepositoryInterface, DeleteRefreshTokenRepositoryInterface, DeleteRefreshTokenFamilyRepositoryInterface
 {
     /**
      * @return iterable<RefreshToken>
@@ -97,6 +98,20 @@ class RefreshTokenRepository extends DocumentRepository implements RefreshTokenR
         $result = $this->createQueryBuilder()
             ->field('id')
             ->in($ids)
+            ->remove()
+            ->getQuery()
+            ->execute();
+
+        return $result->isAcknowledged() ? $result->getDeletedCount() : 0;
+    }
+
+    #[\Override]
+    public function deleteAllExpired(?DateTimeInterface $datetime = null): int
+    {
+        /** @var DeleteResult $result */
+        $result = $this->createQueryBuilder()
+            ->field('valid')
+            ->lt($datetime ?? new DateTime())
             ->remove()
             ->getQuery()
             ->execute();

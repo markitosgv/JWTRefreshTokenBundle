@@ -29,9 +29,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * Deliberately only that method. `revokeAllButNewestForUser()` prunes a user's older sessions while
  * they carry on using the newest, so marking there would sign them out of the device they are
  * holding. `revokeFamily()` ends one session, and nothing on a JWT says which chain issued it, so
- * there is no way to refuse only that session's tokens.
+ * there is no way to refuse only that session's tokens. `revokeAllExpired()` is housekeeping over
+ * tokens that already stopped working on their own, and it is not aimed at a user in the first
+ * place: a mark left by it would sign out everybody whose dead rows were swept up.
  */
-final readonly class RevocationRecordingRefreshTokenManager implements FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class RevocationRecordingRefreshTokenManager implements ExpiredRefreshTokenManagerInterface, FamilyRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @psalm-mutation-free
@@ -65,6 +67,12 @@ final readonly class RevocationRecordingRefreshTokenManager implements FamilyRef
     public function revokeFamily(string $family): int
     {
         return $this->delegateOrFail(FamilyRefreshTokenManagerInterface::class)->revokeFamily($family);
+    }
+
+    #[\Override]
+    public function revokeAllExpired(?DateTimeInterface $datetime = null): int
+    {
+        return $this->delegateOrFail(ExpiredRefreshTokenManagerInterface::class)->revokeAllExpired($datetime);
     }
 
     #[\Override]

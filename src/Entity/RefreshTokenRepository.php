@@ -8,6 +8,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityRepository;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteExpiredRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenFamilyRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
@@ -19,7 +20,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @implements RefreshTokenRepositoryInterface<RefreshToken>
  */
-class RefreshTokenRepository extends EntityRepository implements RefreshTokenRepositoryInterface, DeleteRefreshTokenRepositoryInterface, DeleteRefreshTokenFamilyRepositoryInterface
+class RefreshTokenRepository extends EntityRepository implements RefreshTokenRepositoryInterface, DeleteExpiredRefreshTokenRepositoryInterface, DeleteRefreshTokenRepositoryInterface, DeleteRefreshTokenFamilyRepositoryInterface
 {
     /**
      * @return iterable<RefreshToken>
@@ -103,6 +104,20 @@ class RefreshTokenRepository extends EntityRepository implements RefreshTokenRep
             ->delete()
             ->where('rt.id IN (:ids)')
             ->setParameter('ids', array_map(static fn (RefreshToken $token): int|string|null => $token->getId(), $stale))
+            ->getQuery()
+            ->execute();
+
+        return $deleted;
+    }
+
+    #[\Override]
+    public function deleteAllExpired(?DateTimeInterface $datetime = null): int
+    {
+        /** @var int $deleted */
+        $deleted = $this->createQueryBuilder('rt')
+            ->delete()
+            ->where('rt.valid < :datetime')
+            ->setParameter('datetime', $datetime ?? new DateTime())
             ->getQuery()
             ->execute();
 

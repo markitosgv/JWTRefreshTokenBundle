@@ -9,6 +9,7 @@ use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 #[RequiresPhpExtension('pdo_sqlite')]
 final class DbalRefreshTokenManagerTest extends TestCase
 {
+    use ExpiredRefreshTokenManagerContract;
     use FamilyAwareRefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RefreshTokenManagerContract;
@@ -50,6 +52,15 @@ final class DbalRefreshTokenManagerTest extends TestCase
      */
     protected function forgetLoadedObjects(): void
     {
+    }
+
+    protected function expiringManager(): ExpiredRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        return $manager;
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

@@ -6,6 +6,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\FamilyRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\HashedRefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
@@ -167,6 +168,33 @@ final class HashedOrmRefreshTokenManagerTest extends ORMTestCase
 
         $this->assertSame(2, $manager->revokeFamily('the-chain'));
         $this->assertNull($manager->get('one'));
+    }
+
+    /**
+     * When a token expires is in the row rather than in the token, so the value is not hashed on the
+     * way through and the sweep reaches the rows this manager wrote.
+     */
+    public function test_clears_expired_tokens_through_the_manager_underneath(): void
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        $manager->save(RefreshToken::createForUserWithTtl('long-gone', UserCreator::create('someone'), -600));
+        $manager->save(RefreshToken::createForUserWithTtl('still-valid', UserCreator::create('someone'), 600));
+
+        $this->assertSame(1, $manager->revokeAllExpired());
+        $this->assertNotNull($manager->get('still-valid'));
+    }
+
+    public function test_says_so_when_the_manager_underneath_cannot_clear_expired_tokens(): void
+    {
+        $bare = new HashedRefreshTokenManager($this->createStub(RefreshTokenManagerInterface::class));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('does not implement');
+
+        $bare->revokeAllExpired();
     }
 
     public function test_says_so_when_the_manager_underneath_cannot_revoke_a_chain(): void

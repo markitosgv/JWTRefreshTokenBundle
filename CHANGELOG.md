@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+
+* `Model\ExpiredRefreshTokenManagerInterface::revokeAllExpired()`, which clears expired tokens with
+  one statement sent to the database rather than reading each one first, and `--direct` on
+  `gesdinet:jwt:clear` to use it. The hydrating path costs one object per dead row, so clearing a
+  long backlog that way is the one thing the command is bad at; what this costs does not grow with
+  the backlog. The trade is that the tokens are only counted: nothing is listed with `-v` and no
+  life-cycle events are raised, which is why it is a flag and not the new behaviour. Available with
+  the ORM, ODM and DBAL backends, and a repository of your own gains it by implementing
+  `Doctrine\DeleteExpiredRefreshTokenRepositoryInterface`. The implementation is
+  [@Rainrider](https://github.com/Rainrider)'s, from [#432](https://github.com/markitosgv/JWTRefreshTokenBundle/pull/432),
+  which he withdrew
+
 ### Security
 
 * With `hash_tokens` on, the value stored for a token was accepted as the token. The lookup of the
