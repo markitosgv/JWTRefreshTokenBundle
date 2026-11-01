@@ -12,6 +12,7 @@
 namespace Gesdinet\JWTRefreshTokenBundle\Doctrine;
 
 use Doctrine\Persistence\ObjectManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -20,7 +21,7 @@ use DateTimeInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements ExpiredRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var class-string<RefreshTokenInterface>
@@ -170,6 +171,21 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
         }
 
         return $invalidTokens;
+    }
+
+    /**
+     * The cheap counterpart of revokeAllInvalid(): one query, nothing hydrated, so a backlog of dead
+     * rows costs the same as a handful of them. Delegated whole, since a token's expiry is in the
+     * row and nothing here has to be read to decide it.
+     */
+    #[\Override]
+    public function revokeAllExpired(?DateTimeInterface $datetime = null): int
+    {
+        if (!$this->repository instanceof DeleteExpiredRefreshTokenRepositoryInterface) {
+            throw new LogicException(sprintf('Repository mapped for "%s" should implement %s.', $this->class, DeleteExpiredRefreshTokenRepositoryInterface::class));
+        }
+
+        return $this->repository->deleteAllExpired($datetime);
     }
 
     /**

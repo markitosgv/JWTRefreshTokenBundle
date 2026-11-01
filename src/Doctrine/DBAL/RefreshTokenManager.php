@@ -15,13 +15,14 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class RefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class RefreshTokenManager implements ExpiredRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     /**
      * @var array<string, array{name: string, type: string}>
@@ -379,6 +380,22 @@ final readonly class RefreshTokenManager implements ListRefreshTokenManagerInter
         }
 
         return array_map($this->hydrate(...), $invalidData);
+    }
+
+    /**
+     * The cheap counterpart of revokeAllInvalid(): the rows are not read before being deleted, so
+     * they cannot be reported, only counted, and no transaction is needed around the pair.
+     *
+     * @throws Exception
+     */
+    #[\Override]
+    public function revokeAllExpired(?\DateTimeInterface $datetime = null): int
+    {
+        return (int) $this->connection->createQueryBuilder()
+            ->delete($this->quoteTableIdentifier())
+            ->where($this->quoteColumnIdentifier('valid').' < :datetime')
+            ->setParameter('datetime', $datetime ?? new \DateTime(), 'datetime')
+            ->executeStatement();
     }
 
     /**

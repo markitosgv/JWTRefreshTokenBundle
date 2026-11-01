@@ -833,6 +833,35 @@ about the application rather than about this bundle.
 
 Revoking by user is available with the Doctrine ORM and MongoDB ODM backends.
 
+### Clear expired tokens from your own code
+
+`gesdinet:jwt:clear` reads every token before deleting it, which is what lets it list them and what
+raises the life-cycle events an application may be listening for. Clearing a long backlog that way
+costs one object per dead row, so for a table that has grown for months there is a cheaper route:
+
+```php
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
+
+public function __construct(
+    private ExpiredRefreshTokenManagerInterface $refreshTokenManager,
+) {
+}
+
+public function clearOut(): int
+{
+    // Everything that had expired by now. Pass a date to clear what had expired by then instead
+    return $this->refreshTokenManager->revokeAllExpired();
+}
+```
+
+It returns how many were deleted. One statement, nothing hydrated, so no life-cycle event is raised
+and the tokens that went cannot be reported, only counted. `revokeAllInvalid()` and
+`revokeAllInvalidBatch()` on `RefreshTokenManagerInterface` hand the tokens back and are what an
+application listening for their removal wants instead.
+
+Available with the Doctrine ORM, MongoDB ODM and DBAL backends. A repository of your own gains it by
+implementing `DeleteExpiredRefreshTokenRepositoryInterface`.
+
 ### Use another class for refresh tokens
 
 You can define your own refresh token class for your project by creating a class extending from the classes provided by this bundle. This also allows you to customize the refresh token, i.e. to add extra data to the token.

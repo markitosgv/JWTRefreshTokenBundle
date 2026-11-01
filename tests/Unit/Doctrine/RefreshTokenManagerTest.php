@@ -6,6 +6,7 @@ use DateTimeInterface;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteExpiredRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DeleteRefreshTokenRepositoryInterface;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
@@ -396,6 +397,24 @@ class RefreshTokenManagerTest extends TestCase
         $this->expectExceptionMessage(sprintf('Repository mapped for "%s" should implement %s.', RefreshToken::class, DeleteRefreshTokenRepositoryInterface::class));
 
         $manager->revokeAllForUser(UserCreator::create());
+    }
+
+    public function testRefusesToClearExpiredTokensWhenTheRepositoryCannotDeleteThemDirectly(): void
+    {
+        $metadata = $this->createStub(ClassMetadata::class);
+        $metadata->method('getName')->willReturn(self::REFRESH_TOKEN_ENTITY_CLASS);
+
+        // A repository predating DeleteExpiredRefreshTokenRepositoryInterface still satisfies the rest
+        $objectManager = $this->createStub(ObjectManager::class);
+        $objectManager->method('getRepository')->willReturn($this->createStub(RefreshTokenRepositoryInterface::class));
+        $objectManager->method('getClassMetadata')->willReturn($metadata);
+
+        $manager = new RefreshTokenManager($objectManager, RefreshToken::class, RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(sprintf('Repository mapped for "%s" should implement %s.', RefreshToken::class, DeleteExpiredRefreshTokenRepositoryInterface::class));
+
+        $manager->revokeAllExpired();
     }
 
     public function testProvidesTheModelClass(): void

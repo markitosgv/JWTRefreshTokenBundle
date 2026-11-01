@@ -4,6 +4,7 @@ namespace Gesdinet\JWTRefreshTokenBundle\Tests\Functional\Contract;
 
 use Doctrine\ORM\Tools\SchemaTool;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -18,6 +19,7 @@ final class OrmRefreshTokenManagerTest extends ORMTestCase
     use RefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use ExpiredRefreshTokenManagerContract;
 
     protected function setUp(): void
     {
@@ -35,6 +37,15 @@ final class OrmRefreshTokenManagerTest extends ORMTestCase
     protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
     {
         return new RefreshTokenManager($this->entityManager, RefreshToken::class, $batchSize);
+    }
+
+    protected function expiringManager(): ExpiredRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        return $manager;
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

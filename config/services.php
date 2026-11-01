@@ -8,6 +8,7 @@ use Gesdinet\JWTRefreshTokenBundle\EventListener\AttachRefreshTokenOnSuccessList
 use Gesdinet\JWTRefreshTokenBundle\EventListener\LogoutEventListener;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGenerator;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -68,10 +69,11 @@ return static function (ContainerConfigurator $container): void {
     $services->alias(RefreshTokenGeneratorInterface::class, $vendor.'.refresh_token_generator');
 
     // The manager itself comes from the backend in use, so only the aliases are shared. Every one
-    // of the backends implements all three interfaces
+    // of the backends implements all four interfaces
     $services->alias(RefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
     $services->alias(RevokeRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
     $services->alias(ListRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
+    $services->alias(ExpiredRefreshTokenManagerInterface::class, $vendor.'.refresh_token_manager');
 
     $services->set($vendor.'.request.extractor.chain')
         ->class(ChainExtractor::class)

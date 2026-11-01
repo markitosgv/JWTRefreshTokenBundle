@@ -7,6 +7,7 @@ use Doctrine\DBAL\DriverManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\RefreshTokenManager;
 use Gesdinet\JWTRefreshTokenBundle\Doctrine\DBAL\TableSchemaManager;
 use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\ExpiredRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\ListRefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RevokeRefreshTokenManagerInterface;
@@ -19,6 +20,7 @@ final class DbalRefreshTokenManagerTest extends TestCase
     use RefreshTokenManagerContract;
     use ListRefreshTokenManagerContract;
     use RevokeRefreshTokenManagerContract;
+    use ExpiredRefreshTokenManagerContract;
 
     private Connection $connection;
 
@@ -40,6 +42,15 @@ final class DbalRefreshTokenManagerTest extends TestCase
     protected function manager(int $batchSize = RefreshTokenManagerInterface::DEFAULT_BATCH_SIZE): RefreshTokenManagerInterface
     {
         return new RefreshTokenManager($this->connection, $batchSize, 'refresh_tokens', RefreshToken::class);
+    }
+
+    protected function expiringManager(): ExpiredRefreshTokenManagerInterface&RefreshTokenManagerInterface
+    {
+        $manager = $this->manager();
+
+        \assert($manager instanceof ExpiredRefreshTokenManagerInterface);
+
+        return $manager;
     }
 
     protected function revokingManager(): RevokeRefreshTokenManagerInterface&RefreshTokenManagerInterface

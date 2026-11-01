@@ -30,7 +30,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * issued before this was turned on keep working: they are looked up as they are, and rewritten
  * hashed the first time they are used.
  */
-final readonly class HashedRefreshTokenManager implements ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
+final readonly class HashedRefreshTokenManager implements ExpiredRefreshTokenManagerInterface, ListRefreshTokenManagerInterface, RefreshTokenManagerInterface, RevokeRefreshTokenManagerInterface
 {
     private const PREFIX = 'sha256$';
 
@@ -138,6 +138,16 @@ final readonly class HashedRefreshTokenManager implements ListRefreshTokenManage
     public function revokeAllButNewestForUser(UserInterface $user, int $keep): int
     {
         return $this->delegateOrFail(RevokeRefreshTokenManagerInterface::class)->revokeAllButNewestForUser($user, $keep);
+    }
+
+    /**
+     * When a token expires is in the row rather than in the token, so nothing here needs hashing:
+     * it goes straight through.
+     */
+    #[\Override]
+    public function revokeAllExpired(?DateTimeInterface $datetime = null): int
+    {
+        return $this->delegateOrFail(ExpiredRefreshTokenManagerInterface::class)->revokeAllExpired($datetime);
     }
 
     #[\Override]
